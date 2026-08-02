@@ -750,6 +750,10 @@ private fun NotificationSettingsCard(
     val intensityOptions = MinimumNotificationIntensity.entries
     val tsunamiOptions = listOf(TsunamiGrade.ADVISORY, TsunamiGrade.WARNING, TsunamiGrade.MAJOR_WARNING)
     val controlSizing = responsiveControlSizing()
+    // Dialog/AlertDialog content is hosted in a separate window. Capture the
+    // Settings preview density here and explicitly provide it to every nested
+    // overlay so the Text size slider updates help/info boxes immediately.
+    val overlayDensity = LocalDensity.current
     var alertLocationDialogOpen by remember { mutableStateOf(false) }
     var helpDialog by remember { mutableStateOf<Pair<String, String>?>(null) }
     var scheduleDialogOpen by remember { mutableStateOf(false) }
@@ -1011,61 +1015,69 @@ private fun NotificationSettingsCard(
     }
 
     if (alertLocationDialogOpen) {
-        AlertLocationPickerDialog(
-            language = language,
-            currentLocation = alertLocation,
-            onLocationSelected = { selected ->
-                onAlertLocationChanged(selected)
-                alertLocationDialogOpen = false
-            },
-            onDismiss = { alertLocationDialogOpen = false }
-        )
+        CompositionLocalProvider(LocalDensity provides overlayDensity) {
+            AlertLocationPickerDialog(
+                language = language,
+                currentLocation = alertLocation,
+                onLocationSelected = { selected ->
+                    onAlertLocationChanged(selected)
+                    alertLocationDialogOpen = false
+                },
+                onDismiss = { alertLocationDialogOpen = false }
+            )
+        }
     }
 
     helpDialog?.let { (title, body) ->
-        SettingHelpDialog(
-            title = title,
-            body = body,
-            doneLabel = localizedString(R.string.done, language),
-            onDismiss = { helpDialog = null }
-        )
+        CompositionLocalProvider(LocalDensity provides overlayDensity) {
+            SettingHelpDialog(
+                title = title,
+                body = body,
+                doneLabel = localizedString(R.string.done, language),
+                onDismiss = { helpDialog = null }
+            )
+        }
     }
 
     if (scheduleDialogOpen) {
-        QuietHoursScheduleDialog(
-            language = language,
-            initialSchedule = quietHoursSchedule,
-            initialCountryMode = holidayCountryMode,
-            initialManualCountryCode = manualHolidayCountryCode,
-            supportedCountryCodes = PublicHolidayCalendar.supportedCountryCodes(),
-            onConfirm = { schedule, countryMode, manualCode ->
-                onQuietHoursScheduleChanged(schedule)
-                onHolidayCountryModeChanged(countryMode)
-                onManualHolidayCountryCodeChanged(manualCode)
-                if (schedule.includePublicHolidays) {
-                    val country = HolidayCountryDetector.resolve(
-                        context = context,
-                        mode = countryMode,
-                        manualCountryCode = manualCode
-                    ).countryCode
-                    PublicHolidayCalendar.refreshIfDue(context, country)
-                }
-                scheduleDialogOpen = false
-            },
-            onDismiss = { scheduleDialogOpen = false }
-        )
+        CompositionLocalProvider(LocalDensity provides overlayDensity) {
+            QuietHoursScheduleDialog(
+                language = language,
+                initialSchedule = quietHoursSchedule,
+                initialCountryMode = holidayCountryMode,
+                initialManualCountryCode = manualHolidayCountryCode,
+                supportedCountryCodes = PublicHolidayCalendar.supportedCountryCodes(),
+                onConfirm = { schedule, countryMode, manualCode ->
+                    onQuietHoursScheduleChanged(schedule)
+                    onHolidayCountryModeChanged(countryMode)
+                    onManualHolidayCountryCodeChanged(manualCode)
+                    if (schedule.includePublicHolidays) {
+                        val country = HolidayCountryDetector.resolve(
+                            context = context,
+                            mode = countryMode,
+                            manualCountryCode = manualCode
+                        ).countryCode
+                        PublicHolidayCalendar.refreshIfDue(context, country)
+                    }
+                    scheduleDialogOpen = false
+                },
+                onDismiss = { scheduleDialogOpen = false }
+            )
+        }
     }
 
     if (modeDialogOpen) {
-        QuietHoursModeDialog(
-            language = language,
-            selected = quietHoursMode,
-            onSelected = {
-                onQuietHoursModeChanged(it)
-                modeDialogOpen = false
-            },
-            onDismiss = { modeDialogOpen = false }
-        )
+        CompositionLocalProvider(LocalDensity provides overlayDensity) {
+            QuietHoursModeDialog(
+                language = language,
+                selected = quietHoursMode,
+                onSelected = {
+                    onQuietHoursModeChanged(it)
+                    modeDialogOpen = false
+                },
+                onDismiss = { modeDialogOpen = false }
+            )
+        }
     }
 }
 
