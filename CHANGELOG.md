@@ -2,6 +2,13 @@
 
 QuakeDeck release history, newest first.
 
+## v0.9.68
+
+- Persists the municipality-detail threshold slider instead of resetting it to 40× whenever QuakeDeck starts.
+- Restores the saved whole-number threshold from the existing `quakedeck_settings` preferences and clamps it to the established 24×–64× range.
+- Saves slider changes immediately so orientation changes and later app launches retain the selected value.
+- Bumps the Android application version to `0.9.68` (`versionCode` 95) and updates the README release marker.
+
 ## v0.9.67
 
 - Fixes the contextual Settings help boxes opened from the circled `?` controls so their titles, body text, and action buttons follow QuakeDeck's configured Text size, including the live Settings preview.
