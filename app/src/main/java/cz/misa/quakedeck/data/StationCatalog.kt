@@ -70,7 +70,7 @@ object StationCatalog {
 
         val request = Request.Builder()
             .url(CATALOG_URL)
-            .header("User-Agent", "QuakeDeck/0.9.65 (Android)")
+            .header("User-Agent", "QuakeDeck/0.9.66 (Android)")
             .build()
         client.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
@@ -96,7 +96,7 @@ object StationCatalog {
 
     private fun refreshInBackground(context: Context, client: OkHttpClient) {
         val request = Request.Builder().url(CATALOG_URL)
-            .header("User-Agent", "QuakeDeck/0.9.65 (Android)")
+            .header("User-Agent", "QuakeDeck/0.9.66 (Android)")
             .build()
         client.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) = Unit
