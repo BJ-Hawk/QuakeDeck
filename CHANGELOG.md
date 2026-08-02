@@ -2,6 +2,13 @@
 
 QuakeDeck release history, newest first.
 
+## v0.9.67
+
+- Fixes the contextual Settings help boxes opened from the circled `?` controls so their titles, body text, and action buttons follow QuakeDeck's configured Text size, including the live Settings preview.
+- Fixes the date/time synchronization information box opened from the top status drawer so its title, detail rows, explanatory notes, and close action follow the configured Text size.
+- Captures QuakeDeck's app density before the separate Material dialog window and restores it independently inside every compact dialog title, body, and button slot, preventing fallback to Android's system font scale.
+- Bumps the Android application version to `0.9.67` (`versionCode` 94) and updates the README release marker.
+
 ## v0.9.66
 
 - Fixes Settings overlay information/help dialogs ignoring the live Text size preview.
