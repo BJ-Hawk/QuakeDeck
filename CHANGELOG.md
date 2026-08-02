@@ -2,6 +2,14 @@
 
 QuakeDeck release history, newest first.
 
+## v0.9.69
+
+- Uses the detailed JMA municipality/ward polygons as the authoritative high-zoom land mask instead of leaving the N03 land geometry underneath them.
+- Removes the second N03 boundary/coastline overlay at high zoom, so the visible coast follows the same geometry as municipality fills.
+- Builds the neutral grey land from every municipality polygon before observed municipalities are coloured, eliminating protruding N03 land around unobserved areas.
+- Retains N03 prefecture data for lower zoom levels and existing broader report fallbacks.
+- Bumps the Android application version to `0.9.69` (`versionCode` 96) and updates the README release marker.
+
 ## v0.9.68
 
 - Persists the municipality-detail threshold slider instead of resetting it to 40× whenever QuakeDeck starts.
