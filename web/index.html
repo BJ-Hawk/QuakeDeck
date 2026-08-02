@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="QuakeDeck is an independent Android earthquake monitor focused on Japan.">
+  <meta name="theme-color" content="#07131d">
+  <title>QuakeDeck — Japan earthquake monitor</title>
+  <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="shell nav">
+      <a class="brand" href="index.html"><img src="assets/icon.svg" alt=""><span>QUAKEDECK</span></a>
+      <nav class="nav-links" aria-label="Main navigation">
+        <a aria-current="page" href="index.html">Home</a>
+        <a href="diagnostics.html">DM-D.S.S probe</a>
+        <a href="privacy.html">Privacy</a>
+        <a href="terms.html">Terms</a>
+        <a href="contact.html">Contact</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="shell hero">
+      <div>
+        <span class="eyebrow">Android development build</span>
+        <h1>Japan live.<br>Without the clutter.</h1>
+        <p class="lead">QuakeDeck is an independent earthquake monitor built around a fast, detailed map of Japan, observed JMA intensities, and a future live DM-D.S.S early-warning stream.</p>
+        <div class="actions">
+          <a class="button primary" href="diagnostics.html">Inspect DM-D.S.S access</a>
+          <a class="button" href="#about">About the project</a>
+        </div>
+      </div>
+      <div class="mock-panel" aria-label="Stylized QuakeDeck map preview">
+        <div class="mock-card">
+          <span class="mock-intensity">5−</span>
+          <div class="mock-title">Amakusa and Ashikita Region</div>
+          <div class="mock-meta">Kumamoto Prefecture · M 5.8 · 0 km</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="about" class="section">
+      <div class="shell">
+        <div class="section-header">
+          <div class="kicker">What exists today</div>
+          <h2>A serious map before the serious live feed.</h2>
+          <p class="lead">The current Android prototype already displays recent JMA earthquakes, historical events, prefecture shading by observed Shindo, station observations, progressive labels, and event-aware camera controls.</p>
+        </div>
+        <div class="grid">
+          <article class="card"><div class="icon">🗾</div><h3>Detailed Japan map</h3><p>Prefecture geometry, progressive city and station labels, deep zoom, historical-event focus, and a lightweight regional context layer.</p></article>
+          <article class="card"><div class="icon">📍</div><h3>Observed intensities</h3><p>Current and historical events can color prefectures and reported stations using the JMA seismic-intensity scale.</p></article>
+          <article class="card"><div class="icon">⚡</div><h3>DM-D.S.S next</h3><p>The planned production milestone is browser-based OAuth, reliable WebSocket reception, successive EEW reports, cancellations, and live observations.</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section compact">
+      <div class="shell card">
+        <div class="kicker">Capability probe</div>
+        <h2>Find out what the JQuake-exclusive subscription actually exposes.</h2>
+        <p class="lead">The diagnostic page requests only <code>contract.list</code> and <code>socket.list</code>. It does not start, close, or take over any WebSocket connection.</p>
+        <div class="actions"><a class="button primary" href="diagnostics.html">Open the probe</a></div>
+      </div>
+    </section>
+
+    <section class="section compact">
+      <div class="shell notice">
+        <strong>Not an official warning service.</strong> QuakeDeck is an independent project and must not be treated as a replacement for official JMA warnings, emergency alerts, or instructions from public authorities.
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="shell footer-grid">
+      <div>© <span data-current-year></span> QuakeDeck</div>
+      <div class="footer-links"><a href="privacy.html">Privacy</a><a href="terms.html">Terms</a><a href="contact.html">Contact</a></div>
+    </div>
+  </footer>
+  <script src="assets/site.js"></script>
+</body>
+</html>

@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#07131d"><title>Privacy — QuakeDeck</title>
+  <link rel="icon" href="assets/icon.svg" type="image/svg+xml"><link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+<header class="site-header"><div class="shell nav"><a class="brand" href="index.html"><img src="assets/icon.svg" alt=""><span>QUAKEDECK</span></a><nav class="nav-links" aria-label="Main navigation"><a href="index.html">Home</a><a href="diagnostics.html">DM-D.S.S probe</a><a aria-current="page" href="privacy.html">Privacy</a><a href="terms.html">Terms</a><a href="contact.html">Contact</a></nav></div></header>
+<main class="page-main"><div class="shell prose"><div class="kicker">Policy</div><h1>Privacy policy</h1><p><strong>Last updated: 30 July 2026.</strong></p>
+<p>This website is a static project site for QuakeDeck. It does not use advertising, analytics, tracking pixels, or a QuakeDeck-operated user account system.</p>
+<h2>Normal website use</h2><p>The hosting provider may process standard technical data such as IP address, browser type, requested files, timestamps, and security logs according to its own policies. QuakeDeck does not receive a dedicated analytics dashboard from this site.</p>
+<h2>DM-D.S.S capability probe</h2><p>The optional diagnostic page redirects you to DM-D.S.S for authorization. It requests only the <code>contract.list</code> and <code>socket.list</code> scopes.</p>
+<p>After authorization, the page temporarily receives an access token and refresh token in the browser. They are not sent to a QuakeDeck server, written into the generated report, or intentionally stored persistently. The page uses them to request the contract and socket lists, then attempts to revoke both tokens immediately.</p>
+<p>The generated report excludes OAuth tokens, client secrets, API keys, socket tickets, and IP addresses. The public OAuth client ID may be remembered in your browser's local storage for convenience.</p>
+<h2>Third parties</h2><p>DM-D.S.S processes authorization and API requests under its own terms and privacy policy. The website host processes ordinary web traffic under its own policy.</p>
+<h2>Contact</h2><p>Replace the placeholder on the <a href="contact.html">contact page</a> with a public contact method before registering the OAuth client.</p>
+</div></main>
+<footer class="site-footer"><div class="shell footer-grid"><div>© <span data-current-year></span> QuakeDeck</div><div class="footer-links"><a href="privacy.html">Privacy</a><a href="terms.html">Terms</a><a href="contact.html">Contact</a></div></div></footer><script src="assets/site.js"></script>
+</body></html>

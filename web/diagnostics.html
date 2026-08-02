@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="QuakeDeck capability and controlled socket-entitlement probe for a DM-D.S.S subscription.">
+  <meta name="theme-color" content="#07131d">
+  <title>DM-D.S.S capability probe — QuakeDeck</title>
+  <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="shell nav">
+      <a class="brand" href="index.html"><img src="assets/icon.svg" alt=""><span>QUAKEDECK</span></a>
+      <nav class="nav-links" aria-label="Main navigation">
+        <a href="index.html">Home</a>
+        <a aria-current="page" href="diagnostics.html">DM-D.S.S probe</a>
+        <a href="privacy.html">Privacy</a>
+        <a href="terms.html">Terms</a>
+        <a href="contact.html">Contact</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="page-main">
+    <div class="shell">
+      <div class="page-intro">
+        <div class="kicker">Controlled OAuth diagnostic</div>
+        <h1>DM-D.S.S capability probe</h1>
+        <p class="lead">This one-time probe reads your visible plans and sockets, then calls Socket Start exactly once for QuakeDeck’s earthquake + EEW stream. It never opens the returned WebSocket. If DM-D.S.S creates a socket ticket, the probe immediately closes that exact socket ID.</p>
+      </div>
+
+      <div class="notice info">
+        Requested scopes: <code>contract.list</code>, <code>socket.list</code>, <code>socket.start</code>, <code>socket.close</code>, <code>telegram.get.earthquake</code>, and <code>eew.get.forecast</code>. Leave JQuake connected for the safest test: the expected useful result is HTTP 409 because its one connection slot is already occupied. Temporary OAuth tokens are revoked after the test.
+      </div>
+
+      <section class="card" style="margin-top: 22px;">
+        <div class="form-grid">
+          <div>
+            <label for="client-id">Public OAuth client ID</label>
+            <input id="client-id" type="text" inputmode="text" autocomplete="off" spellcheck="false" placeholder="CId.…">
+          </div>
+          <button id="connect-button" class="button primary" type="button">Connect DM-D.S.S</button>
+        </div>
+
+        <div style="margin-top: 18px;">
+          <label for="redirect-uri">Exact redirect URI to register</label>
+          <div class="form-grid">
+            <input id="redirect-uri" class="readonly" type="url" readonly>
+            <button id="copy-redirect" class="button small" type="button">Copy URI</button>
+          </div>
+        </div>
+
+        <div class="status-row" style="margin-top: 20px;">
+          <span id="status-dot" class="status-dot"></span>
+          <strong id="status-text">Not connected</strong>
+          <button id="clear-button" class="button small" type="button">Clear local data</button>
+        </div>
+        <div id="message" class="notice info hidden" style="margin-top: 16px;"></div>
+      </section>
+
+      <section id="results" class="results hidden" aria-live="polite">
+        <article class="card">
+          <h2>What QuakeDeck can probably use</h2>
+          <div id="interpretation-list" class="result-list"></div>
+        </article>
+
+        <article class="card">
+          <h2>QuakeDeck socket entitlement test</h2>
+          <p style="color: var(--muted);">The probe requests <code>telegram.earthquake</code> and <code>eew.forecast</code> in raw mode. It never connects to the returned WebSocket or exposes its ticket.</p>
+          <div id="socket-test-list" class="result-list"></div>
+        </article>
+
+        <article class="card">
+          <h2>Contracts</h2>
+          <div id="contracts-list" class="result-list"></div>
+        </article>
+
+        <article class="card">
+          <h2>Listed sockets</h2>
+          <p style="color: var(--muted);">The report deliberately omits socket tickets and IP addresses.</p>
+          <div id="sockets-list" class="result-list"></div>
+        </article>
+
+        <article class="card">
+          <h2>Sanitized report</h2>
+          <p style="color: var(--muted);">Safe to share for implementation planning: no access token, refresh token, client secret, socket ticket, or IP address is included.</p>
+          <pre id="summary-json"></pre>
+          <div class="actions">
+            <button id="copy-report" class="button" type="button">Copy report</button>
+            <button id="download-report" class="button" type="button">Download JSON</button>
+          </div>
+        </article>
+      </section>
+
+      <section class="section compact prose">
+        <h2>Before this page can connect</h2>
+        <ol>
+          <li>Deploy this folder to an HTTPS address, for example GitHub Pages.</li>
+          <li>Create a <strong>public</strong> DM-D.S.S OAuth client using the authorization-code flow.</li>
+          <li>Register the exact redirect URI shown above.</li>
+          <li>Enable these scopes for the client: <code>contract.list</code>, <code>socket.list</code>, <code>socket.start</code>, <code>socket.close</code>, <code>telegram.get.earthquake</code>, and <code>eew.get.forecast</code>.</li>
+          <li>Paste the resulting public <code>CId.…</code> value above.</li>
+        </ol>
+        <p>The client ID is public by design. Never paste a client secret, API key, access token, or refresh token into this page. Keep JQuake connected during the first run; a 409 result avoids creating any temporary socket at all.</p>
+      </section>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="shell footer-grid">
+      <div>© <span data-current-year></span> QuakeDeck</div>
+      <div class="footer-links"><a href="privacy.html">Privacy</a><a href="terms.html">Terms</a><a href="contact.html">Contact</a></div>
+    </div>
+  </footer>
+  <script src="site-config.js"></script>
+  <script src="assets/site.js"></script>
+  <script src="assets/diagnostics.js?v=20260730-1"></script>
+</body>
+</html>

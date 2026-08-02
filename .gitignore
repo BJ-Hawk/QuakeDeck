@@ -1,0 +1,48 @@
+# Gradle and Kotlin caches
+/.gradle/
+/.kotlin/
+
+# Android build output
+/build/
+/app/build/
+
+# Machine-specific Android SDK path
+/local.properties
+
+# Android Studio user-specific state
+*.iml
+/.idea/caches/
+/.idea/libraries/
+/.idea/modules.xml
+/.idea/workspace.xml
+/.idea/shelf/
+/.idea/navEditor.xml
+/.idea/assetWizardSettings.xml
+/.idea/deploymentTargetSelector.xml
+/.idea/deviceManager.xml
+
+# Native build output
+/.externalNativeBuild/
+/.cxx/
+
+# Generated application packages
+*.apk
+*.aab
+
+# Signing material and secrets
+*.jks
+*.keystore
+keystore.properties
+
+# Android Studio captures
+/captures/
+
+# Web dependencies and generated output
+/web/node_modules/
+/web/.cache/
+/web/dist/
+
+# Operating-system debris
+.DS_Store
+Thumbs.db
+desktop.ini
