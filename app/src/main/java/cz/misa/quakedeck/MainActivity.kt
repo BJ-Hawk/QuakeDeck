@@ -104,6 +104,7 @@ import cz.misa.quakedeck.ui.common.responsiveControlSizing
 import kotlin.math.abs
 import kotlin.math.ceil
 import kotlin.math.floor
+import kotlin.math.ln
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.roundToInt
@@ -4983,11 +4984,11 @@ private fun JapanMap(
 
                 seamPaint.strokeWidth = 2.2f / renderScale
                 borderPaint.strokeWidth = 0.9f / renderScale
-                eewZoneBoundaryPaint.strokeWidth = 1.15f / renderScale
-                municipalityBoundaryPaint.strokeWidth = 0.55f / renderScale
-                quakePrefectureBorderPaint.strokeWidth = 5f / renderScale
-                municipalityWarningZoneBorderPaint.strokeWidth = 5f / renderScale
-                municipalityPrefectureBorderPaint.strokeWidth = 5f / renderScale
+                eewZoneBoundaryPaint.strokeWidth = 2.5f / renderScale
+                municipalityBoundaryPaint.strokeWidth = 1f / renderScale
+                quakePrefectureBorderPaint.strokeWidth = 4f / renderScale
+                municipalityWarningZoneBorderPaint.strokeWidth = 2.5f / renderScale
+                municipalityPrefectureBorderPaint.strokeWidth = 4f / renderScale
                 tsunamiCoastBackdropPaint.strokeWidth = 6.6f / renderScale
                 tsunamiCoastPaint.strokeWidth = 4.2f / renderScale
 
@@ -5431,19 +5432,52 @@ private fun JapanMap(
             }
         }
 
-        val zoomLabel =
-            uiText(R.string.zoom, language) + " " +
-                String.format(
-                    java.util.Locale.US,
-                    "%.2f",
-                    displayZoomForCameraZoom(committedZoom * gestureScale)
-                ) + "×"
+        val currentDisplayZoom = displayZoomForCameraZoom(committedZoom * gestureScale)
+        val zoomLabel = String.format(
+            java.util.Locale.US,
+            "%.2f×",
+            currentDisplayZoom
+        )
+        val zoomButtonsHeightDp = if (compactZoomControls) {
+            zoomButtonSizeDp
+        } else {
+            zoomButtonSizeDp * 2f + zoomButtonGapDp
+        }
+        val zoomButtonsBottomDp = if (compactZoomControls) 0f else 8f
+        val zoomIndicatorBottomDp =
+            zoomButtonsBottomDp + zoomButtonsHeightDp + zoomButtonGapDp
+
+        // A logarithmic position rail keeps every doubling equally spaced, so
+        // the 1×–128× range remains legible instead of compressing normal zooms
+        // into the first few pixels. It is display-only: pinch and +/- remain
+        // the camera inputs.
+        Column(
+            Modifier
+                .align(Alignment.CenterStart)
+                .fillMaxHeight()
+                .padding(
+                    start = 1.dp,
+                    top = 8.dp,
+                    bottom = zoomIndicatorBottomDp.dp
+                ),
+            horizontalAlignment = Alignment.Start
+        ) {
+            MapZoomIndicator(
+                displayZoom = currentDisplayZoom,
+                scale = zoomControlScale,
+                modifier = Modifier
+                    .weight(1f)
+                    .width((7f * zoomControlScale).dp)
+            )
+            Spacer(Modifier.height((2f * zoomControlScale).dp))
+            MapZoomLabel(zoomLabel, zoomControlScale)
+        }
 
         if (compactZoomControls) {
             Row(
                 Modifier
                     .align(Alignment.BottomStart)
-                    .padding(8.dp),
+                    .padding(start = 8.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(zoomButtonGapDp.dp)
             ) {
@@ -5459,13 +5493,12 @@ private fun JapanMap(
                     scale = zoomControlScale,
                     onClick = { stepZoom(+0.5f) }
                 )
-                MapZoomLabel(zoomLabel, zoomControlScale)
             }
         } else {
             Column(
                 Modifier
                     .align(Alignment.BottomStart)
-                    .padding(start = 8.dp, bottom = 42.dp),
+                    .padding(start = 8.dp, bottom = 8.dp),
                 verticalArrangement = Arrangement.spacedBy(zoomButtonGapDp.dp)
             ) {
                 MapZoomButton(
@@ -5481,14 +5514,6 @@ private fun JapanMap(
                     onClick = { stepZoom(-0.5f) }
                 )
             }
-
-            Box(
-                Modifier
-                    .align(Alignment.BottomStart)
-                    .padding(8.dp)
-            ) {
-                MapZoomLabel(zoomLabel, zoomControlScale)
-            }
         }
 
         // One-tap return to the whole-country framing. Keep the selected
@@ -5502,13 +5527,80 @@ private fun JapanMap(
                 .clickable(onClick = onFitJapan),
             contentAlignment = Alignment.Center
         ) {
-            Text(
-                "⤢",
-                color = extraColors.mapControlForeground,
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Bold
+            FitJapanIcon(Modifier.size(18.dp))
+        }
+    }
+}
+
+@Composable
+private fun MapZoomIndicator(
+    displayZoom: Float,
+    scale: Float,
+    modifier: Modifier = Modifier
+) {
+    val extraColors = LocalQuakeDeckExtraColors.current
+    val safeZoom = displayZoom.coerceIn(MIN_DISPLAY_MAP_ZOOM, MAX_DISPLAY_MAP_ZOOM)
+    val fraction = (
+        ln(safeZoom / MIN_DISPLAY_MAP_ZOOM) /
+            ln(MAX_DISPLAY_MAP_ZOOM / MIN_DISPLAY_MAP_ZOOM)
+    ).coerceIn(0f, 1f)
+
+    Canvas(modifier) {
+        val x = size.width / 2f
+        val thumbRadius = 3.4.dp.toPx() * scale
+        val top = thumbRadius
+        val bottom = (size.height - thumbRadius).coerceAtLeast(top)
+        val thumbY = bottom - (bottom - top) * fraction
+
+        drawLine(
+            color = extraColors.mapControlSurface,
+            start = Offset(x, top),
+            end = Offset(x, bottom),
+            strokeWidth = 4.dp.toPx() * scale,
+            cap = StrokeCap.Round
+        )
+        drawLine(
+            color = extraColors.mapControlForeground.copy(alpha = 0.72f),
+            start = Offset(x, top),
+            end = Offset(x, bottom),
+            strokeWidth = 1.dp.toPx() * scale,
+            cap = StrokeCap.Round
+        )
+        drawCircle(
+            color = extraColors.mapControlSurface,
+            radius = thumbRadius,
+            center = Offset(x, thumbY)
+        )
+        drawCircle(
+            color = extraColors.mapControlForeground,
+            radius = 1.9.dp.toPx() * scale,
+            center = Offset(x, thumbY)
+        )
+    }
+}
+
+@Composable
+private fun FitJapanIcon(modifier: Modifier = Modifier) {
+    val color = LocalQuakeDeckExtraColors.current.mapControlForeground
+    Canvas(modifier) {
+        val unit = size.minDimension / 18f
+        val stroke = 2f * unit
+
+        fun segment(x1: Float, y1: Float, x2: Float, y2: Float) {
+            drawLine(
+                color = color,
+                start = Offset(x1 * unit, y1 * unit),
+                end = Offset(x2 * unit, y2 * unit),
+                strokeWidth = stroke,
+                cap = StrokeCap.Round
             )
         }
+
+        segment(5f, 13f, 13f, 5f)
+        segment(9.5f, 5f, 13f, 5f)
+        segment(13f, 5f, 13f, 8.5f)
+        segment(5f, 9.5f, 5f, 13f)
+        segment(5f, 13f, 8.5f, 13f)
     }
 }
 
