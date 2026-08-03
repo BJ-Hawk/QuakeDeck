@@ -4889,26 +4889,28 @@ private fun JapanMap(
             }
         }
 
-        Box(
-            Modifier
-                .fillMaxSize()
-                .graphicsLayer {
-                    scaleX = gestureScale
-                    scaleY = gestureScale
-                    translationX = gesturePan.x
-                    translationY = gesturePan.y
-                    transformOrigin = TransformOrigin.Center
-                    // Deliberately cache the committed vector map into an
-                    // off-screen layer while a gesture is active. This means
-                    // geometry that began outside the viewport is not revealed
-                    // until the gesture finishes, but it keeps deep pan/zoom
-                    // buttery smooth even with the high-detail N03 geometry.
-                    compositingStrategy = CompositingStrategy.Offscreen
-                }
-        ) {
-            // The parent remains retained during pan/zoom. Key the child by
-            // tier so its off-screen texture is rebuilt at 10x and 32x.
-            key(activeVectorLayer) {
+        // The off-screen parent owns the retained map texture, so the tier key
+        // must replace that parent itself. Keying only the Canvas (or adding a
+        // child graphics layer) leaves the parent's N03 texture eligible for
+        // reuse and can hide the complete 10x-32x JMA EEW layer.
+        key(activeVectorLayer) {
+            Box(
+                Modifier
+                    .fillMaxSize()
+                    .graphicsLayer {
+                        scaleX = gestureScale
+                        scaleY = gestureScale
+                        translationX = gesturePan.x
+                        translationY = gesturePan.y
+                        transformOrigin = TransformOrigin.Center
+                        // Deliberately cache the committed vector map into an
+                        // off-screen layer while a gesture is active. This means
+                        // geometry that began outside the viewport is not revealed
+                        // until the gesture finishes, but it keeps deep pan/zoom
+                        // buttery smooth even with the high-detail N03 geometry.
+                        compositingStrategy = CompositingStrategy.Offscreen
+                    }
+            ) {
             Canvas(Modifier.fillMaxSize()) {
                 val baseOffsetX = baseLeft - data.minX * fitScale
                 val baseOffsetY = baseTop - data.minY * fitScale
