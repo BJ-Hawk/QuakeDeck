@@ -4108,6 +4108,22 @@ private fun JapanMap(
             color = extraColors.mapRegionBoundary.copy(alpha = 0.72f).toArgb()
         }
     }
+    val quakePrefectureBorderPaint = remember {
+        Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            style = Paint.Style.STROKE
+            strokeJoin = Paint.Join.ROUND
+            strokeCap = Paint.Cap.ROUND
+            color = Color(0xFFFF0000).toArgb()
+        }
+    }
+    val municipalityPrefectureBorderPaint = remember {
+        Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            style = Paint.Style.STROKE
+            strokeJoin = Paint.Join.ROUND
+            strokeCap = Paint.Cap.ROUND
+            color = Color(0xFF00FF00).toArgb()
+        }
+    }
     val tsunamiCoastBackdropPaint = remember(extraColors) {
         Paint(Paint.ANTI_ALIAS_FLAG).apply {
             style = Paint.Style.STROKE
@@ -4947,6 +4963,8 @@ private fun JapanMap(
                 borderPaint.strokeWidth = 0.9f / renderScale
                 eewZoneBoundaryPaint.strokeWidth = 1.15f / renderScale
                 municipalityBoundaryPaint.strokeWidth = 0.55f / renderScale
+                quakePrefectureBorderPaint.strokeWidth = 3f / renderScale
+                municipalityPrefectureBorderPaint.strokeWidth = 3f / renderScale
                 tsunamiCoastBackdropPaint.strokeWidth = 6.6f / renderScale
                 tsunamiCoastPaint.strokeWidth = 4.2f / renderScale
 
@@ -5017,6 +5035,10 @@ private fun JapanMap(
                                 officialAreas.quakeAreas.forEach { area ->
                                     native.drawPath(area.path, eewZoneBoundaryPaint)
                                 }
+                                native.drawPath(
+                                    officialAreas.prefectureBorders,
+                                    quakePrefectureBorderPaint
+                                )
                             }
 
                             MapVectorLayer.MUNICIPALITIES -> {
@@ -5042,6 +5064,12 @@ private fun JapanMap(
                                 }
                                 visibleMunicipalities.forEach { area ->
                                     native.drawPath(area.path, municipalityBoundaryPaint)
+                                }
+                                municipalityMap?.let { geometry ->
+                                    native.drawPath(
+                                        geometry.prefectureBorders,
+                                        municipalityPrefectureBorderPaint
+                                    )
                                 }
                             }
                         }

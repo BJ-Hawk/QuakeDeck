@@ -56,7 +56,8 @@ class JmaAreaShape(
 class JmaRegionalMapData(
     val quakeAreas: List<JmaAreaShape>,
     val eewAreas: List<JmaAreaShape>,
-    val tsunamiAreas: List<JmaAreaShape>
+    val tsunamiAreas: List<JmaAreaShape>,
+    val prefectureBorders: Path
 ) {
     private val quakeByCode = quakeAreas
         .filter { it.code.isNotBlank() }
@@ -241,7 +242,8 @@ class JmaRegionalMapData(
 
 /** Deep-zoom JMA municipality/ward geometry, prepared off the UI thread. */
 class JmaMunicipalityMapData(
-    val areas: List<JmaAreaShape>
+    val areas: List<JmaAreaShape>,
+    val prefectureBorders: Path
 ) {
     private val spatialIndex: Map<Long, List<JmaAreaShape>> =
         mutableMapOf<Long, MutableList<JmaAreaShape>>().apply {
@@ -347,7 +349,11 @@ object JmaAreaGeometry {
         return JmaRegionalMapData(
             quakeAreas = quakeAreas,
             eewAreas = eewAreas,
-            tsunamiAreas = tsunamiAreas
+            tsunamiAreas = tsunamiAreas,
+            prefectureBorders = loadInterPrefectureBorders(
+                context,
+                R.raw.jma_quake_region_prefecture_borders
+            )
         )
     }
 }
@@ -360,8 +366,58 @@ object JmaMunicipalityGeometry {
         cached?.let { return it }
         return synchronized(this) {
             cached ?: JmaMunicipalityMapData(
-                loadJmaMunicipalityLayer(context.applicationContext)
+                areas = loadJmaMunicipalityLayer(context.applicationContext),
+                prefectureBorders = loadInterPrefectureBorders(
+                    context.applicationContext,
+                    R.raw.jma_municipality_prefecture_borders
+                )
             ).also { cached = it }
+        }
+    }
+}
+
+private fun loadInterPrefectureBorders(context: Context, resourceId: Int): Path {
+    val text = GZIPInputStream(context.resources.openRawResource(resourceId))
+        .bufferedReader(Charsets.UTF_8)
+        .use { it.readText() }
+    val root = JSONObject(text)
+    require(root.getInt("version") == 2) { "Unsupported prefecture border version" }
+    require(root.getString("kind") == "inter-prefecture-borders") {
+        "Unsupported prefecture border resource"
+    }
+    require(!root.getBoolean("closed")) { "Prefecture border paths must be open" }
+    val quantization = root.getDouble("quantization")
+    require(quantization > 0.0) { "Invalid prefecture border quantization" }
+    val borders = root.getJSONArray("borders")
+
+    return Path().apply {
+        for (borderIndex in 0 until borders.length()) {
+            val paths = borders.getJSONArray(borderIndex).getJSONArray(4)
+            for (pathIndex in 0 until paths.length()) {
+                val encoded = paths.getJSONArray(pathIndex).getJSONArray(1)
+                require(encoded.length() >= 4 && encoded.length() % 2 == 0) {
+                    "Invalid prefecture border path"
+                }
+                var quantizedX = encoded.getLong(0)
+                var quantizedY = encoded.getLong(1)
+                var offset = 0
+                while (offset < encoded.length()) {
+                    if (offset > 0) {
+                        quantizedX += encoded.getLong(offset)
+                        quantizedY += encoded.getLong(offset + 1)
+                    }
+                    val projected = projectGeo(
+                        latitude = quantizedY / quantization,
+                        longitude = quantizedX / quantization
+                    )
+                    if (offset == 0) {
+                        moveTo(projected.x, projected.y)
+                    } else {
+                        lineTo(projected.x, projected.y)
+                    }
+                    offset += 2
+                }
+            }
         }
     }
 }
