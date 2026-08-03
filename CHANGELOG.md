@@ -2,6 +2,13 @@
 
 QuakeDeck release history, newest first.
 
+## v0.9.74
+
+- Restores the complete 56-zone JMA EEW map division from 10× up to, but not including, 32×, including neutral land, warning-zone boundaries, and reported Shindo fills.
+- Keys the retained off-screen map parent at the 10× and 32× tier boundaries so its cached N03 or JMA texture cannot survive into the next vector tier.
+- Removes the ineffective child-layer cache workaround introduced after v0.9.73.
+- Bumps the Android application version to `0.9.74` (`versionCode` 101) and updates the README release marker.
+
 ## v0.9.73
 
 - Adds mutually exclusive map-vector tiers: N03 prefectures below 10×, JMA EEW areas from 10× to below 32×, and municipalities/wards at 32× and above.
