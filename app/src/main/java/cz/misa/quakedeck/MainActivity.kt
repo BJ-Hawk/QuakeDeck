@@ -4984,10 +4984,10 @@ private fun JapanMap(
 
                 seamPaint.strokeWidth = 2.2f / renderScale
                 borderPaint.strokeWidth = 0.9f / renderScale
-                eewZoneBoundaryPaint.strokeWidth = 2.5f / renderScale
-                municipalityBoundaryPaint.strokeWidth = 1f / renderScale
+                eewZoneBoundaryPaint.strokeWidth = 2f / renderScale
+                municipalityBoundaryPaint.strokeWidth = 0.55f / renderScale
                 quakePrefectureBorderPaint.strokeWidth = 4f / renderScale
-                municipalityWarningZoneBorderPaint.strokeWidth = 2.5f / renderScale
+                municipalityWarningZoneBorderPaint.strokeWidth = 2f / renderScale
                 municipalityPrefectureBorderPaint.strokeWidth = 4f / renderScale
                 tsunamiCoastBackdropPaint.strokeWidth = 6.6f / renderScale
                 tsunamiCoastPaint.strokeWidth = 4.2f / renderScale
