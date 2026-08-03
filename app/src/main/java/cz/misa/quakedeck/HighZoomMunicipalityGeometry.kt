@@ -1,31 +1,23 @@
 package cz.misa.quakedeck
 
 import android.content.Context
-import android.graphics.Matrix
 import android.graphics.Path
 import android.os.Handler
 import android.os.Looper
 import cz.misa.quakedeck.data.JapanMapData
 import cz.misa.quakedeck.data.JmaMunicipalityMapData
-import java.util.concurrent.CountDownLatch
+import kotlin.concurrent.thread
 
 /**
- * Temporary bridge for the deep-zoom municipality layer.
+ * Temporary deep-zoom bridge kept outside the main map renderer.
  *
- * Once both high-resolution N03 and municipality geometry are available, the
- * neutral land mask switches to the municipality polygons. The ordinary N03
- * boundary path is replaced by municipality-clipped prefecture and JMA EEW
- * outlines instead of being emptied, so broad borders remain visible below the
- * municipality threshold and become visually stronger at deep zoom without
- * reintroducing the mismatched N03 coastline.
+ * The municipality land mask is installed immediately when both datasets are
+ * available. More expensive prefecture/JMA boundary clipping runs separately,
+ * so loading municipality detail can never block publication of the layer.
  */
 object JapanMapGeometry {
-    private data class PreparedGeometry(
-        val landPath: Path,
-        val majorBoundaryPath: Path
-    )
-
-    private val preparationLock = Any()
+    private val stateLock = Any()
+    private val mainHandler = Handler(Looper.getMainLooper())
 
     @Volatile
     private var highResolutionMap: JapanMapData? = null
@@ -34,7 +26,7 @@ object JapanMapGeometry {
     private var municipalityMap: JmaMunicipalityMapData? = null
 
     @Volatile
-    private var preparedGeometry: PreparedGeometry? = null
+    private var preparationGeneration = 0
 
     fun load(context: Context): JapanMapData =
         cz.misa.quakedeck.data.JapanMapGeometry.load(context)
@@ -42,7 +34,7 @@ object JapanMapGeometry {
     fun loadHighRes(context: Context): JapanMapData =
         cz.misa.quakedeck.data.JapanMapGeometry.loadHighRes(context).also { map ->
             highResolutionMap = map
-            prepareAndApplyIfReady(context.applicationContext)
+            activateMunicipalityGeometry(context.applicationContext)
         }
 
     internal fun useMunicipalityGeometry(
@@ -50,130 +42,98 @@ object JapanMapGeometry {
         municipalities: JmaMunicipalityMapData
     ) {
         municipalityMap = municipalities
-        prepareAndApplyIfReady(context.applicationContext)
+        activateMunicipalityGeometry(context.applicationContext)
     }
 
-    private fun prepareAndApplyIfReady(context: Context) {
-        val installation = synchronized(preparationLock) {
+    private fun activateMunicipalityGeometry(context: Context) {
+        val preparation = synchronized(stateLock) {
             val highResolution = highResolutionMap ?: return
             val municipalities = municipalityMap ?: return
-            val prepared = preparedGeometry ?: prepareGeometry(
-                context = context,
+            val municipalityLand = Path().apply {
+                fillType = Path.FillType.EVEN_ODD
+                municipalities.areas.forEach { addPath(it.path) }
+            }
+            preparationGeneration += 1
+            GeometryPreparation(
+                generation = preparationGeneration,
                 highResolution = highResolution,
-                municipalities = municipalities
-            ).also { preparedGeometry = it }
-            highResolution to prepared
+                municipalityLand = municipalityLand
+            )
         }
 
-        applyPreparedGeometry(
-            highResolution = installation.first,
-            prepared = installation.second
-        )
-    }
-
-    private fun prepareGeometry(
-        context: Context,
-        highResolution: JapanMapData,
-        municipalities: JmaMunicipalityMapData
-    ): PreparedGeometry {
-        val municipalityLand = Path().apply {
-            fillType = Path.FillType.EVEN_ODD
-            municipalities.areas.forEach { addPath(it.path) }
-        }
-        val majorBoundaries = Path()
-
-        // N03 supplies the prefecture grouping, but intersecting every polygon
-        // with the municipality union replaces its sea edge with the exact
-        // municipality coastline before the outline is stored.
-        highResolution.prefectures.forEach { prefecture ->
-            val clipped = Path()
-            if (
-                clipped.op(prefecture.path, municipalityLand, Path.Op.INTERSECT) &&
-                !clipped.isEmpty
-            ) {
-                appendExpandedOutline(
-                    destination = majorBoundaries,
-                    source = clipped,
-                    radius = PREFECTURE_OUTLINE_RADIUS
-                )
+        // The detailed layer must become usable immediately. Do not wait for the
+        // much more expensive broad-boundary clipping before returning from the
+        // municipality loader.
+        runOnMain {
+            if (isCurrent(preparation)) {
+                preparation.highResolution.landPath.set(preparation.municipalityLand)
             }
         }
 
-        // EEW warning-area outlines form the middle level between prefectures
-        // and municipalities. Clip them to the same land mask for a common coast.
+        thread(
+            name = "QuakeDeck municipality borders ${preparation.generation}",
+            isDaemon = true
+        ) {
+            val majorBoundaries = buildMajorBoundaries(
+                context = context,
+                highResolution = preparation.highResolution,
+                municipalityLand = preparation.municipalityLand
+            )
+            runOnMain {
+                if (isCurrent(preparation) && !majorBoundaries.isEmpty) {
+                    // Until this point the original high-resolution N03 path is
+                    // left intact, so the 8x-to-threshold range never loses its
+                    // borders. At deep zoom these broad outlines are visibly
+                    // thicker than the existing municipality mesh.
+                    preparation.highResolution.boundaryPath.set(majorBoundaries)
+                }
+            }
+        }
+    }
+
+    private fun buildMajorBoundaries(
+        context: Context,
+        highResolution: JapanMapData,
+        municipalityLand: Path
+    ): Path = Path().apply {
+        highResolution.prefectures.forEach { prefecture ->
+            clippedToMunicipality(prefecture.path, municipalityLand)?.let { addPath(it) }
+        }
         cz.misa.quakedeck.data.JmaAreaGeometry.load(context)
             .eewAreas
             .forEach { area ->
-                val clipped = Path()
-                if (
-                    clipped.op(area.path, municipalityLand, Path.Op.INTERSECT) &&
-                    !clipped.isEmpty
-                ) {
-                    appendExpandedOutline(
-                        destination = majorBoundaries,
-                        source = clipped,
-                        radius = JMA_OUTLINE_RADIUS
-                    )
-                }
+                clippedToMunicipality(area.path, municipalityLand)?.let { addPath(it) }
             }
-
-        return PreparedGeometry(
-            landPath = municipalityLand,
-            majorBoundaryPath = majorBoundaries
-        )
     }
 
-    private fun appendExpandedOutline(
-        destination: Path,
-        source: Path,
-        radius: Float
-    ) {
-        destination.addPath(source)
-        val matrix = Matrix()
-        OUTLINE_DIRECTIONS.forEach { (x, y) ->
-            matrix.reset()
-            matrix.setTranslate(x * radius, y * radius)
-            val shifted = Path()
-            source.transform(matrix, shifted)
-            destination.addPath(shifted)
-        }
-    }
-
-    private fun applyPreparedGeometry(
-        highResolution: JapanMapData,
-        prepared: PreparedGeometry
-    ) {
-        fun apply() {
-            highResolution.landPath.set(prepared.landPath)
-            highResolution.boundaryPath.set(prepared.majorBoundaryPath)
-        }
-
-        // The map Paths are consumed by Compose on the main thread. Publish both
-        // replacements atomically before either background loader returns.
-        if (Looper.myLooper() == Looper.getMainLooper()) {
-            apply()
+    private fun clippedToMunicipality(source: Path, municipalityLand: Path): Path? {
+        val clipped = Path()
+        return if (
+            clipped.op(source, municipalityLand, Path.Op.INTERSECT) &&
+            !clipped.isEmpty
+        ) {
+            clipped
         } else {
-            val completed = CountDownLatch(1)
-            Handler(Looper.getMainLooper()).post {
-                apply()
-                completed.countDown()
-            }
-            completed.await()
+            null
         }
     }
 
-    private const val PREFECTURE_OUTLINE_RADIUS = 0.0000022f
-    private const val JMA_OUTLINE_RADIUS = 0.0000011f
+    private fun isCurrent(preparation: GeometryPreparation): Boolean =
+        preparation.generation == preparationGeneration &&
+            highResolutionMap === preparation.highResolution
 
-    private val OUTLINE_DIRECTIONS = arrayOf(
-        -1f to 0f,
-        1f to 0f,
-        0f to -1f,
-        0f to 1f,
-        -0.7071f to -0.7071f,
-        0.7071f to -0.7071f,
-        -0.7071f to 0.7071f,
-        0.7071f to 0.7071f
+    private fun runOnMain(action: () -> Unit) {
+        if (Looper.myLooper() == Looper.getMainLooper()) {
+            action()
+        } else {
+            mainHandler.post(action)
+        }
+    }
+
+    private data class GeometryPreparation(
+        val generation: Int,
+        val highResolution: JapanMapData,
+        val municipalityLand: Path
     )
 }
 
