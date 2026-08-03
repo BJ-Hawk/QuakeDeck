@@ -2,6 +2,13 @@
 
 QuakeDeck release history, newest first.
 
+## v0.9.74a
+
+- Corrects the 10×–32× source layer from the 56 broad public EEW forecast areas to the 194 detailed JMA earthquake-reporting areas, restoring subdivisions such as Kumamoto's four regions.
+- Resolves observed Shindo directly against the detailed area geometry while retaining broad EEW-area colouring as a fallback beneath the fine boundaries.
+- Keeps the v0.9.74 retained-parent cache fix and the exclusive N03/detailed/municipality tier boundaries unchanged.
+- Bumps the Android hotfix version to `0.9.74a` (`versionCode` 102) and updates the README release marker.
+
 ## v0.9.74
 
 - Restores the complete 56-zone JMA EEW map division from 10× up to, but not including, 32×, including neutral land, warning-zone boundaries, and reported Shindo fills.

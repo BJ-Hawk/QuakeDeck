@@ -3777,6 +3777,7 @@ private fun compactJstTime(value: String): String =
 private data class ResizeMapRaster(val bitmap: Bitmap)
 private data class MapIntensityGeometry(
     val prefectures: Map<String, String>,
+    val quakeAreas: Map<String, String>,
     val eewAreas: Map<String, String>
 )
 private data class MapViewportState(
@@ -3970,6 +3971,7 @@ private fun JapanMap(
         stationCatalogSize
     ) {
         val prefectures = linkedMapOf<String, String>()
+        val quakeAreas = linkedMapOf<String, String>()
         val eewAreas = linkedMapOf<String, String>()
 
         mapIntensityPoints.forEach { point ->
@@ -3979,13 +3981,24 @@ private fun JapanMap(
             matchMapPrefectures(rawPrefecture, mapPrefectureNames).forEach { prefecture ->
                 prefectures.recordHighestShindo(prefecture, point.intensity)
             }
-            officialAreas.resolveEewAreas(point).forEach { area ->
-                eewAreas.recordHighestShindo(area.geometryKey, point.intensity)
+            officialAreas.resolveIntensityAreas(point).forEach { area ->
+                when (area.layer) {
+                    JmaAreaLayer.QUAKE ->
+                        quakeAreas.recordHighestShindo(area.geometryKey, point.intensity)
+                    JmaAreaLayer.EEW ->
+                        eewAreas.recordHighestShindo(area.geometryKey, point.intensity)
+                    else -> Unit
+                }
             }
         }
-        MapIntensityGeometry(prefectures = prefectures, eewAreas = eewAreas)
+        MapIntensityGeometry(
+            prefectures = prefectures,
+            quakeAreas = quakeAreas,
+            eewAreas = eewAreas
+        )
     }
     val prefectureIntensity = intensityGeometry.prefectures
+    val quakeAreaIntensity = intensityGeometry.quakeAreas
     val eewAreaIntensity = intensityGeometry.eewAreas
     val municipalityIntensity = remember(
         mapIntensityPoints,
@@ -4892,7 +4905,7 @@ private fun JapanMap(
         // The off-screen parent owns the retained map texture, so the tier key
         // must replace that parent itself. Keying only the Canvas (or adding a
         // child graphics layer) leaves the parent's N03 texture eligible for
-        // reuse and can hide the complete 10x-32x JMA EEW layer.
+        // reuse and can hide the complete 10x-32x detailed JMA layer.
         key(activeVectorLayer) {
             Box(
                 Modifier
@@ -4976,8 +4989,15 @@ private fun JapanMap(
                                 native.drawPath(renderData.boundaryPath, borderPaint)
                             }
 
-                            MapVectorLayer.JMA_EEW_AREAS -> {
-                                officialAreas.eewAreas.forEach { area ->
+                            MapVectorLayer.JMA_QUAKE_AREAS -> {
+                                // The middle tier uses the 194 detailed JMA
+                                // earthquake-reporting regions, not the 56 broad
+                                // public EEW forecast areas. Broad EEW colours
+                                // remain a fallback underneath the detailed
+                                // report colours, then every fine boundary is
+                                // stroked so divisions such as Kumamoto's four
+                                // regions stay visible for all report types.
+                                officialAreas.quakeAreas.forEach { area ->
                                     native.drawPath(area.path, landPaint)
                                 }
                                 officialAreas.eewAreas.forEach { area ->
@@ -4987,7 +5007,14 @@ private fun JapanMap(
                                         native.drawPath(area.path, intensityFillPaint)
                                     }
                                 }
-                                officialAreas.eewAreas.forEach { area ->
+                                officialAreas.quakeAreas.forEach { area ->
+                                    quakeAreaIntensity[area.geometryKey]?.let { intensity ->
+                                        intensityFillPaint.color =
+                                            intensityColor(intensity).toArgb()
+                                        native.drawPath(area.path, intensityFillPaint)
+                                    }
+                                }
+                                officialAreas.quakeAreas.forEach { area ->
                                     native.drawPath(area.path, eewZoneBoundaryPaint)
                                 }
                             }
@@ -5816,4 +5843,3 @@ private fun matchMapPrefectures(rawValue: String, available: List<String>): List
     }
     return special?.takeIf { it in available }?.let(::listOf).orEmpty()
 }
-
