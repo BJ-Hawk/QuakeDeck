@@ -91,7 +91,13 @@ import cz.misa.quakedeck.time.AppClockMode
 import cz.misa.quakedeck.time.NetworkTimeSynchronizer
 import cz.misa.quakedeck.ui.map.drawEpicenterMarker
 import cz.misa.quakedeck.ui.map.MapVectorLayer
+import cz.misa.quakedeck.ui.map.MAX_CAMERA_MAP_ZOOM
+import cz.misa.quakedeck.ui.map.MAX_DISPLAY_MAP_ZOOM
+import cz.misa.quakedeck.ui.map.MIN_CAMERA_MAP_ZOOM
+import cz.misa.quakedeck.ui.map.MIN_DISPLAY_MAP_ZOOM
 import cz.misa.quakedeck.ui.map.MUNICIPALITY_LAYER_ZOOM
+import cz.misa.quakedeck.ui.map.cameraZoomForDisplayZoom
+import cz.misa.quakedeck.ui.map.displayZoomForCameraZoom
 import cz.misa.quakedeck.ui.map.mapVectorLayerForEffectiveZoom
 import cz.misa.quakedeck.ui.map.recordHighestShindo
 import cz.misa.quakedeck.ui.common.responsiveControlSizing
@@ -3925,7 +3931,7 @@ private fun JapanMap(
         key1 = context.applicationContext
     ) {
         // Prepare the deep layer concurrently with the startup geometry. A
-        // focus action can jump directly from 1x to 32x+, so threshold-only
+        // focus action can jump directly from 1× to 21×+, so threshold-only
         // loading would otherwise leave the requested layer temporarily empty.
         value = withContext(Dispatchers.Default) {
             cz.misa.quakedeck.data.JmaMunicipalityGeometry.load(context.applicationContext)
@@ -4170,7 +4176,7 @@ private fun JapanMap(
     // The vector map is re-rendered only when a gesture finishes. While fingers
     // are moving, Android transforms the retained layer. This is what keeps the
     // ~280k-point N03 geometry smooth even at the new deep zoom levels.
-    var committedZoom by remember { mutableFloatStateOf(1f) }
+    var committedZoom by remember { mutableFloatStateOf(MIN_CAMERA_MAP_ZOOM) }
     var committedPan by remember { mutableStateOf(Offset.Zero) }
     var gestureScale by remember { mutableFloatStateOf(1f) }
     var gesturePan by remember { mutableStateOf(Offset.Zero) }
@@ -4267,7 +4273,7 @@ private fun JapanMap(
                             val oldGestureScale = gestureScale
                             val requestedTotalZoom = (
                                 committedZoom * oldGestureScale * zoomChange
-                            ).coerceIn(MIN_MAP_ZOOM, MAX_MAP_ZOOM)
+                            ).coerceIn(MIN_CAMERA_MAP_ZOOM, MAX_CAMERA_MAP_ZOOM)
                             val newGestureScale = requestedTotalZoom / committedZoom
                             val ratio = if (oldGestureScale == 0f) 1f else newGestureScale / oldGestureScale
 
@@ -4297,7 +4303,7 @@ private fun JapanMap(
                     } while (pointersStillDown)
 
                     val finalZoom = (committedZoom * gestureScale)
-                        .coerceIn(MIN_MAP_ZOOM, MAX_MAP_ZOOM)
+                        .coerceIn(MIN_CAMERA_MAP_ZOOM, MAX_CAMERA_MAP_ZOOM)
                     committedPan = clampMapPan(
                         pan = committedPan * gestureScale + gesturePan,
                         zoom = finalZoom,
@@ -4392,14 +4398,18 @@ private fun JapanMap(
 
         fun stepZoom(delta: Float) {
             // Pinch zoom remains continuous. Buttons use progressively larger
-            // grids so the new 256x municipality range does not require hundreds
-            // of taps while preserving the familiar 0.5x steps at normal zoom.
-            val oldZoom = committedZoom.coerceIn(MIN_MAP_ZOOM, MAX_MAP_ZOOM)
+            // grids so the 128× municipality range does not require hundreds of
+            // taps while preserving familiar 0.5× steps at normal displayed zoom.
+            val oldCameraZoom = committedZoom.coerceIn(
+                MIN_CAMERA_MAP_ZOOM,
+                MAX_CAMERA_MAP_ZOOM
+            )
+            val oldZoom = displayZoomForCameraZoom(oldCameraZoom)
             val epsilon = 0.0001f
             val step = when {
                 oldZoom <= 16f -> 0.5f
-                oldZoom < MUNICIPALITY_LAYER_ZOOM -> 2f
-                oldZoom <= 128f -> 8f
+                oldZoom <= MUNICIPALITY_LAYER_ZOOM -> 1f
+                oldZoom <= 64f -> 8f
                 else -> 16f
             }
             val gridPosition = oldZoom / step
@@ -4411,7 +4421,7 @@ private fun JapanMap(
                     } else {
                         nextGrid
                     }
-                    candidate.coerceIn(MIN_MAP_ZOOM, MAX_MAP_ZOOM)
+                    candidate.coerceIn(MIN_DISPLAY_MAP_ZOOM, MAX_DISPLAY_MAP_ZOOM)
                 }
                 delta < 0f -> {
                     val previousGrid = floor((gridPosition + epsilon).toDouble()).toFloat() * step
@@ -4420,25 +4430,26 @@ private fun JapanMap(
                     } else {
                         previousGrid
                     }
-                    candidate.coerceIn(MIN_MAP_ZOOM, MAX_MAP_ZOOM)
+                    candidate.coerceIn(MIN_DISPLAY_MAP_ZOOM, MAX_DISPLAY_MAP_ZOOM)
                 }
                 else -> oldZoom
             }
             if (abs(newZoom - oldZoom) <= epsilon) return
+            val newCameraZoom = cameraZoomForDisplayZoom(newZoom)
 
             gestureScale = 1f
             gesturePan = Offset.Zero
-            val centrePreservingPan = committedPan * (newZoom / oldZoom)
+            val centrePreservingPan = committedPan * (newCameraZoom / oldCameraZoom)
             committedPan = clampMapPan(
                 pan = centrePreservingPan,
-                zoom = newZoom,
+                zoom = newCameraZoom,
                 viewportWidth = viewportWidth,
                 viewportHeight = viewportHeight,
                 sourceWidth = sourceWidth,
                 sourceHeight = sourceHeight
             )
-            committedZoom = newZoom
-            if (newZoom >= HIGH_RES_ZOOM) highResRequested = true
+            committedZoom = newCameraZoom
+            if (newCameraZoom >= HIGH_RES_ZOOM) highResRequested = true
             leaseManualCamera(force = true)
             onUserCameraChanged()
         }
@@ -4493,7 +4504,7 @@ private fun JapanMap(
             }
 
             if (affected.isEmpty()) {
-                committedZoom = 1f
+                committedZoom = MIN_CAMERA_MAP_ZOOM
                 committedPan = Offset.Zero
                 return
             }
@@ -4626,7 +4637,7 @@ private fun JapanMap(
             val desiredZoom = min(
                 viewportWidth * 0.38f / horizontalRadius,
                 viewportHeight * 0.38f / verticalRadius
-            ).coerceIn(MIN_MAP_ZOOM, 48f)
+            ).coerceIn(MIN_CAMERA_MAP_ZOOM, 48f)
 
             // Ring animation may only pull the camera outward. A new report or
             // the end of a manual override may perform one complete refit.
@@ -4714,7 +4725,7 @@ private fun JapanMap(
             } else {
                 gestureScale = 1f
                 gesturePan = Offset.Zero
-                committedZoom = 1f
+                committedZoom = MIN_CAMERA_MAP_ZOOM
                 committedPan = Offset.Zero
                 pendingAutomaticCameraRefit = false
             }
@@ -4870,16 +4881,19 @@ private fun JapanMap(
                 pendingAutomaticCameraRefit = false
                 gestureScale = 1f
                 gesturePan = Offset.Zero
-                committedZoom = 1f
+                committedZoom = MIN_CAMERA_MAP_ZOOM
                 committedPan = Offset.Zero
             }
         }
 
         val renderData = if (committedZoom >= HIGH_RES_ZOOM) highResMap ?: data else data
         // The tier follows the zoom visible on screen. During a pinch the
-        // retained layer is still transformed as a whole, but crossing 10x or
-        // 32x must not leave the previous vector visible under the new label.
-        val activeVectorLayer = mapVectorLayerForEffectiveZoom(committedZoom, gestureScale)
+        // retained layer is still transformed as a whole, but crossing 6.5× or
+        // 21× must not leave the previous vector visible under the new label.
+        val activeVectorLayer = mapVectorLayerForEffectiveZoom(
+            displayZoomForCameraZoom(committedZoom),
+            gestureScale
+        )
 
         // The regional context is intentionally NOT part of the expensive cached
         // N03 layer. It is only two tiny native Paths, so redraw it with the live
@@ -4929,7 +4943,7 @@ private fun JapanMap(
         // The off-screen parent owns the retained map texture, so the tier key
         // must replace that parent itself. Keying only the Canvas (or adding a
         // child graphics layer) leaves the parent's N03 texture eligible for
-        // reuse and can hide the complete 10x-32x detailed JMA layer.
+        // reuse and can hide the complete 6.5×–21× detailed JMA layer.
         key(activeVectorLayer) {
             Box(
                 Modifier
@@ -5419,7 +5433,11 @@ private fun JapanMap(
 
         val zoomLabel =
             uiText(R.string.zoom, language) + " " +
-                String.format(java.util.Locale.US, "%.2f", committedZoom * gestureScale) + "×"
+                String.format(
+                    java.util.Locale.US,
+                    "%.2f",
+                    displayZoomForCameraZoom(committedZoom * gestureScale)
+                ) + "×"
 
         if (compactZoomControls) {
             Row(
@@ -5720,8 +5738,8 @@ private fun createMapTextPaint(
         }
     }
 
-private const val MIN_MAP_ZOOM = 1f
-private const val MAX_MAP_ZOOM = 256f
+// Camera thresholds below retain the physical magnification used before the
+// public scale was normalized; their visible values are divided by 1.5.
 private const val HIGH_RES_ZOOM = 8f
 private const val OBSERVED_STATION_DOTS_ZOOM = 12f
 private const val BASE_STATION_DOTS_ZOOM = 18f
@@ -5729,7 +5747,8 @@ private const val OBSERVED_STATION_NAMES_ZOOM = 36f
 private const val BASE_STATION_NAMES_ZOOM = 48f
 
 /**
- * Calculate the 1× scale from the hard screen-space N03 boundary rule.
+ * Calculate the legacy fitted base scale from the hard screen-space N03 rule.
+ * The public 1× view applies a 1.5× camera transform to this fitted geometry.
  *
  * Portrait:
  * - the left-most N03 point may not sit to the right of 25% of the viewport;

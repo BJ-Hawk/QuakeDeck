@@ -8,11 +8,11 @@ class MapVectorLayerPolicyTest {
     @Test
     fun zoomBoundariesSelectExactlyOneVectorLayer() {
         assertEquals(MapVectorLayer.N03_PREFECTURES, mapVectorLayerForZoom(1f))
-        assertEquals(MapVectorLayer.N03_PREFECTURES, mapVectorLayerForZoom(9.999f))
-        assertEquals(MapVectorLayer.JMA_QUAKE_AREAS, mapVectorLayerForZoom(10f))
-        assertEquals(MapVectorLayer.JMA_QUAKE_AREAS, mapVectorLayerForZoom(31.999f))
-        assertEquals(MapVectorLayer.MUNICIPALITIES, mapVectorLayerForZoom(32f))
-        assertEquals(MapVectorLayer.MUNICIPALITIES, mapVectorLayerForZoom(256f))
+        assertEquals(MapVectorLayer.N03_PREFECTURES, mapVectorLayerForZoom(6.499f))
+        assertEquals(MapVectorLayer.JMA_QUAKE_AREAS, mapVectorLayerForZoom(6.5f))
+        assertEquals(MapVectorLayer.JMA_QUAKE_AREAS, mapVectorLayerForZoom(20.999f))
+        assertEquals(MapVectorLayer.MUNICIPALITIES, mapVectorLayerForZoom(21f))
+        assertEquals(MapVectorLayer.MUNICIPALITIES, mapVectorLayerForZoom(128f))
     }
 
     @Test
@@ -25,12 +25,19 @@ class MapVectorLayerPolicyTest {
     fun effectiveZoomSwitchesTiersDuringPinch() {
         assertEquals(
             MapVectorLayer.JMA_QUAKE_AREAS,
-            mapVectorLayerForEffectiveZoom(committedZoom = 8f, gestureScale = 1.25f)
+            mapVectorLayerForEffectiveZoom(committedZoom = 5.2f, gestureScale = 1.25f)
         )
         assertEquals(
             MapVectorLayer.MUNICIPALITIES,
-            mapVectorLayerForEffectiveZoom(committedZoom = 16f, gestureScale = 2f)
+            mapVectorLayerForEffectiveZoom(committedZoom = 10.5f, gestureScale = 2f)
         )
+    }
+
+    @Test
+    fun displayZoomIsNormalizedToTheFormerOnePointFiveView() {
+        assertEquals(1f, displayZoomForCameraZoom(1.5f), 0.0001f)
+        assertEquals(1.5f, cameraZoomForDisplayZoom(1f), 0.0001f)
+        assertEquals(192f, cameraZoomForDisplayZoom(128f), 0.0001f)
     }
 
     @Test

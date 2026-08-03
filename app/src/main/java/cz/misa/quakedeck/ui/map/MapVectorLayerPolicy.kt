@@ -7,8 +7,26 @@ internal enum class MapVectorLayer {
     MUNICIPALITIES
 }
 
-internal const val JMA_QUAKE_LAYER_ZOOM = 10f
-internal const val MUNICIPALITY_LAYER_ZOOM = 32f
+/**
+ * Public zoom units are normalized so the former physical 1.5× view is 1×.
+ * Camera transforms deliberately retain their proven physical magnification.
+ */
+internal const val CAMERA_ZOOM_PER_DISPLAY_ZOOM = 1.5f
+internal const val MIN_DISPLAY_MAP_ZOOM = 1f
+internal const val MAX_DISPLAY_MAP_ZOOM = 128f
+internal const val MIN_CAMERA_MAP_ZOOM =
+    MIN_DISPLAY_MAP_ZOOM * CAMERA_ZOOM_PER_DISPLAY_ZOOM
+internal const val MAX_CAMERA_MAP_ZOOM =
+    MAX_DISPLAY_MAP_ZOOM * CAMERA_ZOOM_PER_DISPLAY_ZOOM
+
+internal const val JMA_QUAKE_LAYER_ZOOM = 6.5f
+internal const val MUNICIPALITY_LAYER_ZOOM = 21f
+
+internal fun displayZoomForCameraZoom(cameraZoom: Float): Float =
+    cameraZoom / CAMERA_ZOOM_PER_DISPLAY_ZOOM
+
+internal fun cameraZoomForDisplayZoom(displayZoom: Float): Float =
+    displayZoom * CAMERA_ZOOM_PER_DISPLAY_ZOOM
 
 /** Select exactly one vector layer for a concrete zoom value. */
 internal fun mapVectorLayerForZoom(zoom: Float): MapVectorLayer = when {
