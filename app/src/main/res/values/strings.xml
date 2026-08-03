@@ -42,6 +42,11 @@
     <string name="dot">Dot</string>
     <string name="cross">Cross</string>
     <string name="marker_size">Marker size</string>
+    <string name="stations_by_provider">Stations by provider</string>
+    <string name="stations_by_provider_explanation">Choose which station networks appear on the normal map. While a report is open, QuakeDeck shows all and only the stations included in that report.</string>
+    <string name="station_provider_jma">Japan Meteorological Agency (JMA)</string>
+    <string name="station_provider_nied">NIED</string>
+    <string name="station_provider_local_government">Local governments</string>
     <string name="station_names">Station names</string>
     <string name="station_names_explanation">Show seismic station names at very deep zoom. Station dots are unaffected.</string>
     <string name="p2pquake_testing_mode">P2PQuake testing mode</string>

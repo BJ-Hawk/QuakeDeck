@@ -11,8 +11,8 @@ android {
         applicationId = "cz.misa.quakedeck"
         minSdk = 26
         targetSdk = 36
-        versionCode = 108
-        versionName = "0.9.74g"
+        versionCode = 109
+        versionName = "0.9.75"
     }
 
     buildTypes {

@@ -34,6 +34,44 @@ data class SeismicStation(
     val municipalityCode: String = ""
 )
 
+enum class SeismicStationProvider {
+    JMA,
+    NIED,
+    LOCAL_GOVERNMENT
+}
+
+val SeismicStation.provider: SeismicStationProvider?
+    get() = when (networkJa) {
+        "気象庁" -> SeismicStationProvider.JMA
+        "防災科学技術研究所" -> SeismicStationProvider.NIED
+        "地方公共団体" -> SeismicStationProvider.LOCAL_GOVERNMENT
+        else -> null
+    }
+
+data class StationProviderVisibility(
+    val jma: Boolean = true,
+    val nied: Boolean = true,
+    val localGovernment: Boolean = true
+) {
+    fun includes(station: SeismicStation): Boolean = when (station.provider) {
+        SeismicStationProvider.JMA -> jma
+        SeismicStationProvider.NIED -> nied
+        SeismicStationProvider.LOCAL_GOVERNMENT -> localGovernment
+        null -> false
+    }
+}
+
+/**
+ * Provider switches filter only the normal idle catalogue. Once a report is
+ * mapped, its own observations become the complete station layer and catalogue
+ * stations must stay hidden regardless of the saved provider preferences.
+ */
+fun shouldShowCatalogStation(
+    reportActive: Boolean,
+    station: SeismicStation,
+    visibility: StationProviderVisibility
+): Boolean = !reportActive && visibility.includes(station)
+
 object StationCatalog {
     private const val CATALOG_URL =
         "https://raw.githubusercontent.com/iku55/jma_int_stations/main/stations.json"

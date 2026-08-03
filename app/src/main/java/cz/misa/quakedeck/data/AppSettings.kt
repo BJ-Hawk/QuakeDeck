@@ -74,6 +74,23 @@ class AppSettings(context: Context) {
             prefs.edit().putBoolean("show_station_names", value).apply()
         }
 
+    var stationProviderVisibility: StationProviderVisibility
+        get() = StationProviderVisibility(
+            jma = prefs.getBoolean("show_station_provider_jma", true),
+            nied = prefs.getBoolean("show_station_provider_nied", true),
+            localGovernment = prefs.getBoolean("show_station_provider_local_government", true)
+        )
+        set(value) {
+            prefs.edit()
+                .putBoolean("show_station_provider_jma", value.jma)
+                .putBoolean("show_station_provider_nied", value.nied)
+                .putBoolean(
+                    "show_station_provider_local_government",
+                    value.localGovernment
+                )
+                .apply()
+        }
+
     var p2pSandboxMode: Boolean
         get() = prefs.getBoolean("p2p_sandbox_mode", false)
         set(value) {

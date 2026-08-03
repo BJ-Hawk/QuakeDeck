@@ -85,6 +85,7 @@ import cz.misa.quakedeck.data.PlaceNameLanguage
 import cz.misa.quakedeck.data.MinimumNotificationIntensity
 import cz.misa.quakedeck.data.TsunamiGrade
 import cz.misa.quakedeck.data.ReportArchiveStatus
+import cz.misa.quakedeck.data.StationProviderVisibility
 import cz.misa.quakedeck.data.QuietHoursMode
 import cz.misa.quakedeck.data.QuietHoursSchedule
 import cz.misa.quakedeck.data.QuietPeriod
@@ -158,6 +159,8 @@ fun QuakeDeckSettings(
     onMarkerStyleChanged: (EpicenterMarkerStyle) -> Unit,
     showStationNames: Boolean,
     onShowStationNamesChanged: (Boolean) -> Unit,
+    stationProviderVisibility: StationProviderVisibility,
+    onStationProviderVisibilityChanged: (StationProviderVisibility) -> Unit,
     testingMode: Boolean,
     onTestingModeChanged: (Boolean) -> Unit,
     snapshot: AppSnapshot,
@@ -316,6 +319,9 @@ fun QuakeDeckSettings(
                                 onMarkerStyleChanged = onMarkerStyleChanged,
                                 showStationNames = showStationNames,
                                 onShowStationNamesChanged = onShowStationNamesChanged,
+                                stationProviderVisibility = stationProviderVisibility,
+                                onStationProviderVisibilityChanged =
+                                    onStationProviderVisibilityChanged,
                                 testingMode = testingMode,
                                 snapshot = snapshot,
                                 requestedMode = requestedMode,
@@ -527,6 +533,8 @@ private fun MainSettingsPage(
     onMarkerStyleChanged: (EpicenterMarkerStyle) -> Unit,
     showStationNames: Boolean,
     onShowStationNamesChanged: (Boolean) -> Unit,
+    stationProviderVisibility: StationProviderVisibility,
+    onStationProviderVisibilityChanged: (StationProviderVisibility) -> Unit,
     testingMode: Boolean,
     snapshot: AppSnapshot,
     requestedMode: DataSourceMode,
@@ -665,6 +673,53 @@ private fun MainSettingsPage(
                     },
                     valueRange = 3f..12f,
                     steps = 17
+                )
+                CardDivider()
+                Text(
+                    text = text(R.string.stations_by_provider, selectedLanguage),
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 13.sp,
+                    lineHeight = 15.sp
+                )
+                Text(
+                    text = text(R.string.stations_by_provider_explanation, selectedLanguage),
+                    modifier = Modifier.padding(top = 1.dp),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    fontSize = 10.sp,
+                    lineHeight = 12.sp
+                )
+                SwitchSettingRow(
+                    title = text(R.string.station_provider_jma, selectedLanguage),
+                    supportingText = "",
+                    checked = stationProviderVisibility.jma,
+                    onCheckedChange = { enabled ->
+                        onStationProviderVisibilityChanged(
+                            stationProviderVisibility.copy(jma = enabled)
+                        )
+                    },
+                    nested = true
+                )
+                SwitchSettingRow(
+                    title = text(R.string.station_provider_nied, selectedLanguage),
+                    supportingText = "",
+                    checked = stationProviderVisibility.nied,
+                    onCheckedChange = { enabled ->
+                        onStationProviderVisibilityChanged(
+                            stationProviderVisibility.copy(nied = enabled)
+                        )
+                    },
+                    nested = true
+                )
+                SwitchSettingRow(
+                    title = text(R.string.station_provider_local_government, selectedLanguage),
+                    supportingText = "",
+                    checked = stationProviderVisibility.localGovernment,
+                    onCheckedChange = { enabled ->
+                        onStationProviderVisibilityChanged(
+                            stationProviderVisibility.copy(localGovernment = enabled)
+                        )
+                    },
+                    nested = true
                 )
                 CardDivider()
                 SwitchSettingRow(

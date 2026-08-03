@@ -42,6 +42,11 @@
     <string name="dot">点</string>
     <string name="cross">十字</string>
     <string name="marker_size">マーカーサイズ</string>
+    <string name="stations_by_provider">所属機関別の観測点</string>
+    <string name="stations_by_provider_explanation">通常の地図に表示する観測網を選択します。レポートを開いている間は、そのレポートに含まれる観測点だけをすべて表示します。</string>
+    <string name="station_provider_jma">気象庁</string>
+    <string name="station_provider_nied">防災科学技術研究所（NIED）</string>
+    <string name="station_provider_local_government">地方公共団体</string>
     <string name="station_names">観測点名</string>
     <string name="station_names_explanation">非常に大きく拡大したときに観測点名を表示します。観測点の点表示には影響しません。</string>
     <string name="p2pquake_testing_mode">P2PQuakeテストモード</string>

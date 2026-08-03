@@ -42,6 +42,11 @@
     <string name="dot">Bod</string>
     <string name="cross">Kříž</string>
     <string name="marker_size">Velikost značky</string>
+    <string name="stations_by_provider">Stanice podle provozovatele</string>
+    <string name="stations_by_provider_explanation">Zvolte sítě stanic zobrazené na běžné mapě. Při otevřeném hlášení QuakeDeck zobrazí všechny a pouze stanice obsažené v daném hlášení.</string>
+    <string name="station_provider_jma">Japonská meteorologická agentura (JMA)</string>
+    <string name="station_provider_nied">NIED</string>
+    <string name="station_provider_local_government">Místní samosprávy</string>
     <string name="station_names">Názvy seismických stanic</string>
     <string name="station_names_explanation">Při velmi velkém přiblížení zobrazit názvy seismických stanic. Tečky stanic zůstanou beze změny.</string>
     <string name="p2pquake_testing_mode">Testovací režim P2PQuake</string>

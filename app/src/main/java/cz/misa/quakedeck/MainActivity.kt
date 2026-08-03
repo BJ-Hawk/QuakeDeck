@@ -215,6 +215,9 @@ private fun QuakeDeckApp(
     var epicenterMarkerSizeDp by remember { mutableFloatStateOf(appSettings.epicenterMarkerSizeDp) }
     var epicenterMarkerStyle by remember { mutableStateOf(appSettings.epicenterMarkerStyle) }
     var showStationNames by remember { mutableStateOf(appSettings.showStationNames) }
+    var stationProviderVisibility by remember {
+        mutableStateOf(appSettings.stationProviderVisibility)
+    }
     var testingMode by remember {
         mutableStateOf(SandboxFeature.permitted(appSettings.p2pSandboxMode))
     }
@@ -1036,6 +1039,7 @@ private fun QuakeDeckApp(
                             markerSizeDp = epicenterMarkerSizeDp,
                             markerStyle = epicenterMarkerStyle,
                             showStationNames = showStationNames,
+                            stationProviderVisibility = stationProviderVisibility,
                             panelResizing = panelResizing,
                             allowAutomaticEventRefit = !historicalMode,
                             onUserCameraChanged = {
@@ -1136,6 +1140,7 @@ private fun QuakeDeckApp(
                             markerSizeDp = epicenterMarkerSizeDp,
                             markerStyle = epicenterMarkerStyle,
                             showStationNames = showStationNames,
+                            stationProviderVisibility = stationProviderVisibility,
                             panelResizing = panelResizing,
                             allowAutomaticEventRefit = !historicalMode,
                             onUserCameraChanged = {
@@ -1416,6 +1421,11 @@ private fun QuakeDeckApp(
             onShowStationNamesChanged = { value ->
                 showStationNames = value
                 appSettings.showStationNames = value
+            },
+            stationProviderVisibility = stationProviderVisibility,
+            onStationProviderVisibilityChanged = { value ->
+                stationProviderVisibility = value
+                appSettings.stationProviderVisibility = value
             },
             testingMode = testingMode,
             snapshot = snapshot,
@@ -3883,6 +3893,7 @@ private fun JapanMap(
     markerSizeDp: Float,
     markerStyle: EpicenterMarkerStyle,
     showStationNames: Boolean,
+    stationProviderVisibility: StationProviderVisibility,
     panelResizing: Boolean,
     allowAutomaticEventRefit: Boolean,
     onUserCameraChanged: () -> Unit,
@@ -4369,10 +4380,26 @@ private fun JapanMap(
             baseTop + (point.y - data.minY) * fitScale
         )
 
-        val projectedStations = remember(data, stationCatalogSize) {
-            StationCatalog.allStations().map { station ->
-                station to data.project(station.latitude, station.longitude)
-            }
+        val reportActive = event.id != "waiting"
+        val projectedStations = remember(
+            data,
+            stationCatalogSize,
+            reportActive,
+            stationProviderVisibility
+        ) {
+            StationCatalog.allStations()
+                .asSequence()
+                .filter { station ->
+                    shouldShowCatalogStation(
+                        reportActive = reportActive,
+                        station = station,
+                        visibility = stationProviderVisibility
+                    )
+                }
+                .map { station ->
+                    station to data.project(station.latitude, station.longitude)
+                }
+                .toList()
         }
         val projectedCities = remember(data) {
             MapLabels.capitals
@@ -5281,9 +5308,10 @@ private fun JapanMap(
                     )
                 }
 
-            // Muted network dots are intentionally a deep-zoom layer. They are
-            // scaffolding for the future live DM-D.S.S station feed and should
-            // never dominate a regional view.
+            // Muted provider-filtered catalogue dots belong only to the idle
+            // map. An active report replaces this entire layer with exactly its
+            // own observations, so preliminary reports without point values
+            // correctly show no station markers at all.
             if (!panelResizing && totalZoom >= BASE_STATION_DOTS_ZOOM) {
                 projectedStations.forEach { (station, projected) ->
                     val p = displayedProjected(projected)
@@ -5314,8 +5342,8 @@ private fun JapanMap(
             }
 
             // Actual station values from the selected/current detailed JMA
-            // report. Keep them hidden until a genuinely regional zoom (12x),
-            // then let their Shindo colour override the muted network layer.
+            // report. They are the only station layer while the report is
+            // mapped, and stay hidden until a genuinely regional zoom (12x).
             if (totalZoom >= OBSERVED_STATION_DOTS_ZOOM) {
                 event.points.forEach { point ->
                     val lat = point.latitude ?: return@forEach

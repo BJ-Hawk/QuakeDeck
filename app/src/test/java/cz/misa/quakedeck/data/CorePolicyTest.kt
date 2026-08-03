@@ -10,6 +10,15 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class CorePolicyTest {
+    private fun station(networkJa: String) = SeismicStation(
+        code = "TEST",
+        nameJa = "試験",
+        prefectureJa = "東京都",
+        latitude = 35.0,
+        longitude = 139.0,
+        networkJa = networkJa
+    )
+
     @Test
     fun eventOriginDisplayHidesOnlyZeroSeconds() {
         assertEquals(
@@ -28,6 +37,40 @@ class CorePolicyTest {
         assertFalse(JapanMapCoverage.contains(Double.NaN, 139.6503))
         assertFalse(JapanMapCoverage.contains(35.6762, Double.POSITIVE_INFINITY))
         assertFalse(JapanMapCoverage.contains(0.0, 0.0))
+    }
+
+    @Test
+    fun stationProviderVisibilityDistinguishesAllThreeNetworks() {
+        val niedOnly = StationProviderVisibility(
+            jma = false,
+            nied = true,
+            localGovernment = false
+        )
+
+        assertFalse(niedOnly.includes(station("気象庁")))
+        assertTrue(niedOnly.includes(station("防災科学技術研究所")))
+        assertFalse(niedOnly.includes(station("地方公共団体")))
+        assertFalse(niedOnly.includes(station("unknown")))
+    }
+
+    @Test
+    fun activeReportAlwaysSuppressesIdleCatalogStations() {
+        val allProviders = StationProviderVisibility()
+
+        assertTrue(
+            shouldShowCatalogStation(
+                reportActive = false,
+                station = station("気象庁"),
+                visibility = allProviders
+            )
+        )
+        assertFalse(
+            shouldShowCatalogStation(
+                reportActive = true,
+                station = station("気象庁"),
+                visibility = allProviders
+            )
+        )
     }
 
     @Test

@@ -2,6 +2,14 @@
 
 QuakeDeck release history, newest first.
 
+## v0.9.75
+
+- Adds persistent idle-map station visibility switches for JMA, NIED, and local-government seismic-intensity networks.
+- Keeps station-name visibility independent from provider filtering so labels can be disabled without hiding station dots.
+- Makes active live, latest, and historical reports replace the idle catalogue with all and only their own observed stations, regardless of the saved provider switches.
+- Shows no station markers for preliminary reports that do not yet contain point observations.
+- Bumps the Android application version to `0.9.75` (`versionCode` 109) and updates the README release marker.
+
 ## v0.9.74a
 
 - Corrects the 10×–32× source layer from the 56 broad public EEW forecast areas to the 194 detailed JMA earthquake-reporting areas, restoring subdivisions such as Kumamoto's four regions.
