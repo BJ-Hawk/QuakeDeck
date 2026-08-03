@@ -1,6 +1,27 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.plugin.compose")
+}
+
+val signingPropertiesFile = rootProject.file("keystore.properties")
+val sharedSigningConfig = if (signingPropertiesFile.isFile) {
+    val signingProperties = Properties().apply {
+        signingPropertiesFile.inputStream().use(::load)
+    }
+    fun signingProperty(name: String): String =
+        signingProperties.getProperty(name)
+            ?: error("Missing signing property: $name")
+
+    signingConfigs.create("shared") {
+        storeFile = rootProject.file(signingProperty("storeFile"))
+        storePassword = signingProperty("storePassword")
+        keyAlias = signingProperty("keyAlias")
+        keyPassword = signingProperty("keyPassword")
+    }
+} else {
+    null
 }
 
 android {
@@ -16,8 +37,12 @@ android {
     }
 
     buildTypes {
+        getByName("debug") {
+            sharedSigningConfig?.let { signingConfig = it }
+        }
         release {
             isMinifyEnabled = false
+            sharedSigningConfig?.let { signingConfig = it }
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -51,7 +76,6 @@ dependencies {
     implementation("androidx.activity:activity-compose:1.12.4")
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.ui:ui-graphics")
-    implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.foundation:foundation")
     implementation("androidx.compose.material3:material3")
     implementation("com.squareup.okhttp3:okhttp:5.4.0")
