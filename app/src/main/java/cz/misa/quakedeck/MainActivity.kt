@@ -4118,14 +4118,6 @@ private fun JapanMap(
     val intensityFillPaint = remember {
         Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.FILL }
     }
-    val eewZoneBoundaryPaint = remember(extraColors) {
-        Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            style = Paint.Style.STROKE
-            strokeJoin = Paint.Join.ROUND
-            strokeCap = Paint.Cap.ROUND
-            color = MAP_WARNING_ZONE_BORDER_COLOR.toArgb()
-        }
-    }
     val municipalityBoundaryPaint = remember(extraColors) {
         Paint(Paint.ANTI_ALIAS_FLAG).apply {
             style = Paint.Style.STROKE
@@ -5050,7 +5042,6 @@ private fun JapanMap(
 
                 seamPaint.strokeWidth = 2.2f / renderScale
                 borderPaint.strokeWidth = 0.9f / renderScale
-                eewZoneBoundaryPaint.strokeWidth = 3f / renderScale
                 municipalityBoundaryPaint.strokeWidth = 0.55f / renderScale
                 quakePrefectureBorderPaint.strokeWidth = 3f / renderScale
                 municipalityWarningZoneBorderPaint.strokeWidth = 3f / renderScale
@@ -5102,9 +5093,9 @@ private fun JapanMap(
                                 // earthquake-reporting regions, not the 56 broad
                                 // public EEW forecast areas. Broad EEW colours
                                 // remain a fallback underneath the detailed
-                                // report colours, then every fine boundary is
-                                // stroked so divisions such as Kumamoto's four
-                                // regions stay visible for all report types.
+                                // report colours. Fine reporting-area boundaries
+                                // stay subtle here; only prefecture borders receive
+                                // the highlighted 3 px treatment at this tier.
                                 officialAreas.quakeAreas.forEach { area ->
                                     native.drawPath(area.path, landPaint)
                                 }
@@ -5123,7 +5114,7 @@ private fun JapanMap(
                                     }
                                 }
                                 officialAreas.quakeAreas.forEach { area ->
-                                    native.drawPath(area.path, eewZoneBoundaryPaint)
+                                    native.drawPath(area.path, borderPaint)
                                 }
                                 native.drawPath(
                                     officialAreas.prefectureBorders,
@@ -5628,14 +5619,15 @@ private fun JapanMap(
         ) {
             FitJapanIcon(Modifier.size(18.dp))
         }
-    }
 
-    if (mapBorderLegendOpen) {
-        MapBorderLegendDialog(
-            language = language,
-            municipalityColor = extraColors.mapRegionBoundary.copy(alpha = 0.72f),
-            onDismiss = { mapBorderLegendOpen = false }
-        )
+        if (mapBorderLegendOpen) {
+            MapBorderLegendDialog(
+                language = language,
+                municipalityColor = extraColors.mapRegionBoundary.copy(alpha = 0.72f),
+                showDetailedBorders = activeVectorLayer == MapVectorLayer.MUNICIPALITIES,
+                onDismiss = { mapBorderLegendOpen = false }
+            )
+        }
     }
 }
 
@@ -5643,6 +5635,7 @@ private fun JapanMap(
 private fun MapBorderLegendDialog(
     language: PlaceNameLanguage,
     municipalityColor: Color,
+    showDetailedBorders: Boolean,
     onDismiss: () -> Unit
 ) {
     AlertDialog(
@@ -5659,24 +5652,26 @@ private fun MapBorderLegendDialog(
                         language
                     )
                 )
-                MapBorderLegendRow(
-                    color = MAP_WARNING_ZONE_BORDER_COLOR,
-                    strokeWidth = 3.dp,
-                    title = uiText(R.string.map_border_legend_warning_zone, language),
-                    description = uiText(
-                        R.string.map_border_legend_warning_zone_description,
-                        language
+                if (showDetailedBorders) {
+                    MapBorderLegendRow(
+                        color = MAP_WARNING_ZONE_BORDER_COLOR,
+                        strokeWidth = 3.dp,
+                        title = uiText(R.string.map_border_legend_warning_zone, language),
+                        description = uiText(
+                            R.string.map_border_legend_warning_zone_description,
+                            language
+                        )
                     )
-                )
-                MapBorderLegendRow(
-                    color = municipalityColor,
-                    strokeWidth = 1.dp,
-                    title = uiText(R.string.map_border_legend_municipality, language),
-                    description = uiText(
-                        R.string.map_border_legend_municipality_description,
-                        language
+                    MapBorderLegendRow(
+                        color = municipalityColor,
+                        strokeWidth = 1.dp,
+                        title = uiText(R.string.map_border_legend_municipality, language),
+                        description = uiText(
+                            R.string.map_border_legend_municipality_description,
+                            language
+                        )
                     )
-                )
+                }
             }
         },
         confirmButton = {

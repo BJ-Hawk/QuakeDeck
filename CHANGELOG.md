@@ -2,6 +2,12 @@
 
 QuakeDeck release history, newest first.
 
+## v0.9.76a
+
+- Keeps the middle JMA reporting-area layer visually restrained: only prefecture borders use the highlighted 3 px slate-blue stroke, while internal reporting-area boundaries return to the normal subtle map line.
+- Reserves the amber 3 px warning-zone borders and municipality-border legend entries for the municipality layer.
+- Bumps the Android hotfix version to `0.9.76a` (`versionCode` 113) and updates the README release marker.
+
 ## v0.9.76
 
 - Adds station counts to the JMA, NIED, and local-government map-provider switches and separates the event-only station rule into a clear note beneath them.
