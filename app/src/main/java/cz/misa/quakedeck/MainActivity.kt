@@ -4026,7 +4026,7 @@ private fun JapanMap(
         val municipalities = linkedMapOf<String, String>()
         municipalityMap?.let { geometry ->
             mapIntensityPoints.forEach { point ->
-                if (point.isArea || point.intensity == "—") return@forEach
+                if (point.intensity == "—") return@forEach
                 val area = geometry.resolveObservation(point) ?: return@forEach
                 municipalities.recordHighestShindo(area.geometryKey, point.intensity)
             }

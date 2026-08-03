@@ -266,10 +266,13 @@ class JmaMunicipalityMapData(
 
     /** Resolve one actual observation station to its JMA municipality or ward. */
     fun resolveObservation(point: IntensityPoint): JmaAreaShape? {
-        if (point.isArea) return null
         val station = point.stationName
             ?.takeIf { it.isNotBlank() }
             ?.let { StationCatalog.lookup(point.prefecture, it) }
+        // Archived report sequences can preserve a station entry with the
+        // preliminary report's area flag. Reject a genuine area, but let an
+        // exact bundled-catalogue station continue to its municipality.
+        if (point.isArea && station == null) return null
         station?.municipalityCode
             ?.takeIf { it.isNotBlank() }
             ?.let(byCode::get)
