@@ -4108,28 +4108,28 @@ private fun JapanMap(
             color = extraColors.mapRegionBoundary.copy(alpha = 0.72f).toArgb()
         }
     }
-    val quakePrefectureBorderPaint = remember {
+    val quakePrefectureBorderPaint = remember(extraColors) {
         Paint(Paint.ANTI_ALIAS_FLAG).apply {
             style = Paint.Style.STROKE
             strokeJoin = Paint.Join.ROUND
             strokeCap = Paint.Cap.ROUND
-            color = Color(0xFFFF0000).toArgb()
+            color = extraColors.mapBoundary.toArgb()
         }
     }
-    val municipalityPrefectureBorderPaint = remember {
+    val municipalityPrefectureBorderPaint = remember(extraColors) {
         Paint(Paint.ANTI_ALIAS_FLAG).apply {
             style = Paint.Style.STROKE
             strokeJoin = Paint.Join.ROUND
             strokeCap = Paint.Cap.ROUND
-            color = Color(0xFFFF0000).toArgb()
+            color = extraColors.mapBoundary.toArgb()
         }
     }
-    val municipalityWarningZoneBorderPaint = remember {
+    val municipalityWarningZoneBorderPaint = remember(extraColors) {
         Paint(Paint.ANTI_ALIAS_FLAG).apply {
             style = Paint.Style.STROKE
             strokeJoin = Paint.Join.ROUND
             strokeCap = Paint.Cap.ROUND
-            color = Color(0xFF00FF00).toArgb()
+            color = extraColors.mapBoundary.toArgb()
         }
     }
     val tsunamiCoastBackdropPaint = remember(extraColors) {
@@ -4971,9 +4971,9 @@ private fun JapanMap(
                 borderPaint.strokeWidth = 0.9f / renderScale
                 eewZoneBoundaryPaint.strokeWidth = 1.15f / renderScale
                 municipalityBoundaryPaint.strokeWidth = 0.55f / renderScale
-                quakePrefectureBorderPaint.strokeWidth = 3f / renderScale
-                municipalityWarningZoneBorderPaint.strokeWidth = 3f / renderScale
-                municipalityPrefectureBorderPaint.strokeWidth = 3f / renderScale
+                quakePrefectureBorderPaint.strokeWidth = 5f / renderScale
+                municipalityWarningZoneBorderPaint.strokeWidth = 5f / renderScale
+                municipalityPrefectureBorderPaint.strokeWidth = 5f / renderScale
                 tsunamiCoastBackdropPaint.strokeWidth = 6.6f / renderScale
                 tsunamiCoastPaint.strokeWidth = 4.2f / renderScale
 
