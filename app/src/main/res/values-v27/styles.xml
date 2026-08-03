@@ -1,0 +1,9 @@
+<resources>
+    <style name="Theme.QuakeDeck.Light" parent="Theme.QuakeDeck.Light.Base">
+        <item name="android:windowLightNavigationBar">true</item>
+    </style>
+
+    <style name="Theme.QuakeDeck.Dark" parent="Theme.QuakeDeck.Dark.Base">
+        <item name="android:windowLightNavigationBar">false</item>
+    </style>
+</resources>

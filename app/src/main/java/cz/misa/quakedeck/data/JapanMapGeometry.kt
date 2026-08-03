@@ -410,7 +410,7 @@ object JapanMapGeometry {
          * boundaries. A temporary land-union mask then checks every tiny line
          * segment: a real coastline has land on one side and sea on the other;
          * an inland prefecture border has land on both sides.
-         */
+        */
         val prefectureCoastlines = linkedMapOf<String, Path>()
         val landMask = LandMask.create(landPath, minX, minY, maxX, maxY)
 
@@ -434,7 +434,6 @@ object JapanMapGeometry {
                 }
                 prefecturePath.lineTo(to.x, to.y)
                 previousPrefectureEnd = to
-
             }
         }
 

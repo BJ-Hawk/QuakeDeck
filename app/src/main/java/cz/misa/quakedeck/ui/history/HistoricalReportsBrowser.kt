@@ -153,16 +153,24 @@ private fun HistoricalBrowserBody(
     var fromDateText by rememberSaveable { mutableStateOf("") }
     var toDateText by rememberSaveable { mutableStateOf("") }
     var selectedIntensityValues by rememberSaveable { mutableStateOf(emptyList<String>()) }
-    val selectedIntensities = selectedIntensityValues.toSet()
-    val sort = runCatching { HistoricalSort.valueOf(sortName) }
-        .getOrDefault(HistoricalSort.DATE_NEWEST)
-    val fromDate = parseDate(fromDateText)
-    val toDate = parseDate(toDateText)
+    val selectedIntensities = remember(selectedIntensityValues) {
+        selectedIntensityValues.toSet()
+    }
+    val sort = remember(sortName) {
+        runCatching { HistoricalSort.valueOf(sortName) }
+            .getOrDefault(HistoricalSort.DATE_NEWEST)
+    }
+    val fromDate = remember(fromDateText) { parseDate(fromDateText) }
+    val toDate = remember(toDateText) { parseDate(toDateText) }
     val fromDateInvalid = fromDateText.isNotBlank() && fromDate == null
     val toDateInvalid = toDateText.isNotBlank() && toDate == null
+    val eventTimes = remember(events) {
+        events.associateWith(::parseEventTime)
+    }
 
     val visibleEvents = remember(
         events,
+        eventTimes,
         sort,
         fromDateText,
         toDateText,
@@ -170,7 +178,7 @@ private fun HistoricalBrowserBody(
     ) {
         events.asSequence()
             .filter { summary ->
-                val date = eventDate(summary)
+                val date = eventTimes[summary]?.toLocalDate()
                 (fromDate == null || date?.isBefore(fromDate) == false) &&
                     (toDate == null || date?.isAfter(toDate) == false)
             }
@@ -178,7 +186,7 @@ private fun HistoricalBrowserBody(
                 selectedIntensities.isEmpty() ||
                     normalizedIntensity(summary.event.maxIntensity) in selectedIntensities
             }
-            .sortedWith(sortComparator(sort))
+            .sortedWith(sortComparator(sort) { eventTimes[it] ?: LocalDateTime.MIN })
             .toList()
     }
 
@@ -539,22 +547,22 @@ private fun parseDate(value: String): LocalDate? =
         runCatching { LocalDate.parse(it) }.getOrNull()
     }
 
-private fun eventDate(summary: HistoricalEventSummary): LocalDate? =
-    runCatching { LocalDateTime.parse(summary.event.originTime, EVENT_TIME_FORMAT).toLocalDate() }.getOrNull()
-
-private fun eventTime(summary: HistoricalEventSummary): LocalDateTime =
+private fun parseEventTime(summary: HistoricalEventSummary): LocalDateTime? =
     runCatching { LocalDateTime.parse(summary.event.originTime, EVENT_TIME_FORMAT) }
-        .getOrDefault(LocalDateTime.MIN)
+        .getOrNull()
 
-private fun sortComparator(sort: HistoricalSort): Comparator<HistoricalEventSummary> = when (sort) {
-    HistoricalSort.DATE_NEWEST -> compareByDescending<HistoricalEventSummary> { eventTime(it) }
-    HistoricalSort.DATE_OLDEST -> compareBy<HistoricalEventSummary> { eventTime(it) }
+private fun sortComparator(
+    sort: HistoricalSort,
+    eventTime: (HistoricalEventSummary) -> LocalDateTime
+): Comparator<HistoricalEventSummary> = when (sort) {
+    HistoricalSort.DATE_NEWEST -> compareByDescending<HistoricalEventSummary>(eventTime)
+    HistoricalSort.DATE_OLDEST -> compareBy<HistoricalEventSummary>(eventTime)
     HistoricalSort.INTENSITY_STRONGEST -> compareByDescending<HistoricalEventSummary> {
         intensityRank(it.event.maxIntensity)
-    }.thenByDescending(::eventTime)
+    }.thenByDescending(eventTime)
     HistoricalSort.INTENSITY_WEAKEST -> compareBy<HistoricalEventSummary> {
         intensityRank(it.event.maxIntensity)
-    }.thenByDescending(::eventTime)
+    }.thenByDescending(eventTime)
 }
 
 private fun normalizedIntensity(value: String): String = when (value.trim()) {

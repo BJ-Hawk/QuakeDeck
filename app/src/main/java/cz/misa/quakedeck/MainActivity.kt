@@ -90,6 +90,10 @@ import cz.misa.quakedeck.time.AppClockController
 import cz.misa.quakedeck.time.AppClockMode
 import cz.misa.quakedeck.time.NetworkTimeSynchronizer
 import cz.misa.quakedeck.ui.map.drawEpicenterMarker
+import cz.misa.quakedeck.ui.map.MapVectorLayer
+import cz.misa.quakedeck.ui.map.MUNICIPALITY_LAYER_ZOOM
+import cz.misa.quakedeck.ui.map.mapVectorLayerForEffectiveZoom
+import cz.misa.quakedeck.ui.map.recordHighestShindo
 import cz.misa.quakedeck.ui.common.responsiveControlSizing
 import kotlin.math.abs
 import kotlin.math.ceil
@@ -97,6 +101,10 @@ import kotlin.math.floor
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.roundToInt
+
+private val DISPLAYED_JST_ZONE = ZoneId.of("Asia/Tokyo")
+private val DISPLAYED_JST_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss 'JST'")
+private val COMPACT_JST_TIME_PATTERN = Regex("\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2} JST")
 
 private fun android.content.Context.isIgnoringBatteryOptimizations(): Boolean {
     val powerManager = getSystemService(PowerManager::class.java)
@@ -3611,8 +3619,8 @@ private fun tsunamiArrivalConditionDisplay(
 private fun parseDisplayedJst(value: String): Instant? = runCatching {
     java.time.LocalDateTime.parse(
         value,
-        DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss 'JST'")
-    ).atZone(ZoneId.of("Asia/Tokyo")).toInstant()
+        DISPLAYED_JST_FORMATTER
+    ).atZone(DISPLAYED_JST_ZONE).toInstant()
 }.getOrNull()
 
 private fun formatCompactDuration(seconds: Long): String {
@@ -3760,7 +3768,7 @@ private fun displayIntensity(value: String, japanese: Boolean): String {
 private fun fmtMag(value: Double): String = if (value <= 0.0) "—" else String.format("%.1f", value)
 
 private fun compactJstTime(value: String): String =
-    if (value.matches(Regex("\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2} JST"))) {
+    if (value.matches(COMPACT_JST_TIME_PATTERN)) {
         value.substringAfter(' ')
     } else {
         value
@@ -3769,7 +3777,8 @@ private fun compactJstTime(value: String): String =
 private data class ResizeMapRaster(val bitmap: Bitmap)
 private data class MapIntensityGeometry(
     val prefectures: Map<String, String>,
-    val regions: Map<String, String>
+    val quakeAreas: Map<String, String>,
+    val eewAreas: Map<String, String>
 )
 private data class MapViewportState(
     val width: Float,
@@ -3786,8 +3795,7 @@ private data class MapViewportState(
  */
 private fun buildResizeMapRaster(
     data: JapanMapData,
-    regionalData: JmaRegionalMapData,
-    intensityGeometry: MapIntensityGeometry,
+    prefectureIntensity: Map<String, String>,
     colors: QuakeDeckExtraColors
 ): ResizeMapRaster {
     val sourceWidth = (data.maxX - data.minX).coerceAtLeast(0.000001f)
@@ -3840,14 +3848,9 @@ private fun buildResizeMapRaster(
 
     canvas.drawPath(data.landPath, land)
     data.prefectures.forEach { prefecture ->
-        val value = intensityGeometry.prefectures[prefecture.nameJa] ?: return@forEach
+        val value = prefectureIntensity[prefecture.nameJa] ?: return@forEach
         intensity.color = intensityColor(value).toArgb()
         canvas.drawPath(prefecture.path, intensity)
-    }
-    (regionalData.quakeAreas + regionalData.eewAreas).forEach { area ->
-        val value = intensityGeometry.regions[area.geometryKey] ?: return@forEach
-        intensity.color = intensityColor(value).toArgb()
-        canvas.drawPath(area.path, intensity)
     }
     canvas.drawPath(data.boundaryPath, seam)
     canvas.drawPath(data.boundaryPath, border)
@@ -3885,7 +3888,7 @@ private fun JapanMap(
 
     val mapData by produceState<JapanMapData?>(initialValue = null, key1 = context.applicationContext) {
         value = withContext(Dispatchers.Default) {
-            JapanMapGeometry.load(context.applicationContext)
+            cz.misa.quakedeck.data.JapanMapGeometry.load(context.applicationContext)
         }
     }
     val regionalContext by produceState<RegionalContextData?>(
@@ -3910,22 +3913,22 @@ private fun JapanMap(
     var highResRequested by remember { mutableStateOf(false) }
     val highResMap by produceState<JapanMapData?>(initialValue = null, key1 = highResRequested) {
         value = if (highResRequested) {
-            withContext(Dispatchers.Default) { JapanMapGeometry.loadHighRes(context.applicationContext) }
+            withContext(Dispatchers.Default) {
+                cz.misa.quakedeck.data.JapanMapGeometry.loadHighRes(context.applicationContext)
+            }
         } else {
             null
         }
     }
-    var municipalityRequested by remember { mutableStateOf(false) }
     val municipalityMap by produceState<JmaMunicipalityMapData?>(
         initialValue = null,
-        key1 = municipalityRequested
+        key1 = context.applicationContext
     ) {
-        value = if (municipalityRequested) {
-            withContext(Dispatchers.Default) {
-                JmaMunicipalityGeometry.load(context.applicationContext)
-            }
-        } else {
-            null
+        // Prepare the deep layer concurrently with the startup geometry. A
+        // focus action can jump directly from 1x to 32x+, so threshold-only
+        // loading would otherwise leave the requested layer temporarily empty.
+        value = withContext(Dispatchers.Default) {
+            cz.misa.quakedeck.data.JmaMunicipalityGeometry.load(context.applicationContext)
         }
     }
 
@@ -3956,6 +3959,7 @@ private fun JapanMap(
     } else {
         event.points
     }
+    val stationCatalogSize = StationCatalog.allStations().size
     val intensityGeometry = remember(
         event.id,
         event.points,
@@ -3963,39 +3967,39 @@ private fun JapanMap(
         activeEewEvent?.reportSerial,
         activeEewEvent?.points,
         mapPrefectureNames,
-        officialAreas
+        officialAreas,
+        stationCatalogSize
     ) {
         val prefectures = linkedMapOf<String, String>()
-        val regions = linkedMapOf<String, String>()
-
-        fun update(target: MutableMap<String, String>, key: String, intensity: String) {
-            val current = target[key]
-            if (current == null || intensityRank(intensity) > intensityRank(current)) {
-                target[key] = intensity
-            }
-        }
+        val quakeAreas = linkedMapOf<String, String>()
+        val eewAreas = linkedMapOf<String, String>()
 
         mapIntensityPoints.forEach { point ->
-            if (point.intensity == "—") return@forEach
-            val resolvedAreas = officialAreas.resolveIntensityAreas(point)
-            if (resolvedAreas.isNotEmpty()) {
-                resolvedAreas.forEach { area ->
-                    update(regions, area.geometryKey, point.intensity)
-                }
-            } else {
-                val rawPrefecture = point.prefecture.ifBlank {
-                    point.name.substringBefore(" · ")
-                }
-                matchMapPrefectures(rawPrefecture, mapPrefectureNames).forEach { prefecture ->
-                    update(prefectures, prefecture, point.intensity)
+            val rawPrefecture = point.prefecture.ifBlank {
+                point.name.substringBefore(" · ")
+            }
+            matchMapPrefectures(rawPrefecture, mapPrefectureNames).forEach { prefecture ->
+                prefectures.recordHighestShindo(prefecture, point.intensity)
+            }
+            officialAreas.resolveIntensityAreas(point).forEach { area ->
+                when (area.layer) {
+                    JmaAreaLayer.QUAKE ->
+                        quakeAreas.recordHighestShindo(area.geometryKey, point.intensity)
+                    JmaAreaLayer.EEW ->
+                        eewAreas.recordHighestShindo(area.geometryKey, point.intensity)
+                    else -> Unit
                 }
             }
         }
-        MapIntensityGeometry(prefectures = prefectures, regions = regions)
+        MapIntensityGeometry(
+            prefectures = prefectures,
+            quakeAreas = quakeAreas,
+            eewAreas = eewAreas
+        )
     }
     val prefectureIntensity = intensityGeometry.prefectures
-    val regionalIntensity = intensityGeometry.regions
-    val stationCatalogSize = StationCatalog.allStations().size
+    val quakeAreaIntensity = intensityGeometry.quakeAreas
+    val eewAreaIntensity = intensityGeometry.eewAreas
     val municipalityIntensity = remember(
         mapIntensityPoints,
         municipalityMap,
@@ -4006,10 +4010,7 @@ private fun JapanMap(
             mapIntensityPoints.forEach { point ->
                 if (point.isArea || point.intensity == "—") return@forEach
                 val area = geometry.resolveObservation(point) ?: return@forEach
-                val current = municipalities[area.geometryKey]
-                if (current == null || intensityRank(point.intensity) > intensityRank(current)) {
-                    municipalities[area.geometryKey] = point.intensity
-                }
+                municipalities.recordHighestShindo(area.geometryKey, point.intensity)
             }
         }
         municipalities
@@ -4023,14 +4024,14 @@ private fun JapanMap(
     val resizeRaster by produceState<ResizeMapRaster?>(
         initialValue = null,
         key1 = data,
-        key2 = officialAreas,
-        key3 = intensityGeometry to extraColors
+        key2 = prefectureIntensity,
+        key3 = extraColors
     ) {
         // Do not expose the previous palette while the replacement raster is
         // being generated after a theme or intensity change.
         value = null
         value = withContext(Dispatchers.Default) {
-            buildResizeMapRaster(data, officialAreas, intensityGeometry, extraColors)
+            buildResizeMapRaster(data, prefectureIntensity, extraColors)
         }
     }
 
@@ -4091,12 +4092,12 @@ private fun JapanMap(
     val intensityFillPaint = remember {
         Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.FILL }
     }
-    val regionBoundaryPaint = remember(extraColors) {
+    val eewZoneBoundaryPaint = remember(extraColors) {
         Paint(Paint.ANTI_ALIAS_FLAG).apply {
             style = Paint.Style.STROKE
             strokeJoin = Paint.Join.ROUND
             strokeCap = Paint.Cap.ROUND
-            color = extraColors.mapRegionBoundary.toArgb()
+            color = extraColors.mapBoundary.copy(alpha = 0.90f).toArgb()
         }
     }
     val municipalityBoundaryPaint = remember(extraColors) {
@@ -4105,6 +4106,22 @@ private fun JapanMap(
             strokeJoin = Paint.Join.ROUND
             strokeCap = Paint.Cap.ROUND
             color = extraColors.mapRegionBoundary.copy(alpha = 0.72f).toArgb()
+        }
+    }
+    val quakePrefectureBorderPaint = remember {
+        Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            style = Paint.Style.STROKE
+            strokeJoin = Paint.Join.ROUND
+            strokeCap = Paint.Cap.ROUND
+            color = Color(0xFFFF0000).toArgb()
+        }
+    }
+    val municipalityPrefectureBorderPaint = remember {
+        Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            style = Paint.Style.STROKE
+            strokeJoin = Paint.Join.ROUND
+            strokeCap = Paint.Cap.ROUND
+            color = Color(0xFF00FF00).toArgb()
         }
     }
     val tsunamiCoastBackdropPaint = remember(extraColors) {
@@ -4152,15 +4169,6 @@ private fun JapanMap(
     var previousViewportState by remember { mutableStateOf<MapViewportState?>(null) }
     var manualCameraOverrideUntilMillis by remember { mutableLongStateOf(0L) }
     var pendingAutomaticCameraRefit by remember { mutableStateOf(false) }
-    var municipalityDetailZoom by rememberSaveable {
-        mutableStateOf(DEFAULT_MUNICIPALITY_DETAIL_ZOOM)
-    }
-
-    LaunchedEffect(committedZoom, municipalityDetailZoom) {
-        if (committedZoom >= municipalityDetailZoom) {
-            municipalityRequested = true
-        }
-    }
 
     fun leaseManualCamera(force: Boolean = false) {
         val target = System.currentTimeMillis() + 10_000L
@@ -4198,21 +4206,9 @@ private fun JapanMap(
                 val compactZoomHeightPx = with(density) { 52.dp.toPx() }
                 val verticalZoomWidthPx = with(density) { 48.dp.toPx() }
                 val verticalZoomHeightPx = with(density) { 126.dp.toPx() }
-                val municipalitySliderHeightPx = with(density) { 56.dp.toPx() }
 
                 awaitEachGesture {
                     val down = awaitFirstDown(requireUnconsumed = false)
-                    // The map viewport can resize while the bottom drawer moves or
-                    // when orientation changes, so derive the slider hit box from
-                    // the current pointer-input size for every new gesture.
-                    val viewportWidthDp = size.width / density.density
-                    val municipalitySliderWidthPx = with(density) {
-                        (viewportWidthDp - 190f).coerceIn(150f, 420f).dp.toPx()
-                    }
-                    val municipalitySliderLeft =
-                        (size.width - municipalitySliderWidthPx) / 2f
-                    val municipalitySliderRight =
-                        municipalitySliderLeft + municipalitySliderWidthPx
                     val startsOnFitButton =
                         down.position.x >= size.width - controlPaddingPx - controlButtonSizePx &&
                             down.position.x <= size.width - controlPaddingPx &&
@@ -4230,13 +4226,8 @@ private fun JapanMap(
                             down.position.y <= size.height - controlPaddingPx
                     val startsOnZoomControls =
                         startsOnCompactZoomControls || startsOnVerticalZoomControls
-                    val startsOnMunicipalitySlider =
-                        down.position.x >= municipalitySliderLeft &&
-                            down.position.x <= municipalitySliderRight &&
-                            down.position.y >= size.height - municipalitySliderHeightPx &&
-                            down.position.y <= size.height
 
-                    if (startsOnFitButton || startsOnZoomControls || startsOnMunicipalitySlider) {
+                    if (startsOnFitButton || startsOnZoomControls) {
                         // Do not consume these events: the child clickables still
                         // need them. We simply abstain from map pan/zoom handling.
                         var buttonPointersDown: Boolean
@@ -4399,7 +4390,7 @@ private fun JapanMap(
             val epsilon = 0.0001f
             val step = when {
                 oldZoom <= 16f -> 0.5f
-                oldZoom <= municipalityDetailZoom -> 2f
+                oldZoom < MUNICIPALITY_LAYER_ZOOM -> 2f
                 oldZoom <= 128f -> 8f
                 else -> 16f
             }
@@ -4877,9 +4868,10 @@ private fun JapanMap(
         }
 
         val renderData = if (committedZoom >= HIGH_RES_ZOOM) highResMap ?: data else data
-        val showMunicipalityLayer =
-            committedZoom >= municipalityDetailZoom && municipalityMap != null
-        val useMunicipalityFills = showMunicipalityLayer && municipalityIntensity.isNotEmpty()
+        // The tier follows the zoom visible on screen. During a pinch the
+        // retained layer is still transformed as a whole, but crossing 10x or
+        // 32x must not leave the previous vector visible under the new label.
+        val activeVectorLayer = mapVectorLayerForEffectiveZoom(committedZoom, gestureScale)
 
         // The regional context is intentionally NOT part of the expensive cached
         // N03 layer. It is only two tiny native Paths, so redraw it with the live
@@ -4926,23 +4918,28 @@ private fun JapanMap(
             }
         }
 
-        Box(
-            Modifier
-                .fillMaxSize()
-                .graphicsLayer {
-                    scaleX = gestureScale
-                    scaleY = gestureScale
-                    translationX = gesturePan.x
-                    translationY = gesturePan.y
-                    transformOrigin = TransformOrigin.Center
-                    // Deliberately cache the committed vector map into an
-                    // off-screen layer while a gesture is active. This means
-                    // geometry that began outside the viewport is not revealed
-                    // until the gesture finishes, but it keeps deep pan/zoom
-                    // buttery smooth even with the high-detail N03 geometry.
-                    compositingStrategy = CompositingStrategy.Offscreen
-                }
-        ) {
+        // The off-screen parent owns the retained map texture, so the tier key
+        // must replace that parent itself. Keying only the Canvas (or adding a
+        // child graphics layer) leaves the parent's N03 texture eligible for
+        // reuse and can hide the complete 10x-32x detailed JMA layer.
+        key(activeVectorLayer) {
+            Box(
+                Modifier
+                    .fillMaxSize()
+                    .graphicsLayer {
+                        scaleX = gestureScale
+                        scaleY = gestureScale
+                        translationX = gesturePan.x
+                        translationY = gesturePan.y
+                        transformOrigin = TransformOrigin.Center
+                        // Deliberately cache the committed vector map into an
+                        // off-screen layer while a gesture is active. This means
+                        // geometry that began outside the viewport is not revealed
+                        // until the gesture finishes, but it keeps deep pan/zoom
+                        // buttery smooth even with the high-detail N03 geometry.
+                        compositingStrategy = CompositingStrategy.Offscreen
+                    }
+            ) {
             Canvas(Modifier.fillMaxSize()) {
                 val baseOffsetX = baseLeft - data.minX * fitScale
                 val baseOffsetY = baseTop - data.minY * fitScale
@@ -4964,8 +4961,10 @@ private fun JapanMap(
 
                 seamPaint.strokeWidth = 2.2f / renderScale
                 borderPaint.strokeWidth = 0.9f / renderScale
-                regionBoundaryPaint.strokeWidth = 0.7f / renderScale
+                eewZoneBoundaryPaint.strokeWidth = 1.15f / renderScale
                 municipalityBoundaryPaint.strokeWidth = 0.55f / renderScale
+                quakePrefectureBorderPaint.strokeWidth = 3f / renderScale
+                municipalityPrefectureBorderPaint.strokeWidth = 3f / renderScale
                 tsunamiCoastBackdropPaint.strokeWidth = 6.6f / renderScale
                 tsunamiCoastPaint.strokeWidth = 4.2f / renderScale
 
@@ -4979,7 +4978,11 @@ private fun JapanMap(
                     // land/intensity layer during that short interaction, then
                     // return to full vector rendering as soon as the drag ends.
                     val activeResizeRaster = resizeRaster
-                    if (panelResizing && activeResizeRaster != null) {
+                    if (
+                        panelResizing &&
+                        activeVectorLayer == MapVectorLayer.N03_PREFECTURES &&
+                        activeResizeRaster != null
+                    ) {
                         native.drawBitmap(
                             activeResizeRaster.bitmap,
                             null,
@@ -4987,53 +4990,89 @@ private fun JapanMap(
                             resizeRasterPaint
                         )
                     } else {
-                        // Neutral Japan base first. Up to 64x, retain the
-                        // official detailed-area colouring. Above that threshold,
-                        // actual station observations colour only their JMA
-                        // municipality/ward; unobserved municipalities stay neutral.
-                        native.drawPath(renderData.landPath, landPaint)
-                        if (!useMunicipalityFills) {
-                            renderData.prefectures.forEach { prefecture ->
-                                val intensity = prefectureIntensity[prefecture.nameJa] ?: return@forEach
-                                intensityFillPaint.color = intensityColor(intensity).toArgb()
-                                native.drawPath(prefecture.path, intensityFillPaint)
+                        // Exactly one administrative vector layer is visible at
+                        // a time. Paint every polygon neutral first, then apply
+                        // the strongest report and finally stroke all boundaries.
+                        when (activeVectorLayer) {
+                            MapVectorLayer.N03_PREFECTURES -> {
+                                native.drawPath(renderData.landPath, landPaint)
+                                renderData.prefectures.forEach { prefecture ->
+                                    prefectureIntensity[prefecture.nameJa]?.let { intensity ->
+                                        intensityFillPaint.color =
+                                            intensityColor(intensity).toArgb()
+                                        native.drawPath(prefecture.path, intensityFillPaint)
+                                    }
+                                }
+                                native.drawPath(renderData.boundaryPath, seamPaint)
+                                native.drawPath(renderData.boundaryPath, borderPaint)
                             }
-                            (officialAreas.quakeAreas + officialAreas.eewAreas).forEach { area ->
-                                val intensity = regionalIntensity[area.geometryKey] ?: return@forEach
-                                intensityFillPaint.color = intensityColor(intensity).toArgb()
-                                native.drawPath(area.path, intensityFillPaint)
-                                native.drawPath(area.path, regionBoundaryPaint)
-                            }
-                        }
 
-                        if (showMunicipalityLayer) {
-                            val margin = 2f / renderScale.coerceAtLeast(0.0001f)
-                            val sourceViewport = RectF(
-                                (0f - renderOffsetX) / renderScale - margin,
-                                (0f - renderOffsetY) / renderScale - margin,
-                                (size.width - renderOffsetX) / renderScale + margin,
-                                (size.height - renderOffsetY) / renderScale + margin
-                            )
-                            val visibleMunicipalities = municipalityMap
-                                ?.visibleAreas(sourceViewport)
-                                .orEmpty()
-                            if (useMunicipalityFills) {
+                            MapVectorLayer.JMA_QUAKE_AREAS -> {
+                                // The middle tier uses the 194 detailed JMA
+                                // earthquake-reporting regions, not the 56 broad
+                                // public EEW forecast areas. Broad EEW colours
+                                // remain a fallback underneath the detailed
+                                // report colours, then every fine boundary is
+                                // stroked so divisions such as Kumamoto's four
+                                // regions stay visible for all report types.
+                                officialAreas.quakeAreas.forEach { area ->
+                                    native.drawPath(area.path, landPaint)
+                                }
+                                officialAreas.eewAreas.forEach { area ->
+                                    eewAreaIntensity[area.geometryKey]?.let { intensity ->
+                                        intensityFillPaint.color =
+                                            intensityColor(intensity).toArgb()
+                                        native.drawPath(area.path, intensityFillPaint)
+                                    }
+                                }
+                                officialAreas.quakeAreas.forEach { area ->
+                                    quakeAreaIntensity[area.geometryKey]?.let { intensity ->
+                                        intensityFillPaint.color =
+                                            intensityColor(intensity).toArgb()
+                                        native.drawPath(area.path, intensityFillPaint)
+                                    }
+                                }
+                                officialAreas.quakeAreas.forEach { area ->
+                                    native.drawPath(area.path, eewZoneBoundaryPaint)
+                                }
+                                native.drawPath(
+                                    officialAreas.prefectureBorders,
+                                    quakePrefectureBorderPaint
+                                )
+                            }
+
+                            MapVectorLayer.MUNICIPALITIES -> {
+                                val margin = 2f / renderScale.coerceAtLeast(0.0001f)
+                                val sourceViewport = RectF(
+                                    (0f - renderOffsetX) / renderScale - margin,
+                                    (0f - renderOffsetY) / renderScale - margin,
+                                    (size.width - renderOffsetX) / renderScale + margin,
+                                    (size.height - renderOffsetY) / renderScale + margin
+                                )
+                                val visibleMunicipalities = municipalityMap
+                                    ?.visibleAreas(sourceViewport)
+                                    .orEmpty()
                                 visibleMunicipalities.forEach { area ->
-                                    val intensity = municipalityIntensity[area.geometryKey]
-                                        ?: return@forEach
-                                    intensityFillPaint.color = intensityColor(intensity).toArgb()
-                                    native.drawPath(area.path, intensityFillPaint)
+                                    native.drawPath(area.path, landPaint)
+                                }
+                                visibleMunicipalities.forEach { area ->
+                                    municipalityIntensity[area.geometryKey]?.let { intensity ->
+                                        intensityFillPaint.color =
+                                            intensityColor(intensity).toArgb()
+                                        native.drawPath(area.path, intensityFillPaint)
+                                    }
+                                }
+                                visibleMunicipalities.forEach { area ->
+                                    native.drawPath(area.path, municipalityBoundaryPaint)
+                                }
+                                municipalityMap?.let { geometry ->
+                                    native.drawPath(
+                                        geometry.prefectureBorders,
+                                        municipalityPrefectureBorderPaint
+                                    )
                                 }
                             }
-                            visibleMunicipalities.forEach { area ->
-                                native.drawPath(area.path, municipalityBoundaryPaint)
-                            }
                         }
-
-                        // N03 remains the low-cost national base and the stronger
-                        // prefecture/coast outline above the finer JMA boundaries.
-                        native.drawPath(renderData.boundaryPath, seamPaint)
-                        native.drawPath(renderData.boundaryPath, borderPaint)
                     }
 
                     // Tsunami warnings belong to coastal forecast regions, not
@@ -5048,9 +5087,10 @@ private fun JapanMap(
                             tsunamiCoastPaint.color = tsunamiGradeColor(grade).toArgb()
                             tsunamiCoastPaint.alpha = tsunamiFlashAlpha
                             native.drawPath(exactPath, tsunamiCoastPaint)
-                        } else {
+                        } else if (activeVectorLayer == MapVectorLayer.N03_PREFECTURES) {
                             // Unknown/renamed areas retain a safe visual fallback
-                            // rather than silently disappearing from the map.
+                            // only at the N03 tier. The official detailed tiers
+                            // must never receive a low-detail N03 coast overlay.
                             TsunamiAreaCatalog.prefectures(areaName).forEach { prefecture ->
                                 val fallback = renderData.prefectureCoastlines[prefecture]
                                 if (fallback != null) {
@@ -5065,6 +5105,18 @@ private fun JapanMap(
                     native.restore()
                 }
             }
+            }
+        }
+
+        if (
+            activeVectorLayer == MapVectorLayer.MUNICIPALITIES &&
+            municipalityMap == null
+        ) {
+            CircularProgressIndicator(
+                modifier = Modifier.align(Alignment.Center).size(30.dp),
+                color = extraColors.mapBranding,
+                strokeWidth = 2.dp
+            )
         }
 
         // Reuse text paints rather than allocating multiple Android Paint objects
@@ -5408,42 +5460,6 @@ private fun JapanMap(
             }
         }
 
-        val municipalitySliderWidthDp =
-            (maxWidth.value - 190f).coerceIn(150f, 420f)
-        Surface(
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .padding(bottom = 4.dp)
-                .width(municipalitySliderWidthDp.dp)
-                .height(48.dp),
-            shape = RoundedCornerShape(9.dp),
-            color = extraColors.mapControlSurface
-        ) {
-            Row(
-                modifier = Modifier.padding(horizontal = 8.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(6.dp)
-            ) {
-                Text(
-                    uiText(R.string.municipalities, language) + " " +
-                        municipalityDetailZoom.roundToInt() + "×",
-                    color = extraColors.mapControlForeground,
-                    fontSize = 10.sp,
-                    fontWeight = FontWeight.Bold,
-                    maxLines = 1
-                )
-                Slider(
-                    value = municipalityDetailZoom,
-                    onValueChange = {
-                        municipalityDetailZoom = it.roundToInt().toFloat()
-                    },
-                    valueRange = MUNICIPALITY_DETAIL_ZOOM_MIN..MUNICIPALITY_DETAIL_ZOOM_MAX,
-                    steps = MUNICIPALITY_DETAIL_ZOOM_STEPS,
-                    modifier = Modifier.weight(1f)
-                )
-            }
-        }
-
         // One-tap return to the whole-country framing. Keep the selected
         // report text, but explicitly clear its map Focus/Re-focus state.
         Box(
@@ -5694,10 +5710,6 @@ private fun createMapTextPaint(
 private const val MIN_MAP_ZOOM = 1f
 private const val MAX_MAP_ZOOM = 256f
 private const val HIGH_RES_ZOOM = 8f
-private const val DEFAULT_MUNICIPALITY_DETAIL_ZOOM = 40f
-private const val MUNICIPALITY_DETAIL_ZOOM_MIN = 24f
-private const val MUNICIPALITY_DETAIL_ZOOM_MAX = 64f
-private const val MUNICIPALITY_DETAIL_ZOOM_STEPS = 39
 private const val OBSERVED_STATION_DOTS_ZOOM = 12f
 private const val BASE_STATION_DOTS_ZOOM = 18f
 private const val OBSERVED_STATION_NAMES_ZOOM = 36f
@@ -5812,20 +5824,6 @@ private fun clampMapPan(
     )
 }
 
-private fun intensityRank(value: String): Int = when (value) {
-    "0" -> 0
-    "1" -> 1
-    "2" -> 2
-    "3" -> 3
-    "4" -> 4
-    "5-", "5弱" -> 5
-    "5+", "5強" -> 6
-    "6-", "6弱" -> 7
-    "6+", "6強" -> 8
-    "7" -> 9
-    else -> 0
-}
-
 /** JMA-style intensity palette used consistently for map fills, dots and badges. */
 private fun intensityColor(value: String): Color = when (value) {
     "0" -> Color(0xFFB7C2CB)
@@ -5873,4 +5871,3 @@ private fun matchMapPrefectures(rawValue: String, available: List<String>): List
     }
     return special?.takeIf { it in available }?.let(::listOf).orEmpty()
 }
-

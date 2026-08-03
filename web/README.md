@@ -1,15 +1,19 @@
 # QuakeDeck website v0.1
 
-A dependency-free static website and read-only DM-D.S.S OAuth capability probe.
+A dependency-free static website and controlled DM-D.S.S OAuth capability probe.
 
 ## What the probe does
 
 - Uses OAuth authorization-code flow with PKCE S256.
-- Requests only `contract.list` and `socket.list`.
+- Requests `contract.list`, `socket.list`, `socket.start`, `socket.close`,
+  `telegram.get.earthquake`, and `eew.get.forecast`.
 - Calls:
   - `GET https://api.dmdata.jp/v2/contract`
   - `GET https://api.dmdata.jp/v2/socket?limit=100`
-- Never calls Socket Start or Socket Close.
+  - `POST https://api.dmdata.jp/v2/socket` once to test the QuakeDeck stream entitlement
+  - `DELETE https://api.dmdata.jp/v2/socket/{id}` if the test creates a socket
+- Never opens the returned WebSocket. If Socket Start succeeds, immediately attempts
+  to close the exact socket ID it created.
 - Builds a sanitized report without tokens, client secrets, API keys, socket tickets, or IP addresses.
 - Attempts to revoke both the temporary access token and refresh token after reading the report.
 
@@ -38,14 +42,17 @@ In the DM-D.S.S credentials/control panel create a client with:
 - Scopes for this probe only:
   - `contract.list`
   - `socket.list`
+  - `socket.start`
+  - `socket.close`
+  - `telegram.get.earthquake`
+  - `eew.get.forecast`
 
 Paste the resulting public `CId.…` into the diagnostic page. A client ID is not a secret. Do not put a client secret, API key, access token, or refresh token into this site.
 
 ## Local preview
 
 ```powershell
-cd QuakeDeck-website-v0.1
-python -m http.server 8080
+python -m http.server 8080 --directory web
 ```
 
 Open `http://127.0.0.1:8080/`.

@@ -17,6 +17,40 @@ import java.util.concurrent.ConcurrentHashMap
  */
 object UiLocalization {
     private val explicitLocaleContexts = ConcurrentHashMap<PlaceNameLanguage, Context>()
+    private val eewReplayArmedPattern =
+        Regex("Built-in Noto EEW replay armed · starts in (\\d+)s")
+    private val tsunamiReplayArmedPattern =
+        Regex("Built-in Noto tsunami replay armed · starts in (\\d+)s")
+    private val combinedReplayArmedPattern =
+        Regex("Combined Noto EEW \\+ tsunami replay armed · starts in (\\d+)s")
+    private val disconnectedReasonPattern = Regex("Disconnected \\((.*)\\)")
+    private val sourceSyncedPattern = Regex("(.+) connected · recent feed synchronized")
+    private val sourceConnectedPattern = Regex("(.+) connected")
+    private val recentFeedSyncedPattern = Regex("(.+) recent feed synchronized")
+    private val recoveredMissedEewReportPattern =
+        Regex("Recovered missed EEW report #(\\S+) · (.+)")
+    private val recoveredMissedEewPattern = Regex("Recovered missed EEW(?: report)? · (.+)")
+    private val eewWarningReportPattern = Regex("EEW WARNING report #(\\S+) · (.+)")
+    private val eewWarningPattern = Regex("EEW WARNING · (.+)")
+    private val recoveredEewCancellationPattern = Regex("Recovered EEW cancellation · (.+)")
+    private val eewCancelledPattern = Regex("EEW cancelled · (.+)")
+    private val eewDetectionExpiredPattern =
+        Regex("EEW detection expired without warning details · (.+)")
+    private val eewPassageCompletePattern =
+        Regex("EEW estimated wave passage complete · (.+)")
+    private val eewDetectedTypePattern = Regex("EEW detected · (.+) · (.+)")
+    private val eewDetectedPattern = Regex("EEW detected · (.+)")
+    private val recoveredTsunamiCancellationPattern =
+        Regex("Recovered tsunami cancellation · (.+)")
+    private val recoveredLatestTsunamiPattern =
+        Regex("Recovered latest tsunami information · (.+)")
+    private val recoveredTsunamiPattern = Regex("Recovered tsunami (.+) · (.+)")
+    private val tsunamiCancelledPattern = Regex("Tsunami warnings cancelled · (.+)")
+    private val tsunamiGradePattern = Regex("TSUNAMI (.+) · (.+)")
+    private val tsunamiClearedPattern = Regex("Tsunami information cleared · (.+)")
+    private val recoveredReportPattern = Regex("Recovered (.+) · (.+)")
+    private val reportEewActivePattern = Regex("(.+) · EEW wave passage active · (.+)")
+    private val reportSourcePattern = Regex("(.+) · (.+)")
 
     /** Translate provider/application status text that still arrives as runtime state. */
     fun status(context: Context, value: String, setting: PlaceNameLanguage): String {
@@ -62,91 +96,91 @@ object UiLocalization {
         }
         if (resourceId != null) return localized.getString(resourceId)
 
-        Regex("Built-in Noto EEW replay armed · starts in (\\d+)s").matchEntire(status)?.let {
+        eewReplayArmedPattern.matchEntire(status)?.let {
             return localized.getString(R.string.status_eew_replay_armed, it.groupValues[1].toInt())
         }
-        Regex("Built-in Noto tsunami replay armed · starts in (\\d+)s").matchEntire(status)?.let {
+        tsunamiReplayArmedPattern.matchEntire(status)?.let {
             return localized.getString(R.string.status_tsunami_replay_armed, it.groupValues[1].toInt())
         }
-        Regex("Combined Noto EEW \\+ tsunami replay armed · starts in (\\d+)s").matchEntire(status)?.let {
+        combinedReplayArmedPattern.matchEntire(status)?.let {
             return localized.getString(R.string.status_combined_replay_armed, it.groupValues[1].toInt())
         }
-        Regex("Disconnected \\((.*)\\)").matchEntire(status)?.let {
+        disconnectedReasonPattern.matchEntire(status)?.let {
             return localized.getString(R.string.status_disconnected_reason, it.groupValues[1])
         }
 
-        Regex("(.+) connected · recent feed synchronized").matchEntire(status)?.let {
+        sourceSyncedPattern.matchEntire(status)?.let {
             return localized.getString(R.string.status_source_synced, it.groupValues[1])
         }
-        Regex("(.+) connected").matchEntire(status)?.let {
+        sourceConnectedPattern.matchEntire(status)?.let {
             return localized.getString(R.string.status_source_connected, it.groupValues[1])
         }
-        Regex("(.+) recent feed synchronized").matchEntire(status)?.let {
+        recentFeedSyncedPattern.matchEntire(status)?.let {
             return localized.getString(R.string.status_source_recent_feed_synced, it.groupValues[1])
         }
 
-        Regex("Recovered missed EEW report #(\\S+) · (.+)").matchEntire(status)?.let {
+        recoveredMissedEewReportPattern.matchEntire(status)?.let {
             return localized.getString(
                 R.string.status_recovered_missed_eew_report_source,
                 it.groupValues[1],
                 it.groupValues[2]
             )
         }
-        Regex("Recovered missed EEW(?: report)? · (.+)").matchEntire(status)?.let {
+        recoveredMissedEewPattern.matchEntire(status)?.let {
             return localized.getString(R.string.status_recovered_missed_eew_source, it.groupValues[1])
         }
-        Regex("EEW WARNING report #(\\S+) · (.+)").matchEntire(status)?.let {
+        eewWarningReportPattern.matchEntire(status)?.let {
             return localized.getString(
                 R.string.status_eew_warning_report_source,
                 it.groupValues[1],
                 it.groupValues[2]
             )
         }
-        Regex("EEW WARNING · (.+)").matchEntire(status)?.let {
+        eewWarningPattern.matchEntire(status)?.let {
             return localized.getString(R.string.status_eew_warning_source, it.groupValues[1])
         }
-        Regex("Recovered EEW cancellation · (.+)").matchEntire(status)?.let {
+        recoveredEewCancellationPattern.matchEntire(status)?.let {
             return localized.getString(
                 R.string.status_recovered_eew_cancellation_source,
                 it.groupValues[1]
             )
         }
-        Regex("EEW cancelled · (.+)").matchEntire(status)?.let {
+        eewCancelledPattern.matchEntire(status)?.let {
             return localized.getString(R.string.status_eew_cancelled_source, it.groupValues[1])
         }
-        Regex("EEW detection expired without warning details · (.+)").matchEntire(status)?.let {
+        eewDetectionExpiredPattern.matchEntire(status)?.let {
             return localized.getString(
                 R.string.status_eew_detection_expired_source,
                 it.groupValues[1]
             )
         }
-        Regex("EEW estimated wave passage complete · (.+)").matchEntire(status)?.let {
+        eewPassageCompletePattern.matchEntire(status)?.let {
             return localized.getString(R.string.status_eew_passage_complete_source, it.groupValues[1])
         }
-        Regex("EEW detected · (.+) · (.+)").matchEntire(status)?.let {
+        eewDetectedTypePattern.matchEntire(status)?.let {
             return localized.getString(
                 R.string.status_eew_detected_type_source,
                 it.groupValues[1],
                 it.groupValues[2]
             )
         }
-        Regex("EEW detected · (.+)").matchEntire(status)?.let {
+        eewDetectedPattern.matchEntire(status)?.let {
             return localized.getString(R.string.status_eew_detected_source, it.groupValues[1])
         }
 
-        Regex("Recovered tsunami cancellation · (.+)").matchEntire(status)?.let {
+        recoveredTsunamiCancellationPattern.matchEntire(status)?.let {
             return localized.getString(
                 R.string.status_recovered_tsunami_cancellation_source,
                 it.groupValues[1]
             )
         }
-        Regex("Recovered latest tsunami information · (.+)").matchEntire(status)?.let {
+        recoveredLatestTsunamiPattern.matchEntire(status)?.let {
             return localized.getString(
                 R.string.status_recovered_latest_tsunami_source,
                 it.groupValues[1]
             )
         }
-        Regex("Recovered tsunami (.+) · (.+)").matchEntire(status)?.let {
+        recoveredTsunamiPattern.matchEntire(status)?.let {
             val grade = localizedTsunamiGrade(localized, it.groupValues[1])
             return localized.getString(
                 R.string.status_recovered_tsunami_grade_source,
@@ -154,10 +188,10 @@ object UiLocalization {
                 it.groupValues[2]
             )
         }
-        Regex("Tsunami warnings cancelled · (.+)").matchEntire(status)?.let {
+        tsunamiCancelledPattern.matchEntire(status)?.let {
             return localized.getString(R.string.status_tsunami_cancelled_source, it.groupValues[1])
         }
-        Regex("TSUNAMI (.+) · (.+)").matchEntire(status)?.let {
+        tsunamiGradePattern.matchEntire(status)?.let {
             val grade = localizedTsunamiGrade(localized, it.groupValues[1])
             return localized.getString(
                 R.string.status_tsunami_grade_source,
@@ -165,11 +199,11 @@ object UiLocalization {
                 it.groupValues[2]
             )
         }
-        Regex("Tsunami information cleared · (.+)").matchEntire(status)?.let {
+        tsunamiClearedPattern.matchEntire(status)?.let {
             return localized.getString(R.string.status_tsunami_cleared_source, it.groupValues[1])
         }
 
-        Regex("Recovered (.+) · (.+)").matchEntire(status)?.let {
+        recoveredReportPattern.matchEntire(status)?.let {
             val report = localizedReportStatus(localized, it.groupValues[1])
             if (report != null) {
                 return localized.getString(
@@ -179,7 +213,7 @@ object UiLocalization {
                 )
             }
         }
-        Regex("(.+) · EEW wave passage active · (.+)").matchEntire(status)?.let {
+        reportEewActivePattern.matchEntire(status)?.let {
             val report = localizedReportStatus(localized, it.groupValues[1])
             if (report != null) {
                 return localized.getString(
@@ -189,7 +223,7 @@ object UiLocalization {
                 )
             }
         }
-        Regex("(.+) · (.+)").matchEntire(status)?.let {
+        reportSourcePattern.matchEntire(status)?.let {
             val report = localizedReportStatus(localized, it.groupValues[1])
             if (report != null) {
                 return localized.getString(

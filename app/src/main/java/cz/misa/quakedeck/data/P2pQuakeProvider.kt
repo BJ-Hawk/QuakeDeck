@@ -2152,8 +2152,8 @@ class P2pQuakeProvider(
         runCatching {
             LocalDateTime.parse(
                 event.originTime,
-                DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss 'JST'")
-            ).atZone(ZoneId.of("Asia/Tokyo")).toInstant()
+                JST_DISPLAY_FORMATTER
+            ).atZone(JST_ZONE).toInstant()
         }.getOrNull()
 
     private fun isRecentMessage(json: JSONObject, maxAgeSeconds: Long): Boolean {
@@ -2179,16 +2179,11 @@ class P2pQuakeProvider(
             // P2PQuake also uses local JST strings without an offset.
         }
 
-        val formatters = listOf(
-            DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss.SSS"),
-            DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss"),
-            DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS"),
-            DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
-        )
-        return formatters.firstNotNullOfOrNull { formatter ->
+        val normalizedLocalValue = cleaned.replace('T', ' ')
+        return LOCAL_SOURCE_FORMATTERS.firstNotNullOfOrNull { formatter ->
             runCatching {
-                LocalDateTime.parse(cleaned.replace('T', ' '), formatter)
-                    .atZone(ZoneId.of("Asia/Tokyo"))
+                LocalDateTime.parse(normalizedLocalValue, formatter)
+                    .atZone(JST_ZONE)
                     .toInstant()
             }.getOrNull()
         }
@@ -2220,9 +2215,8 @@ class P2pQuakeProvider(
             if (!coordinateNear) return false
         }
 
-        val formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss 'JST'")
-        val aTime = runCatching { LocalDateTime.parse(a.originTime, formatter) }.getOrNull()
-        val bTime = runCatching { LocalDateTime.parse(b.originTime, formatter) }.getOrNull()
+        val aTime = runCatching { LocalDateTime.parse(a.originTime, JST_DISPLAY_FORMATTER) }.getOrNull()
+        val bTime = runCatching { LocalDateTime.parse(b.originTime, JST_DISPLAY_FORMATTER) }.getOrNull()
         if (aTime == null || bTime == null) return a.originTime == b.originTime
 
         return abs(java.time.Duration.between(aTime, bTime).seconds) <= 10L
@@ -2281,25 +2275,19 @@ class P2pQuakeProvider(
         val cleaned = value.trim()
         if (cleaned.isBlank() || cleaned.equals("null", ignoreCase = true)) return "—"
 
-        val output = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss 'JST'")
         return try {
             OffsetDateTime.parse(cleaned)
-                .atZoneSameInstant(ZoneId.of("Asia/Tokyo"))
-                .format(output)
+                .atZoneSameInstant(JST_ZONE)
+                .format(JST_DISPLAY_FORMATTER)
         } catch (_: DateTimeParseException) {
-            val localFormatters = listOf(
-                DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss.SSS"),
-                DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss"),
-                DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS"),
-                DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
-            )
-            localFormatters.firstNotNullOfOrNull { formatter ->
+            val normalizedLocalValue = cleaned.replace('T', ' ')
+            LOCAL_SOURCE_FORMATTERS.firstNotNullOfOrNull { formatter ->
                 runCatching {
-                    LocalDateTime.parse(cleaned.replace('T', ' '), formatter)
-                        .atZone(ZoneId.of("Asia/Tokyo"))
-                        .format(output)
+                    LocalDateTime.parse(normalizedLocalValue, formatter)
+                        .atZone(JST_ZONE)
+                        .format(JST_DISPLAY_FORMATTER)
                 }.getOrNull()
-            } ?: cleaned.replace('T', ' ')
+            } ?: normalizedLocalValue
         }
     }
 
@@ -2351,6 +2339,15 @@ class P2pQuakeProvider(
 
     private companion object {
         val ARCHIVE_CODES = setOf(551, 552, 554, 556)
+        val JST_ZONE: ZoneId = ZoneId.of("Asia/Tokyo")
+        val JST_DISPLAY_FORMATTER: DateTimeFormatter =
+            DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss 'JST'")
+        val LOCAL_SOURCE_FORMATTERS: List<DateTimeFormatter> = listOf(
+            DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss.SSS"),
+            DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss"),
+            DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS"),
+            DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+        )
         const val HISTORY_PAGE_SIZE = 100
         const val HISTORY_REQUESTS_PER_WINDOW = 55
         const val HISTORY_RATE_LIMIT_PAUSE_MS = 61_000L

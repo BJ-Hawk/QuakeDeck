@@ -15,6 +15,12 @@
     "telegram.get.earthquake",
     "eew.get.forecast"
   ];
+  const OAUTH_SESSION_KEYS = [
+    "qd_oauth_verifier",
+    "qd_oauth_state",
+    "qd_oauth_client_id",
+    "qd_oauth_redirect_uri"
+  ];
   const SOCKET_TEST_REQUEST = Object.freeze({
     classifications: ["telegram.earthquake", "eew.forecast"],
     types: ["VXSE51", "VXSE52", "VXSE53", "VXSE61", "VTSE41", "VXSE43", "VXSE45"],
@@ -42,6 +48,10 @@
   const downloadReportButton = el("download-report");
 
   let sanitizedReport = null;
+
+  function clearOauthSession() {
+    OAUTH_SESSION_KEYS.forEach((key) => sessionStorage.removeItem(key));
+  }
 
   function currentRedirectUri() {
     return `${window.location.origin}${window.location.pathname}`;
@@ -559,10 +569,7 @@
       const accessRevoked = await revokeToken(clientId, token.access_token).catch(() => false);
       const refreshRevoked = await revokeToken(clientId, token.refresh_token).catch(() => false);
       revokeSucceeded = accessRevoked && refreshRevoked;
-      sessionStorage.removeItem("qd_oauth_verifier");
-      sessionStorage.removeItem("qd_oauth_state");
-      sessionStorage.removeItem("qd_oauth_client_id");
-      sessionStorage.removeItem("qd_oauth_redirect_uri");
+      clearOauthSession();
     }
 
     setStatus("ok", "Capability report complete");
@@ -581,7 +588,7 @@
 
   function clearLocalData() {
     localStorage.removeItem("qd_public_client_id");
-    sessionStorage.clear();
+    clearOauthSession();
     clientIdInput.value = window.QUAKEDECK_CONFIG?.clientId || "";
     sanitizedReport = null;
     results.classList.add("hidden");

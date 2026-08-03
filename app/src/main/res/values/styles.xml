@@ -1,23 +1,23 @@
 <resources>
-    <style name="Theme.QuakeDeck.Light" parent="android:style/Theme.Material.Light.NoActionBar">
+    <style name="Theme.QuakeDeck.Light.Base" parent="android:style/Theme.Material.Light.NoActionBar">
         <item name="android:fontFamily">sans</item>
         <item name="android:windowLightStatusBar">true</item>
-        <item name="android:windowLightNavigationBar">true</item>
         <item name="android:statusBarColor">#F4F7FA</item>
         <item name="android:navigationBarColor">#F4F7FA</item>
         <item name="android:windowBackground">#F4F7FA</item>
         <item name="android:windowActionModeOverlay">true</item>
     </style>
+    <style name="Theme.QuakeDeck.Light" parent="Theme.QuakeDeck.Light.Base" />
 
-    <style name="Theme.QuakeDeck.Dark" parent="android:style/Theme.Material.NoActionBar">
+    <style name="Theme.QuakeDeck.Dark.Base" parent="android:style/Theme.Material.NoActionBar">
         <item name="android:fontFamily">sans</item>
         <item name="android:windowLightStatusBar">false</item>
-        <item name="android:windowLightNavigationBar">false</item>
         <item name="android:statusBarColor">#0B0F14</item>
         <item name="android:navigationBarColor">#0B0F14</item>
         <item name="android:windowBackground">#0B0F14</item>
         <item name="android:windowActionModeOverlay">true</item>
     </style>
+    <style name="Theme.QuakeDeck.Dark" parent="Theme.QuakeDeck.Dark.Base" />
 
     <style name="Theme.QuakeDeck" parent="Theme.QuakeDeck.Light" />
 </resources>

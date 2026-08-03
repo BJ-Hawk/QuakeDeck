@@ -62,7 +62,7 @@
       <div class="shell card">
         <div class="kicker">Capability probe</div>
         <h2>Find out what the JQuake-exclusive subscription actually exposes.</h2>
-        <p class="lead">The diagnostic page requests only <code>contract.list</code> and <code>socket.list</code>. It does not start, close, or take over any WebSocket connection.</p>
+        <p class="lead">The diagnostic page reads contract and socket information, then calls Socket Start once to test QuakeDeck’s earthquake + EEW entitlement. It never opens the returned WebSocket and immediately attempts to close any socket it creates.</p>
         <div class="actions"><a class="button primary" href="diagnostics.html">Open the probe</a></div>
       </div>
     </section>
