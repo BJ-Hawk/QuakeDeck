@@ -6,27 +6,29 @@ plugins {
 }
 
 val signingPropertiesFile = rootProject.file("keystore.properties")
-val sharedSigningConfig = if (signingPropertiesFile.isFile) {
-    val signingProperties = Properties().apply {
+val signingProperties = Properties().apply {
+    if (signingPropertiesFile.isFile) {
         signingPropertiesFile.inputStream().use(::load)
     }
-    fun signingProperty(name: String): String =
-        signingProperties.getProperty(name)
-            ?: error("Missing signing property: $name")
-
-    signingConfigs.create("shared") {
-        storeFile = rootProject.file(signingProperty("storeFile"))
-        storePassword = signingProperty("storePassword")
-        keyAlias = signingProperty("keyAlias")
-        keyPassword = signingProperty("keyPassword")
-    }
-} else {
-    null
 }
+fun signingProperty(name: String): String =
+    signingProperties.getProperty(name)
+        ?: error("Missing signing property: $name")
 
 android {
     namespace = "cz.misa.quakedeck"
     compileSdk = 36
+
+    val sharedSigningConfig = if (signingPropertiesFile.isFile) {
+        signingConfigs.create("shared") {
+            storeFile = rootProject.file(signingProperty("storeFile"))
+            storePassword = signingProperty("storePassword")
+            keyAlias = signingProperty("keyAlias")
+            keyPassword = signingProperty("keyPassword")
+        }
+    } else {
+        null
+    }
 
     defaultConfig {
         applicationId = "cz.misa.quakedeck"
