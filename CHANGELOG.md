@@ -2,6 +2,15 @@
 
 QuakeDeck release history, newest first.
 
+## v0.9.76
+
+- Adds station counts to the JMA, NIED, and local-government map-provider switches and separates the event-only station rule into a clear note beneath them.
+- Color-codes prefecture boundaries in muted slate blue and JMA warning/reporting-zone boundaries in soft amber at the detailed and municipality tiers, with both major border types fixed at a 3 px screen-space stroke.
+- Adds a compact map-border help popup for prefecture, warning/reporting-zone, and municipality boundaries whenever the detailed tiers are visible.
+- Fades the left logarithmic zoom rail after map inactivity and restores it immediately on touch, pan, or zoom.
+- Forces distinct weekday and weekend quiet-hour summaries onto two deliberate rows instead of relying on accidental word wrapping.
+- Bumps the Android application version to `0.9.76` (`versionCode` 112) and updates the README release marker.
+
 ## v0.9.75b
 
 - Removes the erroneous viewport-top exclusion from station markers, so idle provider dots and reported intensity stations no longer disappear along a fixed horizontal line.

@@ -16,6 +16,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.compose.setContent
 import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -112,6 +113,9 @@ import kotlin.math.roundToInt
 private val DISPLAYED_JST_ZONE = ZoneId.of("Asia/Tokyo")
 private val DISPLAYED_JST_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss 'JST'")
 private val COMPACT_JST_TIME_PATTERN = Regex("\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2} JST")
+
+private val MAP_PREFECTURE_BORDER_COLOR = Color(0xFF6F83A8)
+private val MAP_WARNING_ZONE_BORDER_COLOR = Color(0xFFC18B5A)
 
 private fun android.content.Context.isIgnoringBatteryOptimizations(): Boolean {
     val powerManager = getSystemService(PowerManager::class.java)
@@ -4119,7 +4123,7 @@ private fun JapanMap(
             style = Paint.Style.STROKE
             strokeJoin = Paint.Join.ROUND
             strokeCap = Paint.Cap.ROUND
-            color = extraColors.mapBoundary.copy(alpha = 0.90f).toArgb()
+            color = MAP_WARNING_ZONE_BORDER_COLOR.toArgb()
         }
     }
     val municipalityBoundaryPaint = remember(extraColors) {
@@ -4130,28 +4134,28 @@ private fun JapanMap(
             color = extraColors.mapRegionBoundary.copy(alpha = 0.72f).toArgb()
         }
     }
-    val quakePrefectureBorderPaint = remember(extraColors) {
+    val quakePrefectureBorderPaint = remember {
         Paint(Paint.ANTI_ALIAS_FLAG).apply {
             style = Paint.Style.STROKE
             strokeJoin = Paint.Join.ROUND
             strokeCap = Paint.Cap.ROUND
-            color = extraColors.mapBoundary.toArgb()
+            color = MAP_PREFECTURE_BORDER_COLOR.toArgb()
         }
     }
-    val municipalityPrefectureBorderPaint = remember(extraColors) {
+    val municipalityPrefectureBorderPaint = remember {
         Paint(Paint.ANTI_ALIAS_FLAG).apply {
             style = Paint.Style.STROKE
             strokeJoin = Paint.Join.ROUND
             strokeCap = Paint.Cap.ROUND
-            color = extraColors.mapBoundary.toArgb()
+            color = MAP_PREFECTURE_BORDER_COLOR.toArgb()
         }
     }
-    val municipalityWarningZoneBorderPaint = remember(extraColors) {
+    val municipalityWarningZoneBorderPaint = remember {
         Paint(Paint.ANTI_ALIAS_FLAG).apply {
             style = Paint.Style.STROKE
             strokeJoin = Paint.Join.ROUND
             strokeCap = Paint.Cap.ROUND
-            color = extraColors.mapBoundary.toArgb()
+            color = MAP_WARNING_ZONE_BORDER_COLOR.toArgb()
         }
     }
     val tsunamiCoastBackdropPaint = remember(extraColors) {
@@ -4211,6 +4215,26 @@ private fun JapanMap(
         pendingAutomaticCameraRefit = allowAutomaticEventRefit && activeEewEvent != null
     }
 
+    var mapBorderLegendOpen by remember { mutableStateOf(false) }
+    var mapInteractionNonce by remember { mutableIntStateOf(0) }
+    var zoomRailVisible by remember { mutableStateOf(true) }
+    LaunchedEffect(
+        committedZoom,
+        committedPan,
+        gestureScale,
+        gesturePan,
+        mapInteractionNonce
+    ) {
+        zoomRailVisible = true
+        delay(3_200L)
+        zoomRailVisible = false
+    }
+    val zoomRailAlpha by animateFloatAsState(
+        targetValue = if (zoomRailVisible) 1f else 0.22f,
+        animationSpec = tween(durationMillis = 420),
+        label = "Zoom rail inactivity fade"
+    )
+
     val density = LocalDensity.current
 
     BoxWithConstraints(
@@ -4229,6 +4253,7 @@ private fun JapanMap(
                 // turn a slightly imperfect tap into a map drag underneath it.
                 val controlPaddingPx = with(density) { 8.dp.toPx() }
                 val controlButtonSizePx = with(density) { 38.dp.toPx() }
+                val borderHelpButtonSizePx = with(density) { 30.dp.toPx() }
                 // Reserve the union of the normal vertical controls and the
                 // compact horizontal layout. This avoids a map drag stealing a
                 // slightly imperfect tap while the viewport is resizing.
@@ -4239,6 +4264,7 @@ private fun JapanMap(
 
                 awaitEachGesture {
                     val down = awaitFirstDown(requireUnconsumed = false)
+                    mapInteractionNonce += 1
                     val startsOnFitButton =
                         down.position.x >= size.width - controlPaddingPx - controlButtonSizePx &&
                             down.position.x <= size.width - controlPaddingPx &&
@@ -4254,10 +4280,19 @@ private fun JapanMap(
                             down.position.x <= controlPaddingPx + verticalZoomWidthPx &&
                             down.position.y >= size.height - controlPaddingPx - verticalZoomHeightPx &&
                             down.position.y <= size.height - controlPaddingPx
+                    val startsOnBorderHelpButton =
+                        down.position.x >= size.width - controlPaddingPx - borderHelpButtonSizePx &&
+                            down.position.x <= size.width - controlPaddingPx &&
+                            down.position.y >= controlPaddingPx &&
+                            down.position.y <= controlPaddingPx + borderHelpButtonSizePx
                     val startsOnZoomControls =
                         startsOnCompactZoomControls || startsOnVerticalZoomControls
 
-                    if (startsOnFitButton || startsOnZoomControls) {
+                    if (
+                        startsOnFitButton ||
+                        startsOnZoomControls ||
+                        startsOnBorderHelpButton
+                    ) {
                         // Do not consume these events: the child clickables still
                         // need them. We simply abstain from map pan/zoom handling.
                         var buttonPointersDown: Boolean
@@ -5015,11 +5050,11 @@ private fun JapanMap(
 
                 seamPaint.strokeWidth = 2.2f / renderScale
                 borderPaint.strokeWidth = 0.9f / renderScale
-                eewZoneBoundaryPaint.strokeWidth = 2f / renderScale
+                eewZoneBoundaryPaint.strokeWidth = 3f / renderScale
                 municipalityBoundaryPaint.strokeWidth = 0.55f / renderScale
-                quakePrefectureBorderPaint.strokeWidth = 4f / renderScale
-                municipalityWarningZoneBorderPaint.strokeWidth = 2f / renderScale
-                municipalityPrefectureBorderPaint.strokeWidth = 4f / renderScale
+                quakePrefectureBorderPaint.strokeWidth = 3f / renderScale
+                municipalityWarningZoneBorderPaint.strokeWidth = 3f / renderScale
+                municipalityPrefectureBorderPaint.strokeWidth = 3f / renderScale
                 tsunamiCoastBackdropPaint.strokeWidth = 6.6f / renderScale
                 tsunamiCoastPaint.strokeWidth = 4.2f / renderScale
 
@@ -5472,6 +5507,29 @@ private fun JapanMap(
             }
         }
 
+        if (activeVectorLayer != MapVectorLayer.N03_PREFECTURES) {
+            Box(
+                Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(8.dp)
+                    .size(30.dp)
+                    .background(
+                        extraColors.mapControlSurface.copy(alpha = 0.88f),
+                        CircleShape
+                    )
+                    .clickable { mapBorderLegendOpen = true },
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "?",
+                    color = extraColors.mapControlForeground,
+                    fontSize = 15.sp,
+                    lineHeight = 16.sp,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+        }
+
         val currentDisplayZoom = displayZoomForCameraZoom(committedZoom * gestureScale)
         val zoomLabel = String.format(
             java.util.Locale.US,
@@ -5495,6 +5553,7 @@ private fun JapanMap(
             Modifier
                 .align(Alignment.CenterStart)
                 .fillMaxHeight()
+                .graphicsLayer(alpha = zoomRailAlpha)
                 .padding(
                     start = 1.dp,
                     top = 8.dp,
@@ -5568,6 +5627,104 @@ private fun JapanMap(
             contentAlignment = Alignment.Center
         ) {
             FitJapanIcon(Modifier.size(18.dp))
+        }
+    }
+
+    if (mapBorderLegendOpen) {
+        MapBorderLegendDialog(
+            language = language,
+            municipalityColor = extraColors.mapRegionBoundary.copy(alpha = 0.72f),
+            onDismiss = { mapBorderLegendOpen = false }
+        )
+    }
+}
+
+@Composable
+private fun MapBorderLegendDialog(
+    language: PlaceNameLanguage,
+    municipalityColor: Color,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(uiText(R.string.map_border_legend_title, language)) },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                MapBorderLegendRow(
+                    color = MAP_PREFECTURE_BORDER_COLOR,
+                    strokeWidth = 3.dp,
+                    title = uiText(R.string.map_border_legend_prefecture, language),
+                    description = uiText(
+                        R.string.map_border_legend_prefecture_description,
+                        language
+                    )
+                )
+                MapBorderLegendRow(
+                    color = MAP_WARNING_ZONE_BORDER_COLOR,
+                    strokeWidth = 3.dp,
+                    title = uiText(R.string.map_border_legend_warning_zone, language),
+                    description = uiText(
+                        R.string.map_border_legend_warning_zone_description,
+                        language
+                    )
+                )
+                MapBorderLegendRow(
+                    color = municipalityColor,
+                    strokeWidth = 1.dp,
+                    title = uiText(R.string.map_border_legend_municipality, language),
+                    description = uiText(
+                        R.string.map_border_legend_municipality_description,
+                        language
+                    )
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text(uiText(R.string.done, language))
+            }
+        }
+    )
+}
+
+@Composable
+private fun MapBorderLegendRow(
+    color: Color,
+    strokeWidth: androidx.compose.ui.unit.Dp,
+    title: String,
+    description: String
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Canvas(
+            Modifier
+                .width(34.dp)
+                .height(16.dp)
+        ) {
+            drawLine(
+                color = color,
+                start = Offset(0f, size.height / 2f),
+                end = Offset(size.width, size.height / 2f),
+                strokeWidth = strokeWidth.toPx(),
+                cap = StrokeCap.Round
+            )
+        }
+        Spacer(Modifier.width(10.dp))
+        Column(Modifier.weight(1f)) {
+            Text(
+                text = title,
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 13.sp,
+                lineHeight = 15.sp
+            )
+            Text(
+                text = description,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                fontSize = 11.sp,
+                lineHeight = 14.sp
+            )
         }
     }
 }

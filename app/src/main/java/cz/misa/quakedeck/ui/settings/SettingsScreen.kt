@@ -721,6 +721,13 @@ private fun MainSettingsPage(
                     },
                     nested = true
                 )
+                Text(
+                    text = text(R.string.stations_by_provider_report_note, selectedLanguage),
+                    modifier = Modifier.padding(start = 16.dp, top = 3.dp, bottom = 2.dp),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    fontSize = 9.sp,
+                    lineHeight = 11.sp
+                )
                 CardDivider()
                 SwitchSettingRow(
                     title = text(R.string.station_names, selectedLanguage),
