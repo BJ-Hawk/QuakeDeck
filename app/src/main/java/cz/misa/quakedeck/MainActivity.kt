@@ -4121,6 +4121,14 @@ private fun JapanMap(
             style = Paint.Style.STROKE
             strokeJoin = Paint.Join.ROUND
             strokeCap = Paint.Cap.ROUND
+            color = Color(0xFFFF0000).toArgb()
+        }
+    }
+    val municipalityWarningZoneBorderPaint = remember {
+        Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            style = Paint.Style.STROKE
+            strokeJoin = Paint.Join.ROUND
+            strokeCap = Paint.Cap.ROUND
             color = Color(0xFF00FF00).toArgb()
         }
     }
@@ -4964,6 +4972,7 @@ private fun JapanMap(
                 eewZoneBoundaryPaint.strokeWidth = 1.15f / renderScale
                 municipalityBoundaryPaint.strokeWidth = 0.55f / renderScale
                 quakePrefectureBorderPaint.strokeWidth = 3f / renderScale
+                municipalityWarningZoneBorderPaint.strokeWidth = 3f / renderScale
                 municipalityPrefectureBorderPaint.strokeWidth = 3f / renderScale
                 tsunamiCoastBackdropPaint.strokeWidth = 6.6f / renderScale
                 tsunamiCoastPaint.strokeWidth = 4.2f / renderScale
@@ -5066,6 +5075,10 @@ private fun JapanMap(
                                     native.drawPath(area.path, municipalityBoundaryPaint)
                                 }
                                 municipalityMap?.let { geometry ->
+                                    native.drawPath(
+                                        geometry.warningZoneBorders,
+                                        municipalityWarningZoneBorderPaint
+                                    )
                                     native.drawPath(
                                         geometry.prefectureBorders,
                                         municipalityPrefectureBorderPaint

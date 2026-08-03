@@ -243,6 +243,7 @@ class JmaRegionalMapData(
 /** Deep-zoom JMA municipality/ward geometry, prepared off the UI thread. */
 class JmaMunicipalityMapData(
     val areas: List<JmaAreaShape>,
+    val warningZoneBorders: Path,
     val prefectureBorders: Path
 ) {
     private val byCode = areas
@@ -357,7 +358,7 @@ object JmaAreaGeometry {
             quakeAreas = quakeAreas,
             eewAreas = eewAreas,
             tsunamiAreas = tsunamiAreas,
-            prefectureBorders = loadInterPrefectureBorders(
+            prefectureBorders = loadOpenBorderOverlay(
                 context,
                 R.raw.jma_quake_region_prefecture_borders
             )
@@ -374,27 +375,37 @@ object JmaMunicipalityGeometry {
         return synchronized(this) {
             cached ?: JmaMunicipalityMapData(
                 areas = loadJmaMunicipalityLayer(context.applicationContext),
-                prefectureBorders = loadInterPrefectureBorders(
+                warningZoneBorders = loadOpenBorderOverlay(
                     context.applicationContext,
-                    R.raw.jma_municipality_prefecture_borders
+                    R.raw.jma_municipality_warning_zone_borders,
+                    expectedKind = "inter-earthquake-warning-zone-borders"
+                ),
+                prefectureBorders = loadOpenBorderOverlay(
+                    context.applicationContext,
+                    R.raw.jma_municipality_prefecture_borders,
+                    expectedKind = "inter-prefecture-borders"
                 )
             ).also { cached = it }
         }
     }
 }
 
-private fun loadInterPrefectureBorders(context: Context, resourceId: Int): Path {
+private fun loadOpenBorderOverlay(
+    context: Context,
+    resourceId: Int,
+    expectedKind: String = "inter-prefecture-borders"
+): Path {
     val text = GZIPInputStream(context.resources.openRawResource(resourceId))
         .bufferedReader(Charsets.UTF_8)
         .use { it.readText() }
     val root = JSONObject(text)
-    require(root.getInt("version") == 2) { "Unsupported prefecture border version" }
-    require(root.getString("kind") == "inter-prefecture-borders") {
-        "Unsupported prefecture border resource"
+    require(root.getInt("version") == 2) { "Unsupported border overlay version" }
+    require(root.getString("kind") == expectedKind) {
+        "Unsupported border overlay resource"
     }
-    require(!root.getBoolean("closed")) { "Prefecture border paths must be open" }
+    require(!root.getBoolean("closed")) { "Border overlay paths must be open" }
     val quantization = root.getDouble("quantization")
-    require(quantization > 0.0) { "Invalid prefecture border quantization" }
+    require(quantization > 0.0) { "Invalid border overlay quantization" }
     val borders = root.getJSONArray("borders")
 
     return Path().apply {
@@ -403,7 +414,7 @@ private fun loadInterPrefectureBorders(context: Context, resourceId: Int): Path 
             for (pathIndex in 0 until paths.length()) {
                 val encoded = paths.getJSONArray(pathIndex).getJSONArray(1)
                 require(encoded.length() >= 4 && encoded.length() % 2 == 0) {
-                    "Invalid prefecture border path"
+                    "Invalid border overlay path"
                 }
                 var quantizedX = encoded.getLong(0)
                 var quantizedY = encoded.getLong(1)
