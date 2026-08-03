@@ -245,6 +245,9 @@ class JmaMunicipalityMapData(
     val areas: List<JmaAreaShape>,
     val prefectureBorders: Path
 ) {
+    private val byCode = areas
+        .filter { it.code.isNotBlank() }
+        .associateBy { it.code }
     private val spatialIndex: Map<Long, List<JmaAreaShape>> =
         mutableMapOf<Long, MutableList<JmaAreaShape>>().apply {
             areas.forEach { area ->
@@ -266,6 +269,10 @@ class JmaMunicipalityMapData(
         val station = point.stationName
             ?.takeIf { it.isNotBlank() }
             ?.let { StationCatalog.lookup(point.prefecture, it) }
+        station?.municipalityCode
+            ?.takeIf { it.isNotBlank() }
+            ?.let(byCode::get)
+            ?.let { return it }
         val latitude = point.latitude ?: station?.latitude ?: return null
         val longitude = point.longitude ?: station?.longitude ?: return null
         return municipalityAt(latitude, longitude)
