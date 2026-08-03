@@ -1,12 +1,14 @@
 package cz.misa.quakedeck.data
 
 import android.content.Context
+import cz.misa.quakedeck.R
 import okhttp3.Call
 import okhttp3.Callback
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
 import org.json.JSONArray
+import org.json.JSONObject
 import java.io.File
 import java.io.IOException
 import java.util.Locale
@@ -14,8 +16,9 @@ import java.util.Locale
 /**
  * Coordinates for JMA / local-government / NIED seismic-intensity stations.
  *
- * v0.9 deliberately keeps this behind one abstraction. The initial catalogue is
- * the public iku55/jma_int_stations export and is cached locally after download;
+ * v0.9 deliberately keeps this behind one abstraction. A compact snapshot of
+ * the public iku55/jma_int_stations export is bundled so detailed map colouring
+ * never depends on a runtime download. A refreshed export can still be cached;
  * replacing it with JMA's current parameter CSV later does not affect map/event
  * code at all.
  */
@@ -27,7 +30,8 @@ data class SeismicStation(
     val longitude: Double,
     val networkJa: String,
     val areaCode: String = "",
-    val areaNameJa: String = ""
+    val areaNameJa: String = "",
+    val municipalityCode: String = ""
 )
 
 object StationCatalog {
@@ -49,7 +53,7 @@ object StationCatalog {
             ?: byName[normalize(stationNameJa)]
     }
 
-    /** Load cached data off-thread, otherwise download it once and cache it. */
+    /** Load cached or bundled data off-thread, then refresh the cache if needed. */
     fun loadAsync(context: Context, client: OkHttpClient, onReady: () -> Unit) {
         if (loaded) {
             onReady()
@@ -58,40 +62,24 @@ object StationCatalog {
 
         val appContext = context.applicationContext
         val cache = File(appContext.filesDir, CACHE_FILE)
-        if (cache.isFile && cache.length() > 32_000L) {
-            Thread({
-                val ok = runCatching { parse(cache.readText(Charsets.UTF_8)) }.isSuccess
-                if (!ok) cache.delete()
-                onReady()
-                if (!ok) refreshInBackground(appContext, client)
-            }, "QuakeDeck-stations").start()
-            return
-        }
-
-        val request = Request.Builder()
-            .url(CATALOG_URL)
-            .header("User-Agent", "QuakeDeck/0.9.66 (Android)")
-            .build()
-        client.newCall(request).enqueue(object : Callback {
-            override fun onFailure(call: Call, e: IOException) {
-                loaded = true // continue without dots; event feed must never depend on this helper
-                onReady()
+        Thread({
+            var loadedFromCache = false
+            if (cache.isFile && cache.length() > 32_000L) {
+                loadedFromCache = runCatching {
+                    parseRemote(cache.readText(Charsets.UTF_8))
+                }.isSuccess
+                if (!loadedFromCache) cache.delete()
             }
-
-            override fun onResponse(call: Call, response: Response) {
-                response.use {
-                    if (response.isSuccessful) {
-                        val text = response.body.string()
-                        runCatching {
-                            parse(text)
-                            cache.writeText(text, Charsets.UTF_8)
-                        }
-                    }
-                }
-                if (!loaded) loaded = true
-                onReady()
+            if (!loadedFromCache) {
+                runCatching { parseBundled(appContext) }
             }
-        })
+            // The live feed must remain usable even if both catalogue sources
+            // are damaged. In a normal build, the bundled snapshot always wins
+            // before this fallback is reached.
+            if (!loaded) loaded = true
+            onReady()
+            if (!loadedFromCache) refreshInBackground(appContext, client)
+        }, "QuakeDeck-stations").start()
     }
 
     private fun refreshInBackground(context: Context, client: OkHttpClient) {
@@ -104,7 +92,7 @@ object StationCatalog {
                 response.use {
                     if (!response.isSuccessful) return
                     val text = response.body.string()
-                    if (runCatching { parse(text) }.isSuccess) {
+                    if (runCatching { parseRemote(text) }.isSuccess) {
                         runCatching { File(context.filesDir, CACHE_FILE).writeText(text, Charsets.UTF_8) }
                     }
                 }
@@ -112,7 +100,7 @@ object StationCatalog {
         })
     }
 
-    private fun parse(text: String) {
+    private fun parseRemote(text: String) {
         val array = JSONArray(text)
         val parsed = ArrayList<SeismicStation>(array.length())
         for (i in 0 until array.length()) {
@@ -123,6 +111,7 @@ object StationCatalog {
             if (name.isBlank()) continue
             val pref = item.optJSONObject("pref")?.optString("name").orEmpty()
             val area = item.optJSONObject("area")
+            val city = item.optJSONObject("city")
             parsed += SeismicStation(
                 code = item.optString("code"),
                 nameJa = name,
@@ -131,9 +120,45 @@ object StationCatalog {
                 longitude = lon,
                 networkJa = item.optString("affi"),
                 areaCode = area?.optString("code").orEmpty(),
-                areaNameJa = area?.optString("name").orEmpty()
+                areaNameJa = area?.optString("name").orEmpty(),
+                municipalityCode = city?.optString("code").orEmpty()
             )
         }
+        publish(parsed)
+    }
+
+    private fun parseBundled(context: Context) {
+        val text = context.resources.openRawResource(R.raw.jma_intensity_stations)
+            .bufferedReader(Charsets.UTF_8)
+            .use { it.readText() }
+        val root = JSONObject(text)
+        require(root.getInt("version") == 1) { "Unsupported station catalogue version" }
+        val array = root.getJSONArray("stations")
+        val parsed = ArrayList<SeismicStation>(array.length())
+        for (i in 0 until array.length()) {
+            val row = array.optJSONArray(i) ?: continue
+            if (row.length() < 9) continue
+            val name = row.optString(1)
+            val latitude = row.optString(3).toDoubleOrNull() ?: continue
+            val longitude = row.optString(4).toDoubleOrNull() ?: continue
+            if (name.isBlank()) continue
+            parsed += SeismicStation(
+                code = row.optString(0),
+                nameJa = name,
+                prefectureJa = row.optString(2),
+                latitude = latitude,
+                longitude = longitude,
+                networkJa = row.optString(5),
+                areaCode = row.optString(6),
+                areaNameJa = row.optString(7),
+                municipalityCode = row.optString(8)
+            )
+        }
+        publish(parsed)
+    }
+
+    private fun publish(parsed: List<SeismicStation>) {
+        require(parsed.size >= 3_000) { "Incomplete station catalogue: ${parsed.size}" }
         stations = parsed
         byPrefAndName = parsed.associateBy { key(it.prefectureJa, it.nameJa) }
         byName = parsed.associateBy { normalize(it.nameJa) }
