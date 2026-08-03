@@ -159,23 +159,40 @@ class JmaRegionalMapData(
 
     /** Resolve one EEW forecast point without falling back to detailed geometry. */
     fun resolveEewAreas(point: IntensityPoint): List<JmaAreaShape> {
+        val station = if (point.isArea) {
+            null
+        } else {
+            point.stationName
+                ?.takeIf { it.isNotBlank() }
+                ?.let { StationCatalog.lookup(point.prefecture, it) }
+        }
         val candidates = buildList {
             point.name.substringAfterLast(" · ").takeIf { it.isNotBlank() }?.let(::add)
             point.name.takeIf { it.isNotBlank() }?.let(::add)
             point.prefecture.takeIf { it.isNotBlank() }?.let(::add)
             point.stationName?.takeIf { it.isNotBlank() }?.let(::add)
+            station?.areaNameJa?.takeIf { it.isNotBlank() }?.let(::add)
         }
         candidates.forEach { candidate ->
             eewByName[normalizeAreaName(candidate)]
                 ?.takeIf { it.isNotEmpty() }
                 ?.let { return it }
         }
-        val latitude = point.latitude
-        val longitude = point.longitude
+        val latitude = point.latitude ?: station?.latitude
+        val longitude = point.longitude ?: station?.longitude
         if (latitude != null && longitude != null) {
             eewAreaAt(latitude, longitude)?.let { return listOf(it) }
         }
-        return emptyList()
+        // An area-level EEW entry may carry only a prefecture label. This is a
+        // legitimate coarse fallback; an unresolved observation station is not,
+        // because colouring every zone in its prefecture would overstate data.
+        return if (point.isArea) {
+            eewAreasForPrefecture(point.prefecture.ifBlank {
+                point.name.substringBefore(" · ")
+            })
+        } else {
+            emptyList()
+        }
     }
 
     private fun quakeAreaByName(value: String): JmaAreaShape? {
@@ -222,7 +239,7 @@ class JmaRegionalMapData(
     }
 }
 
-/** Deep-zoom JMA municipality/ward geometry, loaded only after the user zooms in. */
+/** Deep-zoom JMA municipality/ward geometry, prepared off the UI thread. */
 class JmaMunicipalityMapData(
     val areas: List<JmaAreaShape>
 ) {
@@ -264,13 +281,43 @@ class JmaMunicipalityMapData(
             ?: areas.firstOrNull { it.contains(projected) }
     }
 
-    fun visibleAreas(sourceBounds: RectF): List<JmaAreaShape> =
-        areas.filter { it.intersects(sourceBounds) }
+    fun visibleAreas(sourceBounds: RectF): List<JmaAreaShape> {
+        if (
+            !sourceBounds.left.isFinite() ||
+            !sourceBounds.top.isFinite() ||
+            !sourceBounds.right.isFinite() ||
+            !sourceBounds.bottom.isFinite() ||
+            sourceBounds.left > sourceBounds.right ||
+            sourceBounds.top > sourceBounds.bottom
+        ) {
+            return emptyList()
+        }
+
+        val minX = gridCoordinate(sourceBounds.left)
+        val maxX = gridCoordinate(sourceBounds.right)
+        val minY = gridCoordinate(sourceBounds.top)
+        val maxY = gridCoordinate(sourceBounds.bottom)
+        val cellCount = (maxX.toLong() - minX + 1L) * (maxY.toLong() - minY + 1L)
+        if (cellCount > MAX_VIEWPORT_GRID_CELLS) {
+            return areas.filter { it.intersects(sourceBounds) }
+        }
+
+        val visible = LinkedHashSet<JmaAreaShape>()
+        for (x in minX..maxX) {
+            for (y in minY..maxY) {
+                spatialIndex[gridKey(x, y)].orEmpty().forEach { area ->
+                    if (area.intersects(sourceBounds)) visible += area
+                }
+            }
+        }
+        return visible.toList()
+    }
 
     private companion object {
         // Roughly 0.57 degrees in projected X. Most cells contain only a handful
         // of municipalities, keeping station-to-polygon lookup effectively O(1).
         const val GRID_SIZE = 0.01f
+        const val MAX_VIEWPORT_GRID_CELLS = 4_096L
 
         fun gridCoordinate(value: Float): Int = floor(value / GRID_SIZE).toInt()
 
@@ -305,7 +352,7 @@ object JmaAreaGeometry {
     }
 }
 
-/** Municipality geometry is intentionally kept outside the startup area bundle. */
+/** Municipality geometry is cached separately from the smaller regional bundle. */
 object JmaMunicipalityGeometry {
     @Volatile private var cached: JmaMunicipalityMapData? = null
 

@@ -407,6 +407,13 @@ class NotificationCoordinator(
                 }
             )
 
+        // Permission can be revoked after the caller's policy check. Keep the
+        // posting boundary safe as well as the public entry points.
+        if (
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+            ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) !=
+            PackageManager.PERMISSION_GRANTED
+        ) return
         manager.notify(tag, id, builder.build())
     }
 

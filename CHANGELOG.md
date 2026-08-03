@@ -2,6 +2,23 @@
 
 QuakeDeck release history, newest first.
 
+## v0.9.73
+
+- Adds mutually exclusive map-vector tiers: N03 prefectures below 10×, JMA EEW areas from 10× to below 32×, and municipalities/wards at 32× and above.
+- Aggregates the highest reported Shindo independently for prefectures, EEW areas, and municipalities, while explicitly painting every unreported polygon with the neutral map color.
+- Removes the configurable municipality threshold and the shared high-resolution geometry mutation so no prefecture, EEW, or municipality vector leaks into another tier.
+- Prepares municipality geometry concurrently, limits divider-resize raster use to the N03 tier, and reuses the municipality spatial index for deep-zoom viewport culling.
+- Corrects detailed-tier selection to follow the effective on-screen zoom and removes N03 fallback coastlines from JMA EEW and municipality views.
+- Rebuilds the retained vector child at tier changes and gives the 10×–32× range a dedicated high-contrast boundary stroke from the 56 official JMA EEW zones.
+- Completes a separate behavior-preserving performance and reliability pass across the Android app and companion website.
+- Reuses compiled status/search patterns, JST formatters, and timezone objects instead of rebuilding them during live updates and UI rendering.
+- Caches historical-event timestamps and derived filter state so date filtering and sorting no longer reparse timestamps inside every comparison.
+- Adds a final notification-permission guard, API 26/27-safe navigation-bar theme resources, and an explicit cleartext-traffic prohibition.
+- Adds six JVM regression tests covering event-time display, Japan map coverage, quiet-hours serialization, malformed schedules, overnight boundaries, and public holidays.
+- Protects the OAuth callback from referrer leakage, limits local-data cleanup to QuakeDeck's own session keys, and aligns the website, privacy policy, terms, and README with the existing one-shot Socket Start/Close probe.
+- Resolves all blocking Android lint findings; debug compilation, unit tests, APK assembly, and lint verification pass.
+- Bumps the Android application version to `0.9.73` (`versionCode` 100) and updates the README release marker.
+
 ## v0.9.72
 
 - Approximately doubles the visible JMA EEW/warning-area border weight in municipality zoom.

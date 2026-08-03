@@ -54,6 +54,7 @@ enum class AlertLocationResolutionKind {
 /** Text-to-place resolver used by the manual alert-location picker. */
 object ManualAlertLocationResolver {
     private const val MAX_RESULTS = 8
+    private val SEARCH_NORMALIZATION_PATTERN = Regex("[^\\p{L}\\p{N}]")
 
     suspend fun search(
         context: Context,
@@ -301,7 +302,7 @@ object ManualAlertLocationResolver {
             .replace("ū", "u")
             .replace("ô", "o")
             .replace("û", "u")
-            .replace(Regex("[^\\p{L}\\p{N}]"), "")
+            .replace(SEARCH_NORMALIZATION_PATTERN, "")
             .removeSuffix("city")
             .removeSuffix("shi")
     }
