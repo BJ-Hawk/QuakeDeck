@@ -2,6 +2,13 @@
 
 QuakeDeck release history, newest first.
 
+## v0.9.72
+
+- Approximately doubles the visible JMA EEW/warning-area border weight in municipality zoom.
+- Expands only the municipality-clipped JMA warning outlines; prefecture and fine municipality borders keep their existing thickness.
+- Keeps the asynchronous municipality-layer loading and border preparation introduced in v0.9.71 unchanged.
+- Bumps the Android application version to `0.9.72` (`versionCode` 99) and updates the README release marker.
+
 ## v0.9.71
 
 - Fixes the municipality layer failing to appear after v0.9.70 by removing synchronous prefecture/JMA path processing from the municipality loader.

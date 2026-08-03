@@ -1,6 +1,7 @@
 package cz.misa.quakedeck
 
 import android.content.Context
+import android.graphics.Matrix
 import android.graphics.Path
 import android.os.Handler
 import android.os.Looper
@@ -102,8 +103,31 @@ object JapanMapGeometry {
         cz.misa.quakedeck.data.JmaAreaGeometry.load(context)
             .eewAreas
             .forEach { area ->
-                clippedToMunicipality(area.path, municipalityLand)?.let { addPath(it) }
+                clippedToMunicipality(area.path, municipalityLand)?.let { warningBoundary ->
+                    addExpandedPath(
+                        source = warningBoundary,
+                        radius = JMA_WARNING_OUTLINE_EXPANSION
+                    )
+                }
             }
+    }
+
+    /**
+     * The renderer uses one shared broad-boundary paint. Expand only the JMA
+     * warning-area path before adding it, approximately doubling its visible
+     * weight at the normal municipality threshold without changing prefecture
+     * or municipality lines.
+     */
+    private fun Path.addExpandedPath(source: Path, radius: Float) {
+        addPath(source)
+        val matrix = Matrix()
+        OUTLINE_DIRECTIONS.forEach { (x, y) ->
+            matrix.reset()
+            matrix.setTranslate(x * radius, y * radius)
+            val shifted = Path()
+            source.transform(matrix, shifted)
+            addPath(shifted)
+        }
     }
 
     private fun clippedToMunicipality(source: Path, municipalityLand: Path): Path? {
@@ -134,6 +158,19 @@ object JapanMapGeometry {
         val generation: Int,
         val highResolution: JapanMapData,
         val municipalityLand: Path
+    )
+
+    private const val JMA_WARNING_OUTLINE_EXPANSION = 0.0000022f
+
+    private val OUTLINE_DIRECTIONS = arrayOf(
+        -1f to 0f,
+        1f to 0f,
+        0f to -1f,
+        0f to 1f,
+        -0.7071f to -0.7071f,
+        0.7071f to -0.7071f,
+        -0.7071f to 0.7071f,
+        0.7071f to 0.7071f
     )
 }
 
