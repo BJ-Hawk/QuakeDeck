@@ -2,6 +2,13 @@
 
 QuakeDeck release history, newest first.
 
+## v0.9.75b
+
+- Removes the erroneous viewport-top exclusion from station markers, so idle provider dots and reported intensity stations no longer disappear along a fixed horizontal line.
+- Makes the app Surface cover the edge-to-edge system-bar areas and makes the status/navigation-bar icon appearance follow the selected in-app light or dark theme on every device.
+- Restores the strict preliminary-area rule: area-level intensity reports colour their warning zones only and cannot be misinterpreted as municipality station observations.
+- Bumps the Android hotfix version to `0.9.75b` (`versionCode` 111) and updates the README release marker.
+
 ## v0.9.75
 
 - Adds persistent idle-map station visibility switches for JMA, NIED, and local-government seismic-intensity networks.

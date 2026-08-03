@@ -179,21 +179,25 @@ private fun QuakeDeckRoot(runtime: QuakeDeckRuntime) {
                 fontScale = systemDensity.fontScale * textScale
             )
         ) {
-            Surface(Modifier.fillMaxSize().safeDrawingPadding()) {
-                QuakeDeckApp(
-                    runtime = runtime,
-                    appSettings = appSettings,
-                    appearance = appearance,
-                    onAppearanceChanged = { value ->
-                        appearance = value
-                        appSettings.appearance = value
-                    },
-                    textScale = textScale,
-                    onTextScaleChanged = { value ->
-                        textScale = value
-                        appSettings.textScale = value
-                    }
-                )
+            // Paint the selected app background behind edge-to-edge system bars;
+            // only the interactive app content itself respects safe insets.
+            Surface(Modifier.fillMaxSize()) {
+                Box(Modifier.fillMaxSize().safeDrawingPadding()) {
+                    QuakeDeckApp(
+                        runtime = runtime,
+                        appSettings = appSettings,
+                        appearance = appearance,
+                        onAppearanceChanged = { value ->
+                            appearance = value
+                            appSettings.appearance = value
+                        },
+                        textScale = textScale,
+                        onTextScaleChanged = { value ->
+                            textScale = value
+                            appSettings.textScale = value
+                        }
+                    )
+                }
             }
         }
     }
@@ -5224,9 +5228,17 @@ private fun JapanMap(
             val useJapaneseNames = !PlaceNameTranslator.shouldUseEnglish(language)
             val topUiExclusion = with(density) { 92.dp.toPx() }
 
+            // Labels must stay below the top map controls, but map markers are
+            // allowed throughout the actual viewport. Applying the label-only
+            // exclusion to dots produced a hard horizontal cut-off on all
+            // screen sizes.
             fun visible(p: Offset, margin: Float = 24f): Boolean =
                 p.x >= -margin && p.x <= size.width + margin &&
                     p.y >= topUiExclusion - margin && p.y <= size.height + margin
+
+            fun visibleMarker(p: Offset, margin: Float = 24f): Boolean =
+                p.x >= -margin && p.x <= size.width + margin &&
+                    p.y >= -margin && p.y <= size.height + margin
 
             val occupiedLabelRects = mutableListOf<RectF>()
 
@@ -5315,7 +5327,7 @@ private fun JapanMap(
             if (!panelResizing && totalZoom >= BASE_STATION_DOTS_ZOOM) {
                 projectedStations.forEach { (station, projected) ->
                     val p = displayedProjected(projected)
-                    if (!visible(p, 8f)) return@forEach
+                    if (!visibleMarker(p, 8f)) return@forEach
                     val stationColor = when (station.networkJa) {
                         "気象庁" -> extraColors.mapStationJma
                         "防災科学技術研究所" -> extraColors.mapStationNied
@@ -5349,7 +5361,7 @@ private fun JapanMap(
                     val lat = point.latitude ?: return@forEach
                     val lon = point.longitude ?: return@forEach
                     val p = displayedGeo(lat, lon)
-                    if (!visible(p, 12f)) return@forEach
+                    if (!visibleMarker(p, 12f)) return@forEach
                     drawCircle(
                         intensityColor(point.intensity),
                         with(density) { 3.1.dp.toPx() },
