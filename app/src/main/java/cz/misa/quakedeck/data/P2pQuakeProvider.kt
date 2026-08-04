@@ -81,6 +81,7 @@ class P2pQuakeProvider(
     private var replayGeneration = 0
     private var builtInReplayActive = false
     private var builtInReplayLabel: String? = null
+    private var injectedTestRestoreRunnable: Runnable? = null
     private var connectionGeneration = 0
     @Volatile private var currentState = ConnectionState.DISCONNECTED
     private var lastRecoveryStartedAtMs = 0L
@@ -328,10 +329,217 @@ class P2pQuakeProvider(
         }
     }
 
+    override fun injectTestEarthquakeReport() = injectLivePipelineTest(InjectedTestKind.EARTHQUAKE)
+
+    override fun injectTestEewWarning() = injectLivePipelineTest(InjectedTestKind.EEW)
+
+    override fun injectTestTsunamiWarning() = injectLivePipelineTest(InjectedTestKind.TSUNAMI)
+
+    /**
+     * Emit a one-shot synthetic snapshot through the exact process callback used by real
+     * WebSocket packets. The provider's live socket, ordering state, raw archive, incident
+     * history, and active-alert fields are deliberately left untouched. A later genuine
+     * packet therefore replaces the test naturally and cannot be rejected as "older".
+     */
+    private fun injectLivePipelineTest(kind: InjectedTestKind) {
+        mainHandler.post {
+            if (stopped || callback == null) return@post
+
+            cancelInjectedTestRestore()
+            val now = LocalDateTime.now(JST_ZONE)
+            val nowText = now.format(JST_DISPLAY_FORMATTER)
+            val location = persistentSettings.alertLocation
+            val uniqueSuffix = System.currentTimeMillis().toString()
+            val pointPrefecture = location.prefectureJa.ifBlank { location.prefecture }
+            val testPlace = "[INJECTED TEST] ${location.displayName}"
+
+            fun testPoint(intensity: String, arrivalTime: String? = null) = IntensityPoint(
+                name = location.city.ifBlank { location.displayName },
+                intensity = intensity,
+                arrivalTime = arrivalTime,
+                latitude = location.latitude,
+                longitude = location.longitude,
+                prefecture = pointPrefecture,
+                stationName = location.city.ifBlank { location.displayName },
+                isArea = false
+            )
+
+            fun testEvent(
+                idPrefix: String,
+                eventKind: EarthquakeEventKind,
+                magnitude: Double,
+                depthKm: Int,
+                maximumIntensity: String,
+                localIntensity: String,
+                arrivalTime: String? = null
+            ) = EarthquakeEvent(
+                id = "$idPrefix:$uniqueSuffix",
+                place = testPlace,
+                originTime = nowText,
+                magnitude = magnitude,
+                depthKm = depthKm,
+                maxIntensity = maximumIntensity,
+                latitude = location.latitude,
+                longitude = location.longitude,
+                points = listOf(testPoint(localIntensity, arrivalTime)),
+                kind = eventKind,
+                reportSerial = "TEST",
+                reportIssuedAt = nowText,
+                reportStage = EarthquakeReportStage.DETAILED,
+                reportType = "InjectedTest",
+                contributingReportTypes = listOf("InjectedTest"),
+                reportCount = 1,
+                hasHypocenter = true
+            )
+
+            val injectedEvent: EarthquakeEvent
+            val injectedTsunami: TsunamiReport?
+            val updateKind: LiveUpdateKind
+            val injectedActiveEew: Boolean
+            val injectedActiveEewEvent: EarthquakeEvent?
+            val injectedActiveTsunami: Boolean
+            val status: String
+
+            when (kind) {
+                InjectedTestKind.EARTHQUAKE -> {
+                    injectedEvent = testEvent(
+                        idPrefix = "injected-earthquake",
+                        eventKind = EarthquakeEventKind.CONFIRMED,
+                        magnitude = 4.6,
+                        depthKm = 10,
+                        maximumIntensity = "5+",
+                        localIntensity = "5+"
+                    )
+                    injectedTsunami = lastTsunami
+                    updateKind = LiveUpdateKind.CONFIRMED
+                    injectedActiveEew = activeEew
+                    injectedActiveEewEvent = activeEewEvent
+                    injectedActiveTsunami = activeTsunami
+                    status = "INJECTED TEST EARTHQUAKE REPORT · ${sourceLabel()} connection unchanged"
+                }
+
+                InjectedTestKind.EEW -> {
+                    injectedEvent = testEvent(
+                        idPrefix = "injected-eew",
+                        eventKind = EarthquakeEventKind.EEW,
+                        magnitude = 6.2,
+                        depthKm = 20,
+                        maximumIntensity = "6-",
+                        localIntensity = "5+",
+                        arrivalTime = now.plusSeconds(30).format(JST_DISPLAY_FORMATTER)
+                    )
+                    injectedTsunami = lastTsunami
+                    updateKind = LiveUpdateKind.EEW
+                    injectedActiveEew = true
+                    injectedActiveEewEvent = injectedEvent
+                    injectedActiveTsunami = activeTsunami
+                    status = "INJECTED TEST EEW WARNING · ${sourceLabel()} connection unchanged"
+                }
+
+                InjectedTestKind.TSUNAMI -> {
+                    injectedEvent = testEvent(
+                        idPrefix = "injected-tsunami-source",
+                        eventKind = EarthquakeEventKind.CONFIRMED,
+                        magnitude = 7.1,
+                        depthKm = 20,
+                        maximumIntensity = "5+",
+                        localIntensity = "4"
+                    )
+                    val forecastArea = TsunamiAreaCatalog.testAreaFor(location)
+                        ?: "東京湾内湾"
+                    injectedTsunami = TsunamiReport(
+                        id = "injected-tsunami:$uniqueSuffix",
+                        issueTime = nowText,
+                        issueType = "Injected test tsunami warning",
+                        expiresAt = now.plusMinutes(30).format(JST_DISPLAY_FORMATTER),
+                        cancelled = false,
+                        areas = listOf(
+                            TsunamiArea(
+                                name = forecastArea,
+                                grade = TsunamiGrade.WARNING,
+                                immediate = false,
+                                arrivalTime = now.plusMinutes(15).format(JST_DISPLAY_FORMATTER),
+                                arrivalCondition = "Injected test",
+                                maxHeightDescription = "3 m",
+                                maxHeightMeters = 3.0
+                            )
+                        )
+                    )
+                    updateKind = LiveUpdateKind.TSUNAMI
+                    injectedActiveEew = activeEew
+                    injectedActiveEewEvent = activeEewEvent
+                    injectedActiveTsunami = true
+                    status = "INJECTED TEST TSUNAMI WARNING · ${sourceLabel()} connection unchanged"
+                }
+            }
+
+            liveUpdateSequence++
+            val injectedSequence = liveUpdateSequence
+            val injectedHistory = if (kind == InjectedTestKind.EARTHQUAKE) {
+                (listOf(injectedEvent) + eventHistory)
+                    .distinctBy { it.id }
+                    .take(INJECTED_HISTORY_LIMIT)
+            } else {
+                eventHistory.toList()
+            }
+
+            emit(
+                AppSnapshot(
+                    sourceMode = sourceMode,
+                    connectionState = currentState,
+                    activeEew = injectedActiveEew,
+                    activeEewEvent = injectedActiveEewEvent,
+                    activeTsunami = injectedActiveTsunami,
+                    tsunami = injectedTsunami,
+                    event = injectedEvent,
+                    history = injectedHistory,
+                    statusText = status,
+                    liveUpdateKind = updateKind,
+                    liveUpdateSequence = injectedSequence,
+                    testingMode = testingMode,
+                    // Unlike the three deterministic replay fixtures, these one-shot
+                    // injections must exercise normal notification delivery.
+                    builtInReplayActive = false
+                )
+            )
+            scheduleInjectedTestRestore(injectedSequence)
+        }
+    }
+
+    private fun scheduleInjectedTestRestore(expectedSequence: Long) {
+        val runnable = Runnable {
+            injectedTestRestoreRunnable = null
+            if (stopped || callback == null || liveUpdateSequence != expectedSequence) return@Runnable
+
+            val restoredEvent = lastEvent ?: waitingSnapshot(
+                mode = sourceMode,
+                state = currentState,
+                status = "Injected test cleared",
+                testingMode = testingMode
+            ).event
+            emit(
+                snapshot(
+                    state = currentState,
+                    activeEew = activeEew,
+                    event = restoredEvent,
+                    status = "Injected test cleared · ${sourceLabel()}"
+                )
+            )
+        }
+        injectedTestRestoreRunnable = runnable
+        mainHandler.postDelayed(runnable, INJECTED_TEST_DISPLAY_MILLIS)
+    }
+
+    private fun cancelInjectedTestRestore() {
+        injectedTestRestoreRunnable?.let { mainHandler.removeCallbacks(it) }
+        injectedTestRestoreRunnable = null
+    }
+
     override fun stop() {
         stopped = true
         callback = null
         cancelBuiltInReplay()
+        cancelInjectedTestRestore()
         cancelScheduledReconnect()
         clearActiveEew()
         cancelTsunamiCleanup()
@@ -2335,6 +2543,8 @@ class P2pQuakeProvider(
     }
 
 
+    private enum class InjectedTestKind { EARTHQUAKE, EEW, TSUNAMI }
+
     private class HistoricalDownloadCancelledException : Exception()
 
     private companion object {
@@ -2353,6 +2563,8 @@ class P2pQuakeProvider(
         const val HISTORY_RATE_LIMIT_PAUSE_MS = 61_000L
         const val AUTO_BACKFILL_MIN_INTERVAL_MS = 15L * 60L * 1000L
         const val TSUNAMI_CANCELLATION_RETENTION_SECONDS = 15L * 60L
+        const val INJECTED_TEST_DISPLAY_MILLIS = 45_000L
+        const val INJECTED_HISTORY_LIMIT = 30
     }
 
     private fun String?.ifNullOrBlank(defaultValue: () -> String): String =

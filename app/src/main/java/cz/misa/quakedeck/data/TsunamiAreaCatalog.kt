@@ -88,4 +88,26 @@ object TsunamiAreaCatalog {
         }
 
     fun prefectures(japanese: String): List<String> = entries[japanese]?.prefectures.orEmpty()
+
+    /**
+     * Choose the real JMA tsunami forecast area that contains a selected alert location.
+     * Inland prefectures intentionally return null so normal location filtering can prove
+     * that a tsunami alert is irrelevant there rather than manufacturing coastal coverage.
+     */
+    fun testAreaFor(location: AlertLocation): String? {
+        val exactArea = when (location.eewAreaNameJa.orEmpty()) {
+            "東京" -> "東京湾内湾"
+            "伊豆諸島" -> "伊豆諸島"
+            "小笠原" -> "小笠原諸島"
+            "奄美(群島)" -> "奄美群島・トカラ列島"
+            "沖縄本島" -> "沖縄本島地方"
+            "大東島" -> "大東島地方"
+            "宮古島", "八重山" -> "宮古島・八重山地方"
+            else -> null
+        }
+        if (exactArea != null && exactArea in entries) return exactArea
+
+        val prefecture = location.prefectureJa.takeIf { it.isNotBlank() } ?: return null
+        return entries.entries.firstOrNull { (_, entry) -> prefecture in entry.prefectures }?.key
+    }
 }

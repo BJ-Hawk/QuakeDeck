@@ -2,6 +2,14 @@
 
 QuakeDeck release history, newest first.
 
+## v0.9.76d
+
+- Adds one-shot live-pipeline injectors for a confirmed earthquake report, an EEW warning, and a tsunami warning from the dedicated Sandbox settings page.
+- Sends injected snapshots through the same process-scoped runtime and notification coordinator as genuine WebSocket updates while keeping the current live or official Sandbox socket connected.
+- Keeps synthetic events out of the raw archive and persistent incident history, preserves provider ordering state, clearly labels every test, and restores the genuine provider state after 45 seconds unless a real update arrives first.
+- Applies normal notification toggles, intensity/tsunami thresholds, selected-location filtering, sound channels, and quiet-hour policy; the three deterministic built-in replay scenarios remain notification-muted.
+- Bumps the Android hotfix version to `0.9.76d` (`versionCode` 116) and updates the README release marker.
+
 ## v0.9.76c
 
 - Fixes all live and official Sandbox notifications being rejected by System UI because the custom `RemoteViews` frame used unsupported plain `View` elements.

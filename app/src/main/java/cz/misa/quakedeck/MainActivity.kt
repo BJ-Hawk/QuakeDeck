@@ -1487,6 +1487,27 @@ private fun QuakeDeckApp(
                     settingsOpenSandboxPage = false
                 }
             },
+            onInjectEarthquakeReportRequested = {
+                if (SandboxFeature.ENABLED) {
+                    provider.injectTestEarthquakeReport()
+                    settingsOpen = false
+                    settingsOpenSandboxPage = false
+                }
+            },
+            onInjectEewWarningRequested = {
+                if (SandboxFeature.ENABLED) {
+                    provider.injectTestEewWarning()
+                    settingsOpen = false
+                    settingsOpenSandboxPage = false
+                }
+            },
+            onInjectTsunamiWarningRequested = {
+                if (SandboxFeature.ENABLED) {
+                    provider.injectTestTsunamiWarning()
+                    settingsOpen = false
+                    settingsOpenSandboxPage = false
+                }
+            },
             reportArchiveEnabled = reportArchiveEnabled,
             onReportArchiveEnabledChanged = { enabled ->
                 reportArchiveEnabled = enabled

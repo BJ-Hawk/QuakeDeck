@@ -116,6 +116,12 @@ class QuakeDeckRuntime(context: Context) : QuakeDataProvider {
     override fun startBuiltInCombinedReplay(startDelayMillis: Long) =
         provider.startBuiltInCombinedReplay(startDelayMillis)
 
+    override fun injectTestEarthquakeReport() = provider.injectTestEarthquakeReport()
+
+    override fun injectTestEewWarning() = provider.injectTestEewWarning()
+
+    override fun injectTestTsunamiWarning() = provider.injectTestTsunamiWarning()
+
     override fun onAppForeground() = provider.onAppForeground()
 
     override fun onAppBackground() = provider.onAppBackground()

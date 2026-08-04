@@ -109,7 +109,10 @@ fun SandboxSettingsPage(
     onActiveChanged: (Boolean) -> Unit,
     onEewReplay: () -> Unit,
     onTsunamiReplay: () -> Unit,
-    onCombinedReplay: () -> Unit
+    onCombinedReplay: () -> Unit,
+    onInjectEarthquakeReport: () -> Unit,
+    onInjectEewWarning: () -> Unit,
+    onInjectTsunamiWarning: () -> Unit
 ) {
     if (!SandboxFeature.ENABLED) return
 
@@ -198,6 +201,32 @@ fun SandboxSettingsPage(
                         Switch(checked = active, onCheckedChange = onActiveChanged)
                     }
                 }
+            }
+        }
+
+        item { SectionLabel(localized(R.string.live_pipeline_tests, language)) }
+        item {
+            SandboxCard {
+                ReplayRow(
+                    title = localized(R.string.inject_test_report, language),
+                    description = localized(R.string.inject_test_report_explanation, language),
+                    runLabel = localized(R.string.inject, language),
+                    onRun = onInjectEarthquakeReport
+                )
+                HorizontalDivider(Modifier.padding(vertical = 7.dp))
+                ReplayRow(
+                    title = localized(R.string.inject_test_eew, language),
+                    description = localized(R.string.inject_test_eew_explanation, language),
+                    runLabel = localized(R.string.inject, language),
+                    onRun = onInjectEewWarning
+                )
+                HorizontalDivider(Modifier.padding(vertical = 7.dp))
+                ReplayRow(
+                    title = localized(R.string.inject_test_tsunami, language),
+                    description = localized(R.string.inject_test_tsunami_explanation, language),
+                    runLabel = localized(R.string.inject, language),
+                    onRun = onInjectTsunamiWarning
+                )
             }
         }
 

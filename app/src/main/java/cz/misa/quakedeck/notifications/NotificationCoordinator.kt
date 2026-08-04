@@ -278,15 +278,23 @@ class NotificationCoordinator(
                         .ifBlank { localized(R.string.notification_japan) }
                     locationRelevantTsunamis += report.id
                     trimIncidentSets()
-                    val title = localized(titleRes)
+                    val injectedTest = report.id.startsWith("injected-tsunami:")
+                    val title = localized(titleRes).let { baseTitle ->
+                        if (injectedTest) "[TEST] $baseTitle" else baseTitle
+                    }
+                    val displayedAreaText = if (injectedTest) {
+                        "[INJECTED TEST] $areaText"
+                    } else {
+                        areaText
+                    }
                     val body = if (locationFiltering) {
                         localized(
                             R.string.notification_location_tsunami_body,
                             alertLocation.displayName,
-                            areaText
+                            displayedAreaText
                         )
                     } else {
-                        areaText
+                        displayedAreaText
                     }
                     post(
                         tag = "tsunami:${report.id}",
@@ -300,7 +308,7 @@ class NotificationCoordinator(
                             report = report,
                             candidateAreas = candidateAreas,
                             highestRelevantGrade = highestRelevantGrade,
-                            areaText = areaText,
+                            areaText = displayedAreaText,
                             locationLine = body.takeIf { locationFiltering }
                         )
                     )
@@ -385,11 +393,15 @@ class NotificationCoordinator(
                 displayNotificationIntensity(intensity)
             )
         }
-        val displayPlace = PlaceNameTranslator.epicenter(
-            context = context,
-            japanese = event.place,
-            setting = settings.placeNameLanguage
-        ).ifBlank { localized(R.string.notification_japan) }
+        val displayPlace = if (event.id.startsWith("injected-")) {
+            event.place
+        } else {
+            PlaceNameTranslator.epicenter(
+                context = context,
+                japanese = event.place,
+                setting = settings.placeNameLanguage
+            )
+        }.ifBlank { localized(R.string.notification_japan) }
         val localLine = localPoint?.let { point ->
             localized(
                 R.string.notification_location_intensity,

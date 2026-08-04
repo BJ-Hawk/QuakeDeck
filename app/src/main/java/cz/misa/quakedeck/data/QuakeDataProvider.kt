@@ -26,6 +26,15 @@ interface QuakeDataProvider {
         startDelayMillis: Long = BuiltInCombinedNotoReplay.DEFAULT_START_DELAY_MILLIS
     ) = Unit
 
+    /** Inject one clearly labelled confirmed report without replacing the live connection. */
+    fun injectTestEarthquakeReport() = Unit
+
+    /** Inject one clearly labelled EEW warning without replacing the live connection. */
+    fun injectTestEewWarning() = Unit
+
+    /** Inject one clearly labelled tsunami warning without replacing the live connection. */
+    fun injectTestTsunamiWarning() = Unit
+
     /** Called when the app becomes interactive again. */
     fun onAppForeground() = Unit
 

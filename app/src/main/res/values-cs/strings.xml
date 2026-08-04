@@ -24,6 +24,14 @@
     <string name="nothing_current_event">Nic na této stránce nepředstavuje aktuální událost.</string>
     <string name="return_live_data">Návrat k živým datům</string>
     <string name="official_test_feed">Oficiální testovací zdroj</string>
+    <string name="live_pipeline_tests">Testy živé datové cesty</string>
+    <string name="inject">Vložit</string>
+    <string name="inject_test_report">Vložit hlášení o zemětřesení</string>
+    <string name="inject_test_report_explanation">Dočasně vloží jasně označené hlášení M4,6 a šindó 5+ bez odpojení aktuálního zdroje nebo uložení do historie. Platí běžné prahy oznámení, filtrování podle místa a tichý režim.</string>
+    <string name="inject_test_eew">Vložit varování EEW</string>
+    <string name="inject_test_eew_explanation">Dočasně vloží jasně označené EEW M6,2 s předpovědí šindó 5+ pro vybrané místo výstrah. Živé nebo testovací připojení zůstane aktivní a platí běžná pravidla oznámení.</string>
+    <string name="inject_test_tsunami">Vložit varování před tsunami</string>
+    <string name="inject_test_tsunami_explanation">Dočasně vloží jasně označené varování před třímetrovou tsunami pro skutečnou pobřežní oblast JMA vybraného místa. Vnitrozemská místa a přísnější nastavení oznámení zůstanou správně odfiltrována.</string>
     <string name="built_in_scenarios">Vestavěné scénáře</string>
     <string name="run">Spustit</string>
     <string name="settings">Nastavení</string>

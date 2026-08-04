@@ -169,6 +169,9 @@ fun QuakeDeckSettings(
     onBuiltInReplayRequested: () -> Unit,
     onBuiltInTsunamiReplayRequested: () -> Unit,
     onBuiltInCombinedReplayRequested: () -> Unit,
+    onInjectEarthquakeReportRequested: () -> Unit,
+    onInjectEewWarningRequested: () -> Unit,
+    onInjectTsunamiWarningRequested: () -> Unit,
     reportArchiveEnabled: Boolean,
     onReportArchiveEnabledChanged: (Boolean) -> Unit,
     automaticHistoricalDownload: Boolean,
@@ -363,6 +366,18 @@ fun QuakeDeckSettings(
                                 onCombinedReplay = {
                                     commitTextScale()
                                     onBuiltInCombinedReplayRequested()
+                                },
+                                onInjectEarthquakeReport = {
+                                    commitTextScale()
+                                    onInjectEarthquakeReportRequested()
+                                },
+                                onInjectEewWarning = {
+                                    commitTextScale()
+                                    onInjectEewWarningRequested()
+                                },
+                                onInjectTsunamiWarning = {
+                                    commitTextScale()
+                                    onInjectTsunamiWarningRequested()
                                 }
                             )
                         }

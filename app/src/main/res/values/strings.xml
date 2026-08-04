@@ -24,6 +24,14 @@
     <string name="nothing_current_event">Nothing on this page represents a current event.</string>
     <string name="return_live_data">Return to live data</string>
     <string name="official_test_feed">Official test feed</string>
+    <string name="live_pipeline_tests">Live pipeline tests</string>
+    <string name="inject">Inject</string>
+    <string name="inject_test_report">Inject earthquake report</string>
+    <string name="inject_test_report_explanation">Temporarily inserts a clearly labelled M4.6, Shindo 5+ report without disconnecting the current feed or saving it to history. Normal notification thresholds, location filtering and quiet hours apply.</string>
+    <string name="inject_test_eew">Inject EEW warning</string>
+    <string name="inject_test_eew_explanation">Temporarily inserts a clearly labelled M6.2 EEW with predicted Shindo 5+ at the selected alert location. The live or Sandbox socket remains connected and normal notification policy applies.</string>
+    <string name="inject_test_tsunami">Inject tsunami warning</string>
+    <string name="inject_test_tsunami_explanation">Temporarily inserts a clearly labelled 3 m tsunami warning for the selected location’s real JMA coastal area. Inland locations and stricter notification settings remain correctly filtered.</string>
     <string name="built_in_scenarios">Built-in scenarios</string>
     <string name="run">Run</string>
     <string name="settings">Settings</string>

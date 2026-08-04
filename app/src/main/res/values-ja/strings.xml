@@ -24,6 +24,14 @@
     <string name="nothing_current_event">このページの内容は現在の事象を示すものではありません。</string>
     <string name="return_live_data">ライブデータに戻る</string>
     <string name="official_test_feed">公式テストフィード</string>
+    <string name="live_pipeline_tests">ライブ経路テスト</string>
+    <string name="inject">挿入</string>
+    <string name="inject_test_report">地震情報を挿入</string>
+    <string name="inject_test_report_explanation">現在のフィードを切断せず、履歴にも保存せずに、明確にテスト表示されたM4.6・最大震度5強の地震情報を一時的に挿入します。通常の通知しきい値、地点フィルター、通知休止時間が適用されます。</string>
+    <string name="inject_test_eew">緊急地震速報を挿入</string>
+    <string name="inject_test_eew_explanation">選択した通知地点で予想震度5強となる、明確にテスト表示されたM6.2の緊急地震速報を一時的に挿入します。ライブまたはサンドボックス接続は維持され、通常の通知設定が適用されます。</string>
+    <string name="inject_test_tsunami">津波警報を挿入</string>
+    <string name="inject_test_tsunami_explanation">選択地点に対応する実在のJMA沿岸予報区へ、明確にテスト表示された予想3 mの津波警報を一時的に挿入します。内陸地点や、より厳しい通知設定では正しく除外されます。</string>
     <string name="built_in_scenarios">内蔵シナリオ</string>
     <string name="run">実行</string>
     <string name="settings">設定</string>
