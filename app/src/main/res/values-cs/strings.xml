@@ -504,4 +504,32 @@
     <string name="notification_holiday_source_sim">Zjištěno podle země SIM</string>
     <string name="notification_holiday_source_phone_region">Zjištěno podle oblasti telefonu</string>
     <string name="notification_holiday_source_unavailable">Není dostupný žádný údaj o zemi</string>
+
+    <!-- Custom notification cards -->
+    <string name="notification_magnitude_value">Magnitudo %1$s</string>
+    
+    <string name="notification_maximum_in_japan">Maximum v Japonsku: šindó %1$s</string>
+    
+    <string name="notification_maximum_predicted_in_japan">Maximum předpovědi v Japonsku: šindó %1$s</string>
+    
+    <string name="notification_badge_local">MÍSTNÍ</string>
+    
+    <string name="notification_badge_predicted">ODHAD</string>
+    
+    <string name="notification_badge_end">KONEC</string>
+    
+    <string name="notification_badge_tsunami_major">VELKÁ</string>
+    
+    <string name="notification_badge_tsunami_warning">VAROVÁNÍ</string>
+    
+    <string name="notification_badge_tsunami_advisory">UPOZ.</string>
+    
+    <string name="notification_badge_tsunami_info">INFO</string>
+    
+    <string name="notification_tsunami_expected_height">Očekáváno až %1$s</string>
+    
+    <string name="notification_tsunami_expected_arrival">Očekávaný příchod %1$s</string>
+    
+    <string name="notification_tsunami_affected_areas">%1$d zasažených oblastí</string>
+
 </resources>

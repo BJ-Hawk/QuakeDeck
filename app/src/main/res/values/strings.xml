@@ -504,4 +504,32 @@
     <string name="notification_holiday_source_sim">Detected from SIM country</string>
     <string name="notification_holiday_source_phone_region">Detected from phone region</string>
     <string name="notification_holiday_source_unavailable">No country signal available</string>
+
+    <!-- Custom notification cards -->
+    <string name="notification_magnitude_value">Magnitude %1$s</string>
+    
+    <string name="notification_maximum_in_japan">Maximum in Japan: Shindo %1$s</string>
+    
+    <string name="notification_maximum_predicted_in_japan">Maximum predicted in Japan: Shindo %1$s</string>
+    
+    <string name="notification_badge_local">LOCAL</string>
+    
+    <string name="notification_badge_predicted">PRED.</string>
+    
+    <string name="notification_badge_end">ENDED</string>
+    
+    <string name="notification_badge_tsunami_major">MAJOR</string>
+    
+    <string name="notification_badge_tsunami_warning">WARNING</string>
+    
+    <string name="notification_badge_tsunami_advisory">ADVISORY</string>
+    
+    <string name="notification_badge_tsunami_info">INFO</string>
+    
+    <string name="notification_tsunami_expected_height">Expected up to %1$s</string>
+    
+    <string name="notification_tsunami_expected_arrival">Expected arrival %1$s</string>
+    
+    <string name="notification_tsunami_affected_areas">%1$d affected areas</string>
+
 </resources>

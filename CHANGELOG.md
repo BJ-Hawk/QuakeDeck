@@ -2,6 +2,22 @@
 
 QuakeDeck release history, newest first.
 
+## v0.9.76c
+
+- Fixes all live and official Sandbox notifications being rejected by System UI because the custom `RemoteViews` frame used unsupported plain `View` elements.
+- Replaces the four dynamic frame edges with supported `ImageView` widgets in compact, expanded, and heads-up notification layouts.
+- Reuses one bounded 128 px badge bitmap across each notification and retries with Android's standard multiline template if an OEM rejects the custom card.
+- Bumps the Android hotfix version to `0.9.76c` (`versionCode` 115) and updates the README release marker.
+
+## v0.9.76b
+
+- Replaces wrapped earthquake notification text with compact, heads-up, and expanded custom cards that keep the alert title, place, magnitude, and depth on deliberate separate lines.
+- Adds dynamically rendered Shindo badges, using the selected location intensity when location filtering is active and preserving the Japan-wide maximum in the expanded details.
+- Gives EEW notifications a bright yellow frame and predicted-intensity badge, while ended or cancelled alerts switch to a muted status treatment.
+- Gives tsunami notifications a wave badge and a frame coloured by the highest relevant level: magenta for major warning, red for warning, yellow for advisory, blue for information, and grey for cancellation.
+- Adds expanded tsunami height, arrival, affected-area, and per-zone details without changing notification eligibility, channel, sound, quiet-hour, or deduplication policy.
+- Bumps the Android hotfix version to `0.9.76b` (`versionCode` 114) and updates the README release marker.
+
 ## v0.9.76a
 
 - Keeps the middle JMA reporting-area layer visually restrained: only prefecture borders use the highlighted 3 px slate-blue stroke, while internal reporting-area boundaries return to the normal subtle map line.

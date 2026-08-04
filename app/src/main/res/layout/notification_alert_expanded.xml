@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:minHeight="96dp"
+    android:clipToPadding="false">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="3dp"
+        android:gravity="top"
+        android:orientation="horizontal"
+        android:paddingStart="7dp"
+        android:paddingTop="7dp"
+        android:paddingEnd="8dp"
+        android:paddingBottom="7dp">
+
+        <ImageView
+            android:id="@+id/notification_badge"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:adjustViewBounds="true"
+            android:contentDescription="@null"
+            android:scaleType="fitCenter" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="10dp"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/notification_alert_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:fontFamily="sans"
+                android:includeFontPadding="false"
+                android:maxLines="1"
+                android:textColor="@color/notification_text_accent"
+                android:textSize="11sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/notification_primary"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:fontFamily="sans"
+                android:includeFontPadding="false"
+                android:maxLines="2"
+                android:textColor="@color/notification_text_primary"
+                android:textSize="15sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/notification_secondary"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:fontFamily="sans"
+                android:includeFontPadding="false"
+                android:maxLines="1"
+                android:textColor="@color/notification_text_secondary"
+                android:textSize="12sp" />
+
+            <TextView
+                android:id="@+id/notification_tertiary"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ellipsize="end"
+                android:fontFamily="sans"
+                android:includeFontPadding="false"
+                android:maxLines="1"
+                android:textColor="@color/notification_text_secondary"
+                android:textSize="12sp" />
+
+            <TextView
+                android:id="@+id/notification_extra"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:ellipsize="end"
+                android:fontFamily="sans"
+                android:includeFontPadding="false"
+                android:maxLines="5"
+                android:textColor="@color/notification_text_secondary"
+                android:textSize="10sp" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <ImageView
+        android:id="@+id/notification_border_top"
+        android:layout_width="match_parent"
+        android:layout_height="3dp"
+        android:layout_gravity="top"
+        android:contentDescription="@null"
+        android:scaleType="fitXY" />
+
+    <ImageView
+        android:id="@+id/notification_border_bottom"
+        android:layout_width="match_parent"
+        android:layout_height="3dp"
+        android:layout_gravity="bottom"
+        android:contentDescription="@null"
+        android:scaleType="fitXY" />
+
+    <ImageView
+        android:id="@+id/notification_border_start"
+        android:layout_width="3dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="start"
+        android:contentDescription="@null"
+        android:scaleType="fitXY" />
+
+    <ImageView
+        android:id="@+id/notification_border_end"
+        android:layout_width="3dp"
+        android:layout_height="match_parent"
+        android:layout_gravity="end"
+        android:contentDescription="@null"
+        android:scaleType="fitXY" />
+</FrameLayout>

@@ -504,4 +504,32 @@
     <string name="notification_holiday_source_sim">SIMの国から検出</string>
     <string name="notification_holiday_source_phone_region">端末の地域から検出</string>
     <string name="notification_holiday_source_unavailable">国情報を取得できません</string>
+
+    <!-- Custom notification cards -->
+    <string name="notification_magnitude_value">マグニチュード %1$s</string>
+    
+    <string name="notification_maximum_in_japan">国内最大震度 %1$s</string>
+    
+    <string name="notification_maximum_predicted_in_japan">国内最大予測震度 %1$s</string>
+    
+    <string name="notification_badge_local">地点</string>
+    
+    <string name="notification_badge_predicted">予測</string>
+    
+    <string name="notification_badge_end">終了</string>
+    
+    <string name="notification_badge_tsunami_major">大津波</string>
+    
+    <string name="notification_badge_tsunami_warning">警報</string>
+    
+    <string name="notification_badge_tsunami_advisory">注意報</string>
+    
+    <string name="notification_badge_tsunami_info">情報</string>
+    
+    <string name="notification_tsunami_expected_height">予想最大 %1$s</string>
+    
+    <string name="notification_tsunami_expected_arrival">到達予想 %1$s</string>
+    
+    <string name="notification_tsunami_affected_areas">対象地域 %1$d件</string>
+
 </resources>
