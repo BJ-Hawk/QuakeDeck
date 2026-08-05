@@ -535,18 +535,37 @@ private fun QuakeDeckApp(
         }
     }
 
-    var portraitMapFraction by remember { mutableFloatStateOf(0.55f) }
+    val savedPortraitPanelCollapsed = remember {
+        appSettings.mainPortraitPanelCollapsed
+    }
+    var portraitMapFraction by remember {
+        mutableFloatStateOf(
+            if (savedPortraitPanelCollapsed) 0.92f else appSettings.mainPortraitMapFraction
+        )
+    }
     var panelResizing by remember { mutableStateOf(false) }
     var portraitEventBlockHeightPx by remember { mutableIntStateOf(0) }
-    var portraitRestoreMapFraction by remember { mutableFloatStateOf(0.55f) }
-    var portraitDragStartMapFraction by remember { mutableFloatStateOf(0.55f) }
+    var portraitRestoreMapFraction by remember {
+        mutableFloatStateOf(appSettings.mainPortraitRestoreMapFraction)
+    }
+    var portraitPanelCollapsed by remember {
+        mutableStateOf(savedPortraitPanelCollapsed)
+    }
+    var portraitDragStartMapFraction by remember {
+        mutableFloatStateOf(portraitMapFraction)
+    }
     var portraitBeforeObservationsFraction by remember { mutableStateOf<Float?>(null) }
     var portraitPendingObservationRestore by remember { mutableStateOf<Float?>(null) }
     // Keep at least ~34% of landscape width for readable text. The divider
     // resizes only within the readable range; a short tap hides/shows the panel
     // while preserving its previous width.
-    var landscapeMapFraction by remember { mutableFloatStateOf(0.66f) }
-    var landscapePanelCollapsed by rememberSaveable { mutableStateOf(false) }
+    var landscapeMapFraction by remember {
+        mutableFloatStateOf(appSettings.mainLandscapeMapFraction)
+    }
+    var landscapePanelCollapsed by remember {
+        mutableStateOf(appSettings.mainLandscapePanelCollapsed)
+    }
+    var currentMainScreenLandscape by remember { mutableStateOf(false) }
     var selectedEventId by remember { mutableStateOf<String?>(null) }
     // A selected report and a report painted on the map are deliberately
     // separate states. QuakeDeck starts with the latest text report available,
@@ -666,6 +685,7 @@ private fun QuakeDeckApp(
         focusNeedsRefocus = false
         cameraChangedSinceFocus = false
         focusedFootprintSignature = null
+        appSettings.clearMainMapCameraState(currentMainScreenLandscape)
         fitJapanIsLatestCameraRequest = true
         fitJapanRequest++
     }
@@ -958,6 +978,32 @@ private fun QuakeDeckApp(
         val orientationKey = LocalConfiguration.current.orientation
         val fullHeightPx = with(density) { maxHeight.toPx() }
         val fullWidthPx = with(density) { maxWidth.toPx() }
+        val initialMapCamera = remember(isLandscape) {
+            appSettings.mainMapCameraState(isLandscape)
+        }
+
+        SideEffect {
+            currentMainScreenLandscape = isLandscape
+        }
+
+        LaunchedEffect(
+            portraitMapFraction,
+            portraitRestoreMapFraction,
+            portraitPanelCollapsed,
+            landscapeMapFraction,
+            landscapePanelCollapsed,
+            panelResizing
+        ) {
+            // Divider drags can update on every visible pixel. Persist only after
+            // the drag has ended and the layout has stayed still briefly.
+            if (panelResizing) return@LaunchedEffect
+            delay(350.milliseconds)
+            appSettings.mainPortraitMapFraction = portraitMapFraction
+            appSettings.mainPortraitRestoreMapFraction = portraitRestoreMapFraction
+            appSettings.mainPortraitPanelCollapsed = portraitPanelCollapsed
+            appSettings.mainLandscapeMapFraction = landscapeMapFraction
+            appSettings.mainLandscapePanelCollapsed = landscapePanelCollapsed
+        }
 
         // Measure the selected/latest event block so ordinary reports can still
         // collapse neatly at their divider. Exceptionally tall combined-alert
@@ -1050,6 +1096,13 @@ private fun QuakeDeckApp(
                             stationProviderVisibility = stationProviderVisibility,
                             panelResizing = panelResizing,
                             allowAutomaticEventRefit = !historicalMode,
+                            initialCamera = initialMapCamera,
+                            onCameraSettled = { state ->
+                                appSettings.saveMainMapCameraState(
+                                    landscape = true,
+                                    state = state
+                                )
+                            },
                             onUserCameraChanged = {
                                 if (eventMapped) {
                                     cameraChangedSinceFocus = true
@@ -1151,6 +1204,13 @@ private fun QuakeDeckApp(
                             stationProviderVisibility = stationProviderVisibility,
                             panelResizing = panelResizing,
                             allowAutomaticEventRefit = !historicalMode,
+                            initialCamera = initialMapCamera,
+                            onCameraSettled = { state ->
+                                appSettings.saveMainMapCameraState(
+                                    landscape = false,
+                                    state = state
+                                )
+                            },
                             onUserCameraChanged = {
                                 if (eventMapped) {
                                     cameraChangedSinceFocus = true
@@ -1175,10 +1235,12 @@ private fun QuakeDeckApp(
                     onTap = {
                         val atMinimum = portraitMapFraction >= portraitMaxMapFraction - 0.003f
                         if (atMinimum) {
+                            portraitPanelCollapsed = false
                             portraitMapFraction = portraitRestoreMapFraction
                                 .coerceIn(0.30f, portraitMaxMapFraction)
                         } else {
                             portraitRestoreMapFraction = portraitMapFraction
+                            portraitPanelCollapsed = true
                             portraitMapFraction = portraitMaxMapFraction
                         }
                     },
@@ -1194,6 +1256,7 @@ private fun QuakeDeckApp(
                     onDragEnd = {
                         panelResizing = false
                         val atMinimum = portraitMapFraction >= portraitMaxMapFraction - 0.003f
+                        portraitPanelCollapsed = atMinimum
                         if (atMinimum && portraitDragStartMapFraction < portraitMaxMapFraction - 0.003f) {
                             portraitRestoreMapFraction = portraitDragStartMapFraction
                         } else if (!atMinimum) {
@@ -3938,6 +4001,8 @@ private fun JapanMap(
     stationProviderVisibility: StationProviderVisibility,
     panelResizing: Boolean,
     allowAutomaticEventRefit: Boolean,
+    initialCamera: MainMapCameraState?,
+    onCameraSettled: (MainMapCameraState) -> Unit,
     onUserCameraChanged: () -> Unit,
     onFitJapan: () -> Unit,
     alertLocation: AlertLocation,
@@ -4222,11 +4287,22 @@ private fun JapanMap(
     // The vector map is re-rendered only when a gesture finishes. While fingers
     // are moving, Android transforms the retained layer. This is what keeps the
     // ~280k-point N03 geometry smooth even at the new deep zoom levels.
-    var committedZoom by remember { mutableFloatStateOf(MIN_CAMERA_MAP_ZOOM) }
+    var committedZoom by remember {
+        mutableFloatStateOf(
+            initialCamera
+                ?.displayZoom
+                ?.coerceIn(MIN_DISPLAY_MAP_ZOOM, MAX_DISPLAY_MAP_ZOOM)
+                ?.let(::cameraZoomForDisplayZoom)
+                ?: MIN_CAMERA_MAP_ZOOM
+        )
+    }
     var committedPan by remember { mutableStateOf(Offset.Zero) }
     var gestureScale by remember { mutableFloatStateOf(1f) }
     var gesturePan by remember { mutableStateOf(Offset.Zero) }
     var previousViewportState by remember { mutableStateOf<MapViewportState?>(null) }
+    var initialCameraApplied by remember { mutableStateOf(initialCamera == null) }
+    var focusStateInitialized by remember { mutableStateOf(false) }
+    var cameraSaveNonce by remember { mutableIntStateOf(0) }
     var manualCameraOverrideUntilMillis by remember { mutableLongStateOf(0L) }
     var pendingAutomaticCameraRefit by remember { mutableStateOf(false) }
 
@@ -4395,6 +4471,7 @@ private fun JapanMap(
                     gesturePan = Offset.Zero
                     if (cameraChanged) {
                         leaseManualCamera(force = true)
+                        cameraSaveNonce++
                         onUserCameraChanged()
                     }
                 }
@@ -4544,6 +4621,7 @@ private fun JapanMap(
             committedZoom = newCameraZoom
             if (newCameraZoom >= HIGH_RES_ZOOM) highResRequested = true
             leaseManualCamera(force = true)
+            cameraSaveNonce++
             onUserCameraChanged()
         }
 
@@ -4818,10 +4896,17 @@ private fun JapanMap(
             } else {
                 gestureScale = 1f
                 gesturePan = Offset.Zero
-                committedZoom = MIN_CAMERA_MAP_ZOOM
-                committedPan = Offset.Zero
+                // On the first clean-map composition, keep the persisted camera
+                // long enough for the measured viewport to restore its centre.
+                // Later transitions out of an event focus retain the established
+                // Fit Japan behaviour.
+                if (focusStateInitialized || initialCamera == null) {
+                    committedZoom = MIN_CAMERA_MAP_ZOOM
+                    committedPan = Offset.Zero
+                }
                 pendingAutomaticCameraRefit = false
             }
+            focusStateInitialized = true
         }
 
         // A final/detail report can add observed areas without changing the
@@ -4899,6 +4984,66 @@ private fun JapanMap(
                     applyBestAutomaticFit()
                 }
             }
+        }
+
+        LaunchedEffect(
+            initialCameraApplied,
+            initialCamera,
+            focusEvent,
+            viewportWidth,
+            viewportHeight,
+            fitScale,
+            baseLeft,
+            baseTop
+        ) {
+            if (initialCameraApplied) return@LaunchedEffect
+            val saved = initialCamera
+            if (!focusEvent && saved != null) {
+                val restoredZoom = cameraZoomForDisplayZoom(
+                    saved.displayZoom.coerceIn(
+                        MIN_DISPLAY_MAP_ZOOM,
+                        MAX_DISPLAY_MAP_ZOOM
+                    )
+                )
+                val sourceCenter = Offset(
+                    data.minX + sourceWidth * saved.centerXFraction.coerceIn(0f, 1f),
+                    data.minY + sourceHeight * saved.centerYFraction.coerceIn(0f, 1f)
+                )
+                val baseCenter = Offset(
+                    baseLeft + (sourceCenter.x - data.minX) * fitScale,
+                    baseTop + (sourceCenter.y - data.minY) * fitScale
+                )
+                committedZoom = restoredZoom
+                committedPan = clampMapPan(
+                    pan = (viewportCenter - baseCenter) * restoredZoom,
+                    zoom = restoredZoom,
+                    viewportWidth = viewportWidth,
+                    viewportHeight = viewportHeight,
+                    sourceWidth = sourceWidth,
+                    sourceHeight = sourceHeight
+                )
+                if (restoredZoom >= HIGH_RES_ZOOM) highResRequested = true
+            }
+            initialCameraApplied = true
+        }
+
+        LaunchedEffect(cameraSaveNonce) {
+            if (cameraSaveNonce <= 0 || committedZoom <= 0f) return@LaunchedEffect
+            val baseCenter = viewportCenter - committedPan / committedZoom
+            val sourceCenterX = data.minX + (baseCenter.x - baseLeft) / fitScale
+            val sourceCenterY = data.minY + (baseCenter.y - baseTop) / fitScale
+            onCameraSettled(
+                MainMapCameraState(
+                    centerXFraction = (
+                        (sourceCenterX - data.minX) / sourceWidth
+                    ).coerceIn(0f, 1f),
+                    centerYFraction = (
+                        (sourceCenterY - data.minY) / sourceHeight
+                    ).coerceIn(0f, 1f),
+                    displayZoom = displayZoomForCameraZoom(committedZoom)
+                        .coerceIn(MIN_DISPLAY_MAP_ZOOM, MAX_DISPLAY_MAP_ZOOM)
+                )
+            )
         }
 
         LaunchedEffect(viewportWidth, viewportHeight, fitScale, baseLeft, baseTop) {

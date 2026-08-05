@@ -1047,7 +1047,7 @@ private fun NotificationSettingsCard(
             CardDivider()
             SwitchSettingRow(
                 title = localizedString(R.string.notification_quiet_hours, language),
-                supportingText = quietScheduleSummary(quietHoursSchedule, language),
+                supportingText = "",
                 checked = quietHoursEnabled,
                 onCheckedChange = onQuietHoursEnabledChanged,
                 helpText = localizedString(R.string.notification_quiet_hours_help_weekly, language),

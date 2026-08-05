@@ -9,6 +9,12 @@ enum class EpicenterMarkerStyle { DOT, CROSS }
 enum class AppAppearance { SYSTEM, LIGHT, DARK }
 enum class QuietHoursMode { CRITICAL_ONLY, ALL_SILENT, NOTHING }
 
+data class MainMapCameraState(
+    val centerXFraction: Float,
+    val centerYFraction: Float,
+    val displayZoom: Float
+)
+
 enum class MinimumNotificationIntensity(val rank: Int) {
     SHINDO_1(1),
     SHINDO_2(2),
@@ -98,7 +104,91 @@ class AppSettings(context: Context) {
             prefs.edit { putBoolean("p2p_sandbox_mode", value) }
         }
 
+    var mainPortraitMapFraction: Float
+        get() = prefs.getFloat("main_portrait_map_fraction", 0.55f)
+            .coerceIn(0.30f, 0.92f)
+        set(value) {
+            prefs.edit { putFloat("main_portrait_map_fraction", value.coerceIn(0.30f, 0.92f)) }
+        }
 
+    var mainPortraitRestoreMapFraction: Float
+        get() = prefs.getFloat("main_portrait_restore_map_fraction", 0.55f)
+            .coerceIn(0.30f, 0.92f)
+        set(value) {
+            prefs.edit {
+                putFloat(
+                    "main_portrait_restore_map_fraction",
+                    value.coerceIn(0.30f, 0.92f)
+                )
+            }
+        }
+
+    var mainPortraitPanelCollapsed: Boolean
+        get() = prefs.getBoolean("main_portrait_panel_collapsed", false)
+        set(value) {
+            prefs.edit { putBoolean("main_portrait_panel_collapsed", value) }
+        }
+
+    var mainLandscapeMapFraction: Float
+        get() = prefs.getFloat("main_landscape_map_fraction", 0.66f)
+            .coerceIn(0.45f, 0.66f)
+        set(value) {
+            prefs.edit { putFloat("main_landscape_map_fraction", value.coerceIn(0.45f, 0.66f)) }
+        }
+
+    var mainLandscapePanelCollapsed: Boolean
+        get() = prefs.getBoolean("main_landscape_panel_collapsed", false)
+        set(value) {
+            prefs.edit { putBoolean("main_landscape_panel_collapsed", value) }
+        }
+
+    fun mainMapCameraState(landscape: Boolean): MainMapCameraState? {
+        val prefix = if (landscape) "main_map_camera_landscape" else "main_map_camera_portrait"
+        val xKey = "${prefix}_center_x_fraction"
+        val yKey = "${prefix}_center_y_fraction"
+        val zoomKey = "${prefix}_display_zoom"
+        if (!prefs.contains(xKey) || !prefs.contains(yKey) || !prefs.contains(zoomKey)) {
+            return null
+        }
+
+        val x = prefs.getFloat(xKey, 0.5f)
+        val y = prefs.getFloat(yKey, 0.5f)
+        val zoom = prefs.getFloat(zoomKey, 1f)
+        if (!x.isFinite() || !y.isFinite() || !zoom.isFinite()) return null
+
+        return MainMapCameraState(
+            centerXFraction = x.coerceIn(0f, 1f),
+            centerYFraction = y.coerceIn(0f, 1f),
+            displayZoom = zoom.coerceIn(1f, 128f)
+        )
+    }
+
+    fun saveMainMapCameraState(landscape: Boolean, state: MainMapCameraState) {
+        val prefix = if (landscape) "main_map_camera_landscape" else "main_map_camera_portrait"
+        prefs.edit {
+            putFloat(
+                "${prefix}_center_x_fraction",
+                state.centerXFraction.coerceIn(0f, 1f)
+            )
+            putFloat(
+                "${prefix}_center_y_fraction",
+                state.centerYFraction.coerceIn(0f, 1f)
+            )
+            putFloat(
+                "${prefix}_display_zoom",
+                state.displayZoom.coerceIn(1f, 128f)
+            )
+        }
+    }
+
+    fun clearMainMapCameraState(landscape: Boolean) {
+        val prefix = if (landscape) "main_map_camera_landscape" else "main_map_camera_portrait"
+        prefs.edit {
+            remove("${prefix}_center_x_fraction")
+            remove("${prefix}_center_y_fraction")
+            remove("${prefix}_display_zoom")
+        }
+    }
 
     var alertLocation: AlertLocation
         get() {

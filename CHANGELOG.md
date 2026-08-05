@@ -2,6 +2,13 @@
 
 QuakeDeck release history, newest first.
 
+## v0.9.79
+
+- Restores the last user-controlled main-map centre and zoom separately for portrait and landscape, while keeping automatic EEW/report/tsunami framing temporary and leaving Fit Japan as an explicit reset.
+- Persists portrait bottom-panel size, its collapsed/expanded state and restore detent, plus landscape side-panel width and collapsed state; divider writes are debounced until resizing stops.
+- Removes the duplicated quiet-hours schedule summary from the main Quiet hours switch row, leaving the schedule readout only in the nested Schedule control shown while quiet hours are enabled.
+- Bumps the Android application version to `0.9.79` (`versionCode` 119) and updates the README release marker.
+
 ## v0.9.78
 
 - Completes a whole-project static-analysis cleanup across Compose UI, preference storage, map geometry, notification graphics, archive transactions, time synchronization, and historical report handling without changing intended behavior.
