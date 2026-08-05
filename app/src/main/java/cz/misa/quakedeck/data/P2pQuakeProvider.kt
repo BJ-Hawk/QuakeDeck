@@ -1526,12 +1526,16 @@ class P2pQuakeProvider(
                             else -> "${sourceLabel()} recent feed synchronized"
                         }
                         emit(
-                            liveSnapshot(
+                            // Recovery fills the interval while QuakeDeck was
+                            // not running. It is deliberately a plain snapshot:
+                            // it refreshes the report card and history, but must
+                            // never be mistaken for a newly received live packet
+                            // by the UI's automatic camera-focus logic.
+                            snapshot(
                                 state = ConnectionState.CONNECTED,
                                 activeEew = activeEew,
                                 event = event,
-                                status = status,
-                                updateKind = recoveredKind
+                                status = status
                             )
                         )
                     } else if (changed && event != null) {
