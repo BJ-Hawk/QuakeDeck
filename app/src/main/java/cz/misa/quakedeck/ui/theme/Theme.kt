@@ -11,7 +11,6 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
 
@@ -166,13 +165,10 @@ private fun ConfigureSystemBars(darkTheme: Boolean) {
         SideEffect {
             val activity = view.context as? Activity ?: return@SideEffect
             val window = activity.window
-            // The app draws its Surface behind transparent edge-to-edge bars.
-            // This makes the bar backdrop follow the in-app appearance switch
-            // instead of retaining the launch theme chosen by a particular OEM.
-            window.statusBarColor = Color.Transparent.toArgb()
-            window.navigationBarColor = Color.Transparent.toArgb()
+            // MainActivity enables edge-to-edge drawing. Keep three-button
+            // navigation free of the automatic contrast scrim where supported;
+            // system-bar icon colors continue to follow the selected app theme.
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                window.isStatusBarContrastEnforced = false
                 window.isNavigationBarContrastEnforced = false
             }
             WindowCompat.getInsetsController(window, view).apply {

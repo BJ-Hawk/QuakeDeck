@@ -2841,7 +2841,7 @@ private fun SettingTitleWithHelp(
                 color = if (enabled) MaterialTheme.colorScheme.onSurface
                 else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.45f)
             )
-            if (helpBody != null && helpCallback != null) {
+            if (helpBody != null && onHelpRequested != null) {
                 Spacer(Modifier.width(4.dp))
                 Surface(
                     modifier = Modifier.size(19.dp),
