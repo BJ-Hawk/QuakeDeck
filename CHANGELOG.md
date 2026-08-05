@@ -2,6 +2,11 @@
 
 QuakeDeck release history, newest first.
 
+## v0.9.81a
+
+- Removes remaining cold-start work from the UI thread: EEW destination-area geometry resolves in the background, detailed JMA and municipality map layers load on demand, and holiday-cache preparation runs at background priority.
+- Bumps the Android hotfix version to `0.9.81a` (`versionCode` 122) and updates the README release marker.
+
 ## v0.9.81
 
 - Prevents a just-before-launch report recovered from the P2PQuake recent-feed endpoint from automatically focusing the map. Recovery still updates the latest report, history, and connection status, but only a packet received after QuakeDeck is already running can now claim the camera.

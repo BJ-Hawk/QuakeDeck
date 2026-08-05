@@ -2613,12 +2613,25 @@ private fun EventPanel(
         snapshot.activeEew &&
             selectedEvent.id == snapshot.event.id &&
             !selectedEvent.isCancelled
-    val destinationEewAreaName = remember(alertLocation) {
-        alertLocation.eewAreaNameJa
-            ?: JmaAreaGeometry.load(context)
-                .eewAreaAt(alertLocation.latitude, alertLocation.longitude)
-                ?.nameJa
+    val needsDestinationEewArea =
+        activeEewForSelected != null && alertLocation.eewAreaNameJa == null
+    val resolvedDestinationEewAreaName by produceState<String?>(
+        initialValue = null,
+        key1 = needsDestinationEewArea,
+        key2 = alertLocation
+    ) {
+        value = if (needsDestinationEewArea) {
+            withContext(Dispatchers.Default) {
+                JmaAreaGeometry.load(context.applicationContext)
+                    .eewAreaAt(alertLocation.latitude, alertLocation.longitude)
+                    ?.nameJa
+            }
+        } else {
+            null
+        }
     }
+    val destinationEewAreaName =
+        alertLocation.eewAreaNameJa ?: resolvedDestinationEewAreaName
     val destinationPrediction = activeEewForSelected?.let { activeEew ->
         EewWaveModel.destinationPrediction(
             event = activeEew,
@@ -4046,6 +4059,16 @@ private fun JapanMap(
         }
     }
     val baseMapReady = mapData != null
+    val mapNeedsJmaDetail =
+        event.points.isNotEmpty() ||
+            activeEewEvent?.points?.isNotEmpty() == true ||
+            tsunami != null
+    var jmaDetailRequested by remember { mutableStateOf(mapNeedsJmaDetail) }
+    var municipalityDetailRequested by remember { mutableStateOf(false) }
+
+    LaunchedEffect(mapNeedsJmaDetail) {
+        if (mapNeedsJmaDetail) jmaDetailRequested = true
+    }
     val regionalContext by produceState<RegionalContextData?>(
         initialValue = null,
         key1 = baseMapReady
@@ -4060,9 +4083,10 @@ private fun JapanMap(
     }
     val jmaRegionalData by produceState<JmaRegionalMapData?>(
         initialValue = null,
-        key1 = baseMapReady
+        key1 = baseMapReady,
+        key2 = jmaDetailRequested
     ) {
-        value = if (baseMapReady) {
+        value = if (baseMapReady && jmaDetailRequested) {
             withContext(Dispatchers.Default) {
                 JmaAreaGeometry.load(context.applicationContext)
             }
@@ -4092,12 +4116,13 @@ private fun JapanMap(
     }
     val municipalityMap by produceState<JmaMunicipalityMapData?>(
         initialValue = null,
-        key1 = baseMapReady
+        key1 = baseMapReady,
+        key2 = municipalityDetailRequested
     ) {
-        // The base map gets the first CPU slice. Deep municipality geometry is
-        // prepared immediately after it becomes visible, rather than competing
-        // with the cold-start Japan/JMA loaders.
-        value = if (baseMapReady) {
+        // Municipality geometry is useful only at deep zoom. Avoid parsing it
+        // during a normal launch, then preserve the current fallback layer
+        // until it is ready.
+        value = if (baseMapReady && municipalityDetailRequested) {
             withContext(Dispatchers.Default) {
                 JmaMunicipalityGeometry.load(context.applicationContext)
             }
@@ -4352,6 +4377,21 @@ private fun JapanMap(
     var committedPan by remember { mutableStateOf(Offset.Zero) }
     var gestureScale by remember { mutableFloatStateOf(1f) }
     var gesturePan by remember { mutableStateOf(Offset.Zero) }
+    LaunchedEffect(committedZoom, gestureScale) {
+        when (
+            mapVectorLayerForEffectiveZoom(
+                displayZoomForCameraZoom(committedZoom),
+                gestureScale
+            )
+        ) {
+            MapVectorLayer.MUNICIPALITIES -> {
+                jmaDetailRequested = true
+                municipalityDetailRequested = true
+            }
+            MapVectorLayer.JMA_QUAKE_AREAS -> jmaDetailRequested = true
+            MapVectorLayer.N03_PREFECTURES -> Unit
+        }
+    }
     var previousViewportState by remember { mutableStateOf<MapViewportState?>(null) }
     var initialCameraApplied by remember { mutableStateOf(initialCamera == null) }
     var focusStateInitialized by remember { mutableStateOf(false) }
@@ -5451,7 +5491,10 @@ private fun JapanMap(
             )
         }
 
-        if (jmaRegionalData == null || municipalityMap == null) {
+        if (
+            (jmaDetailRequested && jmaRegionalData == null) ||
+                (municipalityDetailRequested && municipalityMap == null)
+        ) {
             Surface(
                 modifier = Modifier
                     .align(Alignment.TopCenter)
