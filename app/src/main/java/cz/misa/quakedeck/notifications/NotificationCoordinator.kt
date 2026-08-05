@@ -78,7 +78,6 @@ class NotificationCoordinator(
     )
 
     fun createChannels() {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
         val systemManager = context.getSystemService(NotificationManager::class.java)
         val channels = listOf(
             NotificationChannel(
@@ -495,8 +494,9 @@ class NotificationCoordinator(
             ?: candidateAreas.firstOrNull()
         val heightLine = representativeArea?.let(::tsunamiHeightLine)
         val arrivalLine = representativeArea?.let(::tsunamiArrivalLine)
-        val affectedCountLine = localized(
-            R.string.notification_tsunami_affected_areas,
+        val affectedCountLine = localizedQuantity(
+            R.plurals.notification_tsunami_affected_areas,
+            candidateAreas.size,
             candidateAreas.size
         )
         val secondary = heightLine ?: affectedCountLine
@@ -897,6 +897,15 @@ class NotificationCoordinator(
     private fun localized(@StringRes resourceId: Int, vararg args: Any): String =
         UiLocalization.format(context, resourceId, settings.placeNameLanguage, *args)
 
+    private fun localizedQuantity(resourceId: Int, quantity: Int, vararg args: Any): String =
+        UiLocalization.quantity(
+            context,
+            resourceId,
+            quantity,
+            settings.placeNameLanguage,
+            *args
+        )
+
     private fun isQuietHours(): Boolean {
         val schedule = settings.quietHoursSchedule
         val holidayCountry = if (schedule.includePublicHolidays) {
@@ -951,6 +960,5 @@ class NotificationCoordinator(
         private const val ID_TSUNAMI = 2001
         private const val ID_TEST = 9001
 
-        fun intensityRank(value: String): Int = AlertLocationPolicy.intensityRank(value)
     }
 }

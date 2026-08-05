@@ -750,7 +750,7 @@ private fun StatusDrawer(
                 state = if (requestedMode == DataSourceMode.DMDSS) {
                     localized(R.string.not_configured, language)
                 } else {
-                    localized(R.string.not_selected, language)
+                    localized(R.string.data_source_not_selected, language)
                 },
                 stateColor = if (requestedMode == DataSourceMode.DMDSS) {
                     Color(0xFFFFA94D)

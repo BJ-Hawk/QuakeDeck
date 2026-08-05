@@ -51,6 +51,8 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.SideEffect
@@ -197,7 +199,7 @@ fun QuakeDeckSettings(
     var languageDialogOpen by remember { mutableStateOf(false) }
     var appearanceDialogOpen by remember { mutableStateOf(false) }
     var clearArchiveDialogOpen by remember { mutableStateOf(false) }
-    var previewTextScale by rememberSaveable { mutableStateOf(textScale) }
+    var previewTextScale by rememberSaveable { mutableFloatStateOf(textScale) }
     val restoredPage = runCatching { SettingsPage.valueOf(pageName) }
         .getOrDefault(SettingsPage.MAIN)
     val page = if (!SandboxFeature.ENABLED && restoredPage == SettingsPage.SANDBOX) {
@@ -569,7 +571,7 @@ private fun MainSettingsPage(
 ) {
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
-        contentPadding = androidx.compose.foundation.layout.PaddingValues(
+        contentPadding = PaddingValues(
             start = 12.dp,
             top = 10.dp,
             end = 12.dp,
@@ -680,7 +682,11 @@ private fun MainSettingsPage(
                 Spacer(Modifier.height(6.dp))
                 SliderSetting(
                     title = text(R.string.marker_size, selectedLanguage),
-                    valueLabel = String.format("%.1f dp", markerSizeDp),
+                    valueLabel = String.format(
+                        UiLocalization.locale(LocalContext.current, selectedLanguage),
+                        "%.1f dp",
+                        markerSizeDp
+                    ),
                     supportingText = text(R.string.marker_size_explanation, selectedLanguage),
                     value = markerSizeDp,
                     onValueChange = { raw ->
@@ -1248,7 +1254,7 @@ private fun QuietHoursScheduleDialog(
         manualCountryCode = workingManualCountryCode
     )
     val holidayCountryCode = countryResolution.countryCode
-    var holidayCalendarRevision by remember { mutableStateOf(0) }
+    var holidayCalendarRevision by remember { mutableIntStateOf(0) }
     val view = LocalView.current
 
     DisposableEffect(Unit) {
@@ -2286,6 +2292,7 @@ private fun ReportArchiveSettingsCard(
     onClearArchive: () -> Unit
 ) {
     val controlSizing = responsiveControlSizing()
+    val locale = UiLocalization.locale(LocalContext.current, language)
     val reportsLabel = text(R.string.reports, language)
     val eventsLabel = text(R.string.events, language)
     val hasArchive = status.reportCount > 0 || status.incidentCount > 0
@@ -2296,7 +2303,7 @@ private fun ReportArchiveSettingsCard(
             append(' ')
             append(reportsLabel)
             append(" · ")
-            append(formatArchiveBytes(archiveBytes))
+            append(formatArchiveBytes(archiveBytes, locale))
             if (status.incidentCount > 0) {
                 append(" · ")
                 append(status.incidentCount)
@@ -2423,10 +2430,10 @@ private fun ReportArchiveSettingsCard(
     }
 }
 
-private fun formatArchiveBytes(bytes: Long): String = when {
+private fun formatArchiveBytes(bytes: Long, locale: Locale): String = when {
     bytes < 1024L -> "$bytes B"
-    bytes < 1024L * 1024L -> String.format("%.1f KB", bytes / 1024.0)
-    else -> String.format("%.1f MB", bytes / (1024.0 * 1024.0))
+    bytes < 1024L * 1024L -> String.format(locale, "%.1f KB", bytes / 1024.0)
+    else -> String.format(locale, "%.1f MB", bytes / (1024.0 * 1024.0))
 }
 
 @Composable

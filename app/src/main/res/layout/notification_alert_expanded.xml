@@ -87,7 +87,7 @@
                 android:includeFontPadding="false"
                 android:maxLines="5"
                 android:textColor="@color/notification_text_secondary"
-                android:textSize="10sp" />
+                android:textSize="11sp" />
         </LinearLayout>
     </LinearLayout>
 

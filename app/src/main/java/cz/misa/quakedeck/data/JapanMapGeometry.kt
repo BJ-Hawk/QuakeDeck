@@ -7,6 +7,7 @@ import android.graphics.Color
 import android.graphics.Matrix
 import android.graphics.Paint
 import android.graphics.Path
+import cz.misa.quakedeck.R
 import org.json.JSONArray
 import org.json.JSONObject
 import java.nio.ByteBuffer
@@ -296,7 +297,7 @@ object JapanMapGeometry {
     fun load(context: Context): JapanMapData {
         cached?.let { return it }
         return synchronized(this) {
-            cached ?: loadInternal(context.applicationContext, "japan_prefectures_topojson")
+            cached ?: loadInternal(context.applicationContext, R.raw.japan_prefectures_topojson)
                 .also { cached = it }
         }
     }
@@ -304,16 +305,15 @@ object JapanMapGeometry {
     fun loadHighRes(context: Context): JapanMapData {
         cachedHighRes?.let { return it }
         return synchronized(this) {
-            cachedHighRes ?: loadInternal(context.applicationContext, "japan_prefectures_topojson_hires")
-                .also { cachedHighRes = it }
+            cachedHighRes ?: loadInternal(
+                context.applicationContext,
+                R.raw.japan_prefectures_topojson_hires
+            ).also { cachedHighRes = it }
         }
     }
 
-    private fun loadInternal(context: Context, resourceName: String): JapanMapData {
-        val id = context.resources.getIdentifier(resourceName, "raw", context.packageName)
-        require(id != 0) { "$resourceName resource missing" }
-
-        val text = GZIPInputStream(context.resources.openRawResource(id))
+    private fun loadInternal(context: Context, resourceId: Int): JapanMapData {
+        val text = GZIPInputStream(context.resources.openRawResource(resourceId))
             .bufferedReader(Charsets.UTF_8)
             .use { it.readText() }
 

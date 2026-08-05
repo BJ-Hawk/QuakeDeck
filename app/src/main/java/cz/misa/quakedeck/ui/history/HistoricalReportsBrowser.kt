@@ -1,6 +1,5 @@
 package cz.misa.quakedeck.ui.history
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -431,7 +430,14 @@ private fun FilterPanel(
                 }
             }
             Text(
-                UiLocalization.format(LocalContext.current, R.string.events_result_count, language, resultCount, totalCount),
+                UiLocalization.quantity(
+                    LocalContext.current,
+                    R.plurals.events_result_count,
+                    totalCount,
+                    language,
+                    resultCount,
+                    totalCount
+                ),
                 color = MaterialTheme.colorScheme.primary,
                 fontSize = 11.sp,
                 fontWeight = FontWeight.SemiBold

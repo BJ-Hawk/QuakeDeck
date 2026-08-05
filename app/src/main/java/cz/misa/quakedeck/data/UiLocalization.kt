@@ -2,6 +2,7 @@ package cz.misa.quakedeck.data
 
 import android.content.Context
 import android.content.res.Configuration
+import androidx.annotation.PluralsRes
 import cz.misa.quakedeck.R
 import java.util.Locale
 import java.util.concurrent.ConcurrentHashMap
@@ -269,19 +270,29 @@ object UiLocalization {
         vararg args: Any
     ): String = localizedContext(context, setting).getString(resourceId, *args)
 
+    fun quantity(
+        context: Context,
+        @PluralsRes resourceId: Int,
+        quantity: Int,
+        setting: PlaceNameLanguage,
+        vararg args: Any
+    ): String = localizedContext(context, setting).resources
+        .getQuantityString(resourceId, quantity, *args)
+
+    fun locale(context: Context, setting: PlaceNameLanguage): Locale = when (setting) {
+        PlaceNameLanguage.AUTO -> context.resources.configuration.locales[0]
+        PlaceNameLanguage.ENGLISH -> Locale.ENGLISH
+        PlaceNameLanguage.CZECH -> Locale.forLanguageTag("cs-CZ")
+        PlaceNameLanguage.JAPANESE -> Locale.JAPANESE
+    }
+
     private fun localizedContext(context: Context, setting: PlaceNameLanguage): Context {
         if (setting == PlaceNameLanguage.AUTO) return context
 
         return explicitLocaleContexts.getOrPut(setting) {
-            val locale = when (setting) {
-                PlaceNameLanguage.AUTO -> Locale.getDefault() // handled above
-                PlaceNameLanguage.ENGLISH -> Locale.ENGLISH
-                PlaceNameLanguage.CZECH -> Locale.forLanguageTag("cs-CZ")
-                PlaceNameLanguage.JAPANESE -> Locale.JAPANESE
-            }
             val appContext = context.applicationContext
             val configuration = Configuration(appContext.resources.configuration).apply {
-                setLocale(locale)
+                setLocale(locale(appContext, setting))
             }
             appContext.createConfigurationContext(configuration)
         }

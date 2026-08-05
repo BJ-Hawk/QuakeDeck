@@ -45,8 +45,7 @@
     <string name="language_czech">Čeština</string>
     <string name="language_japanese">日本語</string>
     <string name="language_explanation">自動では端末の言語を使用します。気象庁の地名は日本語表示時のみ日本語、それ以外では気象庁の英語地名を使用します。</string>
-    <string name="display_tuning">表示調整</string>
-    <string name="epicenter_marker">震央マーカー</string>
+<string name="epicenter_marker">震央マーカー</string>
     <string name="dot">点</string>
     <string name="cross">十字</string>
     <string name="marker_size">マーカーサイズ</string>
@@ -68,34 +67,23 @@
     <string name="replay_noto_combined_explanation">5秒後に開始し、EEW発表中に津波情報を重ね、地震確定後に警報を格下げして解除します。</string>
     <string name="text_size">文字サイズ</string>
     <string name="marker_size_explanation">マーカーサイズは画面上で固定され、地図を拡大しても小さくなりません。</string>
-    <string name="data">データ</string>
-    <string name="data_explanation">FREE: P2PQuake。アカウント設定が実装されるまでDM-D.S.Sも同じFREE接続を使用します。</string>
-    <string name="report_card_column_ratio">レポートカード列比率</string>
-    <string name="report_card_ratio_value">左 %1$d%% · 右 %2$d%%</string>
-    <string name="report_card_ratio_explanation">固定レポートカードのレイアウト確認用の一時設定です。</string>
-    <string name="sandbox_replay">サンドボックス再生</string>
-    <string name="tsunami_warning">津波警報</string>
+<string name="tsunami_warning">津波警報</string>
     <string name="eew_warning">緊急地震速報</string>
     <string name="waiting_earthquake_data">地震情報を待機中</string>
     <string name="max_intensity">最大震度</string>
-    <string name="max_predicted_intensity">最大予測震度</string>
-    <string name="depth">深さ</string>
+<string name="depth">深さ</string>
     <string name="predicted">予測</string>
     <string name="focus_event">地震を表示</string>
     <string name="close_report">レポートを閉じる</string>
     <string name="eew_report">緊急地震速報</string>
-    <string name="eew_cancelled">緊急地震速報 取消</string>
-    <string name="return_latest_event">最新の地震に戻る</string>
-    <string name="hide_observed_intensities">観測震度を隠す</string>
+<string name="hide_observed_intensities">観測震度を隠す</string>
     <string name="observed_intensities">観測震度</string>
     <string name="hide_predicted_intensities">予測震度を隠す</string>
     <string name="predicted_intensities">予測震度</string>
     <string name="recent_earthquakes">最近の地震</string>
     <string name="top">先頭</string>
     <string name="preparing_japan_map">日本地図を準備中…</string>
-    <string name="municipalities">市区町村</string>
-    <string name="zoom">ズーム</string>
-    <string name="map_border_legend_title">地図の境界線</string>
+<string name="map_border_legend_title">地図の境界線</string>
     <string name="map_border_legend_prefecture">都道府県</string>
     <string name="map_border_legend_prefecture_description">落ち着いた青色の線は都道府県境を示します。</string>
     <string name="map_border_legend_warning_zone">警報・震度情報区域</string>
@@ -104,9 +92,7 @@
     <string name="map_border_legend_municipality_description">細い中立色の線は高倍率で市区町村境を示します。</string>
     <string name="unknown_hypocenter">震源地不明</string>
     <string name="distant_earthquake">遠地地震</string>
-    <string name="preliminary_report">速報</string>
-    <string name="final_report">最終報</string>
-    <string name="distant_earthquake_report">遠地地震情報</string>
+<string name="distant_earthquake_report">遠地地震情報</string>
     <string name="corrected_report">訂正報</string>
     <string name="outside_japan_map">日本地図の範囲外</string>
     <string name="eew_active">緊急地震速報 発表中</string>
@@ -177,8 +163,7 @@
     <string name="status_live_connected">P2PQuakeライブWebSocket接続済み</string>
     <string name="status_sandbox_waiting">P2PQuakeサンドボックス接続済み · 再生待機中</string>
     <string name="status_p2p_connected">P2PQuake接続済み</string>
-    <string name="status_p2p_sandbox_connected">P2PQuakeサンドボックス接続済み</string>
-    <string name="status_p2p_synced">P2PQuake接続済み · 最近の情報を同期済み</string>
+<string name="status_p2p_synced">P2PQuake接続済み · 最近の情報を同期済み</string>
     <string name="status_p2p_sandbox_synced">P2PQuakeサンドボックス接続済み · 最近の情報を同期済み</string>
     <string name="status_latest_loaded">最新の地震を読み込み済み · ライブフィードへ接続中…</string>
     <string name="status_recent_loaded">最近の情報を読み込み済み · ライブフィードへ接続中…</string>
@@ -207,7 +192,7 @@
     <string name="actual_time_format">実時刻: %1$s</string>
     <string name="connections">接続</string>
     <string name="not_configured">未設定</string>
-    <string name="not_selected">未選択</string>
+    <string name="data_source_not_selected">未選択</string>
     <string name="free_fallback_in_use">現在はP2PQuake FREEフォールバックを使用しています。</string>
     <string name="dmdss_not_selected_detail">アダプター利用可能後にDM-D.S.Sを要求元として選択できます。</string>
     <string name="requested_mode">要求モード</string>
@@ -237,8 +222,7 @@
     <string name="delete_report_archive_explanation">端末に保存されたすべての生情報を削除します。保存が有効なままなら、ライブ受信は継続します。</string>
     <string name="delete_archive">アーカイブを削除</string>
     <string name="cancel">キャンセル</string>
-    <string name="hypocenter_under_assessment">震源を調査中</string>
-    <string name="initial_intensity_report">震度速報</string>
+<string name="initial_intensity_report">震度速報</string>
     <string name="hypocenter_report">震源に関する情報</string>
     <string name="hypocenter_report_with_initial_intensity">震源情報 + 震度速報</string>
     <string name="hypocenter_intensity_report">震源・震度に関する情報</string>
@@ -246,8 +230,7 @@
 
     <string name="browse_past_reports">過去の情報を閲覧</string>
     <string name="browse_past_reports_explanation">保存済みの地震と、アーカイブされた各情報を確認します。</string>
-    <string name="browse">閲覧</string>
-    <string name="past_reports">過去の情報</string>
+<string name="past_reports">過去の情報</string>
     <string name="loading_archived_reports">保存済み情報を読み込み中…</string>
     <string name="retry">再試行</string>
     <string name="no_archived_events_match">条件に一致する保存済み地震はありません。</string>
@@ -256,7 +239,9 @@
     <string name="to_date">終了日</string>
     <string name="maximum_intensity">最大震度</string>
     <string name="all">すべて</string>
-    <string name="events_result_count">%2$d件中%1$d件</string>
+    <plurals name="events_result_count">
+        <item quantity="other">%1$d / %2$d 件</item>
+    </plurals>
     <string name="date_newest">日時：新しい順</string>
     <string name="date_oldest">日時：古い順</string>
     <string name="intensity_strongest">震度：強い順</string>
@@ -333,19 +318,14 @@
     <string name="allow">許可</string>
     <string name="notification_earthquake_reports">地震情報</string>
     <string name="notification_earthquake_reports_description">確定した地震情報および観測震度情報。</string>
-    <string name="notification_minimum_intensity">通知する最低震度</string>
-    <string name="notification_eew">緊急地震速報</string>
+<string name="notification_eew">緊急地震速報</string>
     <string name="notification_eew_description">気象庁の警報レベルの緊急地震速報と終了通知。</string>
     <string name="notification_tsunami_alerts">津波情報</string>
     <string name="notification_tsunami_alerts_description">津波注意報、津波警報、大津波警報、解除情報。</string>
     <string name="notification_minimum_tsunami_level">通知する最低津波レベル</string>
     <string name="notification_updates">情報の更新・取消</string>
-    <string name="notification_updates_description">緊急性の低い更新や取消をサイレント通知で表示します。</string>
-    <string name="notification_quiet_hours">サイレント時間帯</string>
-    <string name="notification_quiet_hours_description">22:00～07:00は通常の地震情報を表示しません。緊急地震速報と津波警報は通常どおり通知します。</string>
-    <string name="notification_quiet_hours_silence_all">サイレント時間帯はすべて無音で通知</string>
-    <string name="notification_quiet_hours_silence_all_description">緊急地震速報と津波警報を含む有効な通知を、サイレント時間帯はすべて無音で表示します。</string>
-    <string name="notification_send_test">テスト通知を送信</string>
+<string name="notification_quiet_hours">サイレント時間帯</string>
+<string name="notification_send_test">テスト通知を送信</string>
     <string name="notification_intensity_shindo_1_plus">震度1以上</string>
     <string name="notification_intensity_shindo_2_plus">震度2以上</string>
     <string name="notification_intensity_shindo_3_plus">震度3以上</string>
@@ -379,8 +359,7 @@
     <string name="notification_test_title">QuakeDeckの通知準備が完了しました</string>
     <string name="notification_test_body">これはテスト通知です。ライブ通知は選択したルールに従います。</string>
     <string name="notification_depth_km">深さ%1$d km</string>
-    <string name="notification_max_intensity">最大震度 %1$s</string>
-    <string name="notification_japan">日本</string>
+<string name="notification_japan">日本</string>
 
 
     <string name="notification_delivery_setup">配信設定</string>
@@ -401,13 +380,7 @@
     <string name="notification_setup_pixel_cooldown">Pixelの通知クールダウン</string>
     <string name="notification_setup_pixel_cooldown_description">Pixelは同じアプリから続けて届く通知を自動的に消音することがあります。すべての新しい地震情報を鳴らすには、設定 › 通知 › 通知のクールダウン をオフにしてください。</string>
     <string name="notification_setup_open_notification_settings">通知設定を開く</string>
-
-    <string name="notification_alert_location">通知地点</string>
-    <string name="notification_location_based">地点に基づく通知</string>
-    <string name="notification_location_based_description">有効にすると、通常の地震情報は選択地点で設定震度に達した場合のみ通知します。緊急地震速報と津波情報は、選択地点が対象の場合のみ通知します。同じ地点をEEW到達予想にも使用します。</string>
-    <string name="notification_silent_below_intensity">設定震度未満の情報もサイレント通知</string>
-    <string name="notification_silent_below_intensity_description">選択地点で設定震度に達しないすべての確定地震情報も、通知音なしで表示します。</string>
-    <string name="notification_alert_location_title">通知地点を選択</string>
+<string name="notification_alert_location_title">通知地点を選択</string>
     <string name="notification_alert_location_description">日本の市区町村名、または郵便番号の先頭3桁・全7桁で検索できます。位置情報の権限は不要です。</string>
     <string name="notification_current_alert_location">現在の通知地点</string>
     <string name="notification_city_or_postcode">市区町村または郵便番号</string>
@@ -443,34 +416,18 @@
     <string name="notification_tsunami_coverage_help">基準地点フィルターが有効な場合、%1$sに関係するJMA津波予報区が選択レベルに達したときだけ通知します。無効な場合、日本全国の該当する津波情報を配信します。</string>
     <string name="notification_updates_short_description">訂正・終了・取消をサイレント通知します。</string>
     <string name="notification_updates_help">緊急性のない訂正、終了、取消はサイレントで配信します。元の通知と同じ種類および地域フィルターの規則に従います。</string>
-    <string name="notification_quiet_hours_schedule_summary">%1$s～%2$s</string>
-    <string name="notification_quiet_hours_help">通知休止時間は端末の現地時刻と選択した曜日を使用します。日付をまたぐ場合、選択曜日は休止時間が始まる曜日です。抑制された通知を後でまとめて送ることはありません。</string>
-    <string name="notification_quiet_schedule">時間帯</string>
+<string name="notification_quiet_schedule">時間帯</string>
     <string name="notification_time_range">%1$s～%2$s</string>
-    <string name="notification_tap_to_edit_times">タップして開始・終了時刻を設定します。</string>
-    <string name="notification_active_days">有効な曜日</string>
-    <string name="notification_during_quiet_hours">通知休止時間中</string>
+<string name="notification_during_quiet_hours">通知休止時間中</string>
     <string name="notification_quiet_mode_critical">重要警報のみ</string>
     <string name="notification_quiet_mode_silent">すべてサイレント</string>
     <string name="notification_quiet_mode_nothing">通知しない</string>
     <string name="notification_quiet_mode_help">重要警報のみでは通常の地震情報と更新を抑制し、対象となるEEWと津波警報は通常どおり通知します。すべてサイレントでは対象通知を音・振動なしで配信します。通知しないでは休止時間中にQuakeDeckの通知を一切表示しません。</string>
     <string name="notification_quiet_start_time">通知休止の開始時刻</string>
     <string name="notification_quiet_end_time">通知休止の終了時刻</string>
-    <string name="notification_days_every_day">毎日</string>
-    <string name="notification_days_weekdays">平日</string>
+<string name="notification_days_weekdays">平日</string>
     <string name="notification_days_weekends">週末</string>
-    <string name="notification_days_custom">カスタム</string>
-    <string name="notification_days_title">通知休止の曜日</string>
-    <string name="notification_days_help">日付をまたぐ場合、選択した曜日は通知休止が始まる曜日です。</string>
-    <string name="notification_day_mon">月</string>
-    <string name="notification_day_tue">火</string>
-    <string name="notification_day_wed">水</string>
-    <string name="notification_day_thu">木</string>
-    <string name="notification_day_fri">金</string>
-    <string name="notification_day_sat">土</string>
-    <string name="notification_day_sun">日</string>
-    <string name="notification_choose_at_least_one_day">少なくとも1日を選択してください。</string>
-    <string name="no_saved_reports">保存済みの報告はありません</string>
+<string name="no_saved_reports">保存済みの報告はありません</string>
     <string name="edit">編集</string>
     <string name="off">オフ</string>
     <string name="notification_quiet_hours_help_weekly">静音時間は端末のローカル時刻と週間スケジュールを使用します。平日と週末で異なる時刻を設定でき、各曜日を個別に上書きできます。日付をまたぐ時間帯は開始した曜日に属します。抑制された通知が後からまとめて送信されることはありません。</string>
@@ -538,6 +495,8 @@
     
     <string name="notification_tsunami_expected_arrival">到達予想 %1$s</string>
     
-    <string name="notification_tsunami_affected_areas">対象地域 %1$d件</string>
+    <plurals name="notification_tsunami_affected_areas">
+        <item quantity="other">対象地域 %1$d件</item>
+    </plurals>
 
 </resources>

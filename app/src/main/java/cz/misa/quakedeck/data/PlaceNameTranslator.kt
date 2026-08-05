@@ -1,6 +1,7 @@
 package cz.misa.quakedeck.data
 
 import android.content.Context
+import cz.misa.quakedeck.R
 import org.json.JSONObject
 import java.util.Locale
 import java.util.concurrent.ConcurrentHashMap
@@ -99,9 +100,9 @@ object PlaceNameTranslator {
     }
 
     private fun load(context: Context): Dictionaries {
-        val resourceId = context.resources.getIdentifier("jma_place_names", "raw", context.packageName)
-        if (resourceId == 0) return Dictionaries(emptyMap(), emptyMap(), emptyMap())
-        val text = context.resources.openRawResource(resourceId).bufferedReader(Charsets.UTF_8).use { it.readText() }
+        val text = context.resources.openRawResource(R.raw.jma_place_names)
+            .bufferedReader(Charsets.UTF_8)
+            .use { it.readText() }
         val root = JSONObject(text)
         return Dictionaries(
             epicenter = root.optJSONObject("epicenter").toMap(),

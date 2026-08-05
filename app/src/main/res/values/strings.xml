@@ -45,8 +45,7 @@
     <string name="language_czech">Čeština</string>
     <string name="language_japanese">日本語</string>
     <string name="language_explanation">Auto follows the device language for the interface. Official JMA place names stay Japanese only in Japanese; every other language uses JMA English place names.</string>
-    <string name="display_tuning">Display tuning</string>
-    <string name="epicenter_marker">Epicenter marker</string>
+<string name="epicenter_marker">Epicenter marker</string>
     <string name="dot">Dot</string>
     <string name="cross">Cross</string>
     <string name="marker_size">Marker size</string>
@@ -68,34 +67,23 @@
     <string name="replay_noto_combined_explanation">Starts after five seconds and deliberately overlaps an active EEW with tsunami bulletins, then confirms the earthquake, downgrades the warning and cancels it.</string>
     <string name="text_size">Text size</string>
     <string name="marker_size_explanation">Marker size is fixed in screen space and does not shrink when the map is zoomed.</string>
-    <string name="data">Data</string>
-    <string name="data_explanation">FREE: P2PQuake. DM-D.S.S currently reuses the same FREE connection until account setup is implemented.</string>
-    <string name="report_card_column_ratio">Report card column ratio</string>
-    <string name="report_card_ratio_value">Left %1$d%% · Right %2$d%%</string>
-    <string name="report_card_ratio_explanation">Temporary layout control for testing the fixed report-card grid.</string>
-    <string name="sandbox_replay">SANDBOX REPLAY</string>
-    <string name="tsunami_warning">Tsunami warning</string>
+<string name="tsunami_warning">Tsunami warning</string>
     <string name="eew_warning">EEW warning</string>
     <string name="waiting_earthquake_data">Waiting for earthquake data</string>
     <string name="max_intensity">Max intensity</string>
-    <string name="max_predicted_intensity">Max predicted intensity</string>
-    <string name="depth">Depth</string>
+<string name="depth">Depth</string>
     <string name="predicted">Predicted</string>
     <string name="focus_event">Focus event</string>
     <string name="close_report">Close report</string>
     <string name="eew_report">EEW report</string>
-    <string name="eew_cancelled">EEW cancelled</string>
-    <string name="return_latest_event">Return to latest event</string>
-    <string name="hide_observed_intensities">Hide observed intensities</string>
+<string name="hide_observed_intensities">Hide observed intensities</string>
     <string name="observed_intensities">Observed intensities</string>
     <string name="hide_predicted_intensities">Hide predicted intensities</string>
     <string name="predicted_intensities">Predicted intensities</string>
     <string name="recent_earthquakes">Recent earthquakes</string>
     <string name="top">Top</string>
     <string name="preparing_japan_map">Preparing Japan map…</string>
-    <string name="municipalities">Municipalities</string>
-    <string name="zoom">Zoom</string>
-    <string name="map_border_legend_title">Map borders</string>
+<string name="map_border_legend_title">Map borders</string>
     <string name="map_border_legend_prefecture">Prefecture</string>
     <string name="map_border_legend_prefecture_description">Muted blue lines mark prefecture boundaries.</string>
     <string name="map_border_legend_warning_zone">Warning / reporting zone</string>
@@ -104,9 +92,7 @@
     <string name="map_border_legend_municipality_description">Thin neutral lines mark municipality and ward boundaries at deep zoom.</string>
     <string name="unknown_hypocenter">Unknown hypocenter</string>
     <string name="distant_earthquake">Distant earthquake</string>
-    <string name="preliminary_report">Preliminary report</string>
-    <string name="final_report">Final report</string>
-    <string name="distant_earthquake_report">Distant-earthquake report</string>
+<string name="distant_earthquake_report">Distant-earthquake report</string>
     <string name="corrected_report">Corrected report</string>
     <string name="outside_japan_map">Outside Japan map</string>
     <string name="eew_active">EEW ACTIVE</string>
@@ -177,8 +163,7 @@
     <string name="status_live_connected">P2PQuake live WebSocket connected</string>
     <string name="status_sandbox_waiting">P2PQuake SANDBOX connected · waiting for replay</string>
     <string name="status_p2p_connected">P2PQuake connected</string>
-    <string name="status_p2p_sandbox_connected">P2PQuake SANDBOX connected</string>
-    <string name="status_p2p_synced">P2PQuake connected · recent feed synchronized</string>
+<string name="status_p2p_synced">P2PQuake connected · recent feed synchronized</string>
     <string name="status_p2p_sandbox_synced">P2PQuake SANDBOX connected · recent feed synchronized</string>
     <string name="status_latest_loaded">Latest event loaded · connecting live feed…</string>
     <string name="status_recent_loaded">Recent reports loaded · connecting live feed…</string>
@@ -207,7 +192,7 @@
     <string name="actual_time_format">Actual time: %1$s</string>
     <string name="connections">CONNECTIONS</string>
     <string name="not_configured">Not configured</string>
-    <string name="not_selected">Not selected</string>
+    <string name="data_source_not_selected">Not selected</string>
     <string name="free_fallback_in_use">The FREE P2PQuake fallback is currently in use.</string>
     <string name="dmdss_not_selected_detail">Select DM-D.S.S as the requested source when its adapter is available.</string>
     <string name="requested_mode">Requested mode</string>
@@ -237,8 +222,7 @@
     <string name="delete_report_archive_explanation">All locally stored raw reports will be deleted. Live reception will continue if archiving remains enabled.</string>
     <string name="delete_archive">Delete archive</string>
     <string name="cancel">Cancel</string>
-    <string name="hypocenter_under_assessment">Hypocenter under assessment</string>
-    <string name="initial_intensity_report">Initial intensity report</string>
+<string name="initial_intensity_report">Initial intensity report</string>
     <string name="hypocenter_report">Hypocenter report</string>
     <string name="hypocenter_report_with_initial_intensity">Hypocenter report + initial intensity</string>
     <string name="hypocenter_intensity_report">Hypocenter &amp; intensity report</string>
@@ -246,8 +230,7 @@
 
     <string name="browse_past_reports">Browse past reports</string>
     <string name="browse_past_reports_explanation">Open saved events and inspect every archived report stage.</string>
-    <string name="browse">Browse</string>
-    <string name="past_reports">Past reports</string>
+<string name="past_reports">Past reports</string>
     <string name="loading_archived_reports">Loading archived reports…</string>
     <string name="retry">Retry</string>
     <string name="no_archived_events_match">No archived events match these filters.</string>
@@ -256,7 +239,10 @@
     <string name="to_date">To date</string>
     <string name="maximum_intensity">Maximum intensity</string>
     <string name="all">All</string>
-    <string name="events_result_count">%1$d of %2$d events</string>
+    <plurals name="events_result_count">
+        <item quantity="one">%1$d of %2$d event</item>
+        <item quantity="other">%1$d of %2$d events</item>
+    </plurals>
     <string name="date_newest">Date: newest</string>
     <string name="date_oldest">Date: oldest</string>
     <string name="intensity_strongest">Intensity: strongest</string>
@@ -333,19 +319,14 @@
     <string name="allow">Allow</string>
     <string name="notification_earthquake_reports">Earthquake reports</string>
     <string name="notification_earthquake_reports_description">Confirmed earthquake and observed intensity reports.</string>
-    <string name="notification_minimum_intensity">Minimum intensity</string>
-    <string name="notification_eew">Earthquake Early Warnings</string>
+<string name="notification_eew">Earthquake Early Warnings</string>
     <string name="notification_eew_description">JMA warning-level EEW messages and their conclusion.</string>
     <string name="notification_tsunami_alerts">Tsunami alerts</string>
     <string name="notification_tsunami_alerts_description">Advisories, warnings, major warnings and cancellations.</string>
     <string name="notification_minimum_tsunami_level">Minimum tsunami level</string>
     <string name="notification_updates">Report updates and cancellations</string>
-    <string name="notification_updates_description">Show non-urgent lifecycle changes as quiet updates.</string>
-    <string name="notification_quiet_hours">Quiet hours</string>
-    <string name="notification_quiet_hours_description">Suppress ordinary reports from 22:00 to 07:00. EEW and tsunami warnings still alert.</string>
-    <string name="notification_quiet_hours_silence_all">Silent all notifications during quiet hours</string>
-    <string name="notification_quiet_hours_silence_all_description">Deliver every enabled notification silently during quiet hours, including EEW and tsunami warnings.</string>
-    <string name="notification_send_test">Send test notification</string>
+<string name="notification_quiet_hours">Quiet hours</string>
+<string name="notification_send_test">Send test notification</string>
     <string name="notification_intensity_shindo_1_plus">Shindo 1+</string>
     <string name="notification_intensity_shindo_2_plus">Shindo 2+</string>
     <string name="notification_intensity_shindo_3_plus">Shindo 3+</string>
@@ -379,8 +360,7 @@
     <string name="notification_test_title">QuakeDeck notifications are ready</string>
     <string name="notification_test_body">This is a test notification. Live alerts will follow your selected rules.</string>
     <string name="notification_depth_km">%1$d km deep</string>
-    <string name="notification_max_intensity">Max %1$s</string>
-    <string name="notification_japan">Japan</string>
+<string name="notification_japan">Japan</string>
 
 
     <string name="notification_delivery_setup">Delivery setup</string>
@@ -401,13 +381,7 @@
     <string name="notification_setup_pixel_cooldown">Pixel notification cooldown</string>
     <string name="notification_setup_pixel_cooldown_description">Pixel can silence repeated notifications from the same app. To hear every new earthquake report, turn off Notification cooldown in Settings › Notifications › Notification cooldown.</string>
     <string name="notification_setup_open_notification_settings">Open notification settings</string>
-
-    <string name="notification_alert_location">Alert location</string>
-    <string name="notification_location_based">Location-based notifications</string>
-    <string name="notification_location_based_description">When enabled, earthquake reports alert only when the selected location reaches the chosen intensity. EEW and tsunami notifications are sent only when the selected location is affected. The same location is used for the EEW arrival countdown.</string>
-    <string name="notification_silent_below_intensity">Silent notifications for reports under selected intensity</string>
-    <string name="notification_silent_below_intensity_description">Still show every confirmed earthquake report silently when the selected location does not reach the chosen intensity.</string>
-    <string name="notification_alert_location_title">Choose alert location</string>
+<string name="notification_alert_location_title">Choose alert location</string>
     <string name="notification_alert_location_description">Search for a Japanese city, or enter either the first 3 digits or all 7 digits of a Japanese postcode. No location permission is required.</string>
     <string name="notification_current_alert_location">Current alert location</string>
     <string name="notification_city_or_postcode">City or postcode</string>
@@ -443,34 +417,18 @@
     <string name="notification_tsunami_coverage_help">With reference-location filtering enabled, tsunami notifications are sent only when a JMA tsunami forecast zone affecting %1$s reaches the selected level. With filtering disabled, qualifying alerts from all Japan are delivered.</string>
     <string name="notification_updates_short_description">Silent revisions, conclusions and cancellations.</string>
     <string name="notification_updates_help">Non-urgent revisions, conclusions and cancellations are delivered silently. They follow the same alert-type and location-coverage rules as the original notification.</string>
-    <string name="notification_quiet_hours_schedule_summary">Scheduled %1$s–%2$s</string>
-    <string name="notification_quiet_hours_help">Quiet hours use the device local time and selected days. For an overnight schedule, a selected day is the day on which the quiet period begins. Suppressed notifications are not released later as a backlog.</string>
-    <string name="notification_quiet_schedule">Schedule</string>
+<string name="notification_quiet_schedule">Schedule</string>
     <string name="notification_time_range">%1$s–%2$s</string>
-    <string name="notification_tap_to_edit_times">Tap to set start and end time.</string>
-    <string name="notification_active_days">Active days</string>
-    <string name="notification_during_quiet_hours">During quiet hours</string>
+<string name="notification_during_quiet_hours">During quiet hours</string>
     <string name="notification_quiet_mode_critical">Critical alerts only</string>
     <string name="notification_quiet_mode_silent">Everything silently</string>
     <string name="notification_quiet_mode_nothing">Nothing</string>
     <string name="notification_quiet_mode_help">Critical alerts only suppresses ordinary reports and updates while allowing eligible EEW and tsunami warnings to alert normally. Everything silently delivers every otherwise eligible notification without sound or vibration. Nothing posts no QuakeDeck notification at all during quiet hours.</string>
     <string name="notification_quiet_start_time">Quiet hours start</string>
     <string name="notification_quiet_end_time">Quiet hours end</string>
-    <string name="notification_days_every_day">Every day</string>
-    <string name="notification_days_weekdays">Weekdays</string>
+<string name="notification_days_weekdays">Weekdays</string>
     <string name="notification_days_weekends">Weekends</string>
-    <string name="notification_days_custom">Custom</string>
-    <string name="notification_days_title">Active quiet-hour days</string>
-    <string name="notification_days_help">For overnight schedules, each selected day is the day on which quiet hours begin.</string>
-    <string name="notification_day_mon">Mon</string>
-    <string name="notification_day_tue">Tue</string>
-    <string name="notification_day_wed">Wed</string>
-    <string name="notification_day_thu">Thu</string>
-    <string name="notification_day_fri">Fri</string>
-    <string name="notification_day_sat">Sat</string>
-    <string name="notification_day_sun">Sun</string>
-    <string name="notification_choose_at_least_one_day">Choose at least one day.</string>
-    <string name="no_saved_reports">No saved reports</string>
+<string name="no_saved_reports">No saved reports</string>
     <string name="edit">Edit</string>
     <string name="off">Off</string>
     <string name="notification_quiet_hours_help_weekly">Quiet hours use the device local time and a weekly schedule. Weekday and weekend times can differ, and any individual day can override its group. For overnight periods, the schedule belongs to the day on which it begins. Suppressed notifications are not released later as a backlog.</string>
@@ -538,6 +496,9 @@
     
     <string name="notification_tsunami_expected_arrival">Expected arrival %1$s</string>
     
-    <string name="notification_tsunami_affected_areas">%1$d affected areas</string>
+    <plurals name="notification_tsunami_affected_areas">
+        <item quantity="one">%1$d affected area</item>
+        <item quantity="other">%1$d affected areas</item>
+    </plurals>
 
 </resources>

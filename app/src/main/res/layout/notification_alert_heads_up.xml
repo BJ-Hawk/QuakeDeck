@@ -37,7 +37,7 @@
                 android:includeFontPadding="false"
                 android:maxLines="1"
                 android:textColor="@color/notification_text_accent"
-                android:textSize="10sp"
+                android:textSize="11sp"
                 android:textStyle="bold" />
 
             <TextView
@@ -83,7 +83,7 @@
                 android:includeFontPadding="false"
                 android:maxLines="1"
                 android:textColor="@color/notification_text_secondary"
-                android:textSize="9sp" />
+                android:textSize="11sp" />
         </LinearLayout>
     </LinearLayout>
 

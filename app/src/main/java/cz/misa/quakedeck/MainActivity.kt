@@ -2,7 +2,6 @@ package cz.misa.quakedeck
 
 import android.os.Bundle
 import android.content.Intent
-import android.net.Uri
 import android.os.Build
 import android.os.PowerManager
 import android.provider.Settings
@@ -21,7 +20,6 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
@@ -68,6 +66,7 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.net.toUri
 import androidx.core.view.WindowCompat
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -1322,7 +1321,7 @@ private fun QuakeDeckApp(
             },
             onDismissNotificationSetup = { notificationSetupDialogOpen = false },
             onRequestUnrestrictedBattery = {
-                val packageUri = Uri.parse("package:${context.packageName}")
+                val packageUri = "package:${context.packageName}".toUri()
                 val directIntent = Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS, packageUri)
                 val fallbackIntent = Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS)
                 val intent = when {
@@ -2290,8 +2289,12 @@ private fun ReportTopGrid(
     }
 }
 
-private fun earthquakeMagnitudeText(event: EarthquakeEvent): String =
-    event.magnitude.takeIf { it > 0.0 }?.let { "M ${fmtMag(it)}" } ?: "M —"
+private fun earthquakeMagnitudeText(
+    event: EarthquakeEvent,
+    locale: java.util.Locale
+): String = event.magnitude.takeIf { it > 0.0 }
+    ?.let { "M ${fmtMag(it, locale)}" }
+    ?: "M —"
 
 @Composable
 private fun earthquakeDepthText(event: EarthquakeEvent, language: PlaceNameLanguage): String =
@@ -2401,10 +2404,11 @@ private fun ReportCardGrid(
     val location = remember(displayPlace, language) {
         splitReportLocation(displayPlace, PlaceNameTranslator.shouldUseEnglish(language))
     }
+    val locale = UiLocalization.locale(LocalContext.current, language)
     val detail = if (event.id == "waiting") {
         "—"
     } else {
-        "${earthquakeMagnitudeText(event)} · ${earthquakeDepthText(event, language)}"
+        "${earthquakeMagnitudeText(event, locale)} · ${earthquakeDepthText(event, language)}"
     }
     val observationLabel = if (observationsExpanded) {
         uiText(if (isEew) R.string.hide_predicted_intensities else R.string.hide_observed_intensities, language)
@@ -2514,6 +2518,7 @@ private fun EventPanel(
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
+    val locale = UiLocalization.locale(context, placeNameLanguage)
     val displayPlace = if (selectedEvent.id == "waiting") {
         uiText(R.string.waiting_earthquake_data, placeNameLanguage)
     } else {
@@ -2846,7 +2851,7 @@ private fun EventPanel(
                                         append(reportLabel.uppercase()).append(" · ")
                                     }
                                     append(displayEventOriginTime(historyEvent.originTime))
-                                    append(" · ").append(earthquakeMagnitudeText(historyEvent))
+                                    append(" · ").append(earthquakeMagnitudeText(historyEvent, locale))
                                     append(" · ").append(historyDepth)
                                 }
                                 Text(
@@ -3406,6 +3411,7 @@ private fun TsunamiAlertCard(
     var expanded by remember(report.id, report.cancelled) {
         mutableStateOf(false)
     }
+    val locale = UiLocalization.locale(LocalContext.current, language)
     val grade = report.highestGrade
     val accent = if (report.cancelled) MaterialTheme.colorScheme.outline else tsunamiGradeColor(grade)
     val title = when {
@@ -3578,7 +3584,7 @@ private fun TsunamiAlertCard(
                                     )
                                 )
                             }
-                            tsunamiHeightLabel(area)?.let { height ->
+                            tsunamiHeightLabel(area, locale)?.let { height ->
                                 Text(
                                     uiText(R.string.expected_height, language) + " $height",
                                     color = MaterialTheme.colorScheme.onSurface,
@@ -3618,11 +3624,17 @@ private fun tsunamiIssueTypeDisplay(
     language
 )
 
-private fun tsunamiHeightLabel(area: TsunamiArea): String? =
-    area.maxHeightDescription?.takeIf { it.isNotBlank() }
-        ?: area.maxHeightMeters?.let { value ->
-            if (value % 1.0 == 0.0) "${value.toInt()} m" else String.format("%.1f m", value)
+private fun tsunamiHeightLabel(
+    area: TsunamiArea,
+    locale: java.util.Locale
+): String? = area.maxHeightDescription?.takeIf { it.isNotBlank() }
+    ?: area.maxHeightMeters?.let { value ->
+        if (value % 1.0 == 0.0) {
+            "${value.toInt()} m"
+        } else {
+            String.format(locale, "%.1f m", value)
         }
+    }
 
 @Composable
 private fun tsunamiArrivalStatus(
@@ -3811,7 +3823,8 @@ private fun displayIntensity(value: String, japanese: Boolean): String {
     }
 }
 
-private fun fmtMag(value: Double): String = if (value <= 0.0) "—" else String.format("%.1f", value)
+private fun fmtMag(value: Double, locale: java.util.Locale): String =
+    if (value <= 0.0) "—" else String.format(locale, "%.1f", value)
 
 private fun compactJstTime(value: String): String =
     if (value.matches(COMPACT_JST_TIME_PATTERN)) {

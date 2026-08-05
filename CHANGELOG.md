@@ -2,6 +2,15 @@
 
 QuakeDeck release history, newest first.
 
+## v0.9.77
+
+- Fixes archived station observations that retain a preliminary area flag so their exact bundled station can still resolve and colour the correct municipality or ward.
+- Replaces runtime raw-resource name lookups with compile-time `R.raw` references, protecting bundled map and place-name data from resource shrinking and eliminating false unused-resource reports.
+- Makes in-app English, Czech, and Japanese selection safe for App Bundle delivery, adds explicit package visibility for Android settings screens, and declares the app's current left-to-right UI policy.
+- Adds proper plural forms for historical-event and tsunami-area counts, makes decimal formatting follow the selected app language, and removes a private Compose resource-name collision.
+- Improves custom-notification readability, adds adaptive-icon monochrome support and genuine circular legacy round icons, and removes small verified dead-code leftovers.
+- Bumps the Android application version to `0.9.77` (`versionCode` 117) and updates the README release marker.
+
 ## v0.9.76d
 
 - Adds one-shot live-pipeline injectors for a confirmed earthquake report, an EEW warning, and a tsunami warning from the dedicated Sandbox settings page.

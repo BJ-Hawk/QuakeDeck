@@ -34,8 +34,8 @@ android {
         applicationId = "cz.misa.quakedeck"
         minSdk = 26
         targetSdk = 36
-        versionCode = 116
-        versionName = "0.9.76d"
+        versionCode = 117
+        versionName = "0.9.77"
     }
 
     buildTypes {
@@ -59,6 +59,13 @@ android {
     buildFeatures {
         compose = true
         buildConfig = true
+    }
+    bundle {
+        language {
+            // QuakeDeck has an in-app language picker, so every installed split
+            // must contain English, Czech and Japanese resources.
+            enableSplit = false
+        }
     }
 }
 

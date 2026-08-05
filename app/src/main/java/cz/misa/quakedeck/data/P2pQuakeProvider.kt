@@ -826,7 +826,7 @@ class P2pQuakeProvider(
                     ?: Instant.ofEpochMilli(record.receivedAt)
                 val secondsAfterOrigin = java.time.Duration.between(eventOrigin, instant).seconds
                 if (secondsAfterOrigin !in -60L..86_400L) return@forEach
-                val tsunami = parseTsunami(record.rawJson) ?: return@forEach
+                val tsunami = parseTsunami(record.rawJson)
                 timeline += instant.toEpochMilli() to HistoricalAssociatedReport(
                     archiveKey = record.archiveKey,
                     kind = HistoricalAssociatedReportKind.TSUNAMI,
@@ -1652,7 +1652,7 @@ class P2pQuakeProvider(
         emitUpdate: Boolean,
         recovered: Boolean
     ): LiveUpdateKind {
-        val parsed = parseTsunami(json) ?: return LiveUpdateKind.NONE
+        val parsed = parseTsunami(json)
         val current = lastTsunami
 
         if (!testingMode && current != null) {
@@ -1736,7 +1736,7 @@ class P2pQuakeProvider(
         return updateKind
     }
 
-    private fun parseTsunami(json: JSONObject): TsunamiReport? {
+    private fun parseTsunami(json: JSONObject): TsunamiReport {
         val issue = json.optJSONObject("issue")
         val issueRaw = issue?.optString("time").orEmpty()
             .takeIf { it.isNotBlank() && !it.equals("null", ignoreCase = true) }

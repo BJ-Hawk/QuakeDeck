@@ -11,7 +11,6 @@ package cz.misa.quakedeck.data
  * used by the production WebSocket.
  */
 object BuiltInTsunamiReplay {
-    const val DISPLAY_NAME = "1 January 2024 Noto tsunami"
     const val DEFAULT_START_DELAY_MILLIS = 5_000L
 
     data class Packet(

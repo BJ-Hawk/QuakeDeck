@@ -2,6 +2,7 @@ package cz.misa.quakedeck.data
 
 import android.content.Context
 import android.graphics.Path
+import cz.misa.quakedeck.R
 import org.json.JSONArray
 import org.json.JSONObject
 import java.util.zip.GZIPInputStream
@@ -33,14 +34,9 @@ object RegionalContextGeometry {
     }
 
     private fun loadInternal(context: Context): RegionalContextData {
-        val id = context.resources.getIdentifier(
-            "regional_world_context",
-            "raw",
-            context.packageName
+        val text = GZIPInputStream(
+            context.resources.openRawResource(R.raw.regional_world_context)
         )
-        require(id != 0) { "regional_world_context resource missing" }
-
-        val text = GZIPInputStream(context.resources.openRawResource(id))
             .bufferedReader(Charsets.UTF_8)
             .use { it.readText() }
         val root = JSONObject(text)

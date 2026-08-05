@@ -10,7 +10,6 @@ package cz.misa.quakedeck.data
  * envelopes and timing are reconstructed integration-test data.
  */
 object BuiltInCombinedNotoReplay {
-    const val DISPLAY_NAME = "1 January 2024 Noto EEW + tsunami"
     const val DEFAULT_START_DELAY_MILLIS = 5_000L
 
     data class Packet(

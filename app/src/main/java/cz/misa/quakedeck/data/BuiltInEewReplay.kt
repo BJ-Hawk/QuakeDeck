@@ -11,7 +11,6 @@ package cz.misa.quakedeck.data
  * not an evidentiary copy of the original P2PQuake packets.
  */
 object BuiltInEewReplay {
-    const val DISPLAY_NAME = "5 May 2023 Noto Peninsula M6.5"
     const val DEFAULT_START_DELAY_MILLIS = 5_000L
 
     data class Packet(

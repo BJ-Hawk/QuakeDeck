@@ -45,8 +45,7 @@
     <string name="language_czech">Čeština</string>
     <string name="language_japanese">日本語</string>
     <string name="language_explanation">Automatický režim používá jazyk zařízení. Oficiální názvy míst JMA zůstávají japonsky pouze v japonštině; ve všech ostatních jazycích se používají anglické názvy JMA.</string>
-    <string name="display_tuning">Nastavení zobrazení</string>
-    <string name="epicenter_marker">Značka epicentra</string>
+<string name="epicenter_marker">Značka epicentra</string>
     <string name="dot">Bod</string>
     <string name="cross">Kříž</string>
     <string name="marker_size">Velikost značky</string>
@@ -68,34 +67,23 @@
     <string name="replay_noto_combined_explanation">Spustí se po pěti sekundách a záměrně překryje aktivní EEW s hlášeními tsunami. Poté zemětřesení potvrdí, sníží stupeň varování a nakonec jej odvolá.</string>
     <string name="text_size">Velikost textu</string>
     <string name="marker_size_explanation">Velikost značky je pevná vůči obrazovce a při přibližování mapy se nezmenšuje.</string>
-    <string name="data">Data</string>
-    <string name="data_explanation">FREE: P2PQuake. Dokud nebude doplněno nastavení účtu, DM-D.S.S používá stejné připojení FREE.</string>
-    <string name="report_card_column_ratio">Poměr sloupců karty hlášení</string>
-    <string name="report_card_ratio_value">Vlevo %1$d %% · vpravo %2$d %%</string>
-    <string name="report_card_ratio_explanation">Dočasný ovladač pro odladění pevné mřížky karty hlášení.</string>
-    <string name="sandbox_replay">TESTOVACÍ PŘEHRÁVÁNÍ</string>
-    <string name="tsunami_warning">Varování před tsunami</string>
+<string name="tsunami_warning">Varování před tsunami</string>
     <string name="eew_warning">Varování EEW</string>
     <string name="waiting_earthquake_data">Čeká se na údaje o zemětřesení</string>
     <string name="max_intensity">Max. intenzita</string>
-    <string name="max_predicted_intensity">Max. předpokládaná intenzita</string>
-    <string name="depth">Hloubka</string>
+<string name="depth">Hloubka</string>
     <string name="predicted">Odhad</string>
     <string name="focus_event">Zaměřit na událost</string>
     <string name="close_report">Zavřít hlášení</string>
     <string name="eew_report">Hlášení EEW</string>
-    <string name="eew_cancelled">EEW odvoláno</string>
-    <string name="return_latest_event">Zpět na nejnovější událost</string>
-    <string name="hide_observed_intensities">Skrýt naměřené intenzity</string>
+<string name="hide_observed_intensities">Skrýt naměřené intenzity</string>
     <string name="observed_intensities">Naměřené intenzity</string>
     <string name="hide_predicted_intensities">Skrýt předpokládané intenzity</string>
     <string name="predicted_intensities">Předpokládané intenzity</string>
     <string name="recent_earthquakes">Nedávná zemětřesení</string>
     <string name="top">Nahoru</string>
     <string name="preparing_japan_map">Příprava mapy Japonska…</string>
-    <string name="municipalities">Obce</string>
-    <string name="zoom">Přiblížení</string>
-    <string name="map_border_legend_title">Hranice mapy</string>
+<string name="map_border_legend_title">Hranice mapy</string>
     <string name="map_border_legend_prefecture">Prefektura</string>
     <string name="map_border_legend_prefecture_description">Tlumené modré čáry označují hranice prefektur.</string>
     <string name="map_border_legend_warning_zone">Výstražná / zpravodajská oblast</string>
@@ -104,9 +92,7 @@
     <string name="map_border_legend_municipality_description">Tenké neutrální čáry označují hranice obcí a městských částí při velkém přiblížení.</string>
     <string name="unknown_hypocenter">Neznámé hypocentrum</string>
     <string name="distant_earthquake">Vzdálené zemětřesení</string>
-    <string name="preliminary_report">Předběžná zpráva</string>
-    <string name="final_report">Konečná zpráva</string>
-    <string name="distant_earthquake_report">Zpráva o vzdáleném zemětřesení</string>
+<string name="distant_earthquake_report">Zpráva o vzdáleném zemětřesení</string>
     <string name="corrected_report">Opravená zpráva</string>
     <string name="outside_japan_map">Mimo mapu Japonska</string>
     <string name="eew_active">AKTIVNÍ EEW</string>
@@ -177,8 +163,7 @@
     <string name="status_live_connected">Živý WebSocket P2PQuake připojen</string>
     <string name="status_sandbox_waiting">Testovací P2PQuake připojen · čeká se na přehrávání</string>
     <string name="status_p2p_connected">P2PQuake připojen</string>
-    <string name="status_p2p_sandbox_connected">Testovací P2PQuake připojen</string>
-    <string name="status_p2p_synced">P2PQuake připojen · nedávná data synchronizována</string>
+<string name="status_p2p_synced">P2PQuake připojen · nedávná data synchronizována</string>
     <string name="status_p2p_sandbox_synced">Testovací P2PQuake připojen · nedávná data synchronizována</string>
     <string name="status_latest_loaded">Nejnovější událost načtena · připojování k živému zdroji…</string>
     <string name="status_recent_loaded">Nedávná hlášení načtena · připojování k živému zdroji…</string>
@@ -207,7 +192,7 @@
     <string name="actual_time_format">Skutečný čas: %1$s</string>
     <string name="connections">PŘIPOJENÍ</string>
     <string name="not_configured">Nenastaveno</string>
-    <string name="not_selected">Nevybráno</string>
+    <string name="data_source_not_selected">Nevybráno</string>
     <string name="free_fallback_in_use">Aktuálně se používá náhradní zdroj P2PQuake FREE.</string>
     <string name="dmdss_not_selected_detail">DM-D.S.S lze vybrat jako požadovaný zdroj, až bude adaptér dostupný.</string>
     <string name="requested_mode">Požadovaný režim</string>
@@ -237,8 +222,7 @@
     <string name="delete_report_archive_explanation">Všechna místně uložená surová hlášení budou smazána. Živý příjem bude pokračovat, pokud archivace zůstane zapnutá.</string>
     <string name="delete_archive">Smazat archiv</string>
     <string name="cancel">Zrušit</string>
-    <string name="hypocenter_under_assessment">Ohnisko se vyhodnocuje</string>
-    <string name="initial_intensity_report">Prvotní hlášení intenzity</string>
+<string name="initial_intensity_report">Prvotní hlášení intenzity</string>
     <string name="hypocenter_report">Hlášení o ohnisku</string>
     <string name="hypocenter_report_with_initial_intensity">Hlášení o ohnisku + prvotní intenzita</string>
     <string name="hypocenter_intensity_report">Hlášení o ohnisku a intenzitě</string>
@@ -246,8 +230,7 @@
 
     <string name="browse_past_reports">Procházet minulé zprávy</string>
     <string name="browse_past_reports_explanation">Otevřít uložené události a prohlížet jednotlivé archivované zprávy.</string>
-    <string name="browse">Procházet</string>
-    <string name="past_reports">Minulé zprávy</string>
+<string name="past_reports">Minulé zprávy</string>
     <string name="loading_archived_reports">Načítání archivovaných zpráv…</string>
     <string name="retry">Zkusit znovu</string>
     <string name="no_archived_events_match">Filtrům neodpovídají žádné archivované události.</string>
@@ -256,7 +239,11 @@
     <string name="to_date">Do data</string>
     <string name="maximum_intensity">Maximální intenzita</string>
     <string name="all">Vše</string>
-    <string name="events_result_count">%1$d z %2$d událostí</string>
+    <plurals name="events_result_count">
+        <item quantity="one">%1$d z %2$d události</item>
+        <item quantity="few">%1$d z %2$d událostí</item>
+        <item quantity="other">%1$d z %2$d událostí</item>
+    </plurals>
     <string name="date_newest">Datum: nejnovější</string>
     <string name="date_oldest">Datum: nejstarší</string>
     <string name="intensity_strongest">Intenzita: nejsilnější</string>
@@ -333,19 +320,14 @@
     <string name="allow">Povolit</string>
     <string name="notification_earthquake_reports">Hlášení o zemětřesení</string>
     <string name="notification_earthquake_reports_description">Potvrzená hlášení o zemětřesení a pozorované intenzitě.</string>
-    <string name="notification_minimum_intensity">Minimální intenzita</string>
-    <string name="notification_eew">Včasná varování před zemětřesením</string>
+<string name="notification_eew">Včasná varování před zemětřesením</string>
     <string name="notification_eew_description">Zprávy EEW na úrovni varování JMA a oznámení o jejich ukončení.</string>
     <string name="notification_tsunami_alerts">Upozornění na tsunami</string>
     <string name="notification_tsunami_alerts_description">Upozornění, varování, nejvyšší varování a jejich odvolání.</string>
     <string name="notification_minimum_tsunami_level">Minimální úroveň tsunami</string>
     <string name="notification_updates">Aktualizace a odvolání hlášení</string>
-    <string name="notification_updates_description">Zobrazovat méně naléhavé změny a odvolání jako tichá oznámení.</string>
-    <string name="notification_quiet_hours">Doba klidu</string>
-    <string name="notification_quiet_hours_description">Od 22:00 do 07:00 potlačí běžná hlášení. EEW a varování před tsunami budou nadále upozorňovat.</string>
-    <string name="notification_quiet_hours_silence_all">Ztišit všechna oznámení během doby klidu</string>
-    <string name="notification_quiet_hours_silence_all_description">Během doby klidu doručí všechna povolená oznámení tiše, včetně EEW a varování před tsunami.</string>
-    <string name="notification_send_test">Odeslat testovací oznámení</string>
+<string name="notification_quiet_hours">Doba klidu</string>
+<string name="notification_send_test">Odeslat testovací oznámení</string>
     <string name="notification_intensity_shindo_1_plus">Shindo 1+</string>
     <string name="notification_intensity_shindo_2_plus">Shindo 2+</string>
     <string name="notification_intensity_shindo_3_plus">Shindo 3+</string>
@@ -379,8 +361,7 @@
     <string name="notification_test_title">Oznámení QuakeDeck jsou připravena</string>
     <string name="notification_test_body">Toto je testovací oznámení. Živá upozornění se budou řídit zvolenými pravidly.</string>
     <string name="notification_depth_km">hloubka %1$d km</string>
-    <string name="notification_max_intensity">max. %1$s</string>
-    <string name="notification_japan">Japonsko</string>
+<string name="notification_japan">Japonsko</string>
 
 
     <string name="notification_delivery_setup">Nastavení doručování</string>
@@ -401,13 +382,7 @@
     <string name="notification_setup_pixel_cooldown">Tlumení oznámení na Pixelu</string>
     <string name="notification_setup_pixel_cooldown_description">Pixel může ztišit opakovaná oznámení stejné aplikace. Chcete-li slyšet každé nové hlášení, vypněte Tlumení oznámení v Nastavení › Oznámení › Tlumení oznámení.</string>
     <string name="notification_setup_open_notification_settings">Otevřít nastavení oznámení</string>
-
-    <string name="notification_alert_location">Místo pro výstrahy</string>
-    <string name="notification_location_based">Oznámení podle polohy</string>
-    <string name="notification_location_based_description">Při zapnutí upozorní běžná zemětřesení pouze při dosažení zvolené intenzity ve vybraném místě. EEW a tsunami se oznámí pouze tehdy, pokud je vybrané místo zasaženo. Stejné místo se používá pro odpočet příchodu EEW.</string>
-    <string name="notification_silent_below_intensity">Tichá oznámení pro hlášení pod zvolenou intenzitou</string>
-    <string name="notification_silent_below_intensity_description">Každé potvrzené zemětřesení, které ve vybraném místě nedosáhne zvolené intenzity, se přesto zobrazí jako tiché oznámení.</string>
-    <string name="notification_alert_location_title">Vybrat místo pro výstrahy</string>
+<string name="notification_alert_location_title">Vybrat místo pro výstrahy</string>
     <string name="notification_alert_location_description">Vyhledejte město v Japonsku nebo zadejte první 3 či všech 7 číslic japonského PSČ. Oprávnění k poloze není potřeba.</string>
     <string name="notification_current_alert_location">Aktuální místo pro výstrahy</string>
     <string name="notification_city_or_postcode">Město nebo PSČ</string>
@@ -443,34 +418,18 @@
     <string name="notification_tsunami_coverage_help">Při zapnutém filtrování podle referenční polohy se oznámení tsunami odešlou pouze tehdy, když oblast předpovědi tsunami JMA zasahující polohu %1$s dosáhne zvolené úrovně. Při vypnutí se doručí odpovídající výstrahy z celého Japonska.</string>
     <string name="notification_updates_short_description">Tiché revize, ukončení a zrušení.</string>
     <string name="notification_updates_help">Neurgentní revize, ukončení a zrušení se doručují tiše. Řídí se stejnými pravidly typu výstrahy a územního pokrytí jako původní oznámení.</string>
-    <string name="notification_quiet_hours_schedule_summary">Naplánováno %1$s–%2$s</string>
-    <string name="notification_quiet_hours_help">Doba klidu používá místní čas zařízení a vybrané dny. U rozvrhu přes půlnoc znamená vybraný den den, kdy doba klidu začíná. Potlačená oznámení se později nedoručují hromadně.</string>
-    <string name="notification_quiet_schedule">Rozvrh</string>
+<string name="notification_quiet_schedule">Rozvrh</string>
     <string name="notification_time_range">%1$s–%2$s</string>
-    <string name="notification_tap_to_edit_times">Klepnutím nastavíte začátek a konec.</string>
-    <string name="notification_active_days">Aktivní dny</string>
-    <string name="notification_during_quiet_hours">Během doby klidu</string>
+<string name="notification_during_quiet_hours">Během doby klidu</string>
     <string name="notification_quiet_mode_critical">Pouze kritické výstrahy</string>
     <string name="notification_quiet_mode_silent">Vše tiše</string>
     <string name="notification_quiet_mode_nothing">Nic</string>
     <string name="notification_quiet_mode_help">Pouze kritické výstrahy potlačí běžná hlášení a aktualizace, ale povolí způsobilým EEW a výstrahám tsunami běžné upozornění. Vše tiše doručí každé jinak způsobilé oznámení bez zvuku a vibrací. Nic během doby klidu nezobrazí žádné oznámení QuakeDeck.</string>
     <string name="notification_quiet_start_time">Začátek doby klidu</string>
     <string name="notification_quiet_end_time">Konec doby klidu</string>
-    <string name="notification_days_every_day">Každý den</string>
-    <string name="notification_days_weekdays">Pracovní dny</string>
+<string name="notification_days_weekdays">Pracovní dny</string>
     <string name="notification_days_weekends">Víkendy</string>
-    <string name="notification_days_custom">Vlastní</string>
-    <string name="notification_days_title">Aktivní dny doby klidu</string>
-    <string name="notification_days_help">U rozvrhu přes půlnoc je každý vybraný den dnem, kdy doba klidu začíná.</string>
-    <string name="notification_day_mon">Po</string>
-    <string name="notification_day_tue">Út</string>
-    <string name="notification_day_wed">St</string>
-    <string name="notification_day_thu">Čt</string>
-    <string name="notification_day_fri">Pá</string>
-    <string name="notification_day_sat">So</string>
-    <string name="notification_day_sun">Ne</string>
-    <string name="notification_choose_at_least_one_day">Vyberte alespoň jeden den.</string>
-    <string name="no_saved_reports">Žádná uložená hlášení</string>
+<string name="no_saved_reports">Žádná uložená hlášení</string>
     <string name="edit">Upravit</string>
     <string name="off">Vypnuto</string>
     <string name="notification_quiet_hours_help_weekly">Doba klidu používá místní čas telefonu a týdenní rozvrh. Pracovní dny a víkend mohou mít jiné časy a každý den lze samostatně přepsat. U rozvrhu přes půlnoc patří interval dni, ve kterém začíná. Potlačená oznámení se později hromadně neodešlou.</string>
@@ -538,6 +497,10 @@
     
     <string name="notification_tsunami_expected_arrival">Očekávaný příchod %1$s</string>
     
-    <string name="notification_tsunami_affected_areas">%1$d zasažených oblastí</string>
+    <plurals name="notification_tsunami_affected_areas">
+        <item quantity="one">%1$d zasažená oblast</item>
+        <item quantity="few">%1$d zasažené oblasti</item>
+        <item quantity="other">%1$d zasažených oblastí</item>
+    </plurals>
 
 </resources>

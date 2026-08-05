@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="48dp"
+    android:layout_height="56dp"
     android:clipToPadding="false">
 
     <LinearLayout
@@ -38,7 +38,7 @@
                 android:includeFontPadding="false"
                 android:maxLines="1"
                 android:textColor="@color/notification_text_accent"
-                android:textSize="8sp"
+                android:textSize="11sp"
                 android:textStyle="bold" />
 
             <TextView
@@ -50,7 +50,7 @@
                 android:includeFontPadding="false"
                 android:maxLines="1"
                 android:textColor="@color/notification_text_primary"
-                android:textSize="12sp"
+                android:textSize="13sp"
                 android:textStyle="bold" />
 
             <TextView
@@ -62,7 +62,7 @@
                 android:includeFontPadding="false"
                 android:maxLines="1"
                 android:textColor="@color/notification_text_secondary"
-                android:textSize="9sp" />
+                android:textSize="11sp" />
 
             <TextView
                 android:id="@+id/notification_tertiary"
@@ -73,7 +73,7 @@
                 android:includeFontPadding="false"
                 android:maxLines="1"
                 android:textColor="@color/notification_text_secondary"
-                android:textSize="9sp" />
+                android:textSize="11sp" />
 
             <TextView
                 android:id="@+id/notification_extra"

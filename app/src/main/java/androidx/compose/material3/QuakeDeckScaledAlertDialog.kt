@@ -1,5 +1,3 @@
-@file:Suppress("PackageDirectoryMismatch")
-
 package androidx.compose.material3
 
 import androidx.compose.runtime.Composable

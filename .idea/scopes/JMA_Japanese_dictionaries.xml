@@ -1,0 +1,3 @@
+<component name="DependencyValidationManager">
+  <scope name="JMA Japanese dictionaries" pattern="file:res/raw/jma_place_names.json||file:res/raw/jma_intensity_stations.json||file:java/cz/misa/quakedeck/MainActivity.kt" />
+</component>
