@@ -2,6 +2,11 @@
 
 QuakeDeck release history, newest first.
 
+## v0.9.81
+
+- Prevents a just-before-launch report recovered from the P2PQuake recent-feed endpoint from automatically focusing the map. Recovery still updates the latest report, history, and connection status, but only a packet received after QuakeDeck is already running can now claim the camera.
+- Bumps the Android application version to `0.9.81` (`versionCode` 121) and updates the README release marker.
+
 ## v0.9.80
 
 - Restores a small always-on cache of the latest confirmed earthquake reports immediately after a cold start, while clearly marking them as saved data until the current recent-report request completes.
