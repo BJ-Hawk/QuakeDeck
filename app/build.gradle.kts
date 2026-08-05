@@ -1,3 +1,5 @@
+@file:Suppress("UnstableApiUsage")
+
 import java.util.Properties
 
 plugins {
@@ -34,8 +36,8 @@ android {
         applicationId = "cz.misa.quakedeck"
         minSdk = 26
         targetSdk = 36
-        versionCode = 117
-        versionName = "0.9.77"
+        versionCode = 118
+        versionName = "0.9.78"
     }
 
     buildTypes {

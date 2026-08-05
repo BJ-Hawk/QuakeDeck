@@ -1,3 +1,5 @@
+@file:Suppress("SimplifyBooleanWithConstants")
+
 package cz.misa.quakedeck.sandbox
 
 import androidx.compose.runtime.Immutable

@@ -7,6 +7,7 @@ import android.graphics.Color
 import android.graphics.Matrix
 import android.graphics.Paint
 import android.graphics.Path
+import androidx.core.graphics.createBitmap
 import cz.misa.quakedeck.R
 import org.json.JSONArray
 import org.json.JSONObject
@@ -134,11 +135,9 @@ object JapanMapGeometry {
              */
             private fun buildOceanMask(
                 pixels: ByteArray,
-                width: Int,
-                height: Int,
                 rowBytes: Int
             ): ByteArray {
-                val ocean = ByteArray(width * height)
+                val ocean = ByteArray(MASK_SIZE * MASK_SIZE)
                 var stack = IntArray(16_384)
                 var stackSize = 0
 
@@ -153,59 +152,59 @@ object JapanMapGeometry {
                 }
 
                 fun push(x: Int, y: Int) {
-                    if (x !in 0 until width || y !in 0 until height) return
-                    val index = y * width + x
+                    if (x !in 0 until MASK_SIZE || y !in 0 until MASK_SIZE) return
+                    val index = y * MASK_SIZE + x
                     if (ocean[index] != UNVISITED || isLand(x, y)) return
                     ocean[index] = QUEUED
                     pushIndex(index)
                 }
 
-                for (x in 0 until width) {
+                for (x in 0 until MASK_SIZE) {
                     push(x, 0)
-                    push(x, height - 1)
+                    push(x, MASK_SIZE - 1)
                 }
-                for (y in 1 until height - 1) {
+                for (y in 1 until MASK_SIZE - 1) {
                     push(0, y)
-                    push(width - 1, y)
+                    push(MASK_SIZE - 1, y)
                 }
 
                 while (stackSize > 0) {
                     val seed = stack[--stackSize]
-                    val seedY = seed / width
-                    val seedX = seed - seedY * width
+                    val seedY = seed / MASK_SIZE
+                    val seedX = seed - seedY * MASK_SIZE
                     if (ocean[seed] == OCEAN || isLand(seedX, seedY)) continue
 
                     var left = seedX
                     while (left > 0) {
-                        val next = seedY * width + left - 1
+                        val next = seedY * MASK_SIZE + left - 1
                         if (ocean[next] == OCEAN || isLand(left - 1, seedY)) break
                         left--
                     }
 
                     var right = seedX
-                    while (right + 1 < width) {
-                        val next = seedY * width + right + 1
+                    while (right + 1 < MASK_SIZE) {
+                        val next = seedY * MASK_SIZE + right + 1
                         if (ocean[next] == OCEAN || isLand(right + 1, seedY)) break
                         right++
                     }
 
-                    val rowStart = seedY * width
+                    val rowStart = seedY * MASK_SIZE
                     for (x in left..right) ocean[rowStart + x] = OCEAN
 
                     fun queueAdjacentRow(y: Int) {
-                        if (y !in 0 until height) return
+                        if (y !in 0 until MASK_SIZE) return
                         var x = left
                         while (x <= right) {
-                            val index = y * width + x
+                            val index = y * MASK_SIZE + x
                             if (ocean[index] == UNVISITED && !isLand(x, y)) {
                                 val runSeedX = x
                                 while (x <= right) {
-                                    val continuation = y * width + x
+                                    val continuation = y * MASK_SIZE + x
                                     if (ocean[continuation] != UNVISITED || isLand(x, y)) break
                                     ocean[continuation] = QUEUED
                                     x++
                                 }
-                                pushIndex(y * width + runSeedX)
+                                pushIndex(y * MASK_SIZE + runSeedX)
                             } else {
                                 x++
                             }
@@ -240,7 +239,7 @@ object JapanMapGeometry {
                 val offsetX = PADDING - minX * scale
                 val offsetY = PADDING - minY * scale
 
-                val bitmap = Bitmap.createBitmap(
+                val bitmap = createBitmap(
                     MASK_SIZE,
                     MASK_SIZE,
                     Bitmap.Config.ALPHA_8
@@ -272,8 +271,6 @@ object JapanMapGeometry {
                 bitmap.recycle()
                 val oceanPixels = buildOceanMask(
                     pixels = pixels,
-                    width = MASK_SIZE,
-                    height = MASK_SIZE,
                     rowBytes = rowBytes
                 )
 

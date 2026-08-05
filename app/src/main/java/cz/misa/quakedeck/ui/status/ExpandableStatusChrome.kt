@@ -3,6 +3,7 @@ package cz.misa.quakedeck.ui.status
 import android.os.SystemClock
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
+import kotlin.time.Duration.Companion.milliseconds
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -155,7 +156,7 @@ fun ExpandableStatusChrome(
                 wallNowMillis = now
                 val displayedNow = clockController.displayTimeMillis(now)
                     ?: clockController.liveTimeMillis(now)
-                delay((1_000L - Math.floorMod(displayedNow, 1_000L)).coerceAtLeast(50L))
+                delay((1_000L - Math.floorMod(displayedNow, 1_000L)).coerceAtLeast(50L).milliseconds)
             }
         }
 

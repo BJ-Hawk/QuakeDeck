@@ -11,6 +11,7 @@ import java.net.DatagramSocket
 import java.net.InetAddress
 import java.net.SocketTimeoutException
 import kotlin.math.abs
+import kotlin.time.Duration.Companion.milliseconds
 
 /** A network-time anchor expressed against Android's monotonic elapsed clock. */
 data class NetworkTimeSample(
@@ -55,7 +56,7 @@ object NetworkTimeSynchronizer {
                     } catch (_: Exception) {
                         // One poor packet must not discard the other samples.
                     }
-                    if (index < SAMPLE_COUNT - 1) delay(SAMPLE_GAP_MILLIS)
+                    if (index < SAMPLE_COUNT - 1) delay(SAMPLE_GAP_MILLIS.milliseconds)
                 }
             } catch (cancelled: CancellationException) {
                 throw cancelled
@@ -100,7 +101,7 @@ object NetworkTimeSynchronizer {
 
         val wallSendMillis = System.currentTimeMillis()
         val elapsedSendMillis = SystemClock.elapsedRealtime()
-        writeTimestamp(request, 40, wallSendMillis)
+        writeTimestamp(request, wallSendMillis)
         val sentTimestamp = request.copyOfRange(40, 48)
 
         val response = ByteArray(NTP_PACKET_SIZE)
@@ -126,20 +127,19 @@ object NetworkTimeSynchronizer {
 
         validateResponse(response, sentTimestamp, server)
 
-        val clientSendMillis = wallSendMillis
-        val serverReceiveMillis = readTimestamp(response, 32, clientSendMillis)
-        val serverTransmitMillis = readTimestamp(response, 40, clientSendMillis)
+        val serverReceiveMillis = readTimestamp(response, 32, wallSendMillis)
+        val serverTransmitMillis = readTimestamp(response, 40, wallSendMillis)
 
         require(serverReceiveMillis > 0L && serverTransmitMillis > 0L) {
             "Invalid NTP timestamps from $server"
         }
 
         val clockOffsetMillis = (
-            (serverReceiveMillis - clientSendMillis) +
+            (serverReceiveMillis - wallSendMillis) +
                 (serverTransmitMillis - clientReceiveMillis)
             ) / 2L
         val rawRoundTripMillis =
-            (clientReceiveMillis - clientSendMillis) -
+            (clientReceiveMillis - wallSendMillis) -
                 (serverTransmitMillis - serverReceiveMillis)
         val roundTripMillis = rawRoundTripMillis.coerceAtLeast(0L)
 
@@ -168,14 +168,15 @@ object NetworkTimeSynchronizer {
         val stratum = response[1].toInt() and 0xff
 
         require(leapIndicator != 3) { "$server reports an unsynchronised NTP clock" }
-        require(mode == 4 || mode == 5) { "Unexpected NTP response mode $mode from $server" }
+        require(mode in 4..5) { "Unexpected NTP response mode $mode from $server" }
         require(stratum in 1..15) { "Invalid NTP stratum $stratum from $server" }
         require(response.copyOfRange(24, 32).contentEquals(sentTimestamp)) {
             "NTP originate timestamp mismatch from $server"
         }
     }
 
-    private fun writeTimestamp(buffer: ByteArray, offset: Int, unixMillis: Long) {
+    private fun writeTimestamp(buffer: ByteArray, unixMillis: Long) {
+        val offset = 40
         val seconds = Math.floorDiv(unixMillis, 1_000L) + NTP_TO_UNIX_EPOCH_SECONDS
         val millis = Math.floorMod(unixMillis, 1_000L)
         val fraction = (millis * 0x1_0000_0000L) / 1_000L

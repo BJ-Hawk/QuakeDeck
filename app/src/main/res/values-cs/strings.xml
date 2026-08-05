@@ -242,6 +242,7 @@
     <plurals name="events_result_count">
         <item quantity="one">%1$d z %2$d události</item>
         <item quantity="few">%1$d z %2$d událostí</item>
+        <item quantity="many">%1$d z %2$d událostí</item>
         <item quantity="other">%1$d z %2$d událostí</item>
     </plurals>
     <string name="date_newest">Datum: nejnovější</string>
@@ -500,6 +501,7 @@
     <plurals name="notification_tsunami_affected_areas">
         <item quantity="one">%1$d zasažená oblast</item>
         <item quantity="few">%1$d zasažené oblasti</item>
+        <item quantity="many">%1$d zasažených oblastí</item>
         <item quantity="other">%1$d zasažených oblastí</item>
     </plurals>
 

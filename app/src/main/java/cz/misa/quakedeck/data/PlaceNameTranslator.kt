@@ -35,8 +35,8 @@ object PlaceNameTranslator {
         setting: PlaceNameLanguage,
         untranslatedFallback: String? = null
     ): String {
-        if (japanese == "Distant earthquake") return UiLocalization.format(context, cz.misa.quakedeck.R.string.distant_earthquake, setting)
-        if (japanese == "Unknown hypocenter") return UiLocalization.format(context, cz.misa.quakedeck.R.string.unknown_hypocenter, setting)
+        if (japanese == "Distant earthquake") return UiLocalization.format(context, R.string.distant_earthquake, setting)
+        if (japanese == "Unknown hypocenter") return UiLocalization.format(context, R.string.unknown_hypocenter, setting)
         if (!shouldUseEnglish(setting) || japanese.isBlank()) return japanese
 
         val epicenters = getDictionaries(context).epicenter
@@ -53,8 +53,8 @@ object PlaceNameTranslator {
         // into a non-Japanese UI.
         return if (containsJapanese(japanese)) {
             when (untranslatedFallback) {
-                "Distant earthquake" -> UiLocalization.format(context, cz.misa.quakedeck.R.string.distant_earthquake, setting)
-                else -> UiLocalization.format(context, cz.misa.quakedeck.R.string.unknown_hypocenter, setting)
+                "Distant earthquake" -> UiLocalization.format(context, R.string.distant_earthquake, setting)
+                else -> UiLocalization.format(context, R.string.unknown_hypocenter, setting)
             }
         } else japanese
     }

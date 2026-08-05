@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<lint>
+    <!-- QuakeDeck packages all three in-app languages by disabling language splits. -->
+    <issue id="AppBundleLocaleChanges">
+        <ignore path="src/main/java/cz/misa/quakedeck/data/UiLocalization.kt" />
+    </issue>
+
+    <!-- Time-critical earthquake and tsunami alerts are the app's core safety function. -->
+    <issue id="BatteryLife">
+        <ignore path="src/main/AndroidManifest.xml" />
+        <ignore path="src/main/java/cz/misa/quakedeck/MainActivity.kt" />
+    </issue>
+
+    <!-- Adaptive icons deliberately remain in the canonical API-26 resource folder. -->
+    <issue id="ObsoleteSdkInt">
+        <ignore path="src/main/res/mipmap-anydpi-v26" />
+    </issue>
+
+    <!-- 100-0001 is a Japanese postal code; the ASCII hyphen is semantically correct. -->
+    <issue id="TypographyDashes">
+        <ignore path="src/main/res/values/strings.xml" />
+        <ignore path="src/main/res/values-cs/strings.xml" />
+        <ignore path="src/main/res/values-ja/strings.xml" />
+    </issue>
+</lint>

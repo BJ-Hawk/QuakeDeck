@@ -561,8 +561,8 @@ private fun sortComparator(
     sort: HistoricalSort,
     eventTime: (HistoricalEventSummary) -> LocalDateTime
 ): Comparator<HistoricalEventSummary> = when (sort) {
-    HistoricalSort.DATE_NEWEST -> compareByDescending<HistoricalEventSummary>(eventTime)
-    HistoricalSort.DATE_OLDEST -> compareBy<HistoricalEventSummary>(eventTime)
+    HistoricalSort.DATE_NEWEST -> compareByDescending(eventTime)
+    HistoricalSort.DATE_OLDEST -> compareBy(eventTime)
     HistoricalSort.INTENSITY_STRONGEST -> compareByDescending<HistoricalEventSummary> {
         intensityRank(it.event.maxIntensity)
     }.thenByDescending(eventTime)

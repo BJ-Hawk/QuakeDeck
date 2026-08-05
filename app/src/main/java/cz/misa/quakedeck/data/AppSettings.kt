@@ -1,6 +1,7 @@
 package cz.misa.quakedeck.data
 
 import android.content.Context
+import androidx.core.content.edit
 import java.util.Locale
 
 enum class PlaceNameLanguage { AUTO, ENGLISH, CZECH, JAPANESE }
@@ -32,7 +33,7 @@ class AppSettings(context: Context) {
             )
         }.getOrDefault(PlaceNameLanguage.AUTO)
         set(value) {
-            prefs.edit().putString("place_name_language", value.name).apply()
+            prefs.edit { putString("place_name_language", value.name) }
         }
 
 
@@ -43,19 +44,19 @@ class AppSettings(context: Context) {
             )
         }.getOrDefault(AppAppearance.SYSTEM)
         set(value) {
-            prefs.edit().putString("appearance", value.name).apply()
+            prefs.edit { putString("appearance", value.name) }
         }
 
     var epicenterMarkerSizeDp: Float
         get() = prefs.getFloat("epicenter_marker_size_dp", 5.5f)
         set(value) {
-            prefs.edit().putFloat("epicenter_marker_size_dp", value).apply()
+            prefs.edit { putFloat("epicenter_marker_size_dp", value) }
         }
 
     var textScale: Float
         get() = prefs.getFloat("text_scale", 1.0f)
         set(value) {
-            prefs.edit().putFloat("text_scale", value).apply()
+            prefs.edit { putFloat("text_scale", value) }
         }
 
     var epicenterMarkerStyle: EpicenterMarkerStyle
@@ -65,13 +66,13 @@ class AppSettings(context: Context) {
             )
         }.getOrDefault(EpicenterMarkerStyle.DOT)
         set(value) {
-            prefs.edit().putString("epicenter_marker_style", value.name).apply()
+            prefs.edit { putString("epicenter_marker_style", value.name) }
         }
 
     var showStationNames: Boolean
         get() = prefs.getBoolean("show_station_names", false)
         set(value) {
-            prefs.edit().putBoolean("show_station_names", value).apply()
+            prefs.edit { putBoolean("show_station_names", value) }
         }
 
     var stationProviderVisibility: StationProviderVisibility
@@ -81,20 +82,20 @@ class AppSettings(context: Context) {
             localGovernment = prefs.getBoolean("show_station_provider_local_government", true)
         )
         set(value) {
-            prefs.edit()
-                .putBoolean("show_station_provider_jma", value.jma)
-                .putBoolean("show_station_provider_nied", value.nied)
-                .putBoolean(
+            prefs.edit {
+                putBoolean("show_station_provider_jma", value.jma)
+                putBoolean("show_station_provider_nied", value.nied)
+                putBoolean(
                     "show_station_provider_local_government",
                     value.localGovernment
                 )
-                .apply()
+            }
         }
 
     var p2pSandboxMode: Boolean
         get() = prefs.getBoolean("p2p_sandbox_mode", false)
         set(value) {
-            prefs.edit().putBoolean("p2p_sandbox_mode", value).apply()
+            prefs.edit { putBoolean("p2p_sandbox_mode", value) }
         }
 
 
@@ -132,53 +133,53 @@ class AppSettings(context: Context) {
             )
         }
         set(value) {
-            prefs.edit()
-                .putBoolean("alert_location_set", true)
-                .putString("alert_location_display_name", value.displayName)
-                .putString("alert_location_city", value.city)
-                .putString("alert_location_prefecture", value.prefecture)
-                .putString("alert_location_prefecture_ja", value.prefectureJa)
-                .putString("alert_location_postal_code", value.postalCode)
-                .putString("alert_location_latitude", value.latitude.toString())
-                .putString("alert_location_longitude", value.longitude.toString())
-                .putString("alert_location_eew_area_ja", value.eewAreaNameJa)
-                .putString("alert_location_quake_area_code", value.quakeAreaCode)
-                .putString("alert_location_quake_area_ja", value.quakeAreaNameJa)
-                .putString("alert_location_resolution_kind", value.resolutionKind.name)
-                .apply()
+            prefs.edit {
+                putBoolean("alert_location_set", true)
+                putString("alert_location_display_name", value.displayName)
+                putString("alert_location_city", value.city)
+                putString("alert_location_prefecture", value.prefecture)
+                putString("alert_location_prefecture_ja", value.prefectureJa)
+                putString("alert_location_postal_code", value.postalCode)
+                putString("alert_location_latitude", value.latitude.toString())
+                putString("alert_location_longitude", value.longitude.toString())
+                putString("alert_location_eew_area_ja", value.eewAreaNameJa)
+                putString("alert_location_quake_area_code", value.quakeAreaCode)
+                putString("alert_location_quake_area_ja", value.quakeAreaNameJa)
+                putString("alert_location_resolution_kind", value.resolutionKind.name)
+            }
         }
 
     var locationBasedNotificationsEnabled: Boolean
         get() = prefs.getBoolean("location_based_notifications_enabled", false)
         set(value) {
-            prefs.edit().putBoolean("location_based_notifications_enabled", value).apply()
+            prefs.edit { putBoolean("location_based_notifications_enabled", value) }
         }
 
     var silentReportsBelowSelectedIntensity: Boolean
         get() = prefs.getBoolean("silent_reports_below_selected_intensity", false)
         set(value) {
-            prefs.edit().putBoolean("silent_reports_below_selected_intensity", value).apply()
+            prefs.edit { putBoolean("silent_reports_below_selected_intensity", value) }
         }
 
     var notificationsEnabled: Boolean
         get() = prefs.getBoolean("notifications_enabled", false)
-        set(value) { prefs.edit().putBoolean("notifications_enabled", value).apply() }
+        set(value) { prefs.edit { putBoolean("notifications_enabled", value) } }
 
     var earthquakeNotificationsEnabled: Boolean
         get() = prefs.getBoolean("earthquake_notifications_enabled", true)
-        set(value) { prefs.edit().putBoolean("earthquake_notifications_enabled", value).apply() }
+        set(value) { prefs.edit { putBoolean("earthquake_notifications_enabled", value) } }
 
     var eewNotificationsEnabled: Boolean
         get() = prefs.getBoolean("eew_notifications_enabled", true)
-        set(value) { prefs.edit().putBoolean("eew_notifications_enabled", value).apply() }
+        set(value) { prefs.edit { putBoolean("eew_notifications_enabled", value) } }
 
     var tsunamiNotificationsEnabled: Boolean
         get() = prefs.getBoolean("tsunami_notifications_enabled", true)
-        set(value) { prefs.edit().putBoolean("tsunami_notifications_enabled", value).apply() }
+        set(value) { prefs.edit { putBoolean("tsunami_notifications_enabled", value) } }
 
     var notificationUpdatesEnabled: Boolean
         get() = prefs.getBoolean("notification_updates_enabled", true)
-        set(value) { prefs.edit().putBoolean("notification_updates_enabled", value).apply() }
+        set(value) { prefs.edit { putBoolean("notification_updates_enabled", value) } }
 
     var minimumNotificationIntensity: MinimumNotificationIntensity
         get() = runCatching {
@@ -186,7 +187,7 @@ class AppSettings(context: Context) {
                 prefs.getString("minimum_notification_intensity", MinimumNotificationIntensity.SHINDO_3.name)!!
             )
         }.getOrDefault(MinimumNotificationIntensity.SHINDO_3)
-        set(value) { prefs.edit().putString("minimum_notification_intensity", value.name).apply() }
+        set(value) { prefs.edit { putString("minimum_notification_intensity", value.name) } }
 
     var minimumTsunamiGrade: TsunamiGrade
         get() = runCatching {
@@ -194,11 +195,11 @@ class AppSettings(context: Context) {
                 prefs.getString("minimum_tsunami_grade", TsunamiGrade.ADVISORY.name)!!
             )
         }.getOrDefault(TsunamiGrade.ADVISORY)
-        set(value) { prefs.edit().putString("minimum_tsunami_grade", value.name).apply() }
+        set(value) { prefs.edit { putString("minimum_tsunami_grade", value.name) } }
 
     var quietHoursEnabled: Boolean
         get() = prefs.getBoolean("quiet_hours_enabled", false)
-        set(value) { prefs.edit().putBoolean("quiet_hours_enabled", value).apply() }
+        set(value) { prefs.edit { putBoolean("quiet_hours_enabled", value) } }
 
     var quietHoursMode: QuietHoursMode
         get() {
@@ -215,29 +216,29 @@ class AppSettings(context: Context) {
             }
         }
         set(value) {
-            prefs.edit().putString("quiet_hours_mode", value.name).apply()
+            prefs.edit { putString("quiet_hours_mode", value.name) }
         }
 
     /** Bit 0 = Monday ... bit 6 = Sunday. Selected days are days on which the quiet period starts. */
     var quietHoursDaysMask: Int
         get() = prefs.getInt("quiet_hours_days_mask", 0b1111111) and 0b1111111
-        set(value) { prefs.edit().putInt("quiet_hours_days_mask", value and 0b1111111).apply() }
+        set(value) { prefs.edit { putInt("quiet_hours_days_mask", value and 0b1111111) } }
 
     var quietHoursStartHour: Int
         get() = prefs.getInt("quiet_hours_start_hour", 22)
-        set(value) { prefs.edit().putInt("quiet_hours_start_hour", value.coerceIn(0, 23)).apply() }
+        set(value) { prefs.edit { putInt("quiet_hours_start_hour", value.coerceIn(0, 23)) } }
 
     var quietHoursStartMinute: Int
         get() = prefs.getInt("quiet_hours_start_minute", 0)
-        set(value) { prefs.edit().putInt("quiet_hours_start_minute", value.coerceIn(0, 59)).apply() }
+        set(value) { prefs.edit { putInt("quiet_hours_start_minute", value.coerceIn(0, 59)) } }
 
     var quietHoursEndHour: Int
         get() = prefs.getInt("quiet_hours_end_hour", 7)
-        set(value) { prefs.edit().putInt("quiet_hours_end_hour", value.coerceIn(0, 23)).apply() }
+        set(value) { prefs.edit { putInt("quiet_hours_end_hour", value.coerceIn(0, 23)) } }
 
     var quietHoursEndMinute: Int
         get() = prefs.getInt("quiet_hours_end_minute", 0)
-        set(value) { prefs.edit().putInt("quiet_hours_end_minute", value.coerceIn(0, 59)).apply() }
+        set(value) { prefs.edit { putInt("quiet_hours_end_minute", value.coerceIn(0, 59)) } }
 
     /** Weekly schedule introduced in v0.9.59; the legacy fields above remain for migration. */
     var quietHoursSchedule: QuietHoursSchedule
@@ -252,11 +253,11 @@ class AppSettings(context: Context) {
                 endHour = quietHoursEndHour,
                 endMinute = quietHoursEndMinute
             )
-            prefs.edit().putString("quiet_hours_weekly_schedule", migrated.encode()).apply()
+            prefs.edit { putString("quiet_hours_weekly_schedule", migrated.encode()) }
             return migrated
         }
         set(value) {
-            prefs.edit().putString("quiet_hours_weekly_schedule", value.encode()).apply()
+            prefs.edit { putString("quiet_hours_weekly_schedule", value.encode()) }
         }
 
     var holidayCountryMode: HolidayCountryMode
@@ -265,7 +266,7 @@ class AppSettings(context: Context) {
                 prefs.getString("holiday_country_mode", HolidayCountryMode.AUTO.name)!!
             )
         }.getOrDefault(HolidayCountryMode.AUTO)
-        set(value) { prefs.edit().putString("holiday_country_mode", value.name).apply() }
+        set(value) { prefs.edit { putString("holiday_country_mode", value.name) } }
 
     var manualHolidayCountryCode: String?
         get() = prefs.getString("manual_holiday_country_code", null)
@@ -273,21 +274,23 @@ class AppSettings(context: Context) {
             ?.uppercase(Locale.ROOT)
             ?.takeIf { it.length == 2 }
         set(value) {
-            prefs.edit().putString(
-                "manual_holiday_country_code",
-                value?.trim()?.uppercase(Locale.ROOT)?.takeIf { it.length == 2 }
-            ).apply()
+            prefs.edit {
+                putString(
+                    "manual_holiday_country_code",
+                    value?.trim()?.uppercase(Locale.ROOT)?.takeIf { it.length == 2 }
+                )
+            }
         }
 
     var reportArchiveEnabled: Boolean
         get() = prefs.getBoolean("report_archive_enabled", false)
         set(value) {
-            prefs.edit().putBoolean("report_archive_enabled", value).apply()
+            prefs.edit { putBoolean("report_archive_enabled", value) }
         }
 
     var automaticHistoricalDownload: Boolean
         get() = prefs.getBoolean("automatic_historical_download", false)
         set(value) {
-            prefs.edit().putBoolean("automatic_historical_download", value).apply()
+            prefs.edit { putBoolean("automatic_historical_download", value) }
         }
 }

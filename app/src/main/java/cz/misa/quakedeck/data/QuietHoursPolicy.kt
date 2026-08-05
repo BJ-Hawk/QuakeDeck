@@ -1,3 +1,5 @@
+@file:Suppress("unused")
+
 package cz.misa.quakedeck.data
 
 import java.time.LocalDateTime

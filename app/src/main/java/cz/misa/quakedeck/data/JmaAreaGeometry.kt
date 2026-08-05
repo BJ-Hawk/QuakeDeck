@@ -95,7 +95,7 @@ class JmaRegionalMapData(
             )
         )
     }
-    private val tsunamiByName = buildMap<String, JmaAreaShape> {
+    private val tsunamiByName = buildMap {
         tsunamiAreas.forEach { put(normalizeAreaName(it.nameJa), it) }
         get(normalizeAreaName("奄美群島・トカラ列島"))?.let { canonical ->
             put(normalizeAreaName("奄美諸島・トカラ列島"), canonical)

@@ -37,7 +37,6 @@ object BuiltInCombinedNotoReplay {
                 issueTime = "2024/01/01 16:10:30.000",
                 latitude = 37.50,
                 longitude = 137.25,
-                depthKm = 10,
                 magnitude = 7.2,
                 ishikawaScaleFrom = 60
             )
@@ -50,7 +49,6 @@ object BuiltInCombinedNotoReplay {
                 issueTime = "2024/01/01 16:10:34.000",
                 latitude = 37.50,
                 longitude = 137.27,
-                depthKm = 10,
                 magnitude = 7.4,
                 ishikawaScaleFrom = 60
             )
@@ -63,7 +61,6 @@ object BuiltInCombinedNotoReplay {
                 issueTime = "2024/01/01 16:10:39.000",
                 latitude = 37.49,
                 longitude = 137.27,
-                depthKm = 10,
                 magnitude = 7.6,
                 ishikawaScaleFrom = 70
             )
@@ -78,7 +75,6 @@ object BuiltInCombinedNotoReplay {
                 issueTime = "2024/01/01 16:10:52.000",
                 latitude = 37.49,
                 longitude = 137.27,
-                depthKm = 10,
                 magnitude = 7.6,
                 ishikawaScaleFrom = 70
             )
@@ -98,7 +94,6 @@ object BuiltInCombinedNotoReplay {
         issueTime: String,
         latitude: Double,
         longitude: Double,
-        depthKm: Int,
         magnitude: Double,
         ishikawaScaleFrom: Int
     ): String = """
@@ -121,7 +116,7 @@ object BuiltInCombinedNotoReplay {
               "reduceName":"能登",
               "latitude":$latitude,
               "longitude":$longitude,
-              "depth":$depthKm,
+              "depth":10,
               "magnitude":$magnitude
             }
           },

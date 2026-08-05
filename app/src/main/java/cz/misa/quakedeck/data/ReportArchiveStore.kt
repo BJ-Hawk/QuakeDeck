@@ -4,6 +4,7 @@ import android.content.ContentValues
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
+import androidx.core.database.transaction
 import org.json.JSONArray
 import org.json.JSONObject
 import java.nio.charset.StandardCharsets
@@ -128,8 +129,7 @@ internal class ReportArchiveStore(context: Context) :
         val db = writableDatabase
         var added = 0
         var duplicates = 0
-        db.beginTransaction()
-        try {
+        db.transaction {
             reports.forEach { json ->
                 val raw = json.toString()
                 val upstreamId = json.optString("id").trim().takeIf { it.isNotEmpty() }
@@ -169,9 +169,6 @@ internal class ReportArchiveStore(context: Context) :
                 )
                 if (row == -1L) duplicates++ else added++
             }
-            db.setTransactionSuccessful()
-        } finally {
-            db.endTransaction()
         }
         return ArchiveWriteResult(added, duplicates)
     }

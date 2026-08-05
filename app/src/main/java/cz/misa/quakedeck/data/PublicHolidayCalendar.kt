@@ -2,6 +2,7 @@ package cz.misa.quakedeck.data
 
 import android.content.Context
 import android.telephony.TelephonyManager
+import androidx.core.content.edit
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.json.JSONArray
@@ -86,16 +87,6 @@ object HolidayCountryDetector {
         ?.takeIf { it.length == 2 && it.all(Char::isLetter) }
 }
 
-data class PublicHolidayDatasetInfo(
-    val generatedAt: String,
-    val source: String,
-    val supportedCountries: Set<String>,
-    val coverageFrom: LocalDate?,
-    val coverageTo: LocalDate?,
-    val nationalDateCount: Int,
-    val regionalDateCount: Int
-)
-
 private data class CountryHolidayData(
     val loadedYears: Set<Int> = emptySet(),
     val nationalDates: Set<LocalDate> = emptySet(),
@@ -134,17 +125,6 @@ object PublicHolidayCalendar {
     private var holidaysByCountry: Map<String, CountryHolidayData> = emptyMap()
 
     @Volatile
-    private var info = PublicHolidayDatasetInfo(
-        generatedAt = "",
-        source = "Nager.Date yearly API v4",
-        supportedCountries = emptySet(),
-        coverageFrom = null,
-        coverageTo = null,
-        nationalDateCount = 0,
-        regionalDateCount = 0
-    )
-
-    @Volatile
     private var initialized = false
 
     fun initialize(context: Context) {
@@ -176,7 +156,6 @@ object PublicHolidayCalendar {
             }
 
             holidaysByCountry = loaded
-            rebuildInfo()
             initialized = true
         }
     }
@@ -223,7 +202,7 @@ object PublicHolidayCalendar {
         notifyChangeListeners()
 
         for (year in dueYears) {
-            prefs.edit().putLong(attemptKey(code, year), now).apply()
+            prefs.edit { putLong(attemptKey(code, year), now) }
         }
 
         Thread({
@@ -234,16 +213,15 @@ object PublicHolidayCalendar {
                 for (year in dueYears) {
                     val downloaded = downloadYear(code, year) ?: continue
                     updated = replaceYear(updated, year, downloaded)
-                    prefs.edit()
-                        .putLong(successKey(code, year), System.currentTimeMillis())
-                        .apply()
+                    prefs.edit {
+                        putLong(successKey(code, year), System.currentTimeMillis())
+                    }
                     changed = true
                 }
 
                 if (changed) {
                     synchronized(this) {
                         holidaysByCountry = holidaysByCountry + (code to updated)
-                        rebuildInfo()
                         writeCountryCacheAtomically(appContext, code, updated)
                     }
                 }
@@ -349,8 +327,6 @@ object PublicHolidayCalendar {
 
     fun isSupportedCountry(countryCode: String?): Boolean =
         countryCode?.trim()?.uppercase(Locale.ROOT) in nagerSupportedCountryCodes
-
-    fun datasetInfo(): PublicHolidayDatasetInfo = info
 
     private fun downloadYear(countryCode: String, year: Int): CountryHolidayData? {
         val url = "$API_BASE_URL/$countryCode/$year"
@@ -510,22 +486,6 @@ object PublicHolidayCalendar {
                 .getOrNull()
                 ?.let(::add)
         }
-    }
-
-    private fun rebuildInfo() {
-        val allData = holidaysByCountry.values
-        val allYears = allData.flatMap { it.loadedYears }
-        info = PublicHolidayDatasetInfo(
-            generatedAt = Instant.now().toString(),
-            source = "Nager.Date yearly API v4",
-            supportedCountries = holidaysByCountry.keys,
-            coverageFrom = allYears.minOrNull()?.let { LocalDate.of(it, 1, 1) },
-            coverageTo = allYears.maxOrNull()?.let { LocalDate.of(it, 12, 31) },
-            nationalDateCount = allData.sumOf { it.nationalDates.size },
-            regionalDateCount = allData.sumOf { data ->
-                data.subdivisionDates.values.sumOf(Set<LocalDate>::size)
-            }
-        )
     }
 
     private fun writeCountryCacheAtomically(

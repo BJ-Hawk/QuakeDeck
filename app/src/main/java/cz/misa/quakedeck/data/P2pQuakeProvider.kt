@@ -3,6 +3,7 @@ package cz.misa.quakedeck.data
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
+import androidx.core.content.edit
 import okhttp3.*
 import org.json.JSONArray
 import org.json.JSONObject
@@ -682,10 +683,11 @@ class P2pQuakeProvider(
         if (parsedRecords.isEmpty()) return null
 
         val frames = parsedRecords.mapIndexed { index, (record, report) ->
-            accumulated = accumulated?.let { previous ->
+            val merged = accumulated?.let { previous ->
                 mergeConfirmedEvent(previous, report)
             } ?: report
-            val cumulative = requireNotNull(accumulated).copy(reportCount = index + 1)
+            accumulated = merged
+            val cumulative = merged.copy(reportCount = index + 1)
             HistoricalReportFrame(
                 index = index,
                 total = parsedRecords.size,
@@ -1025,9 +1027,9 @@ class P2pQuakeProvider(
                     throw HistoricalDownloadCancelledException()
                 }
                 val result = ArchiveWriteResult(addedTotal, duplicateTotal)
-                archiveMetaPrefs.edit()
-                    .putLong("last_historical_download_success_ms", System.currentTimeMillis())
-                    .apply()
+                archiveMetaPrefs.edit {
+                    putLong("last_historical_download_success_ms", System.currentTimeMillis())
+                }
                 val stats = archiveStore.stats(reportArchiveEnabled, automaticHistoricalDownload)
                 mainHandler.post {
                     historicalDownloadRunning = false
@@ -2030,11 +2032,8 @@ class P2pQuakeProvider(
             return LiveUpdateKind.NONE
         }
 
-        val visibleEvent = if (matchesConfirmed) {
-            requireNotNull(current)
-        } else {
-            eew.also { lastEvent = it }
-        }
+        val visibleEvent = current.takeIf { matchesConfirmed }
+            ?: eew.also { lastEvent = it }
         val reportLabel = eew.reportSerial?.takeIf { it.isNotBlank() }
             ?.let { " report #$it" }
             .orEmpty()

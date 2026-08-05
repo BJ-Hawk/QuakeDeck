@@ -205,7 +205,7 @@ object WeeklyQuietHoursPolicy {
         val start = LocalTime.of(period.startHour, period.startMinute)
         val end = LocalTime.of(period.endHour, period.endMinute)
         return when {
-            start < end -> time >= start && time < end
+            start < end -> time in start..<end
             start > end -> time >= start
             else -> time >= start // full 24-hour period; earlier portion is covered by yesterday
         }

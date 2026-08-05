@@ -82,7 +82,6 @@ object StationCatalog {
     @Volatile private var byName: Map<String, SeismicStation> = emptyMap()
     @Volatile private var loaded = false
 
-    fun isLoaded(): Boolean = loaded
     fun allStations(): List<SeismicStation> = stations
 
     fun lookup(prefectureJa: String, stationNameJa: String): SeismicStation? {

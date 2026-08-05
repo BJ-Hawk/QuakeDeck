@@ -2,6 +2,14 @@
 
 QuakeDeck release history, newest first.
 
+## v0.9.78
+
+- Completes a whole-project static-analysis cleanup across Compose UI, preference storage, map geometry, notification graphics, archive transactions, time synchronization, and historical report handling without changing intended behavior.
+- Adopts AndroidX KTX helpers where they improve clarity, modernizes coroutine timing to Kotlin durations, removes redundant null assertions, qualifiers, variables, fixed parameters, and verified dead holiday/station bookkeeping.
+- Adds the missing Czech plural categories and a focused lint configuration for intentional safety-policy, locale-packaging, adaptive-icon, and Japanese-postcode exceptions instead of allowing known false positives to bury real findings.
+- Preserves the compile-time Sandbox master switch and future DM-D.S.S/legacy compatibility placeholders with explicit inspection intent, while deliberately deferring SDK, Gradle, Kotlin, and AndroidX upgrades until they can be build-tested.
+- Bumps the Android application version to `0.9.78` (`versionCode` 118) and updates the README release marker.
+
 ## v0.9.77
 
 - Fixes archived station observations that retain a preliminary area flag so their exact bundled station can still resolve and colour the correct municipality or ward.

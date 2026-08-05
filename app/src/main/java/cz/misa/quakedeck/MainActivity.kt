@@ -1,5 +1,6 @@
 package cz.misa.quakedeck
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.content.Intent
 import android.os.Build
@@ -53,6 +54,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.positionChange
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -66,6 +68,7 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.graphics.createBitmap
 import androidx.core.net.toUri
 import androidx.core.view.WindowCompat
 import kotlinx.coroutines.Dispatchers
@@ -108,6 +111,10 @@ import kotlin.math.ln
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.roundToInt
+import kotlin.time.Duration.Companion.hours
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.minutes
+import kotlin.time.Duration.Companion.seconds
 
 private val DISPLAYED_JST_ZONE = ZoneId.of("Asia/Tokyo")
 private val DISPLAYED_JST_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss 'JST'")
@@ -323,13 +330,7 @@ private fun QuakeDeckApp(
             result.onSuccess(appClock::applyLiveSynchronization)
                 .onFailure { appClock.failLiveSynchronization(it.message) }
 
-            delay(
-                if (result.isSuccess) {
-                    6L * 60L * 60L * 1_000L
-                } else {
-                    5L * 60L * 1_000L
-                }
-            )
+            delay(if (result.isSuccess) 6.hours else 5.minutes)
         }
     }
 
@@ -529,7 +530,7 @@ private fun QuakeDeckApp(
     ) {
         eewTimelineNowMillis = System.currentTimeMillis()
         while (snapshot.activeEew || snapshot.activeTsunami) {
-            delay(250L)
+            delay(250.milliseconds)
             eewTimelineNowMillis = System.currentTimeMillis()
         }
     }
@@ -645,9 +646,8 @@ private fun QuakeDeckApp(
     }
 
     fun selectReport(target: EarthquakeEvent) {
-        val keepFocus = eventMapped
         selectedEventId = target.id
-        if (keepFocus) {
+        if (eventMapped) {
             requestEventMapFocus(target, manual = true)
         } else {
             cancelAutoFocusExpiry()
@@ -918,7 +918,7 @@ private fun QuakeDeckApp(
     LaunchedEffect(autoFocusExpiryToken, snapshot.activeEew, historicalMode) {
         if (historicalMode || snapshot.activeEew) return@LaunchedEffect
         val targetId = autoFocusExpiryEventId ?: return@LaunchedEffect
-        delay(15_000L)
+        delay(15.seconds)
         if (autoFocusExpiryEventId == targetId && mappedEventId == targetId) {
             mappedEventId = null
             focusEventTargetId = null
@@ -955,6 +955,7 @@ private fun QuakeDeckApp(
         BoxWithConstraints(Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
         val density = LocalDensity.current
         val isLandscape = maxWidth > maxHeight
+        val orientationKey = LocalConfiguration.current.orientation
         val fullHeightPx = with(density) { maxHeight.toPx() }
         val fullWidthPx = with(density) { maxWidth.toPx() }
 
@@ -1026,7 +1027,7 @@ private fun QuakeDeckApp(
                         if (landscapePanelCollapsed) 1f else landscapeMapFraction
                     )
                 ) {
-                    key(isLandscape) {
+                    key(orientationKey) {
                         JapanMap(
                             event = mapEvent,
                             activeEewEvent = snapshot.activeEewEvent
@@ -1127,7 +1128,7 @@ private fun QuakeDeckApp(
         } else {
             Column(Modifier.fillMaxSize()) {
                 Box(Modifier.fillMaxWidth().weight(portraitMapFraction)) {
-                    key(isLandscape) {
+                    key(orientationKey) {
                         JapanMap(
                             event = mapEvent,
                             activeEewEvent = snapshot.activeEewEvent
@@ -1779,7 +1780,7 @@ private fun DragHandle(
                             ?: event.changes.firstOrNull()
                             ?: break
                         val delta = change.positionChange()
-                        totalMovement = totalMovement + delta
+                        totalMovement += delta
 
                         if (!dragging && abs(totalMovement.y) >= viewConfiguration.touchSlop) {
                             dragging = true
@@ -2267,13 +2268,12 @@ private fun ReportTopGrid(
         val rowTwoHeight = max(prefecture.height, predicted.height)
         val totalHeight = (rowOneHeight + rowTwoHeight).coerceAtLeast(1)
         val badge = measurables[4].measure(Constraints.fixed(badgeWidth, totalHeight))
-        val rightTextX = leftWidth
         val badgeX = totalWidth - badgeWidth
 
         layout(totalWidth, totalHeight) {
             region.placeRelative(0, (rowOneHeight - region.height) / 2)
             maxLabel.placeRelative(
-                rightTextX,
+                leftWidth,
                 (rowOneHeight - maxLabel.height) / 2
             )
             prefecture.placeRelative(
@@ -2281,7 +2281,7 @@ private fun ReportTopGrid(
                 rowOneHeight + (rowTwoHeight - prefecture.height) / 2
             )
             predicted.placeRelative(
-                rightTextX,
+                leftWidth,
                 rowOneHeight + (rowTwoHeight - predicted.height) / 2
             )
             badge.placeRelative(badgeX, 0)
@@ -2513,9 +2513,9 @@ private fun EventPanel(
     onSelectEvent: (EarthquakeEvent) -> Unit,
     onCloseReport: () -> Unit,
     onFocusEvent: () -> Unit,
+    modifier: Modifier = Modifier,
     onObservationsExpandedChanged: ((Boolean) -> Unit)? = null,
-    onSummaryHeightChanged: ((Int) -> Unit)? = null,
-    modifier: Modifier = Modifier
+    onSummaryHeightChanged: ((Int) -> Unit)? = null
 ) {
     val context = LocalContext.current
     val locale = UiLocalization.locale(context, placeNameLanguage)
@@ -2682,7 +2682,7 @@ private fun EventPanel(
                                     fontSize = 11.sp,
                                     fontWeight = FontWeight.SemiBold,
                                     maxLines = 1,
-                                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                                    overflow = TextOverflow.Ellipsis
                                 )
                             }
                         }
@@ -2928,9 +2928,9 @@ private fun HistoricalEventPanel(
     onBrowseEvents: () -> Unit,
     onReturnToLive: () -> Unit,
     onFocusEvent: () -> Unit,
+    modifier: Modifier = Modifier,
     onObservationsExpandedChanged: ((Boolean) -> Unit)? = null,
-    onSummaryHeightChanged: ((Int) -> Unit)? = null,
-    modifier: Modifier = Modifier
+    onSummaryHeightChanged: ((Int) -> Unit)? = null
 ) {
     val frame = incident.frames.getOrNull(reportIndex) ?: return
     val event = frame.event
@@ -3178,11 +3178,9 @@ private fun HistoricalAssociatedReportRow(
         modifier = Modifier
             .fillMaxWidth()
             .then(
-                if (clickable) {
-                    Modifier.clickable { onSelectEarthquakeFrame(requireNotNull(frameIndex)) }
-                } else {
-                    Modifier
-                }
+                frameIndex?.let { index ->
+                    Modifier.clickable { onSelectEarthquakeFrame(index) }
+                } ?: Modifier
             ),
         shape = RoundedCornerShape(5.dp),
         color = if (selected) MaterialTheme.colorScheme.primaryContainer else Color.Transparent
@@ -3868,7 +3866,7 @@ private fun buildResizeMapRaster(
             .roundToInt().coerceAtLeast(1) to maxDimension
     }
 
-    val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+    val bitmap = createBitmap(width, height, Bitmap.Config.ARGB_8888)
     val rasterScale = min(width / sourceWidth, height / sourceHeight)
     val rasterOffsetX = (width - sourceWidth * rasterScale) / 2f - data.minX * rasterScale
     val rasterOffsetY = (height - sourceHeight * rasterScale) / 2f - data.minY * rasterScale
@@ -3918,6 +3916,8 @@ private fun buildResizeMapRaster(
     return ResizeMapRaster(bitmap)
 }
 
+// Manual native-Canvas save/restore keeps the high-detail retained map path explicit.
+@SuppressLint("UseKtx")
 @Composable
 private fun JapanMap(
     event: EarthquakeEvent,
@@ -3948,7 +3948,7 @@ private fun JapanMap(
 
     val mapData by produceState<JapanMapData?>(initialValue = null, key1 = context.applicationContext) {
         value = withContext(Dispatchers.Default) {
-            cz.misa.quakedeck.data.JapanMapGeometry.load(context.applicationContext)
+            JapanMapGeometry.load(context.applicationContext)
         }
     }
     val regionalContext by produceState<RegionalContextData?>(
@@ -3974,7 +3974,7 @@ private fun JapanMap(
     val highResMap by produceState<JapanMapData?>(initialValue = null, key1 = highResRequested) {
         value = if (highResRequested) {
             withContext(Dispatchers.Default) {
-                cz.misa.quakedeck.data.JapanMapGeometry.loadHighRes(context.applicationContext)
+                JapanMapGeometry.loadHighRes(context.applicationContext)
             }
         } else {
             null
@@ -3988,7 +3988,7 @@ private fun JapanMap(
         // focus action can jump directly from 1× to 21×+, so threshold-only
         // loading would otherwise leave the requested layer temporarily empty.
         value = withContext(Dispatchers.Default) {
-            cz.misa.quakedeck.data.JmaMunicipalityGeometry.load(context.applicationContext)
+            JmaMunicipalityGeometry.load(context.applicationContext)
         }
     }
 
@@ -4252,7 +4252,7 @@ private fun JapanMap(
         mapInteractionNonce
     ) {
         zoomRailVisible = true
-        delay(3_200L)
+        delay(3_200.milliseconds)
         zoomRailVisible = false
     }
     val zoomRailAlpha by animateFloatAsState(
@@ -4886,7 +4886,7 @@ private fun JapanMap(
             val target = manualCameraOverrideUntilMillis
             if (target <= 0L) return@LaunchedEffect
             val waitMillis = (target - System.currentTimeMillis()).coerceAtLeast(0L)
-            delay(waitMillis)
+            delay(waitMillis.milliseconds)
             if (manualCameraOverrideUntilMillis == target) {
                 manualCameraOverrideUntilMillis = 0L
                 if (
@@ -5774,20 +5774,19 @@ private fun MapZoomIndicator(
     Canvas(modifier) {
         val x = size.width / 2f
         val thumbRadius = 3.4.dp.toPx() * scale
-        val top = thumbRadius
-        val bottom = (size.height - thumbRadius).coerceAtLeast(top)
-        val thumbY = bottom - (bottom - top) * fraction
+        val bottom = (size.height - thumbRadius).coerceAtLeast(thumbRadius)
+        val thumbY = bottom - (bottom - thumbRadius) * fraction
 
         drawLine(
             color = extraColors.mapControlSurface,
-            start = Offset(x, top),
+            start = Offset(x, thumbRadius),
             end = Offset(x, bottom),
             strokeWidth = 4.dp.toPx() * scale,
             cap = StrokeCap.Round
         )
         drawLine(
             color = extraColors.mapControlForeground.copy(alpha = 0.72f),
-            start = Offset(x, top),
+            start = Offset(x, thumbRadius),
             end = Offset(x, bottom),
             strokeWidth = 1.dp.toPx() * scale,
             cap = StrokeCap.Round

@@ -21,6 +21,7 @@ import androidx.annotation.StringRes
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.createBitmap
 import cz.misa.quakedeck.MainActivity
 import cz.misa.quakedeck.R
 import cz.misa.quakedeck.data.AlertLocationPolicy
@@ -815,14 +816,14 @@ class NotificationCoordinator(
     }
 
     private fun solidColorBitmap(color: Int): Bitmap =
-        Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888).apply { eraseColor(color) }
+        createBitmap(1, 1, Bitmap.Config.ARGB_8888).apply { eraseColor(color) }
 
     private fun renderNotificationBadge(visual: NotificationVisual): Bitmap {
         // 128 px remains crisp in the 40-64 dp notification slots while keeping the
         // cross-process notification payload comfortably below Binder limits.
         val size = 128
         val density = size / 64f
-        val bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
+        val bitmap = createBitmap(size, size, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
         val background = Paint(Paint.ANTI_ALIAS_FLAG).apply {
             color = visual.badgeBackgroundColor

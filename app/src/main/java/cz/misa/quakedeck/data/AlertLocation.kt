@@ -71,9 +71,9 @@ object ManualAlertLocationResolver {
                     .filter(Char::isDigit)
                     .map { it.digitToInt().digitToChar() }
                     .joinToString("")
-                val kind = when {
-                    digits.length == 3 -> AlertLocationResolutionKind.POSTAL_PREFIX
-                    digits.length == 7 -> AlertLocationResolutionKind.POSTAL_CODE
+                val kind = when (digits.length) {
+                    3 -> AlertLocationResolutionKind.POSTAL_PREFIX
+                    7 -> AlertLocationResolutionKind.POSTAL_CODE
                     else -> AlertLocationResolutionKind.CITY
                 }
                 if (digits.isNotEmpty() && digits.length != 3 && digits.length != 7) {
@@ -97,8 +97,8 @@ object ManualAlertLocationResolver {
                     candidates.asSequence()
                         .filter(::isJapaneseAddress)
                         .forEach { address ->
-                            val key = "${"%.5f".format(Locale.US, address.latitude)}|" +
-                                "${"%.5f".format(Locale.US, address.longitude)}"
+                            val key = "%.5f".format(Locale.US, address.latitude) + "|" +
+                                "%.5f".format(Locale.US, address.longitude)
                             addresses.putIfAbsent(key, address)
                         }
                 }

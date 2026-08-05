@@ -76,6 +76,7 @@ interface QuakeDataProvider {
  * connection. The app-level controller owns the single FREE socket and reuses it
  * while DM-D.S.S is not configured. That prevents duplicate P2PQuake /ws sessions.
  */
+@Suppress("unused")
 class DmDssProvider : QuakeDataProvider {
     override val mode = DataSourceMode.DMDSS
 

@@ -1,3 +1,5 @@
+@file:Suppress("SimplifyBooleanWithConstants")
+
 package cz.misa.quakedeck.ui.settings
 
 import androidx.annotation.StringRes
@@ -2745,8 +2747,8 @@ private fun SwitchSettingRow(
     supportingText: String,
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit,
-    enabled: Boolean = true,
     modifier: Modifier = Modifier,
+    enabled: Boolean = true,
     helpText: String? = null,
     onHelpRequested: ((String, String) -> Unit)? = null,
     nested: Boolean = false
@@ -2822,10 +2824,9 @@ private fun SettingTitleWithHelp(
     BoxWithConstraints(Modifier.fillMaxWidth()) {
         val titleMaxWidth = if (helpText != null) maxWidth - 27.dp else maxWidth
         val helpBody = helpText?.takeIf { it.isNotBlank() }
-        val helpCallback = onHelpRequested
         Row(
-            modifier = if (helpBody != null && helpCallback != null) {
-                Modifier.clickable(enabled = enabled) { helpCallback(title, helpBody) }
+            modifier = if (helpBody != null && onHelpRequested != null) {
+                Modifier.clickable(enabled = enabled) { onHelpRequested(title, helpBody) }
             } else {
                 Modifier
             },
