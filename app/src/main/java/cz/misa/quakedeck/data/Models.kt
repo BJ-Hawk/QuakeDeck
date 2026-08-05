@@ -189,20 +189,26 @@ data class AppSnapshot(
     val liveUpdateKind: LiveUpdateKind = LiveUpdateKind.NONE,
     val liveUpdateSequence: Long = 0L,
     val testingMode: Boolean = false,
-    val builtInReplayActive: Boolean = false
+    val builtInReplayActive: Boolean = false,
+    val showingRememberedReports: Boolean = false,
+    val recentReportsRefreshing: Boolean = false
 )
 
 fun waitingSnapshot(
     mode: DataSourceMode = DataSourceMode.FREE,
     state: ConnectionState = ConnectionState.CONNECTING,
     status: String = "Connecting to P2PQuake…",
-    testingMode: Boolean = false
+    testingMode: Boolean = false,
+    showingRememberedReports: Boolean = false,
+    recentReportsRefreshing: Boolean = false
 ) = AppSnapshot(
     sourceMode = mode,
     connectionState = state,
     activeEew = false,
     statusText = status,
     testingMode = testingMode,
+    showingRememberedReports = showingRememberedReports,
+    recentReportsRefreshing = recentReportsRefreshing,
     event = EarthquakeEvent(
         id = "waiting",
         place = "Waiting for earthquake data",

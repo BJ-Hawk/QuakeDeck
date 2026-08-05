@@ -499,4 +499,10 @@
         <item quantity="other">対象地域 %1$d件</item>
     </plurals>
 
+    <string name="showing_saved_reports_updating">保存済みの情報を表示中・最新情報を更新中…</string>
+    <string name="updating_latest_reports">最新情報を更新中…</string>
+    <string name="preparing_detailed_map">詳細地図を準備中…</string>
+
+    <string name="showing_saved_reports_stale">保存済みの情報を表示中・最新情報を更新できません</string>
+
 </resources>

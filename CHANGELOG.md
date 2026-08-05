@@ -2,6 +2,16 @@
 
 QuakeDeck release history, newest first.
 
+## v0.9.80
+
+- Restores a small always-on cache of the latest confirmed earthquake reports immediately after a cold start, while clearly marking them as saved data until the current recent-report request completes.
+- Starts the live socket, remembered-report hydration, current recent-report request, station catalogue, and map preload concurrently; remembered reports use a non-live update kind and can never trigger notifications.
+- Removes the invariant 4096 × 4096 land-mask and ocean flood-fill from every launch by bundling build-generated prefecture coastline paths for both standard and high-resolution Japan geometry.
+- Displays the base Japan map as soon as it is ready, loads regional and municipality detail afterward with a compact progress banner, and gives the base geometry priority over deep-layer parsing.
+- Makes the saved collapsed portrait-panel state authoritative after the real summary detent is measured, so a minimized panel restores to the exact divider rather than just above it.
+- Applies the static-analysis review by inlining the redundant saved-camera local variable.
+- Bumps the Android application version to `0.9.80` (`versionCode` 120) and updates the README release marker.
+
 ## v0.9.79
 
 - Restores the last user-controlled main-map centre and zoom separately for portrait and landscape, while keeping automatic EEW/report/tsunami framing temporary and leaving Fit Japan as an explicit reset.

@@ -2,16 +2,16 @@
 
 QuakeDeck is an Android earthquake-monitoring prototype focused on Japan. It uses Kotlin and Jetpack Compose to combine live P2PQuake/JMA reports, EEW visualization, observed intensity mapping, tsunami information, historical report browsing, and deterministic Sandbox testing in one map-first interface.
 
-Current development version: **0.9.79**. QuakeDeck is still pre-1.0 and should not be treated as an official emergency-warning application.
+Current development version: **0.9.80**. QuakeDeck is still pre-1.0 and should not be treated as an official emergency-warning application.
 
 ## Current capabilities
 
-- Live P2PQuake REST bootstrap and WebSocket updates
+- Immediate remembered-report startup view followed by concurrent P2PQuake REST bootstrap and WebSocket updates
 - JMA earthquake reports, public warning-level EEW, and tsunami bulletins
 - Normalized 1×–128× map scale, where 1× uses the former 1.5× framing
 - Zoom-exclusive Japan vectors: N03 prefectures below 6.5×, 194 detailed JMA earthquake-reporting areas from 6.5× to below 21×, and municipalities/wards from 21× upward
 - Highest-reported-Shindo coloring for the active vector layer, backed by a bundled station-to-area catalogue so detailed fills remain available offline
-- Official JMA regional, deep-zoom municipality/ward, and tsunami forecast-zone geometry
+- Official JMA regional, deep-zoom municipality/ward, and tsunami forecast-zone geometry with precomputed prefecture coastlines for faster cold starts
 - Persistent JMA, NIED, and local-government station filters for the idle map, with report views restricted to their own observed stations
 - P/S wavefront visualization, event focus, observed intensity lists, report history, and persistent main-map camera/panel layout
 - Persistent local raw-report archive and historical report browser

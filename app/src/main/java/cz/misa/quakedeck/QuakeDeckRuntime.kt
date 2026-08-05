@@ -10,6 +10,8 @@ import cz.misa.quakedeck.data.DataSourceMode
 import cz.misa.quakedeck.data.HistoricalEventSummary
 import cz.misa.quakedeck.data.HistoricalIncident
 import cz.misa.quakedeck.data.HolidayCountryDetector
+import cz.misa.quakedeck.data.JapanMapGeometry
+import cz.misa.quakedeck.data.JmaAreaGeometry
 import cz.misa.quakedeck.data.P2pQuakeProvider
 import cz.misa.quakedeck.data.PublicHolidayCalendar
 import cz.misa.quakedeck.data.QuakeDataProvider
@@ -157,6 +159,21 @@ class QuakeDeckApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         PublicHolidayCalendar.initialize(this)
+
+        // Preload immutable map geometry as soon as the process exists. Keep
+        // the loaders on one ordered worker so the basic Japan outline wins CPU
+        // and can be displayed before the optional JMA detail layer is parsed.
+        Thread(
+            {
+                runCatching { JapanMapGeometry.load(applicationContext) }
+                runCatching { JmaAreaGeometry.load(applicationContext) }
+            },
+            "QuakeDeck-map-preload"
+        ).start()
+
+        // Start live reception before optional holiday refresh bookkeeping.
+        runtime.startProcess()
+
         val settings = AppSettings(this)
         if (settings.quietHoursSchedule.includePublicHolidays) {
             val country = HolidayCountryDetector.resolve(
@@ -166,6 +183,5 @@ class QuakeDeckApplication : Application() {
             ).countryCode
             PublicHolidayCalendar.refreshIfDue(this, country)
         }
-        runtime.startProcess()
     }
 }

@@ -505,4 +505,10 @@
         <item quantity="other">%1$d zasažených oblastí</item>
     </plurals>
 
+    <string name="showing_saved_reports_updating">Zobrazuji uložená hlášení · aktualizuji nejnovější…</string>
+    <string name="updating_latest_reports">Aktualizuji nejnovější hlášení…</string>
+    <string name="preparing_detailed_map">Připravuji podrobnou mapu…</string>
+
+    <string name="showing_saved_reports_stale">Zobrazuji uložená hlášení · nejnovější se nepodařilo aktualizovat</string>
+
 </resources>

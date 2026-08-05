@@ -1,23 +1,14 @@
 package cz.misa.quakedeck.data
 
 import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.Canvas
-import android.graphics.Color
-import android.graphics.Matrix
-import android.graphics.Paint
 import android.graphics.Path
-import androidx.core.graphics.createBitmap
 import cz.misa.quakedeck.R
 import org.json.JSONArray
 import org.json.JSONObject
-import java.nio.ByteBuffer
+import java.io.DataInputStream
 import java.util.zip.GZIPInputStream
 import kotlin.math.PI
 import kotlin.math.ln
-import kotlin.math.min
-import kotlin.math.roundToInt
-import kotlin.math.sqrt
 import kotlin.math.tan
 
 /** Projected Web-Mercator map-space point. X increases east, Y increases south. */
@@ -44,249 +35,8 @@ data class JapanMapData(
 }
 
 object JapanMapGeometry {
-    private data class CoastArcCandidate(
-        val prefecture: String,
-        val ref: Int
-    )
-
-    /**
-     * Rasterized union of all Japanese land polygons, used only while loading
-     * the map. TopoJSON shared-arc counts are not sufficient for this dataset:
-     * some neighbouring prefectures contain nearly coincident but independent
-     * arcs, which makes an inland boundary look unique and therefore coastal.
-     * Sampling both sides of each candidate segment against the union mask
-     * reliably keeps true sea-facing edges and rejects prefecture borders.
-     */
-    private class LandMask(
-        private val pixels: ByteArray,
-        private val oceanPixels: ByteArray,
-        private val width: Int,
-        private val height: Int,
-        private val rowBytes: Int,
-        private val scale: Float,
-        private val offsetX: Float,
-        private val offsetY: Float
-    ) {
-        fun isCoastSegment(from: MapPoint, to: MapPoint): Boolean {
-            val fromX = from.x * scale + offsetX
-            val fromY = from.y * scale + offsetY
-            val toX = to.x * scale + offsetX
-            val toY = to.y * scale + offsetY
-            val dx = toX - fromX
-            val dy = toY - fromY
-            val length = sqrt(dx * dx + dy * dy)
-            if (length < 0.20f) return false
-
-            val midpointX = (fromX + toX) / 2f
-            val midpointY = (fromY + toY) / 2f
-            val normalX = -dy / length
-            val normalY = dx / length
-
-            fun landBesideOcean(sampleDistance: Float): Boolean {
-                val firstX = midpointX + normalX * sampleDistance
-                val firstY = midpointY + normalY * sampleDistance
-                val secondX = midpointX - normalX * sampleDistance
-                val secondY = midpointY - normalY * sampleDistance
-                return (isLand(firstX, firstY) && isOcean(secondX, secondY)) ||
-                    (isOcean(firstX, firstY) && isLand(secondX, secondY))
-            }
-
-            // Multiple distances avoid a quantized boundary pixel producing a
-            // false result while still preserving narrow islands and peninsulas.
-            // The water side must be connected to the ocean: an enclosed lake,
-            // reservoir, or other inland hole is deliberately not coastline.
-            // Requiring agreement at two distances also rejects one-pixel gaps
-            // between nearly coincident prefecture polygons.
-            var confirmations = 0
-            if (landBesideOcean(1.25f)) confirmations++
-            if (landBesideOcean(2.5f)) confirmations++
-            if (landBesideOcean(4f)) confirmations++
-            return confirmations >= 2
-        }
-
-        private fun isLand(pixelX: Float, pixelY: Float): Boolean {
-            val x = pixelX.roundToInt()
-            val y = pixelY.roundToInt()
-            if (x !in 0 until width || y !in 0 until height) return false
-            return (pixels[y * rowBytes + x].toInt() and 0xFF) >= 128
-        }
-
-        private fun isOcean(pixelX: Float, pixelY: Float): Boolean {
-            val x = pixelX.roundToInt()
-            val y = pixelY.roundToInt()
-            // The mask has padding around Japan; treating an out-of-bounds
-            // sample as ocean keeps the outermost island edges valid too.
-            if (x !in 0 until width || y !in 0 until height) return true
-            return oceanPixels[y * width + x] == OCEAN
-        }
-
-        companion object {
-            private const val MASK_SIZE = 4096
-            private const val PADDING = 2f
-            private const val UNVISITED: Byte = 0
-            private const val OCEAN: Byte = 1
-            private const val QUEUED: Byte = 2
-
-            /**
-             * Marks only water connected to the outside of the Japan mask.
-             * Enclosed transparent regions are lakes/land holes, not sea. A
-             * scanline flood fill keeps the temporary stack small even though
-             * the 4096 px mask contains millions of ocean pixels.
-             */
-            private fun buildOceanMask(
-                pixels: ByteArray,
-                rowBytes: Int
-            ): ByteArray {
-                val ocean = ByteArray(MASK_SIZE * MASK_SIZE)
-                var stack = IntArray(16_384)
-                var stackSize = 0
-
-                fun isLand(x: Int, y: Int): Boolean =
-                    (pixels[y * rowBytes + x].toInt() and 0xFF) >= 128
-
-                fun pushIndex(index: Int) {
-                    if (stackSize == stack.size) {
-                        stack = stack.copyOf(stack.size * 2)
-                    }
-                    stack[stackSize++] = index
-                }
-
-                fun push(x: Int, y: Int) {
-                    if (x !in 0 until MASK_SIZE || y !in 0 until MASK_SIZE) return
-                    val index = y * MASK_SIZE + x
-                    if (ocean[index] != UNVISITED || isLand(x, y)) return
-                    ocean[index] = QUEUED
-                    pushIndex(index)
-                }
-
-                for (x in 0 until MASK_SIZE) {
-                    push(x, 0)
-                    push(x, MASK_SIZE - 1)
-                }
-                for (y in 1 until MASK_SIZE - 1) {
-                    push(0, y)
-                    push(MASK_SIZE - 1, y)
-                }
-
-                while (stackSize > 0) {
-                    val seed = stack[--stackSize]
-                    val seedY = seed / MASK_SIZE
-                    val seedX = seed - seedY * MASK_SIZE
-                    if (ocean[seed] == OCEAN || isLand(seedX, seedY)) continue
-
-                    var left = seedX
-                    while (left > 0) {
-                        val next = seedY * MASK_SIZE + left - 1
-                        if (ocean[next] == OCEAN || isLand(left - 1, seedY)) break
-                        left--
-                    }
-
-                    var right = seedX
-                    while (right + 1 < MASK_SIZE) {
-                        val next = seedY * MASK_SIZE + right + 1
-                        if (ocean[next] == OCEAN || isLand(right + 1, seedY)) break
-                        right++
-                    }
-
-                    val rowStart = seedY * MASK_SIZE
-                    for (x in left..right) ocean[rowStart + x] = OCEAN
-
-                    fun queueAdjacentRow(y: Int) {
-                        if (y !in 0 until MASK_SIZE) return
-                        var x = left
-                        while (x <= right) {
-                            val index = y * MASK_SIZE + x
-                            if (ocean[index] == UNVISITED && !isLand(x, y)) {
-                                val runSeedX = x
-                                while (x <= right) {
-                                    val continuation = y * MASK_SIZE + x
-                                    if (ocean[continuation] != UNVISITED || isLand(x, y)) break
-                                    ocean[continuation] = QUEUED
-                                    x++
-                                }
-                                pushIndex(y * MASK_SIZE + runSeedX)
-                            } else {
-                                x++
-                            }
-                        }
-                    }
-
-                    queueAdjacentRow(seedY - 1)
-                    queueAdjacentRow(seedY + 1)
-                }
-
-                // QUEUED can only remain where another scanline claimed the
-                // same run first; it is part of the outside-connected ocean.
-                for (index in ocean.indices) {
-                    if (ocean[index] == QUEUED) ocean[index] = OCEAN
-                }
-                return ocean
-            }
-
-            fun create(
-                landPath: Path,
-                minX: Float,
-                minY: Float,
-                maxX: Float,
-                maxY: Float
-            ): LandMask {
-                val spanX = (maxX - minX).coerceAtLeast(0.000001f)
-                val spanY = (maxY - minY).coerceAtLeast(0.000001f)
-                val scale = min(
-                    (MASK_SIZE - PADDING * 2f) / spanX,
-                    (MASK_SIZE - PADDING * 2f) / spanY
-                )
-                val offsetX = PADDING - minX * scale
-                val offsetY = PADDING - minY * scale
-
-                val bitmap = createBitmap(
-                    MASK_SIZE,
-                    MASK_SIZE,
-                    Bitmap.Config.ALPHA_8
-                )
-                val transformed = Path()
-                val matrix = Matrix().apply {
-                    setValues(
-                        floatArrayOf(
-                            scale, 0f, offsetX,
-                            0f, scale, offsetY,
-                            0f, 0f, 1f
-                        )
-                    )
-                }
-                landPath.transform(matrix, transformed)
-                Canvas(bitmap).drawPath(
-                    transformed,
-                    Paint().apply {
-                        isAntiAlias = false
-                        style = Paint.Style.FILL
-                        color = Color.WHITE
-                    }
-                )
-
-                val buffer = ByteBuffer.allocate(bitmap.byteCount)
-                bitmap.copyPixelsToBuffer(buffer)
-                val pixels = buffer.array()
-                val rowBytes = bitmap.rowBytes
-                bitmap.recycle()
-                val oceanPixels = buildOceanMask(
-                    pixels = pixels,
-                    rowBytes = rowBytes
-                )
-
-                return LandMask(
-                    pixels = pixels,
-                    oceanPixels = oceanPixels,
-                    width = MASK_SIZE,
-                    height = MASK_SIZE,
-                    rowBytes = rowBytes,
-                    scale = scale,
-                    offsetX = offsetX,
-                    offsetY = offsetY
-                )
-            }
-        }
-    }
+    private const val COASTLINE_BINARY_MAGIC = 0x5144434C
+    private const val COASTLINE_BINARY_VERSION = 1
 
     @Volatile private var cached: JapanMapData? = null
     @Volatile private var cachedHighRes: JapanMapData? = null
@@ -294,8 +44,11 @@ object JapanMapGeometry {
     fun load(context: Context): JapanMapData {
         cached?.let { return it }
         return synchronized(this) {
-            cached ?: loadInternal(context.applicationContext, R.raw.japan_prefectures_topojson)
-                .also { cached = it }
+            cached ?: loadInternal(
+                context.applicationContext,
+                R.raw.japan_prefectures_topojson,
+                R.raw.japan_prefecture_coastlines
+            ).also { cached = it }
         }
     }
 
@@ -304,12 +57,13 @@ object JapanMapGeometry {
         return synchronized(this) {
             cachedHighRes ?: loadInternal(
                 context.applicationContext,
-                R.raw.japan_prefectures_topojson_hires
+                R.raw.japan_prefectures_topojson_hires,
+                R.raw.japan_prefecture_coastlines_hires
             ).also { cachedHighRes = it }
         }
     }
 
-    private fun loadInternal(context: Context, resourceId: Int): JapanMapData {
+    private fun loadInternal(context: Context, resourceId: Int, coastlineResourceId: Int): JapanMapData {
         val text = GZIPInputStream(context.resources.openRawResource(resourceId))
             .bufferedReader(Charsets.UTF_8)
             .use { it.readText() }
@@ -355,7 +109,6 @@ object JapanMapGeometry {
         val landPath = Path().apply { fillType = Path.FillType.EVEN_ODD }
         val boundaryPath = Path()
         val prefectureShapes = ArrayList<PrefectureShape>(47)
-        val coastCandidates = ArrayList<CoastArcCandidate>()
 
         val geometryCollection = root
             .getJSONObject("objects")
@@ -365,12 +118,6 @@ object JapanMapGeometry {
         for (i in 0 until geometryCollection.length()) {
             val geometry = geometryCollection.getJSONObject(i)
             val nameJa = geometry.optJSONObject("properties")?.optString("name").orEmpty()
-            collectExteriorArcs(
-                geometry = geometry,
-                prefecture = nameJa,
-                destination = coastCandidates
-            )
-
             val prefecturePath = Path().apply { fillType = Path.FillType.EVEN_ODD }
             when (geometry.getString("type")) {
                 "Polygon" -> {
@@ -402,46 +149,14 @@ object JapanMapGeometry {
             }
         }
 
-        /*
-         * Candidate arcs come from polygon outer rings, excluding lake/hole
-         * boundaries. A temporary land-union mask then checks every tiny line
-         * segment: a real coastline has land on one side and sea on the other;
-         * an inland prefecture border has land on both sides.
-        */
-        val prefectureCoastlines = linkedMapOf<String, Path>()
-        val landMask = LandMask.create(landPath, minX, minY, maxX, maxY)
-
-        fun appendCoastArc(candidate: CoastArcCandidate, source: List<MapPoint>) {
-            val oriented = if (candidate.ref >= 0) source else source.asReversed()
-            if (oriented.size < 2) return
-
-            val prefecturePath = prefectureCoastlines.getOrPut(candidate.prefecture) { Path() }
-            var previousPrefectureEnd: MapPoint? = null
-
-            for (pointIndex in 1 until oriented.size) {
-                val from = oriented[pointIndex - 1]
-                val to = oriented[pointIndex]
-                if (!landMask.isCoastSegment(from, to)) {
-                    previousPrefectureEnd = null
-                    continue
-                }
-
-                if (previousPrefectureEnd != from) {
-                    prefecturePath.moveTo(from.x, from.y)
-                }
-                prefecturePath.lineTo(to.x, to.y)
-                previousPrefectureEnd = to
-            }
-        }
-
-        val seenCandidates = HashSet<Pair<String, Int>>()
-        coastCandidates.forEach { candidate ->
-            val arcIndex = if (candidate.ref >= 0) candidate.ref else -candidate.ref - 1
-            if (arcIndex !in decodedArcs.indices) return@forEach
-            if (!seenCandidates.add(candidate.prefecture to arcIndex)) return@forEach
-            appendCoastArc(candidate, decodedArcs[arcIndex])
-        }
-
+        // Sea-facing prefecture edges are generated at build time. The old
+        // cold-start path rasterized a 4096 x 4096 land mask and flood-filled
+        // the ocean on every process launch; loading these compact paths avoids
+        // that expensive invariant work entirely.
+        val prefectureCoastlines = loadPrefectureCoastlines(
+            context = context,
+            resourceId = coastlineResourceId
+        )
 
         return JapanMapData(
             landPath = landPath,
@@ -458,32 +173,39 @@ object JapanMapGeometry {
         )
     }
 
-    private fun collectExteriorArcs(
-        geometry: JSONObject,
-        prefecture: String,
-        destination: MutableList<CoastArcCandidate>
-    ) {
-        if (prefecture.isBlank()) return
-
-        fun collectRing(refs: JSONArray) {
-            for (index in 0 until refs.length()) {
-                val ref = refs.getInt(index)
-                destination += CoastArcCandidate(prefecture, ref)
-            }
+    private fun loadPrefectureCoastlines(
+        context: Context,
+        resourceId: Int
+    ): Map<String, Path> = DataInputStream(
+        GZIPInputStream(context.resources.openRawResource(resourceId))
+    ).use { input ->
+        require(input.readInt() == COASTLINE_BINARY_MAGIC) {
+            "Invalid prefecture coastline resource"
         }
-
-        when (geometry.getString("type")) {
-            "Polygon" -> {
-                val rings = geometry.getJSONArray("arcs")
-                if (rings.length() > 0) collectRing(rings.getJSONArray(0))
-            }
-
-            "MultiPolygon" -> {
-                val polygons = geometry.getJSONArray("arcs")
-                for (polygonIndex in 0 until polygons.length()) {
-                    val rings = polygons.getJSONArray(polygonIndex)
-                    if (rings.length() > 0) collectRing(rings.getJSONArray(0))
+        require(input.readInt() == COASTLINE_BINARY_VERSION) {
+            "Unsupported prefecture coastline resource version"
+        }
+        val quantization = input.readInt().toFloat()
+        val prefectureCount = input.readInt()
+        buildMap(prefectureCount) {
+            repeat(prefectureCount) {
+                val nameLength = input.readInt()
+                require(nameLength in 1..256) { "Invalid prefecture name length" }
+                val nameBytes = ByteArray(nameLength)
+                input.readFully(nameBytes)
+                val name = nameBytes.toString(Charsets.UTF_8)
+                val segmentCount = input.readInt()
+                val path = Path()
+                repeat(segmentCount) {
+                    val pointCount = input.readInt()
+                    require(pointCount >= 2) { "Invalid coastline segment" }
+                    repeat(pointCount) { pointIndex ->
+                        val x = input.readInt() / quantization
+                        val y = input.readInt() / quantization
+                        if (pointIndex == 0) path.moveTo(x, y) else path.lineTo(x, y)
+                    }
                 }
+                if (!path.isEmpty) put(name, path)
             }
         }
     }

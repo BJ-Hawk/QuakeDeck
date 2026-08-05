@@ -31,6 +31,8 @@ class P2pQuakeProvider(
     private val persistentSettings = AppSettings(appContext)
     private val archiveStore = ReportArchiveStore(appContext)
     private val archiveExecutor = Executors.newSingleThreadExecutor()
+    private val recentReportCache = RecentReportCache(appContext)
+    private val recentCacheExecutor = Executors.newSingleThreadExecutor()
     @Volatile private var reportArchiveEnabled = persistentSettings.reportArchiveEnabled
     @Volatile private var automaticHistoricalDownload = persistentSettings.automaticHistoricalDownload
     @Volatile private var historicalDownloadRunning = false
@@ -86,11 +88,17 @@ class P2pQuakeProvider(
     private var connectionGeneration = 0
     @Volatile private var currentState = ConnectionState.DISCONNECTED
     private var lastRecoveryStartedAtMs = 0L
+    private var recentReportsGeneration = 0
+    private var freshRecentReportsLoaded = false
+    private var showingRememberedReports = false
+    private var recentReportsRefreshing = false
+    private var recentCacheWriteRunnable: Runnable? = null
 
     override fun start(onSnapshot: (AppSnapshot) -> Unit) {
         callback = onSnapshot
         stopped = false
         currentState = ConnectionState.CONNECTING
+        prepareRecentReportRefresh()
         emit(
             waitingSnapshot(
                 sourceMode,
@@ -100,22 +108,29 @@ class P2pQuakeProvider(
                 } else {
                     "Connecting live P2PQuake feed…"
                 },
-                testingMode = testingMode
+                testingMode = testingMode,
+                recentReportsRefreshing = recentReportsRefreshing
             )
         )
 
-        // The live socket is the critical path. Do not wait for the station
-        // catalogue or the slower JMA history endpoint before opening it.
+        // The live socket, remembered-report cache and current-report request
+        // are independent launch paths. Start all three immediately instead of
+        // waiting for station metadata before the main screen becomes useful.
         connectWebSocket()
         refreshArchiveStatus()
+        val startupGeneration = recentReportsGeneration
+        if (!testingMode) {
+            loadRememberedHistory(startupGeneration)
+            loadConfirmedHistory(startupGeneration)
+        }
 
         StationCatalog.loadAsync(appContext, httpClient) {
-            // Station coordinates improve the map, but they never gate the live
-            // socket. The sandbox deliberately stays isolated from production
-            // history so old replay messages cannot be mixed with current events.
-            if (!stopped && !testingMode) {
-                if (reportArchiveEnabled) loadArchivedHistory()
-                loadConfirmedHistory()
+            mainHandler.post {
+                if (stopped) return@post
+                enrichKnownStationCoordinates()
+                // The opt-in raw archive is allowed to wait for station metadata;
+                // it is not part of the cold-start latest-report path.
+                if (!testingMode && reportArchiveEnabled) loadArchivedHistory()
             }
         }
     }
@@ -123,6 +138,10 @@ class P2pQuakeProvider(
     override fun setTestingMode(enabled: Boolean) {
         if (testingMode == enabled) return
         testingMode = enabled
+        recentReportsGeneration++
+        freshRecentReportsLoaded = false
+        showingRememberedReports = false
+        recentReportsRefreshing = false
 
         // setTestingMode() is called once before start() so the initial socket
         // opens directly on the requested endpoint. Only perform a live switch
@@ -147,6 +166,7 @@ class P2pQuakeProvider(
             eventHistory.clear()
             sandboxTimelineOffsets.clear()
             synchronized(seenMessageIds) { seenMessageIds.clear() }
+            prepareRecentReportRefresh()
 
             emit(
                 waitingSnapshot(
@@ -157,14 +177,17 @@ class P2pQuakeProvider(
                     } else {
                         "Testing mode off · reconnecting to the live feed…"
                     },
-                    testingMode = enabled
+                    testingMode = enabled,
+                    recentReportsRefreshing = recentReportsRefreshing
                 )
             )
 
             connectWebSocket()
             if (!enabled) {
+                val refreshGeneration = recentReportsGeneration
+                loadRememberedHistory(refreshGeneration)
+                loadConfirmedHistory(refreshGeneration)
                 if (reportArchiveEnabled) loadArchivedHistory()
-                loadConfirmedHistory()
             }
         }
     }
@@ -541,6 +564,8 @@ class P2pQuakeProvider(
         callback = null
         cancelBuiltInReplay()
         cancelInjectedTestRestore()
+        recentCacheWriteRunnable?.let(mainHandler::removeCallbacks)
+        recentCacheWriteRunnable = null
         cancelScheduledReconnect()
         clearActiveEew()
         cancelTsunamiCleanup()
@@ -924,6 +949,107 @@ class P2pQuakeProvider(
         }
     }
 
+    private fun prepareRecentReportRefresh() {
+        recentReportsGeneration++
+        freshRecentReportsLoaded = false
+        showingRememberedReports = false
+        recentReportsRefreshing = !testingMode
+    }
+
+    private fun loadRememberedHistory(generation: Int) {
+        if (testingMode || stopped) return
+        recentCacheExecutor.execute {
+            val remembered = recentReportCache.load()
+            if (remembered.isEmpty()) return@execute
+            mainHandler.post {
+                if (
+                    stopped ||
+                    testingMode ||
+                    generation != recentReportsGeneration ||
+                    freshRecentReportsLoaded ||
+                    lastEvent != null
+                ) return@post
+
+                remembered.asReversed().forEach(::addToHistory)
+                lastEvent = eventHistory.firstOrNull()
+                showingRememberedReports = lastEvent != null
+                lastEvent?.let { event ->
+                    emit(
+                        snapshot(
+                            state = currentState,
+                            activeEew = activeEew,
+                            event = event,
+                            status = "Showing saved reports · updating latest reports…"
+                        )
+                    )
+                }
+            }
+        }
+    }
+
+    private fun scheduleRecentReportCacheWrite() {
+        if (testingMode || builtInReplayActive || stopped) return
+        recentCacheWriteRunnable?.let(mainHandler::removeCallbacks)
+        val runnable = Runnable {
+            recentCacheWriteRunnable = null
+            if (testingMode || builtInReplayActive || stopped) return@Runnable
+            val reports = eventHistory
+                .filter { it.kind == EarthquakeEventKind.CONFIRMED && it.id != "waiting" }
+                .take(30)
+            if (reports.isEmpty()) return@Runnable
+            recentCacheExecutor.execute { recentReportCache.save(reports) }
+        }
+        recentCacheWriteRunnable = runnable
+        mainHandler.postDelayed(runnable, RECENT_CACHE_WRITE_DELAY_MILLIS)
+    }
+
+    private fun enrichKnownStationCoordinates() {
+        fun enrich(event: EarthquakeEvent): EarthquakeEvent {
+            var changed = false
+            val points = event.points.map { point ->
+                if (
+                    point.isArea ||
+                    point.stationName.isNullOrBlank() ||
+                    (point.latitude != null && point.longitude != null)
+                ) {
+                    point
+                } else {
+                    val station = StationCatalog.lookup(point.prefecture, point.stationName)
+                    if (station == null) {
+                        point
+                    } else {
+                        changed = true
+                        point.copy(latitude = station.latitude, longitude = station.longitude)
+                    }
+                }
+            }
+            return if (changed) event.copy(points = points) else event
+        }
+
+        var changed = false
+        for (index in eventHistory.indices) {
+            val enriched = enrich(eventHistory[index])
+            if (enriched != eventHistory[index]) {
+                eventHistory[index] = enriched
+                changed = true
+            }
+        }
+        val enrichedLastEvent = lastEvent?.let(::enrich)
+        if (enrichedLastEvent != lastEvent) changed = true
+        lastEvent = enrichedLastEvent
+
+        val enrichedActiveEew = activeEewEvent?.let(::enrich)
+        if (enrichedActiveEew != activeEewEvent) changed = true
+        activeEewEvent = enrichedActiveEew
+
+        if (changed) {
+            scheduleRecentReportCacheWrite()
+            lastEvent?.let { event ->
+                emit(snapshot(currentState, activeEew, event, sourceLabel()))
+            }
+        }
+    }
+
     private fun loadArchivedHistory() {
         if (!reportArchiveEnabled || testingMode) return
         archiveExecutor.execute {
@@ -1054,6 +1180,7 @@ class P2pQuakeProvider(
                                 }
                             }
                         }
+                    scheduleRecentReportCacheWrite()
                     if (lastEvent == null) lastEvent = eventHistory.firstOrNull()
                     lastEvent?.let { event ->
                         emit(snapshot(currentState, activeEew, event, "Historical reports archived"))
@@ -1083,7 +1210,25 @@ class P2pQuakeProvider(
         }
     }
 
-    private fun loadConfirmedHistory() {
+    private fun emitCurrentRecentState(status: String) {
+        val event = lastEvent
+        if (event != null) {
+            emit(snapshot(currentState, activeEew, event, status))
+        } else {
+            emit(
+                waitingSnapshot(
+                    mode = sourceMode,
+                    state = currentState,
+                    status = status,
+                    testingMode = testingMode,
+                    showingRememberedReports = showingRememberedReports,
+                    recentReportsRefreshing = recentReportsRefreshing
+                )
+            )
+        }
+    }
+
+    private fun loadConfirmedHistory(generation: Int = recentReportsGeneration) {
         if (testingMode || stopped) return
 
         val request = Request.Builder()
@@ -1092,11 +1237,25 @@ class P2pQuakeProvider(
             .build()
 
         httpClient.newCall(request).enqueue(object : Callback {
-            override fun onFailure(call: Call, e: IOException) = Unit
+            override fun onFailure(call: Call, e: IOException) {
+                mainHandler.post {
+                    if (generation != recentReportsGeneration || stopped || testingMode) return@post
+                    recentReportsRefreshing = false
+                    emitCurrentRecentState(sourceLabel())
+                }
+            }
 
             override fun onResponse(call: Call, response: Response) {
                 val parsedEvents = response.use {
-                    if (!response.isSuccessful) return
+                    if (!response.isSuccessful) {
+                        mainHandler.post {
+                            if (generation == recentReportsGeneration && !stopped && !testingMode) {
+                                recentReportsRefreshing = false
+                                emitCurrentRecentState(sourceLabel())
+                            }
+                        }
+                        return
+                    }
                     runCatching {
                         val array = JSONArray(response.body.string())
                         buildList {
@@ -1107,9 +1266,20 @@ class P2pQuakeProvider(
                     }.getOrDefault(emptyList())
                 }
 
-                if (parsedEvents.isEmpty()) return
+                if (parsedEvents.isEmpty()) {
+                    mainHandler.post {
+                        if (generation == recentReportsGeneration && !stopped && !testingMode) {
+                            recentReportsRefreshing = false
+                            emitCurrentRecentState(sourceLabel())
+                        }
+                    }
+                    return
+                }
                 mainHandler.post {
-                    if (stopped || testingMode) return@post
+                    if (stopped || testingMode || generation != recentReportsGeneration) return@post
+                    freshRecentReportsLoaded = true
+                    showingRememberedReports = false
+                    recentReportsRefreshing = false
                     // API order is newest-first. Add oldest-first so addToHistory
                     // leaves the final list newest-first without disturbing any
                     // newer WebSocket event that arrived while this call ran.
@@ -1119,6 +1289,7 @@ class P2pQuakeProvider(
                             lastEvent = merged
                         }
                     }
+                    scheduleRecentReportCacheWrite()
                     if (lastEvent == null) lastEvent = eventHistory.firstOrNull()
                     lastEvent?.let { event ->
                         emit(
@@ -1207,7 +1378,9 @@ class P2pQuakeProvider(
                             sourceMode,
                             ConnectionState.CONNECTED,
                             connectedStatus,
-                            testingMode = sandboxForThisConnection
+                            testingMode = sandboxForThisConnection,
+                            showingRememberedReports = showingRememberedReports,
+                            recentReportsRefreshing = recentReportsRefreshing
                         )
                     )
 
@@ -1841,6 +2014,10 @@ class P2pQuakeProvider(
         recovered: Boolean
     ): LiveUpdateKind {
         val quake = addToHistory(incoming)
+        if (!testingMode) {
+            showingRememberedReports = false
+            scheduleRecentReportCacheWrite()
+        }
         val current = lastEvent
         val warning = activeEewEvent
         val confirmsActiveEew = warning?.let { likelySameEarthquake(it, quake) } == true
@@ -2339,7 +2516,19 @@ class P2pQuakeProvider(
             point.isArea.toString()
         ).joinToString("|")
         existing.forEach { point -> merged[key(point)] = point }
-        incoming.forEach { point -> merged[key(point)] = point }
+        incoming.forEach { point ->
+            val pointKey = key(point)
+            val previous = merged[pointKey]
+            merged[pointKey] = if (
+                previous != null &&
+                (point.latitude == null || point.longitude == null) &&
+                previous.latitude != null && previous.longitude != null
+            ) {
+                point.copy(latitude = previous.latitude, longitude = previous.longitude)
+            } else {
+                point
+            }
+        }
         return merged.values.sortedByDescending { scaleRank(it.intensity) }
     }
 
@@ -2446,7 +2635,9 @@ class P2pQuakeProvider(
         statusText = status,
         liveUpdateSequence = liveUpdateSequence,
         testingMode = testingMode,
-        builtInReplayActive = builtInReplayActive
+        builtInReplayActive = builtInReplayActive,
+        showingRememberedReports = showingRememberedReports,
+        recentReportsRefreshing = recentReportsRefreshing
     )
 
     private fun liveSnapshot(
@@ -2470,7 +2661,9 @@ class P2pQuakeProvider(
             liveUpdateKind = updateKind,
             liveUpdateSequence = liveUpdateSequence,
             testingMode = testingMode,
-            builtInReplayActive = builtInReplayActive
+            builtInReplayActive = builtInReplayActive,
+            showingRememberedReports = showingRememberedReports,
+            recentReportsRefreshing = recentReportsRefreshing
         )
     }
 
@@ -2563,6 +2756,7 @@ class P2pQuakeProvider(
         const val AUTO_BACKFILL_MIN_INTERVAL_MS = 15L * 60L * 1000L
         const val TSUNAMI_CANCELLATION_RETENTION_SECONDS = 15L * 60L
         const val INJECTED_TEST_DISPLAY_MILLIS = 45_000L
+        const val RECENT_CACHE_WRITE_DELAY_MILLIS = 600L
         const val INJECTED_HISTORY_LIMIT = 30
     }
 

@@ -73,6 +73,7 @@ object UiLocalization {
             "P2PQuake SANDBOX connected · recent feed synchronized" -> R.string.status_p2p_sandbox_synced
             "Latest event loaded · connecting live feed…" -> R.string.status_latest_loaded
             "Recent reports loaded · connecting live feed…" -> R.string.status_recent_loaded
+            "Showing saved reports · updating latest reports…" -> R.string.showing_saved_reports_updating
             "Testing mode off · reconnecting to the live feed…" -> R.string.status_testing_off
             "Testing mode · connecting to historical sandbox replays…" -> R.string.status_testing_on
             "App resumed · reconnecting now…" -> R.string.status_app_resumed

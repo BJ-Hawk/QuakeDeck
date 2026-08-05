@@ -1053,6 +1053,7 @@ private fun QuakeDeckApp(
                     portraitRestoreMapFraction = portraitMapFraction
                     portraitPendingObservationRestore = null
                 }
+                portraitPanelCollapsed -> portraitMapFraction = measuredMaxMapFraction
                 wasAtMinimum -> portraitMapFraction = measuredMaxMapFraction
                 portraitMapFraction > measuredMaxMapFraction -> {
                     portraitMapFraction = measuredMaxMapFraction
@@ -1060,9 +1061,13 @@ private fun QuakeDeckApp(
             }
         }
 
-        LaunchedEffect(isLandscape, portraitMaxMapFraction) {
-            if (!isLandscape && portraitMapFraction > portraitMaxMapFraction) {
-                portraitMapFraction = portraitMaxMapFraction
+        LaunchedEffect(isLandscape, portraitMaxMapFraction, portraitPanelCollapsed) {
+            if (!isLandscape) {
+                portraitMapFraction = if (portraitPanelCollapsed) {
+                    portraitMaxMapFraction
+                } else {
+                    portraitMapFraction.coerceAtMost(portraitMaxMapFraction)
+                }
             }
         }
 
@@ -2715,6 +2720,30 @@ private fun EventPanel(
             ) {
                 Spacer(Modifier.height(6.dp))
 
+                if (snapshot.recentReportsRefreshing || snapshot.showingRememberedReports) {
+                    val startupReportStatus = when {
+                        snapshot.showingRememberedReports && snapshot.recentReportsRefreshing -> {
+                            R.string.showing_saved_reports_updating
+                        }
+                        snapshot.showingRememberedReports -> R.string.showing_saved_reports_stale
+                        else -> R.string.updating_latest_reports
+                    }
+                    Surface(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(8.dp),
+                        color = MaterialTheme.colorScheme.secondaryContainer
+                    ) {
+                        Text(
+                            text = uiText(startupReportStatus, placeNameLanguage),
+                            modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+                            color = MaterialTheme.colorScheme.onSecondaryContainer,
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                    }
+                    Spacer(Modifier.height(6.dp))
+                }
+
                 snapshot.tsunami?.let { tsunami ->
                     TsunamiAlertCard(
                         report = tsunami,
@@ -4016,25 +4045,41 @@ private fun JapanMap(
             JapanMapGeometry.load(context.applicationContext)
         }
     }
+    val baseMapReady = mapData != null
     val regionalContext by produceState<RegionalContextData?>(
         initialValue = null,
-        key1 = context.applicationContext
+        key1 = baseMapReady
     ) {
-        value = withContext(Dispatchers.Default) {
-            RegionalContextGeometry.load(context.applicationContext)
+        value = if (baseMapReady) {
+            withContext(Dispatchers.Default) {
+                RegionalContextGeometry.load(context.applicationContext)
+            }
+        } else {
+            null
         }
     }
     val jmaRegionalData by produceState<JmaRegionalMapData?>(
         initialValue = null,
-        key1 = context.applicationContext
+        key1 = baseMapReady
     ) {
-        value = withContext(Dispatchers.Default) {
-            JmaAreaGeometry.load(context.applicationContext)
+        value = if (baseMapReady) {
+            withContext(Dispatchers.Default) {
+                JmaAreaGeometry.load(context.applicationContext)
+            }
+        } else {
+            null
         }
     }
 
     val data = mapData
-    val officialAreas = jmaRegionalData
+    val officialAreas = jmaRegionalData ?: remember {
+        JmaRegionalMapData(
+            quakeAreas = emptyList(),
+            eewAreas = emptyList(),
+            tsunamiAreas = emptyList(),
+            prefectureBorders = android.graphics.Path()
+        )
+    }
     var highResRequested by remember { mutableStateOf(false) }
     val highResMap by produceState<JapanMapData?>(initialValue = null, key1 = highResRequested) {
         value = if (highResRequested) {
@@ -4047,17 +4092,21 @@ private fun JapanMap(
     }
     val municipalityMap by produceState<JmaMunicipalityMapData?>(
         initialValue = null,
-        key1 = context.applicationContext
+        key1 = baseMapReady
     ) {
-        // Prepare the deep layer concurrently with the startup geometry. A
-        // focus action can jump directly from 1× to 21×+, so threshold-only
-        // loading would otherwise leave the requested layer temporarily empty.
-        value = withContext(Dispatchers.Default) {
-            JmaMunicipalityGeometry.load(context.applicationContext)
+        // The base map gets the first CPU slice. Deep municipality geometry is
+        // prepared immediately after it becomes visible, rather than competing
+        // with the cold-start Japan/JMA loaders.
+        value = if (baseMapReady) {
+            withContext(Dispatchers.Default) {
+                JmaMunicipalityGeometry.load(context.applicationContext)
+            }
+        } else {
+            null
         }
     }
 
-    if (data == null || officialAreas == null) {
+    if (data == null) {
         Box(
             Modifier.fillMaxSize().background(extraColors.mapBackground),
             contentAlignment = Alignment.Center
@@ -4065,7 +4114,11 @@ private fun JapanMap(
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 CircularProgressIndicator()
                 Spacer(Modifier.height(10.dp))
-                Text(uiText(R.string.preparing_japan_map, language), color = extraColors.mapBranding, fontSize = 12.sp)
+                Text(
+                    uiText(R.string.preparing_japan_map, language),
+                    color = extraColors.mapBranding,
+                    fontSize = 12.sp
+                )
             }
         }
         return
@@ -4997,17 +5050,16 @@ private fun JapanMap(
             baseTop
         ) {
             if (initialCameraApplied) return@LaunchedEffect
-            val saved = initialCamera
-            if (!focusEvent && saved != null) {
+            if (!focusEvent && initialCamera != null) {
                 val restoredZoom = cameraZoomForDisplayZoom(
-                    saved.displayZoom.coerceIn(
+                    initialCamera.displayZoom.coerceIn(
                         MIN_DISPLAY_MAP_ZOOM,
                         MAX_DISPLAY_MAP_ZOOM
                     )
                 )
                 val sourceCenter = Offset(
-                    data.minX + sourceWidth * saved.centerXFraction.coerceIn(0f, 1f),
-                    data.minY + sourceHeight * saved.centerYFraction.coerceIn(0f, 1f)
+                    data.minX + sourceWidth * initialCamera.centerXFraction.coerceIn(0f, 1f),
+                    data.minY + sourceHeight * initialCamera.centerYFraction.coerceIn(0f, 1f)
                 )
                 val baseCenter = Offset(
                     baseLeft + (sourceCenter.x - data.minX) * fitScale,
@@ -5128,10 +5180,26 @@ private fun JapanMap(
         // The tier follows the zoom visible on screen. During a pinch the
         // retained layer is still transformed as a whole, but crossing 6.5× or
         // 21× must not leave the previous vector visible under the new label.
-        val activeVectorLayer = mapVectorLayerForEffectiveZoom(
+        val requestedVectorLayer = mapVectorLayerForEffectiveZoom(
             displayZoomForCameraZoom(committedZoom),
             gestureScale
         )
+        // Never blank the land while a more detailed layer is still parsing.
+        // Keep the best ready vector visible and swap upward as each immutable
+        // detail layer becomes available.
+        val activeVectorLayer = when {
+            requestedVectorLayer == MapVectorLayer.MUNICIPALITIES && municipalityMap == null -> {
+                if (jmaRegionalData != null) {
+                    MapVectorLayer.JMA_QUAKE_AREAS
+                } else {
+                    MapVectorLayer.N03_PREFECTURES
+                }
+            }
+            requestedVectorLayer == MapVectorLayer.JMA_QUAKE_AREAS && jmaRegionalData == null -> {
+                MapVectorLayer.N03_PREFECTURES
+            }
+            else -> requestedVectorLayer
+        }
 
         // The regional context is intentionally NOT part of the expensive cached
         // N03 layer. It is only two tiny native Paths, so redraw it with the live
@@ -5373,7 +5441,7 @@ private fun JapanMap(
         }
 
         if (
-            activeVectorLayer == MapVectorLayer.MUNICIPALITIES &&
+            requestedVectorLayer == MapVectorLayer.MUNICIPALITIES &&
             municipalityMap == null
         ) {
             CircularProgressIndicator(
@@ -5381,6 +5449,25 @@ private fun JapanMap(
                 color = extraColors.mapBranding,
                 strokeWidth = 2.dp
             )
+        }
+
+        if (jmaRegionalData == null || municipalityMap == null) {
+            Surface(
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .padding(top = 8.dp),
+                shape = RoundedCornerShape(8.dp),
+                color = MaterialTheme.colorScheme.surface.copy(alpha = 0.90f),
+                tonalElevation = 2.dp
+            ) {
+                Text(
+                    uiText(R.string.preparing_detailed_map, language),
+                    modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp),
+                    color = extraColors.mapBranding,
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.SemiBold
+                )
+            }
         }
 
         // Reuse text paints rather than allocating multiple Android Paint objects

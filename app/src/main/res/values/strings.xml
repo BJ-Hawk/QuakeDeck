@@ -501,4 +501,10 @@
         <item quantity="other">%1$d affected areas</item>
     </plurals>
 
+    <string name="showing_saved_reports_updating">Showing saved reports · updating latest reports…</string>
+    <string name="updating_latest_reports">Updating latest reports…</string>
+    <string name="preparing_detailed_map">Preparing detailed map…</string>
+
+    <string name="showing_saved_reports_stale">Showing saved reports · latest update unavailable</string>
+
 </resources>
