@@ -72,6 +72,8 @@ import androidx.core.graphics.createBitmap
 import androidx.core.net.toUri
 import androidx.core.view.WindowCompat
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -4014,8 +4016,10 @@ private fun buildResizeMapRaster(
         intensity.color = intensityColor(value).toArgb()
         canvas.drawPath(prefecture.path, intensity)
     }
-    canvas.drawPath(data.boundaryPath, seam)
-    canvas.drawPath(data.boundaryPath, border)
+    data.boundaryPaths.forEach { path ->
+        canvas.drawPath(path, seam)
+        canvas.drawPath(path, border)
+    }
 
     bitmap.prepareToDraw()
     return ResizeMapRaster(bitmap)
@@ -4065,6 +4069,7 @@ private fun JapanMap(
             tsunami != null
     var jmaDetailRequested by remember { mutableStateOf(mapNeedsJmaDetail) }
     var municipalityDetailRequested by remember { mutableStateOf(false) }
+    var municipalityCacheGeneration by remember { mutableIntStateOf(0) }
 
     LaunchedEffect(mapNeedsJmaDetail) {
         if (mapNeedsJmaDetail) jmaDetailRequested = true
@@ -4101,23 +4106,15 @@ private fun JapanMap(
             quakeAreas = emptyList(),
             eewAreas = emptyList(),
             tsunamiAreas = emptyList(),
-            prefectureBorders = android.graphics.Path()
+            quakeFineBorders = emptyList(),
+            prefectureBorders = emptyList()
         )
-    }
-    var highResRequested by remember { mutableStateOf(false) }
-    val highResMap by produceState<JapanMapData?>(initialValue = null, key1 = highResRequested) {
-        value = if (highResRequested) {
-            withContext(Dispatchers.Default) {
-                JapanMapGeometry.loadHighRes(context.applicationContext)
-            }
-        } else {
-            null
-        }
     }
     val municipalityMap by produceState<JmaMunicipalityMapData?>(
         initialValue = null,
         key1 = baseMapReady,
-        key2 = municipalityDetailRequested
+        key2 = municipalityDetailRequested,
+        key3 = municipalityCacheGeneration
     ) {
         // Municipality geometry is useful only at deep zoom. Avoid parsing it
         // during a normal launch, then preserve the current fallback layer
@@ -4130,7 +4127,6 @@ private fun JapanMap(
             null
         }
     }
-
     if (data == null) {
         Box(
             Modifier.fillMaxSize().background(extraColors.mapBackground),
@@ -4203,13 +4199,14 @@ private fun JapanMap(
     val prefectureIntensity = intensityGeometry.prefectures
     val quakeAreaIntensity = intensityGeometry.quakeAreas
     val eewAreaIntensity = intensityGeometry.eewAreas
+    val municipalityGeometryForIntensity = municipalityMap
     val municipalityIntensity = remember(
         mapIntensityPoints,
-        municipalityMap,
+        municipalityGeometryForIntensity,
         stationCatalogSize
     ) {
         val municipalities = linkedMapOf<String, String>()
-        municipalityMap?.let { geometry ->
+        municipalityGeometryForIntensity?.let { geometry ->
             mapIntensityPoints.forEach { point ->
                 if (point.intensity == "—") return@forEach
                 val area = geometry.resolveObservation(point) ?: return@forEach
@@ -4292,6 +4289,9 @@ private fun JapanMap(
             color = extraColors.mapLand.toArgb()
         }
     }
+    val municipalityLandPath = remember {
+        android.graphics.Path().apply { fillType = android.graphics.Path.FillType.EVEN_ODD }
+    }
     val intensityFillPaint = remember {
         Paint(Paint.ANTI_ALIAS_FLAG).apply { style = Paint.Style.FILL }
     }
@@ -4342,14 +4342,6 @@ private fun JapanMap(
             strokeCap = Paint.Cap.ROUND
         }
     }
-    val seamPaint = remember(extraColors) {
-        Paint(Paint.ANTI_ALIAS_FLAG).apply {
-            style = Paint.Style.STROKE
-            strokeJoin = Paint.Join.ROUND
-            strokeCap = Paint.Cap.ROUND
-            color = extraColors.mapLand.toArgb()
-        }
-    }
     val borderPaint = remember(extraColors) {
         Paint(Paint.ANTI_ALIAS_FLAG).apply {
             style = Paint.Style.STROKE
@@ -4362,9 +4354,9 @@ private fun JapanMap(
         Paint(Paint.ANTI_ALIAS_FLAG or Paint.FILTER_BITMAP_FLAG)
     }
 
-    // The vector map is re-rendered only when a gesture finishes. While fingers
-    // are moving, Android transforms the retained layer. This is what keeps the
-    // ~280k-point N03 geometry smooth even at the new deep zoom levels.
+    // While fingers move, Android transforms the retained layer. A short
+    // movement debounce commits the exact vector map during deliberate pauses,
+    // without attempting to retessellate the ~280k-point N03 geometry per frame.
     var committedZoom by remember {
         mutableFloatStateOf(
             initialCamera
@@ -4377,19 +4369,40 @@ private fun JapanMap(
     var committedPan by remember { mutableStateOf(Offset.Zero) }
     var gestureScale by remember { mutableFloatStateOf(1f) }
     var gesturePan by remember { mutableStateOf(Offset.Zero) }
-    LaunchedEffect(committedZoom, gestureScale) {
-        when (
+    val requestedVectorLayer by remember {
+        derivedStateOf {
             mapVectorLayerForEffectiveZoom(
                 displayZoomForCameraZoom(committedZoom),
                 gestureScale
             )
-        ) {
+        }
+    }
+    LaunchedEffect(requestedVectorLayer) {
+        when (requestedVectorLayer) {
             MapVectorLayer.MUNICIPALITIES -> {
                 jmaDetailRequested = true
                 municipalityDetailRequested = true
             }
             MapVectorLayer.JMA_QUAKE_AREAS -> jmaDetailRequested = true
             MapVectorLayer.N03_PREFECTURES -> Unit
+        }
+    }
+    // Keep municipal paths across normal threshold crossings, but release them
+    // after a settled lower zoom so the N03/JMA tiers return to a lean cache.
+    LaunchedEffect(committedZoom, municipalityDetailRequested) {
+        if (
+            !municipalityDetailRequested ||
+            displayZoomForCameraZoom(committedZoom) > MUNICIPALITY_CACHE_RELEASE_ZOOM
+        ) return@LaunchedEffect
+
+        delay(MUNICIPALITY_CACHE_RELEASE_DELAY)
+        if (
+            municipalityDetailRequested &&
+            displayZoomForCameraZoom(committedZoom) <= MUNICIPALITY_CACHE_RELEASE_ZOOM
+        ) {
+            municipalityDetailRequested = false
+            JmaMunicipalityGeometry.clear()
+            municipalityCacheGeneration++
         }
     }
     var previousViewportState by remember { mutableStateOf<MapViewportState?>(null) }
@@ -4416,8 +4429,6 @@ private fun JapanMap(
     LaunchedEffect(
         committedZoom,
         committedPan,
-        gestureScale,
-        gesturePan,
         mapInteractionNonce
     ) {
         zoomRailVisible = true
@@ -4443,6 +4454,43 @@ private fun JapanMap(
             // the settled vector render must share this hard map boundary.
             .clipToBounds()
             .pointerInput(density) {
+                coroutineScope {
+                    var settleRenderJob: Job? = null
+                    var settleRenderPending = false
+
+                    fun commitSettledCamera() {
+                        if (!settleRenderPending) return
+                        settleRenderPending = false
+
+                        val finalZoom = (committedZoom * gestureScale)
+                            .coerceIn(MIN_CAMERA_MAP_ZOOM, MAX_CAMERA_MAP_ZOOM)
+                        committedPan = clampMapPan(
+                            pan = committedPan * gestureScale + gesturePan,
+                            zoom = finalZoom,
+                            viewportWidth = size.width.toFloat(),
+                            viewportHeight = size.height.toFloat(),
+                            sourceWidth = data.maxX - data.minX,
+                            sourceHeight = data.maxY - data.minY
+                        )
+                        committedZoom = finalZoom
+                        gestureScale = 1f
+                        gesturePan = Offset.Zero
+                        leaseManualCamera(force = true)
+                        cameraSaveNonce++
+                        onUserCameraChanged()
+                    }
+
+                    fun scheduleSettledCamera(restartDelay: Boolean) {
+                        if (restartDelay) settleRenderJob?.cancel()
+                        if (settleRenderPending && !restartDelay) return
+                        settleRenderPending = true
+                        settleRenderJob = launch {
+                            delay(requestedVectorLayer.settleRenderDelay())
+                            commitSettledCamera()
+                            settleRenderJob = null
+                        }
+                    }
+
                 // Map controls are overlays. A gesture that STARTS on one belongs
                 // exclusively to that control; otherwise the parent recognizer can
                 // turn a slightly imperfect tap into a map drag underneath it.
@@ -4488,6 +4536,9 @@ private fun JapanMap(
                         startsOnZoomControls ||
                         startsOnBorderHelpButton
                     ) {
+                        settleRenderJob?.cancel()
+                        settleRenderJob = null
+                        commitSettledCamera()
                         // Do not consume these events: the child clickables still
                         // need them. We simply abstain from map pan/zoom handling.
                         var buttonPointersDown: Boolean
@@ -4498,10 +4549,6 @@ private fun JapanMap(
                         return@awaitEachGesture
                     }
 
-                    gestureScale = 1f
-                    gesturePan = Offset.Zero
-                    var cameraChanged = false
-
                     var pointersStillDown: Boolean
                     do {
                         val pointerEvent = awaitPointerEvent()
@@ -4510,63 +4557,49 @@ private fun JapanMap(
                         val centroid = pointerEvent.calculateCentroid(useCurrent = true)
 
                         if (!centroid.x.isNaN() && !centroid.y.isNaN()) {
-                            if (abs(zoomChange - 1f) > 0.0005f || panChange.getDistance() > 0.5f) {
-                                // Manual camera input takes control immediately and keeps
-                                // extending the lease while the gesture is still moving.
+                            val hasCameraInput =
+                                abs(zoomChange - 1f) > 0.00001f || panChange.getDistance() > 0.01f
+                            val fastCameraInput =
+                                abs(zoomChange - 1f) > 0.0005f || panChange.getDistance() > 0.5f
+                            if (hasCameraInput) {
+                                // Slow movement keeps the pending timer intact, so a
+                                // deliberate crawl can settle crisply without waiting
+                                // for finger-up. Faster motion postpones that work.
+                                scheduleSettledCamera(restartDelay = fastCameraInput)
                                 leaseManualCamera()
-                                cameraChanged = true
+                                val oldGestureScale = gestureScale
+                                val requestedTotalZoom = (
+                                    committedZoom * oldGestureScale * zoomChange
+                                ).coerceIn(MIN_CAMERA_MAP_ZOOM, MAX_CAMERA_MAP_ZOOM)
+                                val newGestureScale = requestedTotalZoom / committedZoom
+                                val ratio = if (oldGestureScale == 0f) 1f else newGestureScale / oldGestureScale
+
+                                val viewportCenter = Offset(size.width / 2f, size.height / 2f)
+                                val relativeCentroid = centroid - viewportCenter
+                                val rawGesturePan =
+                                    relativeCentroid * (1f - ratio) + gesturePan * ratio + panChange
+
+                                // Clamp the TOTAL displayed map transform, not merely
+                                // the current gesture delta. This keeps a slice of Japan
+                                // on-screen even during a long drag or pinch.
+                                val totalPan = committedPan * newGestureScale + rawGesturePan
+                                val clampedTotalPan = clampMapPan(
+                                    pan = totalPan,
+                                    zoom = requestedTotalZoom,
+                                    viewportWidth = size.width.toFloat(),
+                                    viewportHeight = size.height.toFloat(),
+                                    sourceWidth = data.maxX - data.minX,
+                                    sourceHeight = data.maxY - data.minY
+                                )
+                                gesturePan = clampedTotalPan - committedPan * newGestureScale
+                                gestureScale = newGestureScale
+
+                                pointerEvent.changes.forEach { it.consume() }
                             }
-                            val oldGestureScale = gestureScale
-                            val requestedTotalZoom = (
-                                committedZoom * oldGestureScale * zoomChange
-                            ).coerceIn(MIN_CAMERA_MAP_ZOOM, MAX_CAMERA_MAP_ZOOM)
-                            val newGestureScale = requestedTotalZoom / committedZoom
-                            val ratio = if (oldGestureScale == 0f) 1f else newGestureScale / oldGestureScale
-
-                            val viewportCenter = Offset(size.width / 2f, size.height / 2f)
-                            val relativeCentroid = centroid - viewportCenter
-                            val rawGesturePan =
-                                relativeCentroid * (1f - ratio) + gesturePan * ratio + panChange
-
-                            // Clamp the TOTAL displayed map transform, not merely
-                            // the current gesture delta. This keeps a slice of Japan
-                            // on-screen even during a long drag or pinch.
-                            val totalPan = committedPan * newGestureScale + rawGesturePan
-                            val clampedTotalPan = clampMapPan(
-                                pan = totalPan,
-                                zoom = requestedTotalZoom,
-                                viewportWidth = size.width.toFloat(),
-                                viewportHeight = size.height.toFloat(),
-                                sourceWidth = data.maxX - data.minX,
-                                sourceHeight = data.maxY - data.minY
-                            )
-                            gesturePan = clampedTotalPan - committedPan * newGestureScale
-                            gestureScale = newGestureScale
-
-                            pointerEvent.changes.forEach { it.consume() }
                         }
                         pointersStillDown = pointerEvent.changes.any { it.pressed }
                     } while (pointersStillDown)
-
-                    val finalZoom = (committedZoom * gestureScale)
-                        .coerceIn(MIN_CAMERA_MAP_ZOOM, MAX_CAMERA_MAP_ZOOM)
-                    committedPan = clampMapPan(
-                        pan = committedPan * gestureScale + gesturePan,
-                        zoom = finalZoom,
-                        viewportWidth = size.width.toFloat(),
-                        viewportHeight = size.height.toFloat(),
-                        sourceWidth = data.maxX - data.minX,
-                        sourceHeight = data.maxY - data.minY
-                    )
-                    committedZoom = finalZoom
-                    if (committedZoom >= HIGH_RES_ZOOM) highResRequested = true
-                    gestureScale = 1f
-                    gesturePan = Offset.Zero
-                    if (cameraChanged) {
-                        leaseManualCamera(force = true)
-                        cameraSaveNonce++
-                        onUserCameraChanged()
-                    }
+                }
                 }
             }
     ) {
@@ -4642,21 +4675,13 @@ private fun JapanMap(
                 .sortedByDescending { (city, _) -> cityPriorityValue(city.english) }
         }
 
-        fun displayedProjected(point: MapPoint): Offset {
+        fun committedProjected(point: MapPoint): Offset {
             val base = sourceToBase(point)
-            val committed = viewportCenter + (base - viewportCenter) * committedZoom + committedPan
-            return viewportCenter + (committed - viewportCenter) * gestureScale + gesturePan
-        }
-
-        fun committedGeo(latitude: Double, longitude: Double): Offset {
-            val base = sourceToBase(data.project(latitude, longitude))
             return viewportCenter + (base - viewportCenter) * committedZoom + committedPan
         }
 
-        fun displayedGeo(latitude: Double, longitude: Double): Offset {
-            val committed = committedGeo(latitude, longitude)
-            return viewportCenter +
-                (committed - viewportCenter) * gestureScale + gesturePan
+        fun committedGeo(latitude: Double, longitude: Double): Offset {
+            return committedProjected(data.project(latitude, longitude))
         }
 
         fun stepZoom(delta: Float) {
@@ -4712,7 +4737,6 @@ private fun JapanMap(
                 sourceHeight = sourceHeight
             )
             committedZoom = newCameraZoom
-            if (newCameraZoom >= HIGH_RES_ZOOM) highResRequested = true
             leaseManualCamera(force = true)
             cameraSaveNonce++
             onUserCameraChanged()
@@ -4790,7 +4814,6 @@ private fun JapanMap(
                     viewportHeight * 0.39f / verticalRadius
                 ).coerceIn(2.5f, 48f)
                 committedZoom = desiredZoom
-                if (desiredZoom >= HIGH_RES_ZOOM) highResRequested = true
                 committedPan = clampMapPan(
                     pan = Offset(
                         -(epicenter.x - viewportCenter.x) * desiredZoom,
@@ -4819,7 +4842,6 @@ private fun JapanMap(
                     viewportHeight * 0.78f / spanY
                 ).coerceIn(2.5f, 48f)
                 committedZoom = desiredZoom
-                if (desiredZoom >= HIGH_RES_ZOOM) highResRequested = true
                 committedPan = clampMapPan(
                     pan = Offset(
                         -(centre.x - viewportCenter.x) * desiredZoom,
@@ -4908,7 +4930,6 @@ private fun JapanMap(
             if (!allowZoomIn && desiredZoom >= committedZoom * 0.94f) return
             val targetZoom = if (allowZoomIn) desiredZoom else min(committedZoom, desiredZoom)
             committedZoom = targetZoom
-            if (targetZoom >= HIGH_RES_ZOOM) highResRequested = true
             committedPan = clampMapPan(
                 pan = Offset(
                     -(epicenter.x - viewportCenter.x) * targetZoom,
@@ -5114,7 +5135,6 @@ private fun JapanMap(
                     sourceWidth = sourceWidth,
                     sourceHeight = sourceHeight
                 )
-                if (restoredZoom >= HIGH_RES_ZOOM) highResRequested = true
             }
             initialCameraApplied = true
         }
@@ -5216,29 +5236,26 @@ private fun JapanMap(
             }
         }
 
-        val renderData = if (committedZoom >= HIGH_RES_ZOOM) highResMap ?: data else data
+        val renderData = data
         // The tier follows the zoom visible on screen. During a pinch the
         // retained layer is still transformed as a whole, but crossing 6.5× or
         // 21× must not leave the previous vector visible under the new label.
-        val requestedVectorLayer = mapVectorLayerForEffectiveZoom(
-            displayZoomForCameraZoom(committedZoom),
-            gestureScale
-        )
         // Never blank the land while a more detailed layer is still parsing.
         // Keep the best ready vector visible and swap upward as each immutable
         // detail layer becomes available.
-        val activeVectorLayer = when {
-            requestedVectorLayer == MapVectorLayer.MUNICIPALITIES && municipalityMap == null -> {
-                if (jmaRegionalData != null) {
-                    MapVectorLayer.JMA_QUAKE_AREAS
-                } else {
-                    MapVectorLayer.N03_PREFECTURES
-                }
+        val renderedMunicipalityMap = municipalityMap
+        val activeVectorLayer = when (requestedVectorLayer) {
+            MapVectorLayer.MUNICIPALITIES -> when {
+                renderedMunicipalityMap != null -> MapVectorLayer.MUNICIPALITIES
+                jmaRegionalData != null -> MapVectorLayer.JMA_QUAKE_AREAS
+                else -> MapVectorLayer.N03_PREFECTURES
             }
-            requestedVectorLayer == MapVectorLayer.JMA_QUAKE_AREAS && jmaRegionalData == null -> {
+            MapVectorLayer.JMA_QUAKE_AREAS -> if (jmaRegionalData != null) {
+                MapVectorLayer.JMA_QUAKE_AREAS
+            } else {
                 MapVectorLayer.N03_PREFECTURES
             }
-            else -> requestedVectorLayer
+            MapVectorLayer.N03_PREFECTURES -> MapVectorLayer.N03_PREFECTURES
         }
 
         // The regional context is intentionally NOT part of the expensive cached
@@ -5327,8 +5344,11 @@ private fun JapanMap(
                     )
                 }
 
-                seamPaint.strokeWidth = 2.2f / renderScale
-                borderPaint.strokeWidth = 0.9f / renderScale
+                // The old N03 renderer stroked the complete nationwide border
+                // twice: once with a land-coloured seam and again with the
+                // visible line. One slightly stronger antialiased border keeps
+                // the same separation without a second ~280k-point traversal.
+                borderPaint.strokeWidth = 1.1f / renderScale
                 municipalityBoundaryPaint.strokeWidth = 0.55f / renderScale
                 quakePrefectureBorderPaint.strokeWidth = 3f / renderScale
                 municipalityWarningZoneBorderPaint.strokeWidth = 3f / renderScale
@@ -5342,9 +5362,9 @@ private fun JapanMap(
                     native.concat(matrix)
 
                     // Resizing the event panel changes the Canvas dimensions on
-                    // every drag frame. Use the prepared raster for the stable
-                    // land/intensity layer during that short interaction, then
-                    // return to full vector rendering as soon as the drag ends.
+                    // every drag frame. The prepared raster is reserved for
+                    // that resize interaction only; ordinary N03 pan and zoom
+                    // always use the topology-safe simplified vector paths.
                     val activeResizeRaster = resizeRaster
                     if (
                         panelResizing &&
@@ -5371,8 +5391,9 @@ private fun JapanMap(
                                         native.drawPath(prefecture.path, intensityFillPaint)
                                     }
                                 }
-                                native.drawPath(renderData.boundaryPath, seamPaint)
-                                native.drawPath(renderData.boundaryPath, borderPaint)
+                                renderData.boundaryPaths.forEach { path ->
+                                    native.drawPath(path, borderPaint)
+                                }
                             }
 
                             MapVectorLayer.JMA_QUAKE_AREAS -> {
@@ -5400,13 +5421,12 @@ private fun JapanMap(
                                         native.drawPath(area.path, intensityFillPaint)
                                     }
                                 }
-                                officialAreas.quakeAreas.forEach { area ->
-                                    native.drawPath(area.path, borderPaint)
+                                officialAreas.quakeFineBorders.forEach { path ->
+                                    native.drawPath(path, borderPaint)
                                 }
-                                native.drawPath(
-                                    officialAreas.prefectureBorders,
-                                    quakePrefectureBorderPaint
-                                )
+                                officialAreas.prefectureBorders.forEach { path ->
+                                    native.drawPath(path, quakePrefectureBorderPaint)
+                                }
                             }
 
                             MapVectorLayer.MUNICIPALITIES -> {
@@ -5417,12 +5437,20 @@ private fun JapanMap(
                                     (size.width - renderOffsetX) / renderScale + margin,
                                     (size.height - renderOffsetY) / renderScale + margin
                                 )
-                                val visibleMunicipalities = municipalityMap
+                                val visibleMunicipalities = renderedMunicipalityMap
                                     ?.visibleAreas(sourceViewport)
                                     .orEmpty()
+                                // Fill the visible municipal mesh in one pass.
+                                // Drawing adjacent polygons separately with an
+                                // antialiased opaque paint leaves a hairline of
+                                // blended background even when their arcs match.
+                                municipalityLandPath.rewind()
+                                municipalityLandPath.fillType =
+                                    android.graphics.Path.FillType.EVEN_ODD
                                 visibleMunicipalities.forEach { area ->
-                                    native.drawPath(area.path, landPaint)
+                                    municipalityLandPath.addPath(area.path)
                                 }
+                                native.drawPath(municipalityLandPath, landPaint)
                                 visibleMunicipalities.forEach { area ->
                                     municipalityIntensity[area.geometryKey]?.let { intensity ->
                                         intensityFillPaint.color =
@@ -5430,19 +5458,21 @@ private fun JapanMap(
                                         native.drawPath(area.path, intensityFillPaint)
                                     }
                                 }
-                                visibleMunicipalities.forEach { area ->
-                                    native.drawPath(area.path, municipalityBoundaryPaint)
-                                }
-                                municipalityMap?.let { geometry ->
-                                    native.drawPath(
-                                        geometry.warningZoneBorders,
-                                        municipalityWarningZoneBorderPaint
-                                    )
-                                    native.drawPath(
-                                        geometry.prefectureBorders,
-                                        municipalityPrefectureBorderPaint
-                                    )
-                                }
+                                renderedMunicipalityMap
+                                    ?.visibleFineBoundaryPaths(sourceViewport)
+                                    ?.forEach { path ->
+                                        native.drawPath(path, municipalityBoundaryPaint)
+                                    }
+                                renderedMunicipalityMap
+                                    ?.visibleWarningBoundaryPaths(sourceViewport)
+                                    ?.forEach { path ->
+                                        native.drawPath(path, municipalityWarningZoneBorderPaint)
+                                    }
+                                renderedMunicipalityMap
+                                    ?.visiblePrefectureBoundaryPaths(sourceViewport)
+                                    ?.forEach { path ->
+                                        native.drawPath(path, municipalityPrefectureBorderPaint)
+                                    }
                             }
                         }
                     }
@@ -5482,7 +5512,7 @@ private fun JapanMap(
 
         if (
             requestedVectorLayer == MapVectorLayer.MUNICIPALITIES &&
-            municipalityMap == null
+            renderedMunicipalityMap == null
         ) {
             CircularProgressIndicator(
                 modifier = Modifier.align(Alignment.Center).size(30.dp),
@@ -5555,11 +5585,25 @@ private fun JapanMap(
             )
         }
 
-        // Dynamic overlays stay outside the expensive retained land layer. City
-        // names, stations and the epicenter therefore stay razor-sharp while the
-        // N03 layer can use cheap GPU transforms during gestures.
-        Canvas(Modifier.fillMaxSize()) {
-            val totalZoom = committedZoom * gestureScale
+        // Dynamic overlays stay outside the expensive retained land layer. They
+        // remain crisp once the camera settles, while their own retained layer
+        // receives the same cheap GPU transform during a gesture.
+        // Keep expensive cities, station dots, labels and event overlays in a
+        // retained layer during a gesture. The old path recalculated their
+        // visibility (including all ~3,000 idle stations) for every pointer
+        // update; transforming the settled overlay on the GPU is much smoother.
+        Canvas(
+            Modifier
+                .fillMaxSize()
+                .graphicsLayer {
+                    scaleX = gestureScale
+                    scaleY = gestureScale
+                    translationX = gesturePan.x
+                    translationY = gesturePan.y
+                    transformOrigin = TransformOrigin.Center
+                }
+        ) {
+            val totalZoom = committedZoom
             val useJapaneseNames = !PlaceNameTranslator.shouldUseEnglish(language)
             val topUiExclusion = with(density) { 92.dp.toPx() }
 
@@ -5644,7 +5688,7 @@ private fun JapanMap(
             projectedCities
                 .forEach { (city, projected) ->
                     if (totalZoom < cityMinZoom(city)) return@forEach
-                    val p = displayedProjected(projected)
+                    val p = committedProjected(projected)
                     if (!visible(p)) return@forEach
                     val label = if (useJapaneseNames) city.japanese else city.english
                     if (!drawMapText(label, p, major = city.major)) return@forEach
@@ -5661,7 +5705,7 @@ private fun JapanMap(
             // correctly show no station markers at all.
             if (!panelResizing && totalZoom >= BASE_STATION_DOTS_ZOOM) {
                 projectedStations.forEach { (station, projected) ->
-                    val p = displayedProjected(projected)
+                    val p = committedProjected(projected)
                     if (!visibleMarker(p, 8f)) return@forEach
                     val stationColor = when (station.networkJa) {
                         "気象庁" -> extraColors.mapStationJma
@@ -5695,7 +5739,7 @@ private fun JapanMap(
                 event.points.forEach { point ->
                     val lat = point.latitude ?: return@forEach
                     val lon = point.longitude ?: return@forEach
-                    val p = displayedGeo(lat, lon)
+                    val p = committedGeo(lat, lon)
                     if (!visibleMarker(p, 12f)) return@forEach
                     drawCircle(
                         intensityColor(point.intensity),
@@ -5736,7 +5780,7 @@ private fun JapanMap(
 
                                 val path = Path()
                                 ringPoints.forEachIndexed { index, point ->
-                                    val projected = displayedGeo(point.latitude, point.longitude)
+                                    val projected = committedGeo(point.latitude, point.longitude)
                                     if (index == 0) path.moveTo(projected.x, projected.y)
                                     else path.lineTo(projected.x, projected.y)
                                 }
@@ -5753,7 +5797,7 @@ private fun JapanMap(
                             drawWavefront(waves.pWaveRadiusKm, Color(0xFF51C9FF))
                             drawWavefront(waves.sWaveRadiusKm, Color(0xFFFFA640))
 
-                            val destination = displayedGeo(
+                            val destination = committedGeo(
                                 alertLocation.latitude,
                                 alertLocation.longitude
                             )
@@ -5769,7 +5813,7 @@ private fun JapanMap(
                     }
 
                 if (event.hasJapanMapEpicenter()) {
-                    val epi = displayedGeo(event.latitude, event.longitude)
+                    val epi = committedGeo(event.latitude, event.longitude)
                     drawEpicenterMarker(
                         center = epi,
                         markerSizeDp = markerSizeDp,
@@ -6330,13 +6374,22 @@ private fun createMapTextPaint(
         }
     }
 
-// Camera thresholds below retain the physical magnification used before the
-// public scale was normalized; their visible values are divided by 1.5.
-private const val HIGH_RES_ZOOM = 8f
 private const val OBSERVED_STATION_DOTS_ZOOM = 12f
+private const val MUNICIPALITY_CACHE_RELEASE_ZOOM = 16f
+private val MUNICIPALITY_CACHE_RELEASE_DELAY = 4.seconds
 private const val BASE_STATION_DOTS_ZOOM = 18f
 private const val OBSERVED_STATION_NAMES_ZOOM = 36f
 private const val BASE_STATION_NAMES_ZOOM = 48f
+
+private fun MapVectorLayer.settleRenderDelay() = when (this) {
+    // Shared-arc N03 simplification keeps this nationwide vector responsive
+    // enough to settle on the next scheduler turn, like the JMA tier.
+    MapVectorLayer.N03_PREFECTURES -> 0.milliseconds
+    // The JMA regions are fast enough to settle essentially immediately.
+    MapVectorLayer.JMA_QUAKE_AREAS -> 0.milliseconds
+    // Municipality visibility is indexed, but still benefits from one frame.
+    MapVectorLayer.MUNICIPALITIES -> 0.milliseconds
+}
 
 /**
  * Calculate the legacy fitted base scale from the hard screen-space N03 rule.

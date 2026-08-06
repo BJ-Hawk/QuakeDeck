@@ -2,6 +2,22 @@
 
 QuakeDeck release history, newest first.
 
+## v0.9.82
+
+- Moves normal pan and pinch interaction onto the retained GPU-transformed map layer, then schedules a settled vector redraw after a short quiet pause. The pause is layer-aware: 5 ms for the simplified N03 tier and 1 ms for JMA and municipality tiers.
+- Makes vector-layer selection follow the zoom currently visible during a gesture, preserving the intended 6.5× JMA and 21× municipality transitions without briefly showing a stale lower-detail layer.
+- Replaces the nationwide N03 source with an offline-generated, topology-safe 1 km resource. It retains all 47 prefectures in 15,775 fill points and strokes 13,288 shared boundary edges exactly once through 47 precompiled prefecture-sized paths, eliminating the duplicated N03 border traversal. The prior 167 m candidate remains under `tools/source` as a rollback asset.
+- Keeps detailed JMA and municipality geometry off the cold-start path, retains viewport culling for municipality fills, and keeps dynamic markers, labels, and alerts out of the expensive retained land render.
+- Rebuilds municipality fills and outlines from a planar topology generated from the original JMA source rings. Noded shared arcs remove mismatched double municipal borders and assign only narrow source-boundary slivers to their nearest municipality, so neighbouring fills meet exactly without holes.
+- Fills the visible municipality mesh in one antialiased even/odd pass instead of separately antialiasing every neutral municipal polygon, eliminating background-blended hairline seams before the shared municipal outline is stroked.
+- Simplifies original municipality rings by twelve source units (about 133 m) before rebuilding the shared topology, reducing the installed municipal fill mesh from 547,503 to 285,875 points while preserving all 1,897 municipalities and one-copy boundaries.
+- Splits shared municipality outlines into mutually exclusive fine, warning-zone, and prefecture batches. Each line is now drawn exactly once with its intended hierarchy stroke, instead of broad overlays repainting fine municipal borders.
+- Precompiles the JMA middle-tier reporting-area source into 194 small fine/prefecture path groups. Prefecture edges are assigned once, removed from their fine paths, and drawn with the highlighted stroke without a giant merged Path or any on-device classification/splitting.
+- Removes now build-only municipality and JMA JSON overlay sources from the APK; compact preclassified boundary resources are loaded only with their detailed map tier.
+- Releases cached municipality geometry only after the settled view has remained at or below 16× for four seconds, avoiding threshold thrash near 21× while allowing the N03 and JMA tiers to return to their lighter steady-state memory footprint.
+- Restores/updates the detailed-map loading states and localised status strings, and modernises the affected timing calls to Kotlin duration APIs.
+- Bumps the Android application version to `0.9.82` (`versionCode` 148) and updates the README release marker.
+
 ## v0.9.81a
 
 - Removes remaining cold-start work from the UI thread: EEW destination-area geometry resolves in the background, detailed JMA and municipality map layers load on demand, and holiday-cache preparation runs at background priority.

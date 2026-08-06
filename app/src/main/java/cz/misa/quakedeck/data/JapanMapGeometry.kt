@@ -23,7 +23,7 @@ data class PrefectureShape(
 data class JapanMapData(
     val landPath: Path,
     val prefectures: List<PrefectureShape>,
-    val boundaryPath: Path,
+    val boundaryPaths: List<Path>,
     /** Only arcs on the sea-facing edge, grouped by prefecture. */
     val prefectureCoastlines: Map<String, Path>,
     val minX: Float,
@@ -44,11 +44,7 @@ object JapanMapGeometry {
     fun load(context: Context): JapanMapData {
         cached?.let { return it }
         return synchronized(this) {
-            cached ?: loadInternal(
-                context.applicationContext,
-                R.raw.japan_prefectures_topojson,
-                R.raw.japan_prefecture_coastlines
-            ).also { cached = it }
+            cached ?: loadSimplifiedInternal(context.applicationContext).also { cached = it }
         }
     }
 
@@ -63,7 +59,11 @@ object JapanMapGeometry {
         }
     }
 
-    private fun loadInternal(context: Context, resourceId: Int, coastlineResourceId: Int): JapanMapData {
+    private fun loadInternal(
+        context: Context,
+        resourceId: Int,
+        coastlineResourceId: Int
+    ): JapanMapData {
         val text = GZIPInputStream(context.resources.openRawResource(resourceId))
             .bufferedReader(Charsets.UTF_8)
             .use { it.readText() }
@@ -161,11 +161,127 @@ object JapanMapGeometry {
         return JapanMapData(
             landPath = landPath,
             prefectures = prefectureShapes,
-            boundaryPath = boundaryPath,
+            boundaryPaths = listOf(boundaryPath),
             prefectureCoastlines = prefectureCoastlines,
             // Keep the exact projected extremes from the N03 arcs. Camera
             // context is applied explicitly by mapFitScale, rather than being
             // hidden inside these geometry bounds.
+            minX = minX,
+            minY = minY,
+            maxX = maxX,
+            maxY = maxY
+        )
+    }
+
+    /**
+     * The N03 source was prepared before the JMA detail tiers existed and is
+     * far too intricate for the 1x–6.49x prefecture view. The generated asset
+     * simplifies complete rings (not its tiny TopoJSON arcs), giving the map a
+     * genuinely smaller vector workload while preserving every prefecture.
+     */
+    private fun loadSimplifiedInternal(context: Context): JapanMapData {
+        val text = GZIPInputStream(
+            context.resources.openRawResource(R.raw.japan_prefectures_simplified)
+        ).bufferedReader(Charsets.UTF_8).use { it.readText() }
+        val root = JSONObject(text)
+        val version = root.getInt("version")
+        require(version == 1 || version == 2) { "Unsupported simplified N03 resource" }
+        val quantization = root.getDouble("quantization")
+        require(quantization > 0.0) { "Invalid simplified N03 quantization" }
+        val bounds = root.getJSONArray("bounds")
+        require(bounds.length() == 4) { "Invalid simplified N03 bounds" }
+
+        val minLongitude = bounds.getDouble(0)
+        val minLatitude = bounds.getDouble(1)
+        val maxLongitude = bounds.getDouble(2)
+        val maxLatitude = bounds.getDouble(3)
+        val minX = projectGeo(minLatitude, minLongitude).x
+        val maxX = projectGeo(minLatitude, maxLongitude).x
+        val minY = projectGeo(maxLatitude, minLongitude).y
+        val maxY = projectGeo(minLatitude, minLongitude).y
+        val landPath = Path().apply { fillType = Path.FillType.EVEN_ODD }
+        val legacyBoundaryPath = Path()
+        val boundaryPaths = ArrayList<Path>(47)
+        val prefectures = ArrayList<PrefectureShape>(47)
+        val areas = root.getJSONArray("areas")
+
+        for (areaIndex in 0 until areas.length()) {
+            val area = areas.getJSONArray(areaIndex)
+            val nameJa = area.getString(0)
+            val parts = area.getJSONArray(1)
+            val prefecturePath = Path().apply { fillType = Path.FillType.EVEN_ODD }
+            for (partIndex in 0 until parts.length()) {
+                val encoded = parts.getJSONArray(partIndex)
+                if (encoded.length() < 6 || encoded.length() % 2 != 0) continue
+                var longitude = 0L
+                var latitude = 0L
+                var offset = 0
+                while (offset < encoded.length()) {
+                    if (offset == 0) {
+                        longitude = encoded.getLong(offset)
+                        latitude = encoded.getLong(offset + 1)
+                    } else {
+                        longitude += encoded.getLong(offset)
+                        latitude += encoded.getLong(offset + 1)
+                    }
+                    val point = projectGeo(latitude / quantization, longitude / quantization)
+                    if (offset == 0) {
+                        prefecturePath.moveTo(point.x, point.y)
+                    } else {
+                        prefecturePath.lineTo(point.x, point.y)
+                    }
+                    offset += 2
+                }
+                prefecturePath.close()
+            }
+            if (!prefecturePath.isEmpty && nameJa.isNotBlank()) {
+                landPath.addPath(prefecturePath)
+                if (version == 1) legacyBoundaryPath.addPath(prefecturePath)
+                prefectures += PrefectureShape(nameJa, prefecturePath)
+            }
+        }
+
+        require(prefectures.size == 47) { "Incomplete simplified N03 prefecture resource" }
+        if (version == 1) {
+            boundaryPaths += legacyBoundaryPath
+        } else {
+            val groups = root.getJSONArray("boundaries")
+            require(groups.length() == prefectures.size) {
+                "Simplified N03 boundary group count mismatch"
+            }
+            for (groupIndex in 0 until groups.length()) {
+                val group = groups.getJSONArray(groupIndex)
+                val path = Path()
+                for (pathIndex in 0 until group.length()) {
+                    val encoded = group.getJSONArray(pathIndex)
+                    require(encoded.length() >= 4 && encoded.length() % 2 == 0) {
+                        "Invalid simplified N03 boundary path"
+                    }
+                    var longitude = encoded.getLong(0)
+                    var latitude = encoded.getLong(1)
+                    projectGeo(latitude / quantization, longitude / quantization)
+                        .let { path.moveTo(it.x, it.y) }
+                    var offset = 2
+                    while (offset < encoded.length()) {
+                        longitude += encoded.getLong(offset)
+                        latitude += encoded.getLong(offset + 1)
+                        projectGeo(latitude / quantization, longitude / quantization)
+                            .let { path.lineTo(it.x, it.y) }
+                        offset += 2
+                    }
+                }
+                if (!path.isEmpty) boundaryPaths += path
+            }
+            require(boundaryPaths.isNotEmpty()) { "Missing simplified N03 boundaries" }
+        }
+        return JapanMapData(
+            landPath = landPath,
+            prefectures = prefectures,
+            boundaryPaths = boundaryPaths,
+            prefectureCoastlines = loadPrefectureCoastlines(
+                context,
+                R.raw.japan_prefecture_coastlines
+            ),
             minX = minX,
             minY = minY,
             maxX = maxX,

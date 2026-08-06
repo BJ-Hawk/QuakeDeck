@@ -21,7 +21,7 @@ class JmaAreaShape(
     val nameJa: String,
     val path: Path,
     val bounds: RectF,
-    private val rings: List<FloatArray>,
+    internal val rings: List<FloatArray>,
     private val closed: Boolean
 ) {
     val geometryKey: String = "${layer.name}:$code:$nameJa"
@@ -59,7 +59,8 @@ class JmaRegionalMapData(
     val quakeAreas: List<JmaAreaShape>,
     val eewAreas: List<JmaAreaShape>,
     val tsunamiAreas: List<JmaAreaShape>,
-    val prefectureBorders: Path
+    val quakeFineBorders: List<Path>,
+    val prefectureBorders: List<Path>
 ) {
     private val quakeByCode = quakeAreas
         .filter { it.code.isNotBlank() }
@@ -245,8 +246,9 @@ class JmaRegionalMapData(
 /** Deep-zoom JMA municipality/ward geometry, prepared off the UI thread. */
 class JmaMunicipalityMapData(
     val areas: List<JmaAreaShape>,
-    val warningZoneBorders: Path,
-    val prefectureBorders: Path
+    private val fineBoundaries: MunicipalityBoundaries,
+    private val warningBoundaries: MunicipalityBoundaries,
+    private val prefectureBoundaries: MunicipalityBoundaries
 ) {
     private val byCode = areas
         .filter { it.code.isNotBlank() }
@@ -254,13 +256,13 @@ class JmaMunicipalityMapData(
     private val spatialIndex: Map<Long, List<JmaAreaShape>> =
         mutableMapOf<Long, MutableList<JmaAreaShape>>().apply {
             areas.forEach { area ->
-                val minX = gridCoordinate(area.bounds.left)
-                val maxX = gridCoordinate(area.bounds.right)
-                val minY = gridCoordinate(area.bounds.top)
-                val maxY = gridCoordinate(area.bounds.bottom)
+                val minX = MunicipalityBoundaryGrid.gridCoordinate(area.bounds.left)
+                val maxX = MunicipalityBoundaryGrid.gridCoordinate(area.bounds.right)
+                val minY = MunicipalityBoundaryGrid.gridCoordinate(area.bounds.top)
+                val maxY = MunicipalityBoundaryGrid.gridCoordinate(area.bounds.bottom)
                 for (x in minX..maxX) {
                     for (y in minY..maxY) {
-                        getOrPut(gridKey(x, y)) { mutableListOf() }.add(area)
+                        getOrPut(MunicipalityBoundaryGrid.gridKey(x, y)) { mutableListOf() }.add(area)
                     }
                 }
             }
@@ -286,9 +288,9 @@ class JmaMunicipalityMapData(
 
     fun municipalityAt(latitude: Double, longitude: Double): JmaAreaShape? {
         val projected = projectGeo(latitude, longitude)
-        val candidates = spatialIndex[gridKey(
-            gridCoordinate(projected.x),
-            gridCoordinate(projected.y)
+        val candidates = spatialIndex[MunicipalityBoundaryGrid.gridKey(
+            MunicipalityBoundaryGrid.gridCoordinate(projected.x),
+            MunicipalityBoundaryGrid.gridCoordinate(projected.y)
         )].orEmpty()
         return candidates.firstOrNull { it.contains(projected) }
             // Defensive fallback for a polygon whose simplified bounds touch a
@@ -308,19 +310,19 @@ class JmaMunicipalityMapData(
             return emptyList()
         }
 
-        val minX = gridCoordinate(sourceBounds.left)
-        val maxX = gridCoordinate(sourceBounds.right)
-        val minY = gridCoordinate(sourceBounds.top)
-        val maxY = gridCoordinate(sourceBounds.bottom)
+        val minX = MunicipalityBoundaryGrid.gridCoordinate(sourceBounds.left)
+        val maxX = MunicipalityBoundaryGrid.gridCoordinate(sourceBounds.right)
+        val minY = MunicipalityBoundaryGrid.gridCoordinate(sourceBounds.top)
+        val maxY = MunicipalityBoundaryGrid.gridCoordinate(sourceBounds.bottom)
         val cellCount = (maxX.toLong() - minX + 1L) * (maxY.toLong() - minY + 1L)
-        if (cellCount > MAX_VIEWPORT_GRID_CELLS) {
+        if (cellCount > MunicipalityBoundaryGrid.MAX_VIEWPORT_GRID_CELLS) {
             return areas.filter { it.intersects(sourceBounds) }
         }
 
         val visible = LinkedHashSet<JmaAreaShape>()
         for (x in minX..maxX) {
             for (y in minY..maxY) {
-                spatialIndex[gridKey(x, y)].orEmpty().forEach { area ->
+                spatialIndex[MunicipalityBoundaryGrid.gridKey(x, y)].orEmpty().forEach { area ->
                     if (area.intersects(sourceBounds)) visible += area
                 }
             }
@@ -328,17 +330,47 @@ class JmaMunicipalityMapData(
         return visible.toList()
     }
 
-    private companion object {
+    /** One-copy municipal outlines for the current viewport. */
+    fun visibleFineBoundaryPaths(sourceBounds: RectF): List<Path> =
+        fineBoundaries.visiblePaths(sourceBounds)
+
+    fun visibleWarningBoundaryPaths(sourceBounds: RectF): List<Path> =
+        warningBoundaries.visiblePaths(sourceBounds)
+
+    fun visiblePrefectureBoundaryPaths(sourceBounds: RectF): List<Path> =
+        prefectureBoundaries.visiblePaths(sourceBounds)
+}
+
+private fun MunicipalityBoundaries.visiblePaths(sourceBounds: RectF): List<Path> {
+        if (
+            !sourceBounds.left.isFinite() ||
+            !sourceBounds.top.isFinite() ||
+            !sourceBounds.right.isFinite() ||
+            !sourceBounds.bottom.isFinite()
+        ) return emptyList()
+
+        val paths = ArrayList<Path>()
+        // The resource assigns each edge to its midpoint cell. The padding is
+        // baked into this lookup so an edge crossing a viewport boundary stays
+        // visible without any geometry work on the UI device.
+        for (x in MunicipalityBoundaryGrid.gridCoordinate(sourceBounds.left) - 1..MunicipalityBoundaryGrid.gridCoordinate(sourceBounds.right) + 1) {
+            for (y in MunicipalityBoundaryGrid.gridCoordinate(sourceBounds.top) - 1..MunicipalityBoundaryGrid.gridCoordinate(sourceBounds.bottom) + 1) {
+                chunks[MunicipalityBoundaryGrid.gridKey(x, y)]?.let(paths::add)
+            }
+        }
+        if (!overflow.isEmpty) paths += overflow
+        return paths
+    }
+private object MunicipalityBoundaryGrid {
         // Roughly 0.57 degrees in projected X. Most cells contain only a handful
         // of municipalities, keeping station-to-polygon lookup effectively O(1).
-        const val GRID_SIZE = 0.01f
-        const val MAX_VIEWPORT_GRID_CELLS = 4_096L
+    const val GRID_SIZE = 0.01f
+    const val MAX_VIEWPORT_GRID_CELLS = 4_096L
 
-        fun gridCoordinate(value: Float): Int = floor(value / GRID_SIZE).toInt()
+    fun gridCoordinate(value: Float): Int = floor(value / GRID_SIZE).toInt()
 
-        fun gridKey(x: Int, y: Int): Long =
-            (x.toLong() shl 32) xor (y.toLong() and 0xffffffffL)
-    }
+    fun gridKey(x: Int, y: Int): Long =
+        (x.toLong() shl 32) xor (y.toLong() and 0xffffffffL)
 }
 
 object JmaAreaGeometry {
@@ -359,14 +391,13 @@ object JmaAreaGeometry {
             R.raw.jma_tsunami_coastlines,
             JmaAreaLayer.TSUNAMI
         )
+        val borders = loadJmaReportingBorderPaths(context, quakeAreas)
         return JmaRegionalMapData(
             quakeAreas = quakeAreas,
             eewAreas = eewAreas,
             tsunamiAreas = tsunamiAreas,
-            prefectureBorders = loadOpenBorderOverlay(
-                context,
-                R.raw.jma_quake_region_prefecture_borders
-            )
+            quakeFineBorders = borders.fine,
+            prefectureBorders = borders.prefecture
         )
     }
 }
@@ -378,79 +409,147 @@ object JmaMunicipalityGeometry {
     fun load(context: Context): JmaMunicipalityMapData {
         cached?.let { return it }
         return synchronized(this) {
-            cached ?: JmaMunicipalityMapData(
-                areas = loadJmaMunicipalityLayer(context.applicationContext),
-                warningZoneBorders = loadOpenBorderOverlay(
-                    context.applicationContext,
-                    R.raw.jma_municipality_warning_zone_borders,
-                    expectedKind = "inter-earthquake-warning-zone-borders"
-                ),
-                prefectureBorders = loadOpenBorderOverlay(
-                    context.applicationContext,
-                    R.raw.jma_municipality_prefecture_borders,
-                    expectedKind = "inter-prefecture-borders"
+            cached ?: run {
+                JmaMunicipalityMapData(
+                    areas = loadJmaMunicipalityLayer(
+                        context.applicationContext,
+                        R.raw.jma_quake_municipalities_topology
+                    ),
+                    fineBoundaries = loadJmaMunicipalityBoundaries(context.applicationContext, R.raw.jma_municipality_fine_boundaries),
+                    warningBoundaries = loadJmaMunicipalityBoundaries(context.applicationContext, R.raw.jma_municipality_warning_boundaries),
+                    prefectureBoundaries = loadJmaMunicipalityBoundaries(context.applicationContext, R.raw.jma_municipality_prefecture_boundaries)
                 )
-            ).also { cached = it }
+            }.also { cached = it }
         }
+    }
+
+    /** Release deep-zoom geometry after the map has moved well below its tier. */
+    fun clear() {
+        cached = null
     }
 }
 
-private fun loadOpenBorderOverlay(
-    context: Context,
-    resourceId: Int,
-    expectedKind: String = "inter-prefecture-borders"
-): Path {
-    val text = GZIPInputStream(context.resources.openRawResource(resourceId))
-        .bufferedReader(Charsets.UTF_8)
-        .use { it.readText() }
-    val root = JSONObject(text)
-    require(root.getInt("version") == 2) { "Unsupported border overlay version" }
-    require(root.getString("kind") == expectedKind) {
-        "Unsupported border overlay resource"
-    }
-    require(!root.getBoolean("closed")) { "Border overlay paths must be open" }
-    val quantization = root.getDouble("quantization")
-    require(quantization > 0.0) { "Invalid border overlay quantization" }
-    val borders = root.getJSONArray("borders")
+private const val MUNICIPALITY_BOUNDARY_MAGIC = 0x51444D43 // "QDMC"
 
-    return Path().apply {
-        for (borderIndex in 0 until borders.length()) {
-            val paths = borders.getJSONArray(borderIndex).getJSONArray(4)
-            for (pathIndex in 0 until paths.length()) {
-                val encoded = paths.getJSONArray(pathIndex).getJSONArray(1)
-                require(encoded.length() >= 4 && encoded.length() % 2 == 0) {
-                    "Invalid border overlay path"
+data class MunicipalityBoundaries(
+    val chunks: Map<Long, Path>,
+    val overflow: Path
+)
+
+/**
+ * Reads offline-built, one-copy shared outlines. Municipality fills are rebuilt
+ * from the same planar topology, so neighbouring areas meet exactly; no edge
+ * reconciliation happens on the device.
+ */
+private fun loadJmaMunicipalityBoundaries(context: Context, resourceId: Int): MunicipalityBoundaries =
+    DataInputStream(
+        GZIPInputStream(
+            context.resources.openRawResource(resourceId)
+        ).buffered()
+    ).use { input ->
+        require(input.readInt() == MUNICIPALITY_BOUNDARY_MAGIC) {
+            "Unsupported municipality boundary resource"
+        }
+        require(input.readInt() == 1) { "Unsupported municipality boundary version" }
+        val quantization = input.readInt().toDouble()
+        require(quantization > 0.0) { "Invalid municipality boundary quantization" }
+
+        fun readBoundaryPaths(): Path {
+            val pathCount = input.readUnsignedVarInt()
+            require(pathCount <= 1_000_000) { "Invalid municipality boundary path count" }
+            return Path().apply {
+                repeat(pathCount) {
+                    val pointCount = input.readUnsignedVarInt()
+                    require(pointCount in 2..2_000_000) { "Invalid municipality boundary path" }
+                    var x = input.readSignedVarInt()
+                    var y = input.readSignedVarInt()
+                    projectGeo(y / quantization, x / quantization).let { moveTo(it.x, it.y) }
+                    repeat(pointCount - 1) {
+                        x += input.readSignedVarInt()
+                        y += input.readSignedVarInt()
+                        projectGeo(y / quantization, x / quantization).let { lineTo(it.x, it.y) }
+                    }
                 }
-                var quantizedX = encoded.getLong(0)
-                var quantizedY = encoded.getLong(1)
-                var offset = 0
-                while (offset < encoded.length()) {
-                    if (offset > 0) {
-                        quantizedX += encoded.getLong(offset)
-                        quantizedY += encoded.getLong(offset + 1)
-                    }
-                    val projected = projectGeo(
-                        latitude = quantizedY / quantization,
-                        longitude = quantizedX / quantization
-                    )
-                    if (offset == 0) {
-                        moveTo(projected.x, projected.y)
-                    } else {
-                        lineTo(projected.x, projected.y)
-                    }
-                    offset += 2
+            }
+        }
+
+        val chunkCount = input.readInt()
+        require(chunkCount in 0..50_000) { "Invalid municipality boundary chunk count" }
+        val chunks = buildMap(chunkCount) {
+            repeat(chunkCount) {
+                val x = input.readSignedVarInt()
+                val y = input.readSignedVarInt()
+                put((x.toLong() shl 32) xor (y.toLong() and 0xffffffffL), readBoundaryPaths())
+            }
+        }
+        MunicipalityBoundaries(chunks = chunks, overflow = readBoundaryPaths())
+    }
+
+private const val JMA_BORDER_PATHS_MAGIC = 0x51444250 // "QDBP"
+
+private data class JmaReportingBorderPaths(
+    val fine: List<Path>,
+    val prefecture: List<Path>
+)
+
+/**
+ * Reads precompiled JMA border paths grouped exactly like the source reporting
+ * areas. No edge classification or Path splitting occurs on the device.
+ */
+private fun loadJmaReportingBorderPaths(
+    context: Context,
+    areas: List<JmaAreaShape>
+): JmaReportingBorderPaths = DataInputStream(
+    GZIPInputStream(
+        context.resources.openRawResource(R.raw.jma_quake_region_borders)
+    ).buffered()
+).use { input ->
+    require(input.readInt() == JMA_BORDER_PATHS_MAGIC) {
+        "Unsupported JMA reporting-border paths"
+    }
+    require(input.readInt() == 1) { "Unsupported JMA reporting-border path version" }
+    val quantization = input.readInt().toDouble()
+    require(quantization > 0.0) { "Invalid JMA reporting-border quantization" }
+    require(input.readInt() == areas.size) { "JMA reporting-border area count mismatch" }
+
+    fun readPath(): Path {
+        val pathCount = input.readUnsignedVarInt()
+        require(pathCount <= 100_000) { "Invalid JMA reporting-border path count" }
+        return Path().apply {
+            repeat(pathCount) {
+                val pointCount = input.readUnsignedVarInt()
+                require(pointCount in 2..2_000_000) { "Invalid JMA reporting-border contour" }
+                var x = input.readSignedVarInt()
+                var y = input.readSignedVarInt()
+                projectGeo(y / quantization, x / quantization).let { moveTo(it.x, it.y) }
+                repeat(pointCount - 1) {
+                    x += input.readSignedVarInt()
+                    y += input.readSignedVarInt()
+                    projectGeo(y / quantization, x / quantization).let { lineTo(it.x, it.y) }
                 }
             }
         }
     }
+    val fine = ArrayList<Path>(areas.size)
+    val prefecture = ArrayList<Path>(areas.size)
+    repeat(areas.size) {
+        val finePath = readPath()
+        val prefecturePath = readPath()
+        if (!finePath.isEmpty) fine += finePath
+        if (!prefecturePath.isEmpty) prefecture += prefecturePath
+    }
+    JmaReportingBorderPaths(fine = fine, prefecture = prefecture)
 }
 
 private const val MUNICIPALITY_BINARY_MAGIC = 0x51444D42 // "QDMB"
 
-private fun loadJmaMunicipalityLayer(context: Context): List<JmaAreaShape> =
+private fun loadJmaMunicipalityLayer(
+    context: Context,
+    resourceId: Int
+): List<JmaAreaShape> =
     DataInputStream(
         GZIPInputStream(
-            context.resources.openRawResource(R.raw.jma_quake_municipalities)
+            context.resources.openRawResource(resourceId)
         ).buffered()
     ).use { input ->
         require(input.readInt() == MUNICIPALITY_BINARY_MAGIC) {
@@ -499,9 +598,10 @@ private fun loadJmaMunicipalityLayer(context: Context): List<JmaAreaShape> =
                             quantizedX += deltaX
                             quantizedY += deltaY
                         }
-                        val longitude = quantizedX / quantization
-                        val latitude = quantizedY / quantization
-                        val projected = projectGeo(latitude, longitude)
+                        val projected = projectGeo(
+                            latitude = quantizedY / quantization,
+                            longitude = quantizedX / quantization
+                        )
                         val offset = pointIndex * 2
                         ring[offset] = projected.x
                         ring[offset + 1] = projected.y
@@ -509,11 +609,7 @@ private fun loadJmaMunicipalityLayer(context: Context): List<JmaAreaShape> =
                         if (projected.x > bounds.right) bounds.right = projected.x
                         if (projected.y < bounds.top) bounds.top = projected.y
                         if (projected.y > bounds.bottom) bounds.bottom = projected.y
-                        if (pointIndex == 0) {
-                            path.moveTo(projected.x, projected.y)
-                        } else {
-                            path.lineTo(projected.x, projected.y)
-                        }
+                        if (pointIndex == 0) path.moveTo(projected.x, projected.y) else path.lineTo(projected.x, projected.y)
                     }
                     path.close()
                     rings += ring
@@ -535,7 +631,6 @@ private fun loadJmaMunicipalityLayer(context: Context): List<JmaAreaShape> =
             }
         }
     }
-
 
 private fun DataInputStream.readUnsignedVarInt(): Int {
     var result = 0
