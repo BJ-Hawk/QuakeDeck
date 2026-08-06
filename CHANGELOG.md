@@ -2,6 +2,17 @@
 
 QuakeDeck release history, newest first.
 
+## v0.9.83
+
+- Makes map/report interaction more dependable: Re-focus survives build/deploy, live updates no longer steal a manually selected report, historical frames retain their map association, and Return to Live preserves the current camera.
+- Adds double-tap-to-zoom at the tapped point and centres the zoom label and controls without moving the rail. The control width now accommodates all supported zoom values through `128.00×`.
+- Refines report lists: removes the redundant Region label, shortens English prefectures to `Pref.`, omits initial regional readings once a detailed report is available, and groups confirmed observed intensities into independently expandable prefectures with maximum-Shindo badges, compact indented station rows, provider chips, and scan dividers.
+- Makes prefecture collapse scrolling predictable and scopes expansion to its event: frames of the same historical incident retain state, while closing the event, returning to Live, or selecting another event resets it.
+- Adds verified English airport labels, improved initial-report area labels, and an official JMA detailed-report link from report status strips (Japanese for Japanese UI; English otherwise).
+- Adds an optional on-device Japanese-to-English Google ML Kit model for observed place names without an official JMA English label. Before download they remain Japanese with guidance; translated labels show `English (Japanese)` and Google attribution. The Language settings section is localised, appears only for non-Japanese UI languages, and includes a test-only Delete action that fully resets the downloaded model and cached results.
+- Adds a persisted 5–60 second delay to Sandbox live-pipeline injections for locked-screen notification testing, and reconnects P2PQuake’s routine WebSocket rollover promptly while retaining a conservative retry for unrelated background failures.
+- Bumps the Android application version to `0.9.83` (`versionCode` 166) and updates the README release marker.
+
 ## v0.9.82
 
 - Moves normal pan and pinch interaction onto the retained GPU-transformed map layer, then schedules a settled vector redraw after a short quiet pause. The pause is layer-aware: 5 ms for the simplified N03 tier and 1 ms for JMA and municipality tiers.

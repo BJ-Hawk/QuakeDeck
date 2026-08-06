@@ -27,13 +27,13 @@ interface QuakeDataProvider {
     ) = Unit
 
     /** Inject one clearly labelled confirmed report without replacing the live connection. */
-    fun injectTestEarthquakeReport() = Unit
+    fun injectTestEarthquakeReport(delayMillis: Long = 0L) = Unit
 
     /** Inject one clearly labelled EEW warning without replacing the live connection. */
-    fun injectTestEewWarning() = Unit
+    fun injectTestEewWarning(delayMillis: Long = 0L) = Unit
 
     /** Inject one clearly labelled tsunami warning without replacing the live connection. */
-    fun injectTestTsunamiWarning() = Unit
+    fun injectTestTsunamiWarning(delayMillis: Long = 0L) = Unit
 
     /** Called when the app becomes interactive again. */
     fun onAppForeground() = Unit

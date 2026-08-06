@@ -87,6 +87,7 @@ import cz.misa.quakedeck.data.DataSourceMode
 import cz.misa.quakedeck.data.EpicenterMarkerStyle
 import cz.misa.quakedeck.data.PlaceNameLanguage
 import cz.misa.quakedeck.data.MinimumNotificationIntensity
+import cz.misa.quakedeck.data.OfflineStationTranslationStatus
 import cz.misa.quakedeck.data.TsunamiGrade
 import cz.misa.quakedeck.data.ReportArchiveStatus
 import cz.misa.quakedeck.data.StationProviderVisibility
@@ -163,6 +164,9 @@ fun QuakeDeckSettings(
     onMarkerStyleChanged: (EpicenterMarkerStyle) -> Unit,
     showStationNames: Boolean,
     onShowStationNamesChanged: (Boolean) -> Unit,
+    offlineStationTranslationStatus: OfflineStationTranslationStatus,
+    onDownloadOfflineStationTranslation: () -> Unit,
+    onDeleteOfflineStationTranslation: () -> Unit,
     stationProviderVisibility: StationProviderVisibility,
     onStationProviderVisibilityChanged: (StationProviderVisibility) -> Unit,
     testingMode: Boolean,
@@ -173,9 +177,11 @@ fun QuakeDeckSettings(
     onBuiltInReplayRequested: () -> Unit,
     onBuiltInTsunamiReplayRequested: () -> Unit,
     onBuiltInCombinedReplayRequested: () -> Unit,
-    onInjectEarthquakeReportRequested: () -> Unit,
-    onInjectEewWarningRequested: () -> Unit,
-    onInjectTsunamiWarningRequested: () -> Unit,
+    testInjectionDelaySeconds: Int,
+    onTestInjectionDelaySecondsChanged: (Int) -> Unit,
+    onInjectEarthquakeReportRequested: (Long) -> Unit,
+    onInjectEewWarningRequested: (Long) -> Unit,
+    onInjectTsunamiWarningRequested: (Long) -> Unit,
     reportArchiveEnabled: Boolean,
     onReportArchiveEnabledChanged: (Boolean) -> Unit,
     automaticHistoricalDownload: Boolean,
@@ -326,6 +332,9 @@ fun QuakeDeckSettings(
                                 onMarkerStyleChanged = onMarkerStyleChanged,
                                 showStationNames = showStationNames,
                                 onShowStationNamesChanged = onShowStationNamesChanged,
+                                offlineStationTranslationStatus = offlineStationTranslationStatus,
+                                onDownloadOfflineStationTranslation = onDownloadOfflineStationTranslation,
+                                onDeleteOfflineStationTranslation = onDeleteOfflineStationTranslation,
                                 stationProviderVisibility = stationProviderVisibility,
                                 onStationProviderVisibilityChanged =
                                     onStationProviderVisibilityChanged,
@@ -371,17 +380,19 @@ fun QuakeDeckSettings(
                                     commitTextScale()
                                     onBuiltInCombinedReplayRequested()
                                 },
-                                onInjectEarthquakeReport = {
+                                testInjectionDelaySeconds = testInjectionDelaySeconds,
+                                onTestInjectionDelaySecondsChanged = onTestInjectionDelaySecondsChanged,
+                                onInjectEarthquakeReport = { delayMillis ->
                                     commitTextScale()
-                                    onInjectEarthquakeReportRequested()
+                                    onInjectEarthquakeReportRequested(delayMillis)
                                 },
-                                onInjectEewWarning = {
+                                onInjectEewWarning = { delayMillis ->
                                     commitTextScale()
-                                    onInjectEewWarningRequested()
+                                    onInjectEewWarningRequested(delayMillis)
                                 },
-                                onInjectTsunamiWarning = {
+                                onInjectTsunamiWarning = { delayMillis ->
                                     commitTextScale()
-                                    onInjectTsunamiWarningRequested()
+                                    onInjectTsunamiWarningRequested(delayMillis)
                                 }
                             )
                         }
@@ -552,6 +563,9 @@ private fun MainSettingsPage(
     onMarkerStyleChanged: (EpicenterMarkerStyle) -> Unit,
     showStationNames: Boolean,
     onShowStationNamesChanged: (Boolean) -> Unit,
+    offlineStationTranslationStatus: OfflineStationTranslationStatus,
+    onDownloadOfflineStationTranslation: () -> Unit,
+    onDeleteOfflineStationTranslation: () -> Unit,
     stationProviderVisibility: StationProviderVisibility,
     onStationProviderVisibilityChanged: (StationProviderVisibility) -> Unit,
     testingMode: Boolean,
@@ -571,6 +585,8 @@ private fun MainSettingsPage(
     onTextScaleChanged: (Float) -> Unit,
     sliderInteractionDensity: Density
 ) {
+    var offlineTranslationHelpDialog by remember { mutableStateOf<Pair<String, String>?>(null) }
+    val overlayDensity = LocalDensity.current
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(
@@ -599,6 +615,36 @@ private fun MainSettingsPage(
                     value = languageLabel(selectedLanguage, selectedLanguage),
                     onClick = onLanguagePickerRequested
                 )
+                if (selectedLanguage != PlaceNameLanguage.JAPANESE) {
+                    CardDivider()
+                    OfflineStationTranslationSettingRow(
+                        title = text(R.string.offline_station_translation, selectedLanguage),
+                        helpText = text(
+                            R.string.offline_station_translation_explanation,
+                            selectedLanguage
+                        ),
+                        status = offlineStationTranslationStatus,
+                        readyLabel = text(
+                            R.string.offline_station_translation_ready,
+                            selectedLanguage
+                        ),
+                        downloadingLabel = text(
+                            R.string.offline_station_translation_downloading,
+                            selectedLanguage
+                        ),
+                        deletingLabel = text(
+                            R.string.offline_station_translation_deleting,
+                            selectedLanguage
+                        ),
+                        downloadLabel = text(R.string.download, selectedLanguage),
+                        deleteLabel = text(R.string.delete, selectedLanguage),
+                        onDownload = onDownloadOfflineStationTranslation,
+                        onDelete = onDeleteOfflineStationTranslation,
+                        onHelpRequested = { title, body ->
+                            offlineTranslationHelpDialog = title to body
+                        }
+                    )
+                }
                 CardDivider()
                 NavigationSettingRow(
                     title = text(R.string.appearance, selectedLanguage),
@@ -789,6 +835,96 @@ private fun MainSettingsPage(
         }
     }
 
+    offlineTranslationHelpDialog?.let { (title, body) ->
+        CompositionLocalProvider(LocalDensity provides overlayDensity) {
+            SettingHelpDialog(
+                title = title,
+                body = body,
+                doneLabel = text(R.string.done, selectedLanguage),
+                onDismiss = { offlineTranslationHelpDialog = null }
+            )
+        }
+    }
+}
+
+@Composable
+private fun OfflineStationTranslationSettingRow(
+    title: String,
+    helpText: String,
+    status: OfflineStationTranslationStatus,
+    readyLabel: String,
+    downloadingLabel: String,
+    deletingLabel: String,
+    downloadLabel: String,
+    deleteLabel: String,
+    onDownload: () -> Unit,
+    onDelete: () -> Unit,
+    onHelpRequested: (String, String) -> Unit
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column(Modifier.weight(1f)) {
+            SettingTitleWithHelp(
+                title = title,
+                helpText = helpText,
+                enabled = true,
+                fontSize = 13.sp,
+                lineHeight = 15.sp,
+                onHelpRequested = onHelpRequested
+            )
+            when (status) {
+                OfflineStationTranslationStatus.READY -> Text(
+                    text = readyLabel,
+                    modifier = Modifier.padding(top = 1.dp),
+                    color = MaterialTheme.colorScheme.primary,
+                    fontSize = 10.sp,
+                    lineHeight = 12.sp,
+                    fontWeight = FontWeight.SemiBold
+                )
+                OfflineStationTranslationStatus.DOWNLOADING -> Text(
+                    text = downloadingLabel,
+                    modifier = Modifier.padding(top = 1.dp),
+                    color = MaterialTheme.colorScheme.primary,
+                    fontSize = 10.sp,
+                    lineHeight = 12.sp,
+                    fontWeight = FontWeight.SemiBold
+                )
+                OfflineStationTranslationStatus.DELETING -> Text(
+                    text = deletingLabel,
+                    modifier = Modifier.padding(top = 1.dp),
+                    color = MaterialTheme.colorScheme.primary,
+                    fontSize = 10.sp,
+                    lineHeight = 12.sp,
+                    fontWeight = FontWeight.SemiBold
+                )
+                else -> Unit
+            }
+        }
+        Spacer(Modifier.width(8.dp))
+        when (status) {
+            OfflineStationTranslationStatus.NOT_DOWNLOADED,
+            OfflineStationTranslationStatus.FAILED -> Button(
+                onClick = onDownload,
+                contentPadding = PaddingValues(horizontal = 10.dp, vertical = 3.dp)
+            ) {
+                Text(downloadLabel, fontSize = 10.sp)
+            }
+            OfflineStationTranslationStatus.CHECKING,
+            OfflineStationTranslationStatus.DOWNLOADING,
+            OfflineStationTranslationStatus.DELETING -> CircularProgressIndicator(
+                modifier = Modifier.size(20.dp),
+                strokeWidth = 2.dp
+            )
+            OfflineStationTranslationStatus.READY -> OutlinedButton(
+                onClick = onDelete,
+                contentPadding = PaddingValues(horizontal = 10.dp, vertical = 3.dp)
+            ) {
+                Text(deleteLabel, fontSize = 10.sp)
+            }
+        }
+    }
 }
 
 private enum class QuietTimeTarget { START, END }

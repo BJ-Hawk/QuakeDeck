@@ -21,6 +21,7 @@ import androidx.compose.material3.LocalMinimumInteractiveComponentSize
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.Slider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
@@ -34,6 +35,7 @@ import cz.misa.quakedeck.data.PlaceNameLanguage
 import cz.misa.quakedeck.data.UiLocalization
 import cz.misa.quakedeck.sandbox.SandboxFeature
 import cz.misa.quakedeck.ui.common.responsiveControlSizing
+import kotlin.math.roundToInt
 
 /** The single main-settings entry point for all Sandbox controls. */
 @Composable
@@ -110,9 +112,11 @@ fun SandboxSettingsPage(
     onEewReplay: () -> Unit,
     onTsunamiReplay: () -> Unit,
     onCombinedReplay: () -> Unit,
-    onInjectEarthquakeReport: () -> Unit,
-    onInjectEewWarning: () -> Unit,
-    onInjectTsunamiWarning: () -> Unit
+    testInjectionDelaySeconds: Int,
+    onTestInjectionDelaySecondsChanged: (Int) -> Unit,
+    onInjectEarthquakeReport: (Long) -> Unit,
+    onInjectEewWarning: (Long) -> Unit,
+    onInjectTsunamiWarning: (Long) -> Unit
 ) {
     if (!SandboxFeature.ENABLED) return
 
@@ -207,25 +211,64 @@ fun SandboxSettingsPage(
         item { SectionLabel(localized(R.string.live_pipeline_tests, language)) }
         item {
             SandboxCard {
+                val context = LocalContext.current
+                Text(
+                    localized(R.string.sandbox_injection_delay, language),
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 13.sp,
+                    lineHeight = 15.sp
+                )
+                Text(
+                    UiLocalization.format(
+                        context,
+                        R.string.sandbox_injection_delay_value,
+                        language,
+                        testInjectionDelaySeconds
+                    ),
+                    modifier = Modifier.padding(top = 2.dp),
+                    color = MaterialTheme.colorScheme.secondary,
+                    fontSize = 11.sp,
+                    lineHeight = 13.sp,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    localized(R.string.sandbox_injection_delay_explanation, language),
+                    modifier = Modifier.padding(top = 1.dp),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    fontSize = 10.sp,
+                    lineHeight = 12.sp
+                )
+                Slider(
+                    value = testInjectionDelaySeconds.toFloat(),
+                    onValueChange = { value ->
+                        onTestInjectionDelaySecondsChanged((value / 5f).roundToInt() * 5)
+                    },
+                    valueRange = 5f..60f,
+                    steps = 10
+                )
+            }
+        }
+        item {
+            SandboxCard {
                 ReplayRow(
                     title = localized(R.string.inject_test_report, language),
                     description = localized(R.string.inject_test_report_explanation, language),
                     runLabel = localized(R.string.inject, language),
-                    onRun = onInjectEarthquakeReport
+                    onRun = { onInjectEarthquakeReport(testInjectionDelaySeconds * 1_000L) }
                 )
                 HorizontalDivider(Modifier.padding(vertical = 7.dp))
                 ReplayRow(
                     title = localized(R.string.inject_test_eew, language),
                     description = localized(R.string.inject_test_eew_explanation, language),
                     runLabel = localized(R.string.inject, language),
-                    onRun = onInjectEewWarning
+                    onRun = { onInjectEewWarning(testInjectionDelaySeconds * 1_000L) }
                 )
                 HorizontalDivider(Modifier.padding(vertical = 7.dp))
                 ReplayRow(
                     title = localized(R.string.inject_test_tsunami, language),
                     description = localized(R.string.inject_test_tsunami_explanation, language),
                     runLabel = localized(R.string.inject, language),
-                    onRun = onInjectTsunamiWarning
+                    onRun = { onInjectTsunamiWarning(testInjectionDelaySeconds * 1_000L) }
                 )
             }
         }

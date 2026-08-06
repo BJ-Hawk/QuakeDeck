@@ -104,6 +104,12 @@ class AppSettings(context: Context) {
             prefs.edit { putBoolean("p2p_sandbox_mode", value) }
         }
 
+    var sandboxTestInjectionDelaySeconds: Int
+        get() = prefs.getInt("sandbox_test_injection_delay_seconds", 10).coerceIn(5, 60)
+        set(value) {
+            prefs.edit { putInt("sandbox_test_injection_delay_seconds", value.coerceIn(5, 60)) }
+        }
+
     var mainPortraitMapFraction: Float
         get() = prefs.getFloat("main_portrait_map_fraction", 0.55f)
             .coerceIn(0.30f, 0.92f)

@@ -36,8 +36,8 @@ android {
         applicationId = "cz.misa.quakedeck"
         minSdk = 26
         targetSdk = 36
-        versionCode = 148
-        versionName = "0.9.82"
+        versionCode = 166
+        versionName = "0.9.83"
     }
 
     buildTypes {
@@ -89,6 +89,7 @@ dependencies {
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.foundation:foundation")
     implementation("androidx.compose.material3:material3")
+    implementation("com.google.mlkit:translate:17.0.3")
     implementation("com.squareup.okhttp3:okhttp:5.4.0")
     testImplementation("junit:junit:4.13.2")
     debugImplementation("androidx.compose.ui:ui-tooling")

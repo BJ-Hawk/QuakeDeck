@@ -22,6 +22,13 @@ object PlaceNameTranslator {
     // that cost is paid once per raw JMA place name rather than once per frame.
     private val observationCache = ConcurrentHashMap<String, String>()
 
+    // These are official station titles rather than municipalities, so they
+    // cannot be inferred from the JMA municipality-name dictionary.
+    private val stationNameAliases = mapOf(
+        "福岡空港" to "Fukuoka Airport",
+        "鹿児島空港" to "Kagoshima Airport"
+    )
+
     fun shouldUseEnglish(setting: PlaceNameLanguage): Boolean = when (setting) {
         PlaceNameLanguage.ENGLISH,
         PlaceNameLanguage.CZECH -> true
@@ -66,11 +73,35 @@ object PlaceNameTranslator {
             val parts = rawName.split(" · ")
             parts.mapNotNull { part ->
                 dict.prefecture[part]
+                    ?: stationNameAliases[part]
                     ?: dict.municipality[part]
                     ?: translateLongestMunicipalityPrefix(part, dict.municipality)
                     ?: part.takeUnless(::containsJapanese)
             }.distinct().joinToString(" · ")
         }
+    }
+
+    fun prefecture(context: Context, japanese: String, setting: PlaceNameLanguage): String {
+        if (!shouldUseEnglish(setting) || japanese.isBlank()) return japanese
+        return getDictionaries(context).prefecture[japanese]
+            ?: observation(context, japanese, setting)
+    }
+
+    /**
+     * Translate a JMA initial-intensity reporting area. P2PQuake's ScalePrompt
+     * payloads occasionally omit the final \"地方\" from the official JMA area
+     * name (for example 熊本県熊本), so try that canonical form as well.
+     */
+    fun intensityReportingArea(
+        context: Context,
+        japanese: String,
+        setting: PlaceNameLanguage
+    ): String {
+        if (!shouldUseEnglish(setting) || japanese.isBlank()) return japanese
+        val dictionaries = getDictionaries(context)
+        return dictionaries.epicenter[japanese]
+            ?: dictionaries.epicenter["${japanese}地方"]
+            ?: observation(context, japanese, setting)
     }
 
     private fun translateLongestMunicipalityPrefix(

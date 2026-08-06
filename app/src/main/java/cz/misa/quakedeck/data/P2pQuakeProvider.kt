@@ -3,6 +3,7 @@ package cz.misa.quakedeck.data
 import android.content.Context
 import android.os.Handler
 import android.os.Looper
+import android.os.SystemClock
 import androidx.core.content.edit
 import okhttp3.*
 import org.json.JSONArray
@@ -86,6 +87,7 @@ class P2pQuakeProvider(
     private var builtInReplayLabel: String? = null
     private var injectedTestRestoreRunnable: Runnable? = null
     private var connectionGeneration = 0
+    private var socketOpenedAtElapsedMillis = 0L
     @Volatile private var currentState = ConnectionState.DISCONNECTED
     private var lastRecoveryStartedAtMs = 0L
     private var recentReportsGeneration = 0
@@ -353,11 +355,14 @@ class P2pQuakeProvider(
         }
     }
 
-    override fun injectTestEarthquakeReport() = injectLivePipelineTest(InjectedTestKind.EARTHQUAKE)
+    override fun injectTestEarthquakeReport(delayMillis: Long) =
+        injectLivePipelineTest(InjectedTestKind.EARTHQUAKE, delayMillis)
 
-    override fun injectTestEewWarning() = injectLivePipelineTest(InjectedTestKind.EEW)
+    override fun injectTestEewWarning(delayMillis: Long) =
+        injectLivePipelineTest(InjectedTestKind.EEW, delayMillis)
 
-    override fun injectTestTsunamiWarning() = injectLivePipelineTest(InjectedTestKind.TSUNAMI)
+    override fun injectTestTsunamiWarning(delayMillis: Long) =
+        injectLivePipelineTest(InjectedTestKind.TSUNAMI, delayMillis)
 
     /**
      * Emit a one-shot synthetic snapshot through the exact process callback used by real
@@ -365,9 +370,11 @@ class P2pQuakeProvider(
      * history, and active-alert fields are deliberately left untouched. A later genuine
      * packet therefore replaces the test naturally and cannot be rejected as "older".
      */
-    private fun injectLivePipelineTest(kind: InjectedTestKind) {
-        mainHandler.post {
-            if (stopped || callback == null) return@post
+    private fun injectLivePipelineTest(kind: InjectedTestKind, delayMillis: Long) {
+        // Delaying happens before the ordinary injection callback, so the emitted
+        // snapshot still takes the exact live-notification route at trigger time.
+        mainHandler.postDelayed({
+            if (stopped || callback == null) return@postDelayed
 
             cancelInjectedTestRestore()
             val now = LocalDateTime.now(JST_ZONE)
@@ -527,7 +534,7 @@ class P2pQuakeProvider(
                 )
             )
             scheduleInjectedTestRestore(injectedSequence)
-        }
+        }, delayMillis.coerceIn(0L, MAX_TEST_INJECTION_DELAY_MILLIS))
     }
 
     private fun scheduleInjectedTestRestore(expectedSequence: Long) {
@@ -1322,6 +1329,7 @@ class P2pQuakeProvider(
         // us cancel a sleeping/broken socket and reconnect on wake without the
         // old onFailure() scheduling a second connection behind our back.
         val generation = ++connectionGeneration
+        socketOpenedAtElapsedMillis = 0L
         socket?.cancel()
         socket = null
 
@@ -1354,6 +1362,7 @@ class P2pQuakeProvider(
                     if (stopped || generation != connectionGeneration) return@post
                     reconnectAttempt = 0
                     currentState = ConnectionState.CONNECTED
+                    socketOpenedAtElapsedMillis = SystemClock.elapsedRealtime()
                     if (sandboxForThisConnection) {
                         // Every sandbox socket is a new replay session. The service
                         // may reuse historical message IDs after its forced reconnect,
@@ -1410,7 +1419,14 @@ class P2pQuakeProvider(
             override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
                 mainHandler.post {
                     if (!stopped && generation == connectionGeneration) {
-                        scheduleReconnect("Disconnected ($code${if (reason.isNotBlank()) ": $reason" else ""})")
+                        val socketLifetimeMillis = SystemClock.elapsedRealtime() -
+                            socketOpenedAtElapsedMillis
+                        val plannedRollover =
+                            code == 1000 && socketLifetimeMillis >= PLANNED_SOCKET_ROLLOVER_MIN_MILLIS
+                        scheduleReconnect(
+                            reason = "Disconnected ($code${if (reason.isNotBlank()) ": $reason" else ""})",
+                            plannedRollover = plannedRollover
+                        )
                     }
                 }
             }
@@ -1616,22 +1632,27 @@ class P2pQuakeProvider(
         })
     }
 
-    private fun scheduleReconnect(reason: String) {
+    private fun scheduleReconnect(reason: String, plannedRollover: Boolean = false) {
         currentState = ConnectionState.DISCONNECTED
         reconnectAttempt++
 
-        // In the foreground, recover quickly. With the screen/app in the
-        // background, don't hammer a network Android may have deliberately
-        // suspended; keep a quiet 30 s best-effort retry instead. onAppForeground
-        // cancels this delay and reconnects immediately.
-        val baseDelayMs = if (appInForeground) {
+        // P2PQuake intentionally ends a normal WebSocket session after about
+        // ten minutes. That known, healthy rollover should not create the usual
+        // 30-second background blind spot. Other background failures remain
+        // conservative because Android may have suspended their network path.
+        val baseDelayMs = if (plannedRollover) {
+            PLANNED_SOCKET_ROLLOVER_RECONNECT_MILLIS
+        } else if (appInForeground) {
             min(30_000L, 1_000L shl min(reconnectAttempt - 1, 5))
         } else {
             30_000L
         }
         // Small jitter avoids every disconnected client retrying on exactly the
         // same millisecond after a heavily loaded earthquake event.
-        val delayMs = baseDelayMs + Random.nextLong(200L, 900L)
+        val delayMs = baseDelayMs + Random.nextLong(
+            if (plannedRollover) 0L else 200L,
+            if (plannedRollover) 250L else 900L
+        )
 
         val event = lastEvent
         if (event != null) {
@@ -2468,6 +2489,15 @@ class P2pQuakeProvider(
             else -> mergeIntensityPoints(existing.points, incoming.points)
         }
 
+        // Once a detailed report gives individual stations, its earlier
+        // ScalePrompt reporting areas are redundant and must not appear beside
+        // station rows. Keep areas in historical early frames, where they were
+        // genuinely the only information JMA had published at that time.
+        val detailedStationDataAvailable = listOf(existing, incoming).any { report ->
+            report.reportStage == EarthquakeReportStage.DETAILED &&
+                report.points.any { point -> !point.isArea }
+        }
+
         return incoming.copy(
             place = if (incoming.hasHypocenter) {
                 incoming.place
@@ -2491,7 +2521,11 @@ class P2pQuakeProvider(
             maxIntensity = if (
                 incomingCarriesIntensity && incoming.maxIntensity != "—"
             ) incoming.maxIntensity else existing.maxIntensity,
-            points = mergedPoints,
+            points = if (detailedStationDataAvailable) {
+                mergedPoints.filterNot { it.isArea }
+            } else {
+                mergedPoints
+            },
             reportIssuedAt = listOfNotNull(existing.reportIssuedAt, incoming.reportIssuedAt).maxOrNull(),
             reportStage = incoming.reportStage.takeUnless {
                 it == EarthquakeReportStage.UNKNOWN
@@ -2760,6 +2794,9 @@ class P2pQuakeProvider(
         const val AUTO_BACKFILL_MIN_INTERVAL_MS = 15L * 60L * 1000L
         const val TSUNAMI_CANCELLATION_RETENTION_SECONDS = 15L * 60L
         const val INJECTED_TEST_DISPLAY_MILLIS = 45_000L
+        const val MAX_TEST_INJECTION_DELAY_MILLIS = 60_000L
+        const val PLANNED_SOCKET_ROLLOVER_MIN_MILLIS = 9L * 60L * 1000L
+        const val PLANNED_SOCKET_ROLLOVER_RECONNECT_MILLIS = 1_000L
         const val RECENT_CACHE_WRITE_DELAY_MILLIS = 600L
         const val INJECTED_HISTORY_LIMIT = 30
     }
