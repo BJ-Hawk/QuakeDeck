@@ -2,6 +2,14 @@
 
 QuakeDeck release history, newest first.
 
+## v0.9.83b
+
+- Repairs the underlying municipality and middle-tier JMA polygon topology from one global planar coverage so every inland edge is shared by exactly two owners; one-owner edges are now valid only on the exterior/water boundary. This removes the duplicated single-owner shadow tails around three-way junctions instead of merely hiding or reclassifying them.
+- Rebuilds municipality, warning-zone, prefecture, and JMA reporting-border resources from the repaired topology and scales build-time border matching with resource quantization so administrative classes remain stable at the higher repair precision.
+- Adds the Windows QuakeDeck Map Editor with its fixed top editing toolbar, deep coastline-aware editing, vortice multi-selection, advanced point editing, Add point, Delete edge, Undo/Redo, automatic server shutdown, and bilingual place search.
+- Adds a reusable geometry-first topology repair utility that validates the invariant before replacing app resources; the packaged resources are already repaired, so running the utility is not required for this release.
+- Bumps the Android hotfix version to `0.9.83b` (`versionCode` 168) and updates the README release marker.
+
 ## v0.9.83a
 
 - Reduces the compact notification place line to match the other three lines, preventing the final compact-detail row from being clipped.

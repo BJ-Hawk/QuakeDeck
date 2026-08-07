@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>QuakeDeck Map Editor</title>
+    <link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+<div class="app-shell">
+    <header class="topbar">
+        <div class="toolbar-row toolbar-main">
+            <div class="toolbar-title">QuakeDeck Map Editor</div>
+            <div class="toolbar-group layer-group">
+                <label for="layer-select">Layer</label>
+                <select id="layer-select" disabled>
+                    <option value="municipality">Municipalities — deep</option>
+                    <option value="jma">JMA reporting — middle</option>
+                </select>
+            </div>
+            <div class="toolbar-group">
+                <button id="save-button" disabled>Save</button>
+                <button id="reload-button" disabled>Reload</button>
+                <button id="undo-button" disabled title="Ctrl+Z">Undo</button>
+                <button id="redo-button" disabled title="Ctrl+Y / Ctrl+Shift+Z">Redo</button>
+            </div>
+            <div id="class-buttons" class="toolbar-group">
+                <button data-class="fine" class="class-button">Municipality</button>
+                <button data-class="warning" class="class-button">Warning zone</button>
+                <button data-class="prefecture" class="class-button">Prefecture</button>
+                <button data-class="coast" class="class-button">Coast</button>
+                <button id="revert-button">Revert</button>
+                <button id="delete-edge-button" class="danger-button">Delete edge</button>
+                <button id="focus-button">Focus</button>
+            </div>
+            <div class="toolbar-group topology-toolbar">
+                <button id="reassign-areas-button" disabled>Reassign areas</button>
+                <button id="mass-coast-button">Set coast from fill</button>
+                <button id="mass-warning-button">Set warning zone</button>
+                <button id="mass-prefecture-button">Set prefecture</button>
+            </div>
+            <div class="toolbar-group advanced-toolbar">
+                <label class="advanced-switch"><input type="checkbox" id="advanced-toggle"> Advanced</label>
+                <button id="move-button" disabled>Move points</button>
+                <button id="add-point-button" disabled>Add point</button>
+                <button id="create-edge-button" disabled>Create edge</button>
+                <button id="combine-points-button" disabled>Combine points</button>
+                <button id="combine-button" disabled>Combine vortices</button>
+                <button id="delete-button" disabled>Delete points</button>
+                <button id="restore-baseline-button" class="danger-button" disabled>Restore baseline</button>
+            </div>
+            <button id="close-button" class="close-button">Close</button>
+        </div>
+
+        <div class="toolbar-row toolbar-secondary">
+            <div class="toolbar-search">
+                <label for="search-input">Search</label>
+                <input id="search-input" type="text" placeholder="Japanese / English name or code">
+            </div>
+            <div class="view-toggles">
+                <label><input type="checkbox" id="toggle-coastlines" checked> Coast</label>
+                <label><input type="checkbox" id="toggle-fine" checked> Fine</label>
+                <label><input type="checkbox" id="toggle-warning" checked> Warning</label>
+                <label><input type="checkbox" id="toggle-prefecture" checked> Prefecture</label>
+                <label><input type="checkbox" id="toggle-vertices" checked> Points</label>
+                <label><input type="checkbox" id="toggle-modified" checked> Modified</label>
+                <label><input type="checkbox" id="toggle-errors" checked> Errors</label>
+                <label><input type="checkbox" id="toggle-labels" checked> Labels</label>
+            </div>
+            <button id="issues-button" class="issues-button" title="Focus next topology issue">Issues: 0</button>
+            <div class="toolbar-readout"><span>Zoom</span><strong id="zoom-text">—</strong></div>
+            <div class="toolbar-readout"><span>Overrides</span><strong id="modified-count">0</strong></div>
+            <div class="toolbar-status"><span>Status</span><strong id="status-text">Loading map data…</strong></div>
+        </div>
+        <div id="area-operation-row" class="toolbar-row area-operation-row hidden">
+            <strong id="area-operation-label">Area operation</strong>
+            <span id="area-operation-help" class="muted">Click filled areas to select them.</span>
+            <span class="area-operation-count">Selected: <strong id="selected-area-count">0</strong></span>
+            <button id="area-operation-clear">Clear areas</button>
+            <button id="area-operation-confirm">Confirm</button>
+            <button id="area-operation-cancel">Cancel</button>
+        </div>
+    </header>
+
+    <div class="workspace">
+        <aside class="sidebar">
+            <div class="panel">
+                <h2>Project</h2>
+                <div class="meta-row"><span>Root</span><strong id="project-root">Loading…</strong></div>
+                <div id="advanced-status" class="muted compact">Geometry editing disabled.</div>
+            </div>
+
+            <div class="panel topology-panel">
+                <h2>Topology issues</h2>
+                <div id="topology-summary" class="muted compact">Validating…</div>
+                <div id="topology-issue-list" class="result-list empty">No topology issues.</div>
+            </div>
+
+            <div class="panel">
+                <h2>Search results</h2>
+                <div id="search-results" class="result-list empty">Search works in Japanese and English.</div>
+            </div>
+
+            <div class="panel">
+                <h2>Selection</h2>
+                <div class="selection-grid">
+                    <span>Vortices</span><strong id="selected-vortice-count">0</strong>
+                    <span>Primary vortice</span><strong id="selected-primary-vortice" class="mono">—</strong>
+                    <span>Points</span><strong id="selected-point-count">0</strong>
+                    <span>Primary point</span><strong id="selected-primary-point" class="mono">—</strong>
+                </div>
+                <p class="muted compact">
+                    Click selects a vortice. Shift-click toggles one. Ctrl-click selects the connected path. Shift-drag box-selects. Empty space clears selection. Coast is a first-class edge status; one-owner edges must be Coast.
+                </p>
+                <div class="section-divider"></div>
+                <div id="selection-empty" class="muted">Click a boundary segment for details.</div>
+                <div id="selection-details" class="hidden">
+                    <div class="selection-grid">
+                        <span>Areas</span><strong id="selected-owners">—</strong>
+                        <span>Geometry owners</span><strong id="selected-raw-owners">—</strong>
+                        <span>Current</span><strong id="selected-current">—</strong>
+                        <span>Baseline</span><strong id="selected-original">—</strong>
+                        <span>Edge id</span><strong id="selected-id" class="mono">—</strong>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel help-panel">
+                <h2>Advanced geometry</h2>
+                <p class="muted compact">
+                    Points appear only at deep zoom with Advanced enabled. Alt-click selects a point; Alt+Shift-click toggles one; Alt+Shift-drag box-selects points.
+                </p>
+                <p class="muted compact">
+                    Add point enters placement mode: click a vortice where the new geometry point should be inserted. Create edge uses exactly two selected points, then asks for two owner areas. Delete edge removes the selected boundary from boundary resources without opening the polygon.
+                </p>
+            </div>
+        </aside>
+
+        <main class="map-area">
+            <canvas id="map-canvas"></canvas>
+            <div id="mode-chip" class="mode-chip hidden"></div>
+        </main>
+    </div>
+</div>
+<script src="assets/app.js" defer></script>
+</body>
+</html>
