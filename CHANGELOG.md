@@ -2,6 +2,13 @@
 
 QuakeDeck release history, newest first.
 
+## v0.9.83a
+
+- Reduces the compact notification place line to match the other three lines, preventing the final compact-detail row from being clipped.
+- Makes earthquake and EEW notification taps report-aware: QuakeDeck opens the exact originating live/history report and focuses its event on the map instead of only opening the generic latest view.
+- Shortens English notification place names only: removes `Region` and writes `Prefecture` as `Pref.` to preserve the compact card's usable width.
+- Bumps the Android hotfix version to `0.9.83a` (`versionCode` 167) and updates the README release marker.
+
 ## v0.9.83
 
 - Makes map/report interaction more dependable: Re-focus survives build/deploy, live updates no longer steal a manually selected report, historical frames retain their map association, and Return to Live preserves the current camera.

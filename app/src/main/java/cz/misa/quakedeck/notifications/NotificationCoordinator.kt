@@ -401,7 +401,9 @@ class NotificationCoordinator(
                 japanese = event.place,
                 setting = settings.placeNameLanguage
             )
-        }.ifBlank { localized(R.string.notification_japan) }
+        }
+            .let(::compactNotificationPlace)
+            .ifBlank { localized(R.string.notification_japan) }
         val localLine = localPoint?.let { point ->
             localized(
                 R.string.notification_location_intensity,
@@ -446,8 +448,15 @@ class NotificationCoordinator(
         } else {
             null
         }
-        val secondary = magnitudeLine ?: maximumLine
-        val tertiary = depthLine ?: maximumLine?.takeUnless { it == secondary }
+        val magnitudeAndDepthLine = listOfNotNull(magnitudeLine, depthLine)
+            .joinToString(" · ")
+        val secondary = magnitudeAndDepthLine.ifBlank { maximumLine }
+        // Preserve the former maximum-intensity fallback only when there is no
+        // depth to merge.  When magnitude and depth share the row, do not move
+        // the unrelated "Maximum in Japan" text into the last compact row.
+        val tertiary = maximumLine?.takeUnless {
+            it == secondary || (magnitudeLine != null && depthLine != null)
+        }
         val body = listOfNotNull(
             title,
             displayPlace,
@@ -464,6 +473,7 @@ class NotificationCoordinator(
             title = title,
             body = body,
             urgent = urgent,
+            reportId = event.id,
             forceSilent = forceSilent,
             visual = NotificationVisual(
                 accentColor = accent,
@@ -611,6 +621,19 @@ class NotificationCoordinator(
         }
     }
 
+    /**
+     * Keep the notification's place line short without changing the place names
+     * used anywhere else in the app. English JMA titles frequently include
+     * "Region" and "Prefecture", which consume valuable collapsed-card width.
+     */
+    private fun compactNotificationPlace(value: String): String = value
+        .replace(Regex("\\bRegion\\b"), "")
+        .replace(Regex("\\bPrefecture\\b"), "Pref.")
+        .replace(Regex("\\s+([,·])"), "$1")
+        .replace(Regex("([,·])\\s+"), "$1 ")
+        .replace(Regex("\\s{2,}"), " ")
+        .trim()
+
     private fun shindoBadgeColors(value: String): Pair<Int, Int> {
         val normalized = value
             .replace("弱", "-")
@@ -643,6 +666,7 @@ class NotificationCoordinator(
         title: String,
         body: String,
         urgent: Boolean,
+        reportId: String? = null,
         ignoreQuietHours: Boolean = false,
         forceSilent: Boolean = false,
         visual: NotificationVisual? = null
@@ -662,6 +686,7 @@ class NotificationCoordinator(
 
         val intent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+            reportId?.let { putExtra(MainActivity.EXTRA_NOTIFICATION_REPORT_ID, it) }
         }
         val contentIntent = PendingIntent.getActivity(
             context,

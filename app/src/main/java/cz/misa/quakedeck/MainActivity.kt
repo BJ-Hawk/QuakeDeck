@@ -143,9 +143,15 @@ private fun isGooglePixelDevice(): Boolean =
 private enum class OverlayReturnTarget { MAP, SETTINGS }
 
 class MainActivity : ComponentActivity() {
+    companion object {
+        const val EXTRA_NOTIFICATION_REPORT_ID =
+            "cz.misa.quakedeck.extra.NOTIFICATION_REPORT_ID"
+    }
+
     private val runtime: QuakeDeckRuntime by lazy {
         (application as QuakeDeckApplication).runtime
     }
+    private var notificationReportId by mutableStateOf<String?>(null)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         val savedAppearance = AppSettings(this).appearance
@@ -159,10 +165,23 @@ class MainActivity : ComponentActivity() {
         setTheme(if (startDark) R.style.Theme_QuakeDeck_Dark else R.style.Theme_QuakeDeck_Light)
 
         super.onCreate(savedInstanceState)
+        notificationReportId = intent?.getStringExtra(EXTRA_NOTIFICATION_REPORT_ID)
         WindowCompat.enableEdgeToEdge(window)
         setContent {
-            QuakeDeckRoot(runtime)
+            QuakeDeckRoot(
+                runtime = runtime,
+                notificationReportId = notificationReportId,
+                onNotificationReportHandled = { handledId ->
+                    if (notificationReportId == handledId) notificationReportId = null
+                }
+            )
         }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        notificationReportId = intent.getStringExtra(EXTRA_NOTIFICATION_REPORT_ID)
     }
 
     override fun onResume() {
@@ -177,7 +196,11 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-private fun QuakeDeckRoot(runtime: QuakeDeckRuntime) {
+private fun QuakeDeckRoot(
+    runtime: QuakeDeckRuntime,
+    notificationReportId: String?,
+    onNotificationReportHandled: (String) -> Unit
+) {
     val context = LocalContext.current
     val appSettings = remember { AppSettings(context.applicationContext) }
     var textScale by remember { mutableFloatStateOf(appSettings.textScale) }
@@ -212,7 +235,9 @@ private fun QuakeDeckRoot(runtime: QuakeDeckRuntime) {
                         onTextScaleChanged = { value ->
                             textScale = value
                             appSettings.textScale = value
-                        }
+                        },
+                        notificationReportId = notificationReportId,
+                        onNotificationReportHandled = onNotificationReportHandled
                     )
                 }
             }
@@ -227,7 +252,9 @@ private fun QuakeDeckApp(
     appearance: AppAppearance,
     onAppearanceChanged: (AppAppearance) -> Unit,
     textScale: Float,
-    onTextScaleChanged: (Float) -> Unit
+    onTextScaleChanged: (Float) -> Unit,
+    notificationReportId: String?,
+    onNotificationReportHandled: (String) -> Unit
 ) {
     val context = LocalContext.current
     val provider: QuakeDataProvider = runtime
@@ -734,6 +761,28 @@ private fun QuakeDeckApp(
             fitJapanAndClearEventFocus()
         } else {
             requestEventMapFocus(selectedEvent, manual = true)
+        }
+    }
+
+    // A notification names the exact live report that produced it. When its card
+    // is tapped, retain the normal latest-report screen if appropriate, otherwise
+    // select that report from history and issue the same explicit map-focus request
+    // as the on-screen Focus event button.
+    LaunchedEffect(notificationReportId, snapshot.event, snapshot.history) {
+        val requestedId = notificationReportId ?: return@LaunchedEffect
+        val target = when {
+            snapshot.event.id == requestedId -> snapshot.event
+            else -> snapshot.history.firstOrNull { it.id == requestedId }
+        }
+        if (target != null) {
+            if (target.id != selectedEvent.id) clearObservedIntensityExpansion()
+            selectedEventId = target.id
+            requestEventMapFocus(target, manual = true)
+            onNotificationReportHandled(requestedId)
+        } else if (snapshot.event.id != "waiting") {
+            // The report may already have aged out of the in-memory history. Do
+            // not keep replaying a stale navigation request on later snapshots.
+            onNotificationReportHandled(requestedId)
         }
     }
 

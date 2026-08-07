@@ -50,7 +50,7 @@
                 android:includeFontPadding="false"
                 android:maxLines="1"
                 android:textColor="@color/notification_text_primary"
-                android:textSize="13sp"
+                android:textSize="11sp"
                 android:textStyle="bold" />
 
             <TextView
