@@ -22,6 +22,10 @@ internal const val MAX_CAMERA_MAP_ZOOM =
 internal const val JMA_QUAKE_LAYER_ZOOM = 6.5f
 internal const val MUNICIPALITY_LAYER_ZOOM = 21f
 
+/** Disabled source-isolation hook for future map performance experiments. */
+internal const val USE_SINGLE_SOURCE_PERFORMANCE_TEST = false
+private val PERFORMANCE_TEST_VECTOR_LAYER = MapVectorLayer.N03_PREFECTURES
+
 internal fun displayZoomForCameraZoom(cameraZoom: Float): Float =
     cameraZoom / CAMERA_ZOOM_PER_DISPLAY_ZOOM
 
@@ -29,18 +33,25 @@ internal fun cameraZoomForDisplayZoom(displayZoom: Float): Float =
     displayZoom * CAMERA_ZOOM_PER_DISPLAY_ZOOM
 
 /** Select exactly one vector layer for a concrete zoom value. */
-internal fun mapVectorLayerForZoom(zoom: Float): MapVectorLayer = when {
-    zoom.isNaN() -> MapVectorLayer.N03_PREFECTURES
-    zoom >= MUNICIPALITY_LAYER_ZOOM -> MapVectorLayer.MUNICIPALITIES
-    zoom >= JMA_QUAKE_LAYER_ZOOM -> MapVectorLayer.JMA_QUAKE_AREAS
-    else -> MapVectorLayer.N03_PREFECTURES
+internal fun mapVectorLayerForZoom(
+    zoom: Float,
+    singleSourceOnly: Boolean = USE_SINGLE_SOURCE_PERFORMANCE_TEST
+): MapVectorLayer {
+    if (singleSourceOnly) return PERFORMANCE_TEST_VECTOR_LAYER
+    return when {
+        zoom.isNaN() -> MapVectorLayer.N03_PREFECTURES
+        zoom >= MUNICIPALITY_LAYER_ZOOM -> MapVectorLayer.MUNICIPALITIES
+        zoom >= JMA_QUAKE_LAYER_ZOOM -> MapVectorLayer.JMA_QUAKE_AREAS
+        else -> MapVectorLayer.N03_PREFECTURES
+    }
 }
 
 /** Select from the zoom currently visible while a pinch transform is active. */
 internal fun mapVectorLayerForEffectiveZoom(
     committedZoom: Float,
-    gestureScale: Float
-): MapVectorLayer = mapVectorLayerForZoom(committedZoom * gestureScale)
+    gestureScale: Float,
+    singleSourceOnly: Boolean = USE_SINGLE_SOURCE_PERFORMANCE_TEST
+): MapVectorLayer = mapVectorLayerForZoom(committedZoom * gestureScale, singleSourceOnly)
 
 /** Retain the strongest valid JMA intensity reported for one geometry key. */
 internal fun MutableMap<String, String>.recordHighestShindo(

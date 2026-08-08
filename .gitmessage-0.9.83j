@@ -1,0 +1,7 @@
+Refine map tooling and JMA report links
+
+Keep the standard tiered map renderer while preserving the high-resolution N03
+source pipeline for future experiments. Improve municipality-boundary editing
+and add an OpenStreetMap reference basemap to the map editor.
+
+Make official JMA report links wait until JMA has published the detail payload.

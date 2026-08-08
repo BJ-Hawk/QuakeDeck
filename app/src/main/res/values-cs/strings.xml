@@ -242,6 +242,8 @@
     <string name="hypocenter_report_with_initial_intensity">Hlášení o ohnisku + prvotní intenzita</string>
     <string name="hypocenter_intensity_report">Hlášení o ohnisku a intenzitě</string>
     <string name="detailed_intensity_report">Podrobné hlášení intenzity</string>
+    <string name="checking_official_jma_report">Ověřování oficiální zprávy JMA…</string>
+    <string name="official_jma_report_preparing">Oficiální zpráva JMA se připravuje…</string>
 
     <string name="browse_past_reports">Procházet minulé zprávy</string>
     <string name="browse_past_reports_explanation">Otevřít uložené události a prohlížet jednotlivé archivované zprávy.</string>

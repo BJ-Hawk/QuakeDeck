@@ -1,6 +1,5 @@
 const PATHS = {
     placeNames: 'app/src/main/res/raw/jma_place_names.json',
-    coastlines: 'app/src/main/res/raw/japan_prefecture_coastlines_hires.gz',
     municipality: {
         geometry: 'app/src/main/res/raw/jma_quake_municipalities_topology.gz',
         fine: 'app/src/main/res/raw/jma_municipality_fine_boundaries.gz',
@@ -64,6 +63,18 @@ const MIN_ZOOM_MULTIPLIER = 0.35;
 const HISTORY_LIMIT = 40;
 const OCEAN_CODE = '__OCEAN__';
 const CLASS_PRIORITY = { none: 0, fine: 1, warning: 2, prefecture: 3, coast: 4 };
+
+const BASEMAP = {
+    tileUrl: (z, x, y) => `https://tile.openstreetmap.org/${z}/${x}/${y}.png`,
+    minZoom: 4,
+    maxZoom: 19,
+    tileSize: 256,
+    opacity: 0.72,
+    west: 118.0,
+    east: 158.0,
+    south: 18.0,
+    north: 48.5,
+};
 const OCEAN_SELECTION_PADDING = 0.06;
 
 class ByteReader {
@@ -1093,7 +1104,7 @@ function shortestEdgePath(layer, startEdgeId, targetEdgeId) {
 const state = {
     meta: null,
     translations: null,
-    coastlines: [],
+    basemapTiles: new Map(),
     layers: new Map(),
     activeLayerKey: 'municipality',
     selectedEdgeId: null,
@@ -1103,7 +1114,7 @@ const state = {
     primaryVertexKey: null,
     searchHighlightCode: null,
     viewport: { scale: 1, offsetX: 0, offsetY: 0, fitScale: 1 },
-    show: { coastlines: true, fine: true, warning: true, prefecture: true, vertices: true, modified: true, errors: true, labels: true },
+    show: { basemap: true, coast: true, fine: true, warning: true, prefecture: true, vertices: true, modified: true, errors: true, labels: true },
     advanced: false,
     moveMode: false,
     addPointMode: false,
@@ -1572,6 +1583,15 @@ function areaOperationPlan(layer) {
         if (edge.currentClass !== targetClass) result.set(edge.id, targetClass);
     };
 
+    // Inner edges are intentionally normalized to Municipality for a selected
+    // Warning-area group. Coast and Prefecture remain protected, but an old
+    // Warning assignment must be cleared because it is no longer on the outer
+    // perimeter of the selected group.
+    const assignInnerMunicipality = edge => {
+        if (edge.currentClass === 'coast' || edge.currentClass === 'prefecture') return;
+        if (edge.currentClass !== 'fine') result.set(edge.id, 'fine');
+    };
+
     if (state.areaOperation === 'mass-coast') {
         if (!selected.has(OCEAN_CODE)) return result;
         const selectedLand = new Set([...selected].filter(code => code !== OCEAN_CODE));
@@ -1584,7 +1604,7 @@ function areaOperationPlan(layer) {
         for (const edge of layer.edges.values()) {
             const selectedOwners = edge.ownerAreas.filter(area => selected.has(area.code)).length;
             if (!selectedOwners) continue;
-            if (edge.ownerAreas.length === 2 && selectedOwners === 2) assignWithPriority(edge, 'fine');
+            if (edge.ownerAreas.length === 2 && selectedOwners === 2) assignInnerMunicipality(edge);
             else if (selectedOwners === 1) assignWithPriority(edge, 'warning');
         }
     } else if (state.areaOperation === 'mass-prefecture') {
@@ -1849,6 +1869,89 @@ function visibleVertexKeys(layer) {
     return result;
 }
 
+function longitudeToWorldX(longitude) {
+    return longitude * Math.PI / 180;
+}
+
+function latitudeToWorldY(latitude) {
+    return projectGeo(latitude, 0).y;
+}
+
+function slippyZoomForViewport() {
+    const ideal = Math.log2(Math.max(1e-9, state.viewport.scale * Math.PI * 2 / BASEMAP.tileSize));
+    return Math.max(BASEMAP.minZoom, Math.min(BASEMAP.maxZoom, Math.round(ideal)));
+}
+
+function worldToTileX(worldX, zoom) {
+    const count = 2 ** zoom;
+    return (worldX + Math.PI) / (Math.PI * 2) * count;
+}
+
+function worldToTileY(worldY, zoom) {
+    const count = 2 ** zoom;
+    return (worldY + Math.PI) / (Math.PI * 2) * count;
+}
+
+function requestBasemapTile(zoom, x, y) {
+    const count = 2 ** zoom;
+    if (x < 0 || y < 0 || x >= count || y >= count) return null;
+    const key = `${zoom}/${x}/${y}`;
+    let tile = state.basemapTiles.get(key);
+    if (tile) return tile;
+    const image = new Image();
+    tile = { image, loaded: false, failed: false };
+    state.basemapTiles.set(key, tile);
+    image.addEventListener('load', () => {
+        tile.loaded = true;
+        if (state.show.basemap) render();
+    }, { once: true });
+    image.addEventListener('error', () => { tile.failed = true; }, { once: true });
+    image.src = BASEMAP.tileUrl(zoom, x, y);
+    return tile;
+}
+
+function renderBasemap(ctx) {
+    if (!state.show.basemap) return;
+    const viewport = screenRectToWorld(0, 0, elements.canvas.width, elements.canvas.height);
+    const japan = {
+        minX: longitudeToWorldX(BASEMAP.west),
+        maxX: longitudeToWorldX(BASEMAP.east),
+        minY: latitudeToWorldY(BASEMAP.north),
+        maxY: latitudeToWorldY(BASEMAP.south),
+    };
+    const visible = {
+        minX: Math.max(viewport.minX, japan.minX),
+        maxX: Math.min(viewport.maxX, japan.maxX),
+        minY: Math.max(viewport.minY, japan.minY),
+        maxY: Math.min(viewport.maxY, japan.maxY),
+    };
+    if (visible.minX >= visible.maxX || visible.minY >= visible.maxY) return;
+
+    const zoom = slippyZoomForViewport();
+    const count = 2 ** zoom;
+    const minTileX = Math.max(0, Math.floor(worldToTileX(visible.minX, zoom)));
+    const maxTileX = Math.min(count - 1, Math.floor(worldToTileX(visible.maxX, zoom)));
+    const minTileY = Math.max(0, Math.floor(worldToTileY(visible.minY, zoom)));
+    const maxTileY = Math.min(count - 1, Math.floor(worldToTileY(visible.maxY, zoom)));
+
+    ctx.save();
+    ctx.globalAlpha = BASEMAP.opacity;
+    for (let tileY = minTileY; tileY <= maxTileY; tileY += 1) {
+        for (let tileX = minTileX; tileX <= maxTileX; tileX += 1) {
+            const tile = requestBasemapTile(zoom, tileX, tileY);
+            if (!tile?.loaded || tile.failed) continue;
+            const worldLeft = -Math.PI + (Math.PI * 2 * tileX / count);
+            const worldTop = -Math.PI + (Math.PI * 2 * tileY / count);
+            const worldRight = -Math.PI + (Math.PI * 2 * (tileX + 1) / count);
+            const worldBottom = -Math.PI + (Math.PI * 2 * (tileY + 1) / count);
+            const topLeft = worldToScreen(worldLeft, worldTop);
+            const bottomRight = worldToScreen(worldRight, worldBottom);
+            ctx.drawImage(tile.image, Math.floor(topLeft.x), Math.floor(topLeft.y), Math.ceil(bottomRight.x - topLeft.x) + 1, Math.ceil(bottomRight.y - topLeft.y) + 1);
+        }
+    }
+    ctx.restore();
+}
+
 function render() {
     const layer = activeLayer();
     const ctx = elements.canvas.getContext('2d');
@@ -1864,24 +1967,10 @@ function render() {
 
     renderAreaSelection(ctx, layer);
 
-    if (state.show.coastlines) {
-        ctx.strokeStyle = 'rgba(216,226,240,0.72)';
-        ctx.lineWidth = 1.25;
-        ctx.beginPath();
-        for (const segment of state.coastlines) {
-            if (!segment.points.length) continue;
-            const first = worldToScreen(segment.points[0].x, segment.points[0].y);
-            ctx.moveTo(first.x, first.y);
-            for (let index = 1; index < segment.points.length; index += 1) {
-                const point = worldToScreen(segment.points[index].x, segment.points[index].y);
-                ctx.lineTo(point.x, point.y);
-            }
-        }
-        ctx.stroke();
-    }
+    renderBasemap(ctx);
 
     for (const className of ['fine', 'warning', 'prefecture', 'coast']) {
-        const visible = className === 'coast' ? state.show.coastlines : state.show[className];
+        const visible = className === 'coast' ? state.show.coast : state.show[className];
         if (!visible || !layer.allowedClasses.includes(className)) continue;
         ctx.strokeStyle = CLASS_COLORS[className];
         ctx.lineWidth = className === 'fine' ? 0.95 : className === 'warning' ? 1.9 : className === 'prefecture' ? 2.8 : 2.3;
@@ -2995,11 +3084,10 @@ async function loadData() {
     state.meta = await fetchJson('/api/meta');
     elements.projectRoot.textContent = state.meta.projectRoot;
 
-    const [placeNamesBuffer, coastlineGz,
+    const [placeNamesBuffer,
         muniGeometryGz, muniFineGz, muniWarningGz, muniPrefectureGz, muniOverridesText,
         jmaGeometryGz, jmaBordersGz, jmaOverridesText] = await Promise.all([
         fetchArrayBuffer(PATHS.placeNames),
-        fetchArrayBuffer(PATHS.coastlines),
         fetchArrayBuffer(PATHS.municipality.geometry),
         fetchArrayBuffer(PATHS.municipality.fine),
         fetchArrayBuffer(PATHS.municipality.warning),
@@ -3011,7 +3099,6 @@ async function loadData() {
     ]);
 
     state.translations = JSON.parse(new TextDecoder().decode(placeNamesBuffer));
-    state.coastlines = parseCoastlines(await gunzip(coastlineGz));
 
     const [muniGeometryBuffer, muniFineBuffer, muniWarningBuffer, muniPrefectureBuffer, jmaRoot] = await Promise.all([
         gunzip(muniGeometryGz),
@@ -3176,6 +3263,7 @@ function bindUi() {
     elements.advancedStatus = document.getElementById('advanced-status');
     elements.toggleWarning = document.getElementById('toggle-warning');
     elements.canvas = document.getElementById('map-canvas');
+    elements.basemapAttribution = document.getElementById('basemap-attribution');
     elements.mapArea = document.querySelector('.map-area');
     elements.modeChip = document.getElementById('mode-chip');
 
@@ -3230,7 +3318,8 @@ function bindUi() {
     elements.restoreBaselineButton.addEventListener('click', () => restoreActiveBaseline().catch(error => setStatus(error.message)));
 
     const toggles = {
-        'toggle-coastlines': 'coastlines',
+        'toggle-basemap': 'basemap',
+        'toggle-coast': 'coast',
         'toggle-fine': 'fine',
         'toggle-warning': 'warning',
         'toggle-prefecture': 'prefecture',
@@ -3242,6 +3331,9 @@ function bindUi() {
     for (const [id, key] of Object.entries(toggles)) {
         document.getElementById(id).addEventListener('change', event => {
             state.show[key] = event.target.checked;
+            if (key === 'basemap' && elements.basemapAttribution) {
+                elements.basemapAttribution.style.display = state.show.basemap ? '' : 'none';
+            }
             render();
         });
     }

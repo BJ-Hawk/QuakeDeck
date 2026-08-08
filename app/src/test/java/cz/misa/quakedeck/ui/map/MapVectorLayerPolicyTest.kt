@@ -16,6 +16,12 @@ class MapVectorLayerPolicyTest {
     }
 
     @Test
+    fun sourceIsolationHookUsesItsConfiguredLayerAtEveryZoom() {
+        assertEquals(MapVectorLayer.N03_PREFECTURES, mapVectorLayerForZoom(1f, true))
+        assertEquals(MapVectorLayer.N03_PREFECTURES, mapVectorLayerForZoom(128f, true))
+    }
+
+    @Test
     fun invalidZoomFallsBackToCoarseLayer() {
         assertEquals(MapVectorLayer.N03_PREFECTURES, mapVectorLayerForZoom(Float.NaN))
         assertEquals(MapVectorLayer.N03_PREFECTURES, mapVectorLayerForZoom(-1f))

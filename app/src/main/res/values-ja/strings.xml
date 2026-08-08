@@ -242,6 +242,8 @@
     <string name="hypocenter_report_with_initial_intensity">震源情報 + 震度速報</string>
     <string name="hypocenter_intensity_report">震源・震度に関する情報</string>
     <string name="detailed_intensity_report">各地の震度に関する情報</string>
+    <string name="checking_official_jma_report">気象庁の公式情報を確認中…</string>
+    <string name="official_jma_report_preparing">気象庁の公式情報を準備中…</string>
 
     <string name="browse_past_reports">過去の情報を閲覧</string>
     <string name="browse_past_reports_explanation">保存済みの地震と、アーカイブされた各情報を確認します。</string>

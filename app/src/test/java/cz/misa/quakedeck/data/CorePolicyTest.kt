@@ -32,6 +32,44 @@ class CorePolicyTest {
     }
 
     @Test
+    fun jmaReportReadinessRequiresThePublishedDetailJsonForTheIncident() {
+        val reportId = "20260808212614"
+        val preparing = """
+            [{"eid":"20260808212343","ctt":"$reportId","json":""}]
+        """.trimIndent()
+        val published = """
+            [{"eid":"20260808212343","ctt":"$reportId","json":"20260808212614_20260808212343_VXSE5k_1.json"}]
+        """.trimIndent()
+
+        assertEquals(
+            JmaReportReadiness.PREPARING,
+            jmaReportReadinessFromList(reportId, preparing)
+        )
+        assertEquals(
+            JmaReportReadiness.AVAILABLE,
+            jmaReportReadinessFromList(reportId, published)
+        )
+    }
+
+    @Test
+    fun officialJmaReportIdUsesTheReportIssueTimestamp() {
+        val event = EarthquakeEvent(
+            id = "quake:2026-08-08T21:23:43+09:00",
+            place = "Test",
+            originTime = "2026-08-08 21:23:43 JST",
+            magnitude = 3.0,
+            depthKm = 10,
+            maxIntensity = "1",
+            latitude = 35.0,
+            longitude = 139.0,
+            points = emptyList(),
+            reportIssuedAt = "2026-08-08 21:26:14 JST"
+        )
+
+        assertEquals("20260808212614", officialJmaReportId(event))
+    }
+
+    @Test
     fun mapCoverageRejectsInvalidAndOutOfBoundsCoordinates() {
         assertTrue(JapanMapCoverage.contains(35.6762, 139.6503))
         assertFalse(JapanMapCoverage.contains(Double.NaN, 139.6503))

@@ -2522,6 +2522,35 @@ private fun EarthquakeReportStageStrip(
     ) {
         officialJmaReportUri(reportLinkEvent, language)
     }
+    val jmaReportId = remember(reportLinkEvent.reportIssuedAt) {
+        officialJmaReportId(reportLinkEvent)
+    }
+    var reportReadiness by remember(reportUri, jmaReportId) {
+        mutableStateOf(
+            if (reportUri == null || jmaReportId == null) {
+                JmaReportReadiness.AVAILABLE
+            } else {
+                JmaReportReadiness.CHECKING
+            }
+        )
+    }
+    LaunchedEffect(reportUri, jmaReportId) {
+        if (reportUri == null || jmaReportId == null) return@LaunchedEffect
+        while (true) {
+            reportReadiness = JmaReportReadinessChecker.readinessFor(jmaReportId)
+            if (reportReadiness == JmaReportReadiness.AVAILABLE) return@LaunchedEffect
+            // JMA can expose the event row before its detail JSON. Recheck only
+            // while this report card remains composed, and no more than once per
+            // short-lived list-cache interval.
+            delay(25.seconds)
+        }
+    }
+    val reportReady = reportReadiness == JmaReportReadiness.AVAILABLE
+    val reportLabel = when (reportReadiness) {
+        JmaReportReadiness.CHECKING -> uiText(R.string.checking_official_jma_report, language)
+        JmaReportReadiness.PREPARING -> uiText(R.string.official_jma_report_preparing, language)
+        JmaReportReadiness.AVAILABLE -> label
+    }
     val (container, content) = when {
         !event.reportCorrection.isNullOrBlank() ->
             MaterialTheme.colorScheme.errorContainer to MaterialTheme.colorScheme.onErrorContainer
@@ -2538,7 +2567,7 @@ private fun EarthquakeReportStageStrip(
         modifier = Modifier
             .fillMaxWidth()
             .then(
-                if (reportUri != null) {
+                if (reportUri != null && reportReady) {
                     Modifier.clickable {
                         context.startActivity(Intent(Intent.ACTION_VIEW, reportUri))
                     }
@@ -2557,7 +2586,7 @@ private fun EarthquakeReportStageStrip(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = label.uppercase(),
+                text = reportLabel.uppercase(),
                 modifier = Modifier.weight(1f),
                 color = content,
                 fontWeight = FontWeight.Bold,
@@ -2577,7 +2606,7 @@ private fun EarthquakeReportStageStrip(
                     overflow = TextOverflow.Ellipsis
                 )
             }
-            if (reportUri != null) {
+            if (reportUri != null && reportReady) {
                 Spacer(Modifier.width((4f * cardScale).dp))
                 Text(
                     text = "↗",

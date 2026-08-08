@@ -58,7 +58,8 @@
                 <input id="search-input" type="text" placeholder="Japanese / English name or code">
             </div>
             <div class="view-toggles">
-                <label><input type="checkbox" id="toggle-coastlines" checked> Coast</label>
+                <label><input type="checkbox" id="toggle-basemap" checked> Basemap</label>
+                <label><input type="checkbox" id="toggle-coast" checked> Coast</label>
                 <label><input type="checkbox" id="toggle-fine" checked> Fine</label>
                 <label><input type="checkbox" id="toggle-warning" checked> Warning</label>
                 <label><input type="checkbox" id="toggle-prefecture" checked> Prefecture</label>
@@ -138,6 +139,9 @@
 
         <main class="map-area">
             <canvas id="map-canvas"></canvas>
+            <div id="basemap-attribution" style="position:absolute;right:8px;bottom:6px;padding:3px 6px;border-radius:4px;background:rgba(15,17,21,.78);font:11px Segoe UI,sans-serif;z-index:4;pointer-events:auto;">
+                <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer" style="color:#d9e1ee;text-decoration:none;">© OpenStreetMap contributors</a>
+            </div>
             <div id="mode-chip" class="mode-chip hidden"></div>
         </main>
     </div>

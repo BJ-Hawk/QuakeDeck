@@ -242,6 +242,8 @@
     <string name="hypocenter_report_with_initial_intensity">Hypocenter report + initial intensity</string>
     <string name="hypocenter_intensity_report">Hypocenter &amp; intensity report</string>
     <string name="detailed_intensity_report">Detailed intensity report</string>
+    <string name="checking_official_jma_report">Checking official JMA report…</string>
+    <string name="official_jma_report_preparing">Official JMA report preparing…</string>
 
     <string name="browse_past_reports">Browse past reports</string>
     <string name="browse_past_reports_explanation">Open saved events and inspect every archived report stage.</string>
