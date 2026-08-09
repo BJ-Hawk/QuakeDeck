@@ -2443,6 +2443,12 @@ class P2pQuakeProvider(
     private fun addToHistory(event: EarthquakeEvent): EarthquakeEvent {
         val existing = eventHistory.firstOrNull { it.id == event.id }
             ?: lastEvent?.takeIf { it.id == event.id }
+            // P2PQuake normally repeats the exact origin timestamp in every
+            // bulletin, but a follow-up can occasionally use another valid
+            // textual representation of the same instant. Do not let that
+            // transport variation create a second live incident card.
+            ?: eventHistory.firstOrNull { sameConfirmedIncident(it, event) }
+            ?: lastEvent?.takeIf { sameConfirmedIncident(it, event) }
         val merged = if (
             existing != null &&
             existing.kind == EarthquakeEventKind.CONFIRMED &&
@@ -2453,7 +2459,10 @@ class P2pQuakeProvider(
             event
         }
 
-        eventHistory.removeAll { it.id == merged.id }
+        // Remove a previously split representation as well as the normal
+        // exact-ID match. The surviving event keeps the established ID, which
+        // preserves UI selection and notification navigation.
+        eventHistory.removeAll { it.id == merged.id || sameConfirmedIncident(it, merged) }
         eventHistory.add(merged)
         eventHistory.sortWith(
             compareByDescending<EarthquakeEvent> {
@@ -2468,25 +2477,32 @@ class P2pQuakeProvider(
         existing: EarthquakeEvent,
         incoming: EarthquakeEvent
     ): EarthquakeEvent {
-        val incomingCarriesIntensity = when (incoming.reportStage) {
+        // Live WebSocket packets are chronological, but the startup cache,
+        // current-report endpoint, recovery feed and raw archive are not one
+        // ordered stream. Never let an earlier ScaleAndDestination response
+        // overwrite an already received DetailScale response.
+        val incomingIsAuthoritative = incomingReportIsAuthoritative(existing, incoming)
+        val authoritative = if (incomingIsAuthoritative) incoming else existing
+        val supplementary = if (incomingIsAuthoritative) existing else incoming
+        val authoritativeCarriesIntensity = when (authoritative.reportStage) {
             EarthquakeReportStage.INITIAL_INTENSITY,
             EarthquakeReportStage.COMBINED,
             EarthquakeReportStage.DETAILED -> true
-            else -> incoming.maxIntensity != "—" || incoming.points.isNotEmpty()
+            else -> authoritative.maxIntensity != "—" || authoritative.points.isNotEmpty()
         }
         val contributingTypes = (existing.contributingReportTypes +
             incoming.contributingReportTypes + listOfNotNull(incoming.reportType))
             .distinctBy { it.lowercase() }
-        val effectiveHasHypocenter = incoming.hasHypocenter || existing.hasHypocenter
-        val intensityCorrection = incoming.reportCorrection?.lowercase() in setOf(
+        val effectiveHasHypocenter = authoritative.hasHypocenter || supplementary.hasHypocenter
+        val intensityCorrection = authoritative.reportCorrection?.lowercase() in setOf(
             "scaleonly",
             "scaleanddestination"
         )
         val mergedPoints = when {
-            !incomingCarriesIntensity -> existing.points
-            incoming.points.isEmpty() -> existing.points
-            intensityCorrection -> incoming.points
-            else -> mergeIntensityPoints(existing.points, incoming.points)
+            !authoritativeCarriesIntensity -> supplementary.points
+            authoritative.points.isEmpty() -> supplementary.points
+            intensityCorrection -> authoritative.points
+            else -> mergeIntensityPoints(supplementary.points, authoritative.points)
         }
 
         // Once a detailed report gives individual stations, its earlier
@@ -2498,48 +2514,95 @@ class P2pQuakeProvider(
                 report.points.any { point -> !point.isArea }
         }
 
-        return incoming.copy(
-            place = if (incoming.hasHypocenter) {
-                incoming.place
+        return authoritative.copy(
+            // Preserve the established incident identity if a malformed or
+            // reformatted follow-up was reconciled by sameConfirmedIncident.
+            id = existing.id,
+            place = if (authoritative.hasHypocenter) {
+                authoritative.place
             } else {
-                existing.place.takeUnless {
+                supplementary.place.takeUnless {
                     it.isBlank() || it == "Hypocenter under assessment"
-                } ?: incoming.place
+                } ?: authoritative.place
             },
-            magnitude = if (incoming.hasHypocenter && incoming.magnitude > 0.0) {
-                incoming.magnitude
+            magnitude = if (authoritative.hasHypocenter && authoritative.magnitude > 0.0) {
+                authoritative.magnitude
             } else {
-                existing.magnitude
+                supplementary.magnitude
             },
-            depthKm = if (incoming.hasHypocenter && incoming.depthKm >= 0) {
-                incoming.depthKm
+            depthKm = if (authoritative.hasHypocenter && authoritative.depthKm >= 0) {
+                authoritative.depthKm
             } else {
-                existing.depthKm
+                supplementary.depthKm
             },
-            latitude = if (incoming.hasHypocenter) incoming.latitude else existing.latitude,
-            longitude = if (incoming.hasHypocenter) incoming.longitude else existing.longitude,
+            latitude = if (authoritative.hasHypocenter) authoritative.latitude else supplementary.latitude,
+            longitude = if (authoritative.hasHypocenter) authoritative.longitude else supplementary.longitude,
             maxIntensity = if (
-                incomingCarriesIntensity && incoming.maxIntensity != "—"
-            ) incoming.maxIntensity else existing.maxIntensity,
+                authoritativeCarriesIntensity && authoritative.maxIntensity != "—"
+            ) authoritative.maxIntensity else supplementary.maxIntensity,
             points = if (detailedStationDataAvailable) {
                 mergedPoints.filterNot { it.isArea }
             } else {
                 mergedPoints
             },
-            reportIssuedAt = listOfNotNull(existing.reportIssuedAt, incoming.reportIssuedAt).maxOrNull(),
-            reportStage = incoming.reportStage.takeUnless {
+            reportIssuedAt = authoritative.reportIssuedAt ?: supplementary.reportIssuedAt,
+            reportStage = authoritative.reportStage.takeUnless {
                 it == EarthquakeReportStage.UNKNOWN
-            } ?: existing.reportStage,
-            reportType = incoming.reportType ?: existing.reportType,
+            } ?: supplementary.reportStage,
+            reportType = authoritative.reportType ?: supplementary.reportType,
             contributingReportTypes = contributingTypes,
             reportCount = existing.reportCount + if (incoming.reportType != null) 1 else 0,
             hasHypocenter = effectiveHasHypocenter,
-            // The frame label describes the report that just arrived. Earlier
-            // corrections remain discoverable in the raw incident sequence and
-            // summary metadata, but must not make every later ordinary report
-            // look corrected.
-            reportCorrection = incoming.reportCorrection
+            // The frame label reflects the newest reliable report, regardless
+            // of which asynchronous source happened to deliver it last.
+            reportCorrection = authoritative.reportCorrection
         )
+    }
+
+    private fun sameConfirmedIncident(
+        first: EarthquakeEvent,
+        second: EarthquakeEvent
+    ): Boolean {
+        if (
+            first.kind != EarthquakeEventKind.CONFIRMED ||
+            second.kind != EarthquakeEventKind.CONFIRMED
+        ) return false
+        val firstTime = eventInstant(first) ?: return false
+        val secondTime = eventInstant(second) ?: return false
+        return abs(java.time.Duration.between(firstTime, secondTime).seconds) <= 2L
+    }
+
+    private fun incomingReportIsAuthoritative(
+        existing: EarthquakeEvent,
+        incoming: EarthquakeEvent
+    ): Boolean {
+        val existingIssued = reportIssuedInstant(existing)
+        val incomingIssued = reportIssuedInstant(incoming)
+        if (existingIssued != null && incomingIssued != null && existingIssued != incomingIssued) {
+            return incomingIssued.isAfter(existingIssued)
+        }
+
+        val existingStage = reportStageRank(existing.reportStage)
+        val incomingStage = reportStageRank(incoming.reportStage)
+        if (existingStage != incomingStage) return incomingStage > existingStage
+
+        return !incoming.reportCorrection.isNullOrBlank() && existing.reportCorrection.isNullOrBlank()
+    }
+
+    private fun reportIssuedInstant(event: EarthquakeEvent): Instant? =
+        event.reportIssuedAt?.let { value ->
+            runCatching {
+                LocalDateTime.parse(value, JST_DISPLAY_FORMATTER).atZone(JST_ZONE).toInstant()
+            }.getOrNull()
+        }
+
+    private fun reportStageRank(stage: EarthquakeReportStage): Int = when (stage) {
+        EarthquakeReportStage.DETAILED -> 5
+        EarthquakeReportStage.COMBINED -> 4
+        EarthquakeReportStage.HYPOCENTER -> 3
+        EarthquakeReportStage.INITIAL_INTENSITY -> 2
+        EarthquakeReportStage.DISTANT -> 1
+        EarthquakeReportStage.UNKNOWN -> 0
     }
 
     private fun mergeIntensityPoints(

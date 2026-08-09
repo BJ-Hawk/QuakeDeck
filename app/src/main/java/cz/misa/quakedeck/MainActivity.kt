@@ -15,6 +15,11 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.compose.setContent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -42,6 +47,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
@@ -632,6 +638,13 @@ private fun QuakeDeckApp(
     var focusEventRequest by remember { mutableIntStateOf(0) }
     var focusEventRequestIsManual by remember { mutableStateOf(false) }
     var focusEventTargetId by remember { mutableStateOf<String?>(null) }
+    // A station selection is deliberately separate from event focus. This lets
+    // a report remain visible long enough to draw its station marker, while
+    // closing the selection restores the exact camera mode the user had before.
+    var focusedStation by remember { mutableStateOf<IntensityPoint?>(null) }
+    var stationFocusRequest by remember { mutableIntStateOf(0) }
+    var stationFocusRestoreRequest by remember { mutableIntStateOf(0) }
+    var stationFocusReturnsToEvent by remember { mutableStateOf(false) }
     // The focus button state is derived from a stable mapped event plus camera
     // revisions. A transient selection/cache update can no longer erase a real
     // manual pan or pinch and silently turn Re-focus back into Focus.
@@ -675,7 +688,7 @@ private fun QuakeDeckApp(
             selectedEvent.id != "waiting" &&
             selectedEventCanMap
     val cleanMapEvent = remember { waitingSnapshot().event }
-    val mapEvent = if (eventMapped) selectedEvent else cleanMapEvent
+    val mapEvent = if (eventMapped || focusedStation != null) selectedEvent else cleanMapEvent
 
     fun eventFocusSignature(event: EarthquakeEvent): String = buildString {
         append(event.hasHypocenter)
@@ -725,7 +738,37 @@ private fun QuakeDeckApp(
         focusEventRequest++
     }
 
+    fun clearStationFocus(restoreCamera: Boolean = true) {
+        if (focusedStation == null) return
+        focusedStation = null
+        if (restoreCamera && stationFocusReturnsToEvent) {
+            requestEventMapFocus(selectedEvent, manual = true)
+        } else if (restoreCamera) {
+            mappedEventId = null
+            focusEventTargetId = null
+            focusNeedsRefocusRequested = false
+            focusedFootprintSignature = null
+            stationFocusRestoreRequest++
+        }
+        stationFocusReturnsToEvent = false
+    }
+
+    fun focusStation(point: IntensityPoint) {
+        val latitude = point.latitude ?: return
+        val longitude = point.longitude ?: return
+        if (!JapanMapCoverage.contains(latitude, longitude)) return
+        if (focusedStation == point) {
+            clearStationFocus()
+            return
+        }
+        cancelAutoFocusExpiry()
+        stationFocusReturnsToEvent = eventMapped && !focusNeedsRefocus
+        focusedStation = point
+        stationFocusRequest++
+    }
+
     fun selectReport(target: EarthquakeEvent) {
+        clearStationFocus()
         if (target.id != selectedEvent.id) {
             clearObservedIntensityExpansion()
         }
@@ -742,6 +785,7 @@ private fun QuakeDeckApp(
     }
 
     fun fitJapanAndClearEventFocus() {
+        clearStationFocus(restoreCamera = false)
         cancelAutoFocusExpiry()
         mappedEventId = null
         focusEventTargetId = null
@@ -753,6 +797,7 @@ private fun QuakeDeckApp(
     }
 
     fun focusSelectedEvent() {
+        clearStationFocus(restoreCamera = false)
         // The focus control is a real toggle while the event is already framed:
         // Focus event -> Fit Japan. After any manual camera movement the label
         // becomes Re-focus event, and the same press restores the event framing
@@ -806,6 +851,7 @@ private fun QuakeDeckApp(
     }
 
     fun exitHistoricalMode() {
+        clearStationFocus()
         clearObservedIntensityExpansion()
         historicalIncident = null
         historicalReportIndex = 0
@@ -1173,6 +1219,9 @@ private fun QuakeDeckApp(
                             focusRequest = focusEventRequest,
                             focusRequestIsManual = focusEventRequestIsManual,
                             focusRequestEventId = focusEventTargetId,
+                            focusedStation = focusedStation,
+                            stationFocusRequest = stationFocusRequest,
+                            stationFocusRestoreRequest = stationFocusRestoreRequest,
                             markerSizeDp = epicenterMarkerSizeDp,
                             markerStyle = epicenterMarkerStyle,
                             showStationNames = showStationNames,
@@ -1233,10 +1282,15 @@ private fun QuakeDeckApp(
                             offlineStationTranslator = offlineStationTranslator,
                             offlineStationTranslationStatus = offlineStationTranslationStatus,
                             observedIntensityExpandedPrefectures = observedIntensityExpandedPrefectures,
-                            onReportIndexChanged = ::selectHistoricalReport,
+                            onReportIndexChanged = {
+                                clearStationFocus()
+                                selectHistoricalReport(it)
+                            },
                             onBrowseEvents = ::openHistoricalBrowserFromMap,
                             onReturnToLive = ::exitHistoricalMode,
                             onFocusEvent = ::focusSelectedEvent,
+                            onFocusStation = ::focusStation,
+                            onStationFocusCleared = ::clearStationFocus,
                             modifier = Modifier.fillMaxHeight().weight(1f - landscapeMapFraction)
                         )
                     } else {
@@ -1262,6 +1316,8 @@ private fun QuakeDeckApp(
                                 focusedFootprintSignature = null
                             },
                             onFocusEvent = ::focusSelectedEvent,
+                            onFocusStation = ::focusStation,
+                            onStationFocusCleared = ::clearStationFocus,
                             modifier = Modifier.fillMaxHeight().weight(1f - landscapeMapFraction)
                         )
                     }
@@ -1287,6 +1343,9 @@ private fun QuakeDeckApp(
                             focusRequest = focusEventRequest,
                             focusRequestIsManual = focusEventRequestIsManual,
                             focusRequestEventId = focusEventTargetId,
+                            focusedStation = focusedStation,
+                            stationFocusRequest = stationFocusRequest,
+                            stationFocusRestoreRequest = stationFocusRestoreRequest,
                             markerSizeDp = epicenterMarkerSizeDp,
                             markerStyle = epicenterMarkerStyle,
                             showStationNames = showStationNames,
@@ -1364,10 +1423,15 @@ private fun QuakeDeckApp(
                         offlineStationTranslator = offlineStationTranslator,
                         offlineStationTranslationStatus = offlineStationTranslationStatus,
                         observedIntensityExpandedPrefectures = observedIntensityExpandedPrefectures,
-                        onReportIndexChanged = ::selectHistoricalReport,
+                        onReportIndexChanged = {
+                            clearStationFocus()
+                            selectHistoricalReport(it)
+                        },
                         onBrowseEvents = ::openHistoricalBrowserFromMap,
                         onReturnToLive = ::exitHistoricalMode,
                         onFocusEvent = ::focusSelectedEvent,
+                        onFocusStation = ::focusStation,
+                        onStationFocusCleared = ::clearStationFocus,
                         onObservationsExpandedChanged = { expanded ->
                             if (expanded) {
                                 portraitBeforeObservationsFraction = portraitMapFraction
@@ -1412,6 +1476,8 @@ private fun QuakeDeckApp(
                             portraitPendingObservationRestore = null
                         },
                         onFocusEvent = ::focusSelectedEvent,
+                        onFocusStation = ::focusStation,
+                        onStationFocusCleared = ::clearStationFocus,
                         onObservationsExpandedChanged = { expanded ->
                             if (expanded) {
                                 portraitBeforeObservationsFraction = portraitMapFraction
@@ -2769,6 +2835,8 @@ private fun EventPanel(
     onSelectEvent: (EarthquakeEvent) -> Unit,
     onCloseReport: () -> Unit,
     onFocusEvent: () -> Unit,
+    onFocusStation: (IntensityPoint) -> Unit,
+    onStationFocusCleared: () -> Unit,
     modifier: Modifier = Modifier,
     onObservationsExpandedChanged: ((Boolean) -> Unit)? = null,
     onSummaryHeightChanged: ((Int) -> Unit)? = null
@@ -2863,6 +2931,7 @@ private fun EventPanel(
     }
 
     val closeHistoricalReport: () -> Unit = {
+        onStationFocusCleared()
         val anchor = returnScrollAnchor
         val closingEventId = selectedEvent.id
         onCloseReport()
@@ -3003,6 +3072,7 @@ private fun EventPanel(
                     onCloseReport = closeHistoricalReport,
                     onToggleObservations = {
                         val expanded = !observationsExpanded
+                        if (!expanded) onStationFocusCleared()
                         onObservationsExpandedChanged?.invoke(expanded)
                         observationsExpanded = expanded
                     }
@@ -3029,7 +3099,9 @@ private fun EventPanel(
                             expansionKey = selectedEvent.originTime,
                             listState = listState,
                             listViewportTopInRootPx = listViewportTopInRootPx,
-                            expandedPrefectures = observedIntensityExpandedPrefectures
+                            expandedPrefectures = observedIntensityExpandedPrefectures,
+                            onFocusStation = onFocusStation,
+                            onStationFocusCleared = onStationFocusCleared
                         )
                     } else {
                         selectedEvent.points.forEach { point ->
@@ -3038,7 +3110,8 @@ private fun EventPanel(
                                 language = placeNameLanguage,
                                 japaneseIntensity = japaneseIntensity,
                                 offlineStationTranslator = offlineStationTranslator,
-                                offlineStationTranslationStatus = offlineStationTranslationStatus
+                                offlineStationTranslationStatus = offlineStationTranslationStatus,
+                                onFocusStation = onFocusStation
                             )
                         }
                     }
@@ -3207,6 +3280,8 @@ private fun HistoricalEventPanel(
     onBrowseEvents: () -> Unit,
     onReturnToLive: () -> Unit,
     onFocusEvent: () -> Unit,
+    onFocusStation: (IntensityPoint) -> Unit,
+    onStationFocusCleared: () -> Unit,
     modifier: Modifier = Modifier,
     onObservationsExpandedChanged: ((Boolean) -> Unit)? = null,
     onSummaryHeightChanged: ((Int) -> Unit)? = null
@@ -3240,6 +3315,7 @@ private fun HistoricalEventPanel(
 
     LaunchedEffect(frame.archiveKey, event.points.isEmpty()) {
         if (observationsExpanded && event.points.isEmpty()) {
+            onStationFocusCleared()
             onObservationsExpandedChanged?.invoke(false)
             observationsExpanded = false
             associatedScrollAnchor?.let { (index, offset) ->
@@ -3346,6 +3422,7 @@ private fun HistoricalEventPanel(
                         onCloseReport = onReturnToLive,
                         onToggleObservations = {
                             val expanded = !observationsExpanded
+                            if (!expanded) onStationFocusCleared()
                             if (expanded) {
                                 associatedScrollAnchor = listState.firstVisibleItemIndex to
                                     listState.firstVisibleItemScrollOffset
@@ -3387,7 +3464,9 @@ private fun HistoricalEventPanel(
                             expansionKey = incident.eventKey,
                             listState = listState,
                             listViewportTopInRootPx = listViewportTopInRootPx,
-                            expandedPrefectures = observedIntensityExpandedPrefectures
+                            expandedPrefectures = observedIntensityExpandedPrefectures,
+                            onFocusStation = onFocusStation,
+                            onStationFocusCleared = onStationFocusCleared
                         )
                     }
 
@@ -3668,7 +3747,9 @@ private fun ObservedIntensityGroups(
     expansionKey: String,
     listState: LazyListState,
     listViewportTopInRootPx: Float,
-    expandedPrefectures: MutableMap<String, Boolean>
+    expandedPrefectures: MutableMap<String, Boolean>,
+    onFocusStation: (IntensityPoint) -> Unit,
+    onStationFocusCleared: () -> Unit
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -3700,40 +3781,48 @@ private fun ObservedIntensityGroups(
         val expansionStateKey = "$expansionKey\u0000${group.prefecture}"
         val expanded = expandedPrefectures[expansionStateKey] == true
         var prefectureTopInRootPx by remember(group.prefecture) { mutableFloatStateOf(0f) }
+        val triangleRotation by animateFloatAsState(
+            targetValue = if (expanded) 90f else 0f,
+            animationSpec = tween(durationMillis = 180),
+            label = "prefecture-expansion-triangle"
+        )
+        val railColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.62f)
+        fun collapse() {
+            expandedPrefectures.remove(expansionStateKey)
+            onStationFocusCleared()
+            val scrollDelta = prefectureTopInRootPx -
+                (listViewportTopInRootPx + headerTopPaddingPx)
+            // Do not move a visible header. Only recover it when it already
+            // sits above the report viewport.
+            if (scrollDelta < -1f) {
+                scope.launch { listState.animateScrollBy(scrollDelta) }
+            }
+        }
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = 2.dp)
                 .onGloballyPositioned { coordinates ->
                     prefectureTopInRootPx = coordinates.positionInRoot().y
-                }
-                .clickable {
-                    if (expanded) {
-                        expandedPrefectures.remove(expansionStateKey)
-                        val scrollDelta = prefectureTopInRootPx -
-                            (listViewportTopInRootPx + headerTopPaddingPx)
-                        // Do not move a visible header. Only recover it when
-                        // it already sits above the report viewport.
-                        if (scrollDelta < -1f) {
-                            scope.launch {
-                                listState.animateScrollBy(scrollDelta)
-                            }
-                        }
-                    } else {
-                        expandedPrefectures[expansionStateKey] = true
-                    }
                 },
             shape = RoundedCornerShape(7.dp),
             color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.56f)
         ) {
             Column(Modifier.padding(horizontal = 8.dp, vertical = 5.dp)) {
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable {
+                            if (expanded) collapse()
+                            else expandedPrefectures[expansionStateKey] = true
+                        },
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        if (expanded) "▾" else "▸",
-                        modifier = Modifier.width(14.dp),
+                        "▶",
+                        modifier = Modifier
+                            .width(14.dp)
+                            .graphicsLayer { rotationZ = triangleRotation },
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         fontSize = 12.sp,
                         fontWeight = FontWeight.Bold
@@ -3754,15 +3843,46 @@ private fun ObservedIntensityGroups(
                     )
                 }
 
-                if (expanded) {
-                    group.points.forEach { point ->
-                        ObservedStationRow(
-                            point = point,
-                            language = language,
-                            japaneseIntensity = japaneseIntensity,
-                            offlineStationTranslator = offlineStationTranslator,
-                            offlineStationTranslationStatus = offlineStationTranslationStatus,
-                            showSeparator = point != group.points.last()
+                AnimatedVisibility(
+                    visible = expanded,
+                    enter = expandVertically(animationSpec = tween(180)) + fadeIn(tween(120)),
+                    exit = shrinkVertically(animationSpec = tween(160)) + fadeOut(tween(90))
+                ) {
+                    Box(
+                        Modifier
+                            .fillMaxWidth()
+                            .drawBehind {
+                                val railX = 7.dp.toPx()
+                                drawLine(
+                                    color = railColor,
+                                    start = Offset(railX, 0f),
+                                    end = Offset(railX, size.height),
+                                    strokeWidth = 1.dp.toPx()
+                                )
+                            }
+                    ) {
+                        Column(Modifier.fillMaxWidth()) {
+                            group.points.forEach { point ->
+                                ObservedStationRow(
+                                    point = point,
+                                    language = language,
+                                    japaneseIntensity = japaneseIntensity,
+                                    offlineStationTranslator = offlineStationTranslator,
+                                    offlineStationTranslationStatus = offlineStationTranslationStatus,
+                                    showSeparator = point != group.points.last(),
+                                    showCloseTriangle = point == group.points.last(),
+                                    onFocusStation = onFocusStation
+                                )
+                            }
+                        }
+                        // Station rows remain fully tappable; only this narrow
+                        // left rail and the header collapse the prefecture.
+                        Box(
+                            Modifier
+                                .align(Alignment.CenterStart)
+                                .fillMaxHeight()
+                                .width(20.dp)
+                                .clickable(onClick = ::collapse)
                         )
                     }
                 }
@@ -3798,7 +3918,9 @@ private fun ObservedStationRow(
     japaneseIntensity: Boolean,
     offlineStationTranslator: OfflineStationTranslator,
     offlineStationTranslationStatus: OfflineStationTranslationStatus,
-    showSeparator: Boolean = false
+    showSeparator: Boolean = false,
+    showCloseTriangle: Boolean = false,
+    onFocusStation: ((IntensityPoint) -> Unit)? = null
 ) {
     val context = LocalContext.current
     val useEnglishPlaceNames = PlaceNameTranslator.shouldUseEnglish(language)
@@ -3844,50 +3966,72 @@ private fun ObservedStationRow(
         ?.takeIf { !point.isArea }
         ?.let { StationCatalog.lookup(point.prefecture, it)?.provider }
     Column(Modifier.fillMaxWidth()) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = 24.dp, top = 4.dp, bottom = 2.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column(Modifier.weight(1f)) {
-                Text(stationLabel, fontSize = 12.sp, lineHeight = 14.sp)
-                when {
-                    useEnglishPlaceNames && automaticTranslation != null -> Text(
-                        uiText(R.string.station_name_translated_by_google, language),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        fontSize = 9.sp,
-                        lineHeight = 10.sp
-                    )
-                    useEnglishPlaceNames && needsOfflineTranslation &&
-                        offlineStationTranslationStatus != OfflineStationTranslationStatus.READY -> Text(
-                        uiText(R.string.station_name_download_offline_translation, language),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        fontSize = 9.sp,
-                        lineHeight = 10.sp
-                    )
+        val stationCanBeFocused = onFocusStation != null && !point.isArea &&
+            point.latitude?.let { latitude ->
+                point.longitude?.let { longitude -> JapanMapCoverage.contains(latitude, longitude) }
+            } == true
+        Box(Modifier.fillMaxWidth()) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    // Leave the rail outside the station's tap target so its
+                    // collapse touch zone wins reliably on every device.
+                    .padding(start = 24.dp, top = 4.dp, bottom = 2.dp)
+                    .then(if (stationCanBeFocused) Modifier.clickable { onFocusStation.invoke(point) } else Modifier),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(Modifier.weight(1f)) {
+                    Text(stationLabel, fontSize = 12.sp, lineHeight = 14.sp)
+                    when {
+                        useEnglishPlaceNames && automaticTranslation != null -> Text(
+                            uiText(R.string.station_name_translated_by_google, language),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            fontSize = 9.sp,
+                            lineHeight = 10.sp
+                        )
+                        useEnglishPlaceNames && needsOfflineTranslation &&
+                            offlineStationTranslationStatus != OfflineStationTranslationStatus.READY -> Text(
+                            uiText(R.string.station_name_download_offline_translation, language),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            fontSize = 9.sp,
+                            lineHeight = 10.sp
+                        )
+                    }
+                }
+                Spacer(Modifier.width(8.dp))
+                Column(horizontalAlignment = Alignment.End) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        provider?.let { StationProviderChip(provider, language) }
+                        if (provider != null) Spacer(Modifier.width(4.dp))
+                        IntensityBadge(
+                            intensity = point.intensity,
+                            japaneseIntensity = japaneseIntensity,
+                            intensityFrom = point.intensityFrom,
+                            upperOpenEnded = point.intensityUpperOpenEnded
+                        )
+                    }
+                    point.arrivalTime?.let { arrival ->
+                        Text(
+                            compactJstTime(arrival),
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            fontSize = 9.sp
+                        )
+                    }
                 }
             }
-            Spacer(Modifier.width(8.dp))
-            Column(horizontalAlignment = Alignment.End) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    provider?.let { StationProviderChip(provider, language) }
-                    if (provider != null) Spacer(Modifier.width(4.dp))
-                    IntensityBadge(
-                        intensity = point.intensity,
-                        japaneseIntensity = japaneseIntensity,
-                        intensityFrom = point.intensityFrom,
-                        upperOpenEnded = point.intensityUpperOpenEnded
-                    )
-                }
-                point.arrivalTime?.let { arrival ->
-                    Text(
-                        compactJstTime(arrival),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        fontSize = 9.sp
-                    )
-                }
+            if (showCloseTriangle) {
+                Text(
+                    "▴",
+                    modifier = Modifier
+                        .align(Alignment.CenterStart)
+                        .width(14.dp),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    fontSize = 10.sp,
+                    lineHeight = 10.sp,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Center
+                )
             }
         }
         if (showSeparator) {
@@ -4487,6 +4631,9 @@ private fun JapanMap(
     focusRequest: Int,
     focusRequestIsManual: Boolean,
     focusRequestEventId: String?,
+    focusedStation: IntensityPoint?,
+    stationFocusRequest: Int,
+    stationFocusRestoreRequest: Int,
     markerSizeDp: Float,
     markerStyle: EpicenterMarkerStyle,
     showStationNames: Boolean,
@@ -4818,6 +4965,8 @@ private fun JapanMap(
     var committedPan by remember { mutableStateOf(Offset.Zero) }
     var gestureScale by remember { mutableFloatStateOf(1f) }
     var gesturePan by remember { mutableStateOf(Offset.Zero) }
+    var stationFocusReturnCamera by remember { mutableStateOf<MainMapCameraState?>(null) }
+    var handledStationFocusRequest by remember { mutableIntStateOf(0) }
     val requestedVectorLayer by remember {
         derivedStateOf {
             mapVectorLayerForEffectiveZoom(
@@ -5194,6 +5343,43 @@ private fun JapanMap(
 
         fun committedGeo(latitude: Double, longitude: Double): Offset {
             return committedProjected(data.project(latitude, longitude))
+        }
+
+        fun currentCameraState(): MainMapCameraState {
+            val baseCenter = viewportCenter - committedPan / committedZoom
+            val sourceCenterX = data.minX + (baseCenter.x - baseLeft) / fitScale
+            val sourceCenterY = data.minY + (baseCenter.y - baseTop) / fitScale
+            return MainMapCameraState(
+                centerXFraction = ((sourceCenterX - data.minX) / sourceWidth).coerceIn(0f, 1f),
+                centerYFraction = ((sourceCenterY - data.minY) / sourceHeight).coerceIn(0f, 1f),
+                displayZoom = displayZoomForCameraZoom(committedZoom)
+                    .coerceIn(MIN_DISPLAY_MAP_ZOOM, MAX_DISPLAY_MAP_ZOOM)
+            )
+        }
+
+        fun restoreCamera(state: MainMapCameraState) {
+            val zoom = cameraZoomForDisplayZoom(
+                state.displayZoom.coerceIn(MIN_DISPLAY_MAP_ZOOM, MAX_DISPLAY_MAP_ZOOM)
+            )
+            val sourceCenter = Offset(
+                data.minX + sourceWidth * state.centerXFraction.coerceIn(0f, 1f),
+                data.minY + sourceHeight * state.centerYFraction.coerceIn(0f, 1f)
+            )
+            val baseCenter = Offset(
+                baseLeft + (sourceCenter.x - data.minX) * fitScale,
+                baseTop + (sourceCenter.y - data.minY) * fitScale
+            )
+            gestureScale = 1f
+            gesturePan = Offset.Zero
+            committedZoom = zoom
+            committedPan = clampMapPan(
+                pan = (viewportCenter - baseCenter) * zoom,
+                zoom = zoom,
+                viewportWidth = viewportWidth,
+                viewportHeight = viewportHeight,
+                sourceWidth = sourceWidth,
+                sourceHeight = sourceHeight
+            )
         }
 
         fun stepZoom(delta: Float) {
@@ -5733,6 +5919,38 @@ private fun JapanMap(
             }
         }
 
+        LaunchedEffect(stationFocusRequest, focusedStation, viewportWidth, viewportHeight) {
+            val station = focusedStation ?: return@LaunchedEffect
+            val latitude = station.latitude ?: return@LaunchedEffect
+            val longitude = station.longitude ?: return@LaunchedEffect
+            if (!JapanMapCoverage.contains(latitude, longitude)) return@LaunchedEffect
+
+            if (handledStationFocusRequest != stationFocusRequest) {
+                stationFocusReturnCamera = currentCameraState()
+                handledStationFocusRequest = stationFocusRequest
+            }
+            val zoom = cameraZoomForDisplayZoom(MAX_DISPLAY_MAP_ZOOM)
+            val baseStation = sourceToBase(data.project(latitude, longitude))
+            gestureScale = 1f
+            gesturePan = Offset.Zero
+            committedZoom = zoom
+            committedPan = clampMapPan(
+                pan = (viewportCenter - baseStation) * zoom,
+                zoom = zoom,
+                viewportWidth = viewportWidth,
+                viewportHeight = viewportHeight,
+                sourceWidth = sourceWidth,
+                sourceHeight = sourceHeight
+            )
+        }
+
+        LaunchedEffect(stationFocusRestoreRequest, viewportWidth, viewportHeight) {
+            if (stationFocusRestoreRequest > 0) {
+                stationFocusReturnCamera?.let(::restoreCamera)
+                stationFocusReturnCamera = null
+            }
+        }
+
         // A new tsunami bulletin is nationwide/coastal information and is not
         // guaranteed to carry an earthquake relationship. Show the whole Japan
         // overlay instead of leaving the user zoomed into an unrelated old map
@@ -6253,6 +6471,24 @@ private fun JapanMap(
                     val lon = point.longitude ?: return@forEach
                     val p = committedGeo(lat, lon)
                     if (!visibleMarker(p, 12f)) return@forEach
+                    val stationFocused = focusedStation?.let { selected ->
+                        selected.latitude == lat &&
+                            selected.longitude == lon &&
+                            selected.stationName == point.stationName
+                    } == true
+                    if (stationFocused) {
+                        drawCircle(
+                            color = Color(0xFFFFD54F).copy(alpha = 0.30f),
+                            radius = with(density) { 9.dp.toPx() },
+                            center = p
+                        )
+                        drawCircle(
+                            color = Color(0xFFFFF1A6),
+                            radius = with(density) { 6.2.dp.toPx() },
+                            center = p,
+                            style = Stroke(width = with(density) { 1.4.dp.toPx() })
+                        )
+                    }
                     drawCircle(
                         intensityColor(point.intensity),
                         with(density) { 3.1.dp.toPx() },
@@ -6265,7 +6501,7 @@ private fun JapanMap(
                         style = Stroke(width = with(density) { 0.7.dp.toPx() })
                     )
 
-                    if (showStationNames && totalZoom >= OBSERVED_STATION_NAMES_ZOOM) {
+                    if (stationFocused || (showStationNames && totalZoom >= OBSERVED_STATION_NAMES_ZOOM)) {
                         val label = if (useJapaneseNames) {
                             point.stationName.orEmpty()
                         } else {

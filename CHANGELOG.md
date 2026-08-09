@@ -1,11 +1,13 @@
 # Changelog
 
 QuakeDeck release history
-## v0.9.83k (in progress)
+## v0.9.84
 
 - Keeps Initial, Hypocenter, and other report-stage statuses visible. Only a detailed report whose JMA payload is still unavailable says that the official JMA report is preparing; the link enables automatically once published.
 - Keeps the ready official-report strip exactly as thin as Initial and preparing report strips.
-- Bumps the Android hotfix version to `0.9.83k` (`versionCode` 177) and updates the README release marker.
+- Refines Observed intensities with animated prefecture expansion, a header-to-final-report guide rail, and station-only tap handling; the rail now takes precedence over station selection, its closing triangle sits on the final station row, and retapping the focused station restores the prior camera or event focus.
+- Reconciles equivalent timestamp spellings for live JMA earthquake reports and makes the most recently issued bulletin authoritative, preventing an older combined report from duplicating or replacing a detailed final report during startup restoration.
+- Bumps the Android application version to `0.9.84` (`versionCode` 181) and updates the README release marker.
 
 ## v0.9.83j (cumulative since v0.9.83c)
 
