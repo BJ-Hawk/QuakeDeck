@@ -348,6 +348,18 @@
     <string name="notification_intensity_shindo_3_plus">Shindo 3+</string>
     <string name="notification_intensity_shindo_4_plus">Shindo 4+</string>
     <string name="notification_intensity_shindo_5_lower_plus">Shindo 5-lower+</string>
+    <string name="notification_intensity_shindo_5_upper_plus">Shindo 5-upper+</string>
+    <string name="notification_local_eew_attention">Local EEW attention</string>
+    <string name="notification_local_eew_attention_description">Only a new warning affecting %1$s can use this.</string>
+    <string name="notification_local_eew_attention_off">Off</string>
+    <string name="notification_local_eew_attention_wake_screen">Wake screen</string>
+    <string name="notification_local_eew_attention_full_screen">Full-screen alert</string>
+    <string name="notification_local_eew_attention_threshold">Minimum predicted intensity</string>
+    <string name="notification_local_eew_attention_wake_description">Briefly wakes the lock screen at this intensity; Android or the device may limit it.</string>
+    <string name="notification_local_eew_attention_full_screen_description">Opens QuakeDeck over the lock screen at this intensity.</string>
+    <string name="notification_local_eew_attention_permission">Full-screen notification permission</string>
+    <string name="notification_local_eew_attention_permission_required">Permission required</string>
+    <string name="notification_local_eew_attention_permission_description">Android requires separate approval. Until then, QuakeDeck falls back to a heads-up alert.</string>
 
     <string name="notification_channel_eew_name">Earthquake Early Warnings</string>
     <string name="notification_channel_eew_description">Urgent JMA warning-level EEW updates</string>
@@ -361,6 +373,13 @@
     <string name="notification_channel_silent_description">Below-threshold reports and notifications silenced by quiet hours</string>
     <string name="notification_channel_test_name">Notification tests</string>
     <string name="notification_channel_test_description">QuakeDeck test notifications</string>
+    <string name="foreground_monitoring">Live background monitoring</string>
+    <string name="foreground_monitoring_description">Keeps receiving Japan earthquake, EEW, and tsunami data after QuakeDeck is closed. Shows a permanent silent status notification.</string>
+    <string name="foreground_monitoring_channel_name">Live background monitoring</string>
+    <string name="foreground_monitoring_channel_description">Persistent silent status for QuakeDeck live monitoring</string>
+    <string name="foreground_monitoring_notification_title">Japan monitoring · %1$s</string>
+    <string name="foreground_monitoring_connected">Connected</string>
+    <string name="foreground_monitoring_reconnecting">Reconnecting</string>
 
     <string name="notification_eew_title">Earthquake Early Warning</string>
     <string name="notification_eew_ended_title">Earthquake Early Warning ended</string>

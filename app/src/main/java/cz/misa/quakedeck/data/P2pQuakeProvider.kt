@@ -77,6 +77,7 @@ class P2pQuakeProvider(
     private val sandboxTimelineOffsets = mutableMapOf<String, Long>()
     @Volatile private var stopped = false
     @Volatile private var appInForeground = true
+    @Volatile private var foregroundMonitoringEnabled = false
     @Volatile private var testingMode = false
     private var reconnectAttempt = 0
     private var reconnectRunnable: Runnable? = null
@@ -606,6 +607,19 @@ class P2pQuakeProvider(
         // Leave an already-open socket alone. Android may keep it alive for a
         // while; if Doze/network suspension kills it, scheduleReconnect() will
         // fall back to a gentle retry cadence until the app is opened again.
+    }
+
+    /**
+     * A user-enabled foreground service is allowed to use the prompt retry policy
+     * while the Activity is absent. Without it, ordinary background reception
+     * remains deliberately conservative.
+     */
+    fun setForegroundMonitoringEnabled(enabled: Boolean) {
+        foregroundMonitoringEnabled = enabled
+        if (enabled && !appInForeground && currentState == ConnectionState.DISCONNECTED) {
+            cancelScheduledReconnect()
+            connectWebSocket("Foreground monitoring enabled · reconnecting now…")
+        }
     }
 
     override fun setReportArchiveEnabled(enabled: Boolean) {
@@ -1642,7 +1656,7 @@ class P2pQuakeProvider(
         // conservative because Android may have suspended their network path.
         val baseDelayMs = if (plannedRollover) {
             PLANNED_SOCKET_ROLLOVER_RECONNECT_MILLIS
-        } else if (appInForeground) {
+        } else if (appInForeground || foregroundMonitoringEnabled) {
             min(30_000L, 1_000L shl min(reconnectAttempt - 1, 5))
         } else {
             30_000L

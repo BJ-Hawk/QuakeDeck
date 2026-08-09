@@ -2,7 +2,7 @@
 
 QuakeDeck is an Android earthquake-monitoring prototype focused on Japan. It uses Kotlin and Jetpack Compose to combine live P2PQuake/JMA reports, EEW visualization, observed intensity mapping, tsunami information, historical report browsing, and deterministic Sandbox testing in one map-first interface.
 
-Current development version: **0.9.84**. QuakeDeck is still pre-1.0 and should not be treated as an official emergency-warning application.
+Current development version: **0.9.84b (in progress)**. QuakeDeck is still pre-1.0 and should not be treated as an official emergency-warning application.
 
 ## Current capabilities
 
@@ -18,7 +18,8 @@ Current development version: **0.9.84**. QuakeDeck is still pre-1.0 and should n
 - English, Czech, and Japanese UI/place-name handling
 - Light, dark, and system appearance modes
 - Custom Android notification cards with Shindo or tsunami-grade graphics, alert-level borders, multiline event details, location-aware coverage, audible/silent thresholds, scheduled quiet-hour delivery policies, manual city/postcode relevance filtering, and a shared EEW destination
-- Process-scoped live reception while the app is backgrounded and Android keeps the process executable
+- Opt-in foreground live monitoring with a permanent silent connection-status notification; it reuses the single P2PQuake runtime and continues after QuakeDeck is closed
+- Opt-in local-EEW attention: off, a brief wake-screen, or a full-screen alert at a selected predicted Shindo threshold; full-screen delivery requires Android's separate permission
 - Official rotating P2PQuake Sandbox, deterministic built-in replay scenarios, and one-shot live-pipeline injections for earthquake, EEW, and tsunami testing
 - Independently synchronized NICT-based JST display clock
 
@@ -47,4 +48,4 @@ The resulting APK is written below `app\build\outputs\apk\debug`. To run the uni
 
 ## Important limitation
 
-QuakeDeck is an independent hobby project, not an official JMA warning client. Delivery, latency, availability, and interpretation depend on third-party data and Android background-execution behaviour. The current background receiver does not survive Android freezing or killing the application process; persistent foreground-service monitoring is still planned. Always follow official emergency information and local authorities.
+QuakeDeck is an independent hobby project, not an official JMA warning client. Delivery, latency, availability, and interpretation depend on third-party data and Android background-execution behaviour. The opt-in monitoring service materially improves background reliability, but it cannot recover from force-stop, Android's Stop control, a reboot, network/provider outages, or aggressive manufacturer battery controls. Always follow official emergency information and local authorities.

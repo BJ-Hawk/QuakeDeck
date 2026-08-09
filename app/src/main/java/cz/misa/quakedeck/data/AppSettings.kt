@@ -8,6 +8,14 @@ enum class PlaceNameLanguage { AUTO, ENGLISH, CZECH, JAPANESE }
 enum class EpicenterMarkerStyle { DOT, CROSS }
 enum class AppAppearance { SYSTEM, LIGHT, DARK }
 enum class QuietHoursMode { CRITICAL_ONLY, ALL_SILENT, NOTHING }
+enum class LocalEewAttentionMode { NONE, WAKE_SCREEN, FULL_SCREEN }
+
+enum class MinimumLocalEewAttentionIntensity(val rank: Int) {
+    SHINDO_3(3),
+    SHINDO_4(4),
+    SHINDO_5_LOWER(5),
+    SHINDO_5_UPPER(6)
+}
 
 data class MainMapCameraState(
     val centerXFraction: Float,
@@ -261,6 +269,11 @@ class AppSettings(context: Context) {
         get() = prefs.getBoolean("notifications_enabled", false)
         set(value) { prefs.edit { putBoolean("notifications_enabled", value) } }
 
+    /** User-controlled foreground service; intentionally off until explicitly enabled. */
+    var foregroundMonitoringEnabled: Boolean
+        get() = prefs.getBoolean("foreground_monitoring_enabled", false)
+        set(value) { prefs.edit { putBoolean("foreground_monitoring_enabled", value) } }
+
     var earthquakeNotificationsEnabled: Boolean
         get() = prefs.getBoolean("earthquake_notifications_enabled", true)
         set(value) { prefs.edit { putBoolean("earthquake_notifications_enabled", value) } }
@@ -268,6 +281,29 @@ class AppSettings(context: Context) {
     var eewNotificationsEnabled: Boolean
         get() = prefs.getBoolean("eew_notifications_enabled", true)
         set(value) { prefs.edit { putBoolean("eew_notifications_enabled", value) } }
+
+    var localEewAttentionMode: LocalEewAttentionMode
+        get() = runCatching {
+            LocalEewAttentionMode.valueOf(
+                prefs.getString("local_eew_attention_mode", LocalEewAttentionMode.NONE.name)!!
+            )
+        }.getOrDefault(LocalEewAttentionMode.NONE)
+        set(value) { prefs.edit { putString("local_eew_attention_mode", value.name) } }
+
+    var minimumLocalEewAttentionIntensity: MinimumLocalEewAttentionIntensity
+        get() = runCatching {
+            MinimumLocalEewAttentionIntensity.valueOf(
+                prefs.getString(
+                    "minimum_local_eew_attention_intensity",
+                    MinimumLocalEewAttentionIntensity.SHINDO_4.name
+                )!!
+            )
+        }.getOrDefault(MinimumLocalEewAttentionIntensity.SHINDO_4)
+        set(value) {
+            prefs.edit {
+                putString("minimum_local_eew_attention_intensity", value.name)
+            }
+        }
 
     var tsunamiNotificationsEnabled: Boolean
         get() = prefs.getBoolean("tsunami_notifications_enabled", true)

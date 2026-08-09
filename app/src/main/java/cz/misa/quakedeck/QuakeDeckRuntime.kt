@@ -57,6 +57,9 @@ class QuakeDeckRuntime(context: Context) : QuakeDataProvider {
     @Volatile
     private var uiCallback: ((AppSnapshot) -> Unit)? = null
 
+    @Volatile
+    private var monitoringSnapshotCallback: ((AppSnapshot) -> Unit)? = null
+
     override val mode: DataSourceMode
         get() = provider.mode
 
@@ -81,6 +84,16 @@ class QuakeDeckRuntime(context: Context) : QuakeDataProvider {
         // Notifications must not depend on whether the Activity is visible or
         // whether Compose is currently allowed to recompose.
         notificationCoordinator.process(snapshot)
+
+        monitoringSnapshotCallback?.let { callback ->
+            if (Looper.myLooper() == Looper.getMainLooper()) {
+                callback(snapshot)
+            } else {
+                mainHandler.post {
+                    if (monitoringSnapshotCallback === callback) callback(snapshot)
+                }
+            }
+        }
 
         val callback = uiCallback ?: return
         if (Looper.myLooper() == Looper.getMainLooper()) {
@@ -129,6 +142,18 @@ class QuakeDeckRuntime(context: Context) : QuakeDataProvider {
     override fun onAppForeground() = provider.onAppForeground()
 
     override fun onAppBackground() = provider.onAppBackground()
+
+    fun setForegroundMonitoringEnabled(enabled: Boolean) =
+        provider.setForegroundMonitoringEnabled(enabled)
+
+    fun setMonitoringSnapshotCallback(callback: ((AppSnapshot) -> Unit)?) {
+        monitoringSnapshotCallback = callback
+        callback?.let { listener ->
+            mainHandler.post {
+                if (monitoringSnapshotCallback === listener) listener(latestSnapshot)
+            }
+        }
+    }
 
     override fun setReportArchiveEnabled(enabled: Boolean) =
         provider.setReportArchiveEnabled(enabled)

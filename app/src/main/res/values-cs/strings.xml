@@ -350,6 +350,18 @@
     <string name="notification_intensity_shindo_3_plus">Shindo 3+</string>
     <string name="notification_intensity_shindo_4_plus">Shindo 4+</string>
     <string name="notification_intensity_shindo_5_lower_plus">Shindo 5− a vyšší</string>
+    <string name="notification_intensity_shindo_5_upper_plus">Shindo 5+ a vyšší</string>
+    <string name="notification_local_eew_attention">Upozornění na místní EEW</string>
+    <string name="notification_local_eew_attention_description">Použije se jen pro nové varování týkající se místa %1$s.</string>
+    <string name="notification_local_eew_attention_off">Vypnuto</string>
+    <string name="notification_local_eew_attention_wake_screen">Probudit obrazovku</string>
+    <string name="notification_local_eew_attention_full_screen">Upozornění přes celou obrazovku</string>
+    <string name="notification_local_eew_attention_threshold">Minimální předpovězená intenzita</string>
+    <string name="notification_local_eew_attention_wake_description">Při této intenzitě krátce probudí zamknutou obrazovku; Android nebo zařízení to může omezit.</string>
+    <string name="notification_local_eew_attention_full_screen_description">Při této intenzitě otevře QuakeDeck přes zamknutou obrazovku.</string>
+    <string name="notification_local_eew_attention_permission">Oprávnění pro oznámení přes celou obrazovku</string>
+    <string name="notification_local_eew_attention_permission_required">Je vyžadováno oprávnění</string>
+    <string name="notification_local_eew_attention_permission_description">Android vyžaduje samostatné schválení. Do té doby QuakeDeck použije upozornění heads-up.</string>
 
     <string name="notification_channel_eew_name">Včasná varování před zemětřesením</string>
     <string name="notification_channel_eew_description">Naléhavé aktualizace EEW na úrovni varování JMA</string>
@@ -363,6 +375,13 @@
     <string name="notification_channel_silent_description">Hlášení pod zvolenou intenzitou a oznámení ztišená během doby klidu</string>
     <string name="notification_channel_test_name">Testy oznámení</string>
     <string name="notification_channel_test_description">Testovací oznámení aplikace QuakeDeck</string>
+    <string name="foreground_monitoring">Živé sledování na pozadí</string>
+    <string name="foreground_monitoring_description">Přijímá data o zemětřeseních, EEW a tsunami v Japonsku i po zavření QuakeDecku. Zobrazuje trvalé tiché stavové oznámení.</string>
+    <string name="foreground_monitoring_channel_name">Živé sledování na pozadí</string>
+    <string name="foreground_monitoring_channel_description">Trvalý tichý stav živého sledování QuakeDecku</string>
+    <string name="foreground_monitoring_notification_title">Sledování Japonska · %1$s</string>
+    <string name="foreground_monitoring_connected">Připojeno</string>
+    <string name="foreground_monitoring_reconnecting">Opětovné připojování</string>
 
     <string name="notification_eew_title">Včasné varování před zemětřesením</string>
     <string name="notification_eew_ended_title">Včasné varování před zemětřesením ukončeno</string>

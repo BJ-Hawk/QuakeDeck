@@ -1,6 +1,14 @@
 # Changelog
 
 QuakeDeck release history
+## v0.9.84b (in progress)
+
+- Adds opt-in foreground monitoring that reuses the existing single live runtime and WebSocket, keeps Japan earthquake/EEW/tsunami reception active after QuakeDeck is closed, and shows only a one-line permanent silent `Japan monitoring · Connected/Reconnecting` status notification. It uses its own small radar/connection icon, does not echo report details or set an app-icon notification dot, and leaves real report notifications independent.
+- Gives live report notifications distinct small icons: a seismic wave for confirmed earthquake reports, a siren for EEW, and waves for tsunami alerts and their cancellations.
+- Adds an opt-in local-EEW attention mode: off, a brief wake-screen, or a full-screen QuakeDeck alert. The modes are exclusive, apply only once to a new warning affecting the configured alert location at the selected predicted Shindo threshold, and never apply to updates, reports, or Sandbox data. Full-screen alerts require Android's separate full-screen-notification approval and otherwise fall back to the ordinary heads-up EEW alert.
+- Uses Android's declared special-use foreground-service type, keeps normal background behavior unchanged when monitoring is off, and retries non-rollover disconnections promptly while monitoring is enabled.
+- Bumps the Android hotfix version to `0.9.84b` (`versionCode` 183); this cumulative hotfix remains uncommitted until approved.
+
 ## v0.9.84
 
 - Keeps Initial, Hypocenter, and other report-stage statuses visible. Only a detailed report whose JMA payload is still unavailable says that the official JMA report is preparing; the link enables automatically once published.

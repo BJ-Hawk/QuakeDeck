@@ -347,6 +347,18 @@
     <string name="notification_intensity_shindo_3_plus">震度3以上</string>
     <string name="notification_intensity_shindo_4_plus">震度4以上</string>
     <string name="notification_intensity_shindo_5_lower_plus">震度5弱以上</string>
+    <string name="notification_intensity_shindo_5_upper_plus">震度5強以上</string>
+    <string name="notification_local_eew_attention">地域の緊急地震速報アラート</string>
+    <string name="notification_local_eew_attention_description">%1$sに影響する新しい警報のみで使用します。</string>
+    <string name="notification_local_eew_attention_off">オフ</string>
+    <string name="notification_local_eew_attention_wake_screen">画面を起動</string>
+    <string name="notification_local_eew_attention_full_screen">全画面アラート</string>
+    <string name="notification_local_eew_attention_threshold">予想震度の下限</string>
+    <string name="notification_local_eew_attention_wake_description">この震度でロック画面を短時間起動します。Androidまたは端末により制限される場合があります。</string>
+    <string name="notification_local_eew_attention_full_screen_description">この震度でロック画面上にQuakeDeckを開きます。</string>
+    <string name="notification_local_eew_attention_permission">全画面通知の許可</string>
+    <string name="notification_local_eew_attention_permission_required">許可が必要です</string>
+    <string name="notification_local_eew_attention_permission_description">Androidでは別途許可が必要です。許可されるまでは、QuakeDeckはヘッドアップ通知に戻ります。</string>
 
     <string name="notification_channel_eew_name">緊急地震速報</string>
     <string name="notification_channel_eew_description">気象庁の警報レベルの緊急地震速報</string>
@@ -360,6 +372,13 @@
     <string name="notification_channel_silent_description">設定震度未満の地震情報とサイレント時間帯に無音化された通知</string>
     <string name="notification_channel_test_name">通知テスト</string>
     <string name="notification_channel_test_description">QuakeDeckのテスト通知</string>
+    <string name="foreground_monitoring">バックグラウンドでライブ監視</string>
+    <string name="foreground_monitoring_description">QuakeDeckを閉じた後も、日本の地震・緊急地震速報・津波情報を受信します。常時表示のサイレント状態通知が表示されます。</string>
+    <string name="foreground_monitoring_channel_name">バックグラウンドでライブ監視</string>
+    <string name="foreground_monitoring_channel_description">QuakeDeckのライブ監視を示す常時サイレント状態</string>
+    <string name="foreground_monitoring_notification_title">日本を監視中 · %1$s</string>
+    <string name="foreground_monitoring_connected">接続済み</string>
+    <string name="foreground_monitoring_reconnecting">再接続中</string>
 
     <string name="notification_eew_title">緊急地震速報</string>
     <string name="notification_eew_ended_title">緊急地震速報 終了</string>

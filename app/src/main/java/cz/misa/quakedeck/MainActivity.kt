@@ -2,6 +2,7 @@ package cz.misa.quakedeck
 
 import android.annotation.SuppressLint
 import android.os.Bundle
+import android.app.NotificationManager
 import android.content.Intent
 import android.os.Build
 import android.os.PowerManager
@@ -146,12 +147,18 @@ private fun isGooglePixelDevice(): Boolean =
         Build.BRAND.equals("google", ignoreCase = true) ||
         Build.MODEL.startsWith("Pixel", ignoreCase = true)
 
+private fun android.content.Context.canUseFullScreenIntent(): Boolean =
+    Build.VERSION.SDK_INT < Build.VERSION_CODES.UPSIDE_DOWN_CAKE ||
+        getSystemService(NotificationManager::class.java).canUseFullScreenIntent()
+
 private enum class OverlayReturnTarget { MAP, SETTINGS }
 
 class MainActivity : ComponentActivity() {
     companion object {
         const val EXTRA_NOTIFICATION_REPORT_ID =
             "cz.misa.quakedeck.extra.NOTIFICATION_REPORT_ID"
+        const val EXTRA_FULL_SCREEN_EEW =
+            "cz.misa.quakedeck.extra.FULL_SCREEN_EEW"
     }
 
     private val runtime: QuakeDeckRuntime by lazy {
@@ -171,6 +178,10 @@ class MainActivity : ComponentActivity() {
         setTheme(if (startDark) R.style.Theme_QuakeDeck_Dark else R.style.Theme_QuakeDeck_Light)
 
         super.onCreate(savedInstanceState)
+        applyFullScreenEewWindowMode(intent)
+        if (AppSettings(this).foregroundMonitoringEnabled) {
+            ForegroundMonitoringService.start(this)
+        }
         notificationReportId = intent?.getStringExtra(EXTRA_NOTIFICATION_REPORT_ID)
         WindowCompat.enableEdgeToEdge(window)
         setContent {
@@ -187,7 +198,14 @@ class MainActivity : ComponentActivity() {
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
+        applyFullScreenEewWindowMode(intent)
         notificationReportId = intent.getStringExtra(EXTRA_NOTIFICATION_REPORT_ID)
+    }
+
+    private fun applyFullScreenEewWindowMode(intent: Intent?) {
+        val fullScreenEew = intent?.getBooleanExtra(EXTRA_FULL_SCREEN_EEW, false) == true
+        setShowWhenLocked(fullScreenEew)
+        setTurnScreenOn(fullScreenEew)
     }
 
     override fun onResume() {
@@ -288,8 +306,17 @@ private fun QuakeDeckApp(
         mutableStateOf(appSettings.automaticHistoricalDownload && appSettings.reportArchiveEnabled)
     }
     var notificationsEnabled by remember { mutableStateOf(appSettings.notificationsEnabled) }
+    var foregroundMonitoringEnabled by remember {
+        mutableStateOf(appSettings.foregroundMonitoringEnabled)
+    }
     var earthquakeNotificationsEnabled by remember { mutableStateOf(appSettings.earthquakeNotificationsEnabled) }
     var eewNotificationsEnabled by remember { mutableStateOf(appSettings.eewNotificationsEnabled) }
+    var localEewAttentionMode by remember {
+        mutableStateOf(appSettings.localEewAttentionMode)
+    }
+    var minimumLocalEewAttentionIntensity by remember {
+        mutableStateOf(appSettings.minimumLocalEewAttentionIntensity)
+    }
     var tsunamiNotificationsEnabled by remember { mutableStateOf(appSettings.tsunamiNotificationsEnabled) }
     var notificationUpdatesEnabled by remember { mutableStateOf(appSettings.notificationUpdatesEnabled) }
     var minimumNotificationIntensity by remember { mutableStateOf(appSettings.minimumNotificationIntensity) }
@@ -340,6 +367,12 @@ private fun QuakeDeckApp(
         ActivityResultContracts.StartActivityForResult()
     ) {
         notificationPermissionGranted = notificationCoordinator.hasPermission()
+    }
+    var fullScreenIntentAllowed by remember { mutableStateOf(context.canUseFullScreenIntent()) }
+    val fullScreenIntentSettingsLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) {
+        fullScreenIntentAllowed = context.canUseFullScreenIntent()
     }
 
     LaunchedEffect(placeNameLanguage) {
@@ -1523,6 +1556,23 @@ private fun QuakeDeckApp(
                     }
                 } else {
                     notificationSetupDialogOpen = false
+                    if (foregroundMonitoringEnabled) {
+                        foregroundMonitoringEnabled = false
+                        appSettings.foregroundMonitoringEnabled = false
+                        runtime.setForegroundMonitoringEnabled(false)
+                        ForegroundMonitoringService.stop(context)
+                    }
+                }
+            },
+            foregroundMonitoringEnabled = foregroundMonitoringEnabled,
+            onForegroundMonitoringEnabledChanged = { value ->
+                foregroundMonitoringEnabled = value
+                appSettings.foregroundMonitoringEnabled = value
+                runtime.setForegroundMonitoringEnabled(value)
+                if (value) {
+                    ForegroundMonitoringService.start(context)
+                } else {
+                    ForegroundMonitoringService.stop(context)
                 }
             },
             notificationPermissionGranted = notificationPermissionGranted,
@@ -1577,6 +1627,32 @@ private fun QuakeDeckApp(
             onEewNotificationsEnabledChanged = { value ->
                 eewNotificationsEnabled = value
                 appSettings.eewNotificationsEnabled = value
+            },
+            localEewAttentionMode = localEewAttentionMode,
+            onLocalEewAttentionModeChanged = { value ->
+                localEewAttentionMode = value
+                appSettings.localEewAttentionMode = value
+            },
+            minimumLocalEewAttentionIntensity = minimumLocalEewAttentionIntensity,
+            onMinimumLocalEewAttentionIntensityChanged = { value ->
+                minimumLocalEewAttentionIntensity = value
+                appSettings.minimumLocalEewAttentionIntensity = value
+            },
+            fullScreenIntentAllowed = fullScreenIntentAllowed,
+            onRequestFullScreenIntentPermission = {
+                val packageUri = "package:${context.packageName}".toUri()
+                val fullScreenIntentSettings = Intent(
+                    Settings.ACTION_MANAGE_APP_USE_FULL_SCREEN_INTENT,
+                    packageUri
+                )
+                val fallbackIntent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, packageUri)
+                fullScreenIntentSettingsLauncher.launch(
+                    if (fullScreenIntentSettings.resolveActivity(context.packageManager) != null) {
+                        fullScreenIntentSettings
+                    } else {
+                        fallbackIntent
+                    }
+                )
             },
             tsunamiNotificationsEnabled = tsunamiNotificationsEnabled,
             onTsunamiNotificationsEnabledChanged = { value ->

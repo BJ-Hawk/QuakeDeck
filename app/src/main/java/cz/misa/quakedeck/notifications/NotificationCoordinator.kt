@@ -8,6 +8,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
+import android.os.PowerManager
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
@@ -30,6 +31,7 @@ import cz.misa.quakedeck.data.AppSnapshot
 import cz.misa.quakedeck.data.EarthquakeEvent
 import cz.misa.quakedeck.data.IntensityPoint
 import cz.misa.quakedeck.data.LiveUpdateKind
+import cz.misa.quakedeck.data.LocalEewAttentionMode
 import cz.misa.quakedeck.data.PlaceNameTranslator
 import cz.misa.quakedeck.data.QuietHoursMode
 import cz.misa.quakedeck.data.HolidayCountryDetector
@@ -57,6 +59,7 @@ class NotificationCoordinator(
     }
     private var lastHandledSequence = 0L
     private val locationRelevantEews = LinkedHashSet<String>()
+    private val attentionPresentedEews = LinkedHashSet<String>()
     private val notifiedEarthquakes = LinkedHashSet<String>()
     private val audiblyAlertedEarthquakes = LinkedHashSet<String>()
     private val locationRelevantTsunamis = LinkedHashSet<String>()
@@ -162,13 +165,19 @@ class NotificationCoordinator(
                 if (!locationFiltering || localPoint != null) {
                     locationRelevantEews += event.id
                     trimIncidentSets()
+                    val attentionMode = localEewAttentionMode(
+                        updateKind = snapshot.liveUpdateKind,
+                        event = event,
+                        testingMode = snapshot.testingMode
+                    )
                     postEarthquake(
                         event = event,
                         channel = CHANNEL_EEW,
                         titleRes = R.string.notification_eew_title,
                         urgent = true,
                         localPoint = localPoint,
-                        visualKind = AlertVisualKind.EEW
+                        visualKind = AlertVisualKind.EEW,
+                        localEewAttentionMode = attentionMode
                     )
                 }
             }
@@ -303,6 +312,7 @@ class NotificationCoordinator(
                         title = title,
                         body = body,
                         urgent = highestRelevantGrade.severity >= TsunamiGrade.WARNING.severity,
+                        smallIcon = R.drawable.ic_notification_tsunami,
                         visual = tsunamiVisual(
                             title = title,
                             report = report,
@@ -330,6 +340,7 @@ class NotificationCoordinator(
                         title = title,
                         body = body,
                         urgent = false,
+                        smallIcon = R.drawable.ic_notification_tsunami,
                         visual = NotificationVisual(
                             accentColor = COLOR_STATUS_BORDER,
                             badgeKind = BadgeVisualKind.TSUNAMI,
@@ -369,6 +380,7 @@ class NotificationCoordinator(
         localPoint: IntensityPoint? = null,
         forceSilent: Boolean = false,
         visualKind: AlertVisualKind = AlertVisualKind.EARTHQUAKE,
+        localEewAttentionMode: LocalEewAttentionMode = LocalEewAttentionMode.NONE,
         cancelled: Boolean = false
     ) {
         // Magnitude notation deliberately stays locale-neutral (4.6, never 4,6).
@@ -475,6 +487,12 @@ class NotificationCoordinator(
             urgent = urgent,
             reportId = event.id,
             forceSilent = forceSilent,
+            fullScreenIntent = localEewAttentionMode == LocalEewAttentionMode.FULL_SCREEN,
+            smallIcon = if (visualKind == AlertVisualKind.EEW) {
+                R.drawable.ic_notification_eew
+            } else {
+                R.drawable.ic_notification_earthquake
+            },
             visual = NotificationVisual(
                 accentColor = accent,
                 badgeKind = if (cancelled) BadgeVisualKind.STATUS else BadgeVisualKind.SHINDO,
@@ -669,6 +687,8 @@ class NotificationCoordinator(
         reportId: String? = null,
         ignoreQuietHours: Boolean = false,
         forceSilent: Boolean = false,
+        fullScreenIntent: Boolean = false,
+        smallIcon: Int = R.drawable.ic_notification,
         visual: NotificationVisual? = null
     ) {
         val withinQuietHours = !ignoreQuietHours && isQuietHours()
@@ -687,6 +707,9 @@ class NotificationCoordinator(
         val intent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
             reportId?.let { putExtra(MainActivity.EXTRA_NOTIFICATION_REPORT_ID, it) }
+            if (fullScreenIntent) {
+                putExtra(MainActivity.EXTRA_FULL_SCREEN_EEW, true)
+            }
         }
         val contentIntent = PendingIntent.getActivity(
             context,
@@ -695,7 +718,7 @@ class NotificationCoordinator(
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
         val builder = NotificationCompat.Builder(context, effectiveChannel)
-            .setSmallIcon(R.drawable.ic_notification)
+            .setSmallIcon(smallIcon)
             .setContentTitle(title)
             .setContentText(visual?.primary ?: body.lineSequence().firstOrNull().orEmpty())
             .setContentIntent(contentIntent)
@@ -716,6 +739,10 @@ class NotificationCoordinator(
                     else -> NotificationCompat.PRIORITY_DEFAULT
                 }
             )
+
+        if (fullScreenIntent && canUseFullScreenIntent()) {
+            builder.setFullScreenIntent(contentIntent, true)
+        }
 
         if (visual == null) {
             builder.setStyle(NotificationCompat.BigTextStyle().bigText(body))
@@ -775,7 +802,7 @@ class NotificationCoordinator(
             // presentation failure suppress the actual warning: retry with Android's
             // standard multiline notification template.
             val fallback = NotificationCompat.Builder(context, effectiveChannel)
-                .setSmallIcon(R.drawable.ic_notification)
+                .setSmallIcon(smallIcon)
                 .setContentTitle(title)
                 .setContentText(body.lineSequence().firstOrNull().orEmpty())
                 .setStyle(NotificationCompat.BigTextStyle().bigText(body))
@@ -797,6 +824,11 @@ class NotificationCoordinator(
                         else -> NotificationCompat.PRIORITY_DEFAULT
                     }
                 )
+                .also { fallbackBuilder ->
+                    if (fullScreenIntent && canUseFullScreenIntent()) {
+                        fallbackBuilder.setFullScreenIntent(contentIntent, true)
+                    }
+                }
                 .build()
             manager.notify(tag, id, fallback)
         }
@@ -969,7 +1001,56 @@ class NotificationCoordinator(
         while (locationRelevantTsunamis.size > 32) {
             locationRelevantTsunamis.remove(locationRelevantTsunamis.first())
         }
+        while (attentionPresentedEews.size > 64) {
+            attentionPresentedEews.remove(attentionPresentedEews.first())
+        }
     }
+
+    private fun localEewAttentionMode(
+        updateKind: LiveUpdateKind,
+        event: EarthquakeEvent,
+        testingMode: Boolean
+    ): LocalEewAttentionMode {
+        val selectedMode = settings.localEewAttentionMode
+        if (
+            selectedMode == LocalEewAttentionMode.NONE ||
+            updateKind != LiveUpdateKind.EEW ||
+            testingMode
+        ) {
+            return LocalEewAttentionMode.NONE
+        }
+        // Claim the warning before examining its predicted intensity. A later
+        // revision must never turn an already-seen EEW into a new wake/full-screen
+        // interruption merely because its forecast became stronger.
+        if (!attentionPresentedEews.add(event.id)) return LocalEewAttentionMode.NONE
+        trimIncidentSets()
+        val localPoint = locationPolicy.eewForecastPoint(event, settings.alertLocation)
+            ?: return LocalEewAttentionMode.NONE
+        if (
+            AlertLocationPolicy.intensityRank(localPoint.intensity) <
+            settings.minimumLocalEewAttentionIntensity.rank
+        ) {
+            return LocalEewAttentionMode.NONE
+        }
+        if (selectedMode == LocalEewAttentionMode.WAKE_SCREEN) wakeScreen()
+        return selectedMode
+    }
+
+    @Suppress("DEPRECATION")
+    private fun wakeScreen() {
+        val powerManager = context.getSystemService(PowerManager::class.java) ?: return
+        if (powerManager.isInteractive) return
+        runCatching {
+            powerManager.newWakeLock(
+                PowerManager.SCREEN_BRIGHT_WAKE_LOCK or PowerManager.ACQUIRE_CAUSES_WAKEUP,
+                "QuakeDeck:LocalEewWake"
+            ).acquire(LOCAL_EEW_WAKE_MILLIS)
+        }
+    }
+
+    private fun canUseFullScreenIntent(): Boolean =
+        Build.VERSION.SDK_INT < Build.VERSION_CODES.UPSIDE_DOWN_CAKE ||
+            context.getSystemService(NotificationManager::class.java).canUseFullScreenIntent()
 
     companion object {
         private val COLOR_EEW_BORDER = Color.rgb(255, 214, 0)
@@ -985,6 +1066,7 @@ class NotificationCoordinator(
         private const val ID_EARTHQUAKE = 1001
         private const val ID_TSUNAMI = 2001
         private const val ID_TEST = 9001
+        private const val LOCAL_EEW_WAKE_MILLIS = 5_000L
 
     }
 }

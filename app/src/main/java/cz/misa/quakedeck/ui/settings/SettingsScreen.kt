@@ -87,6 +87,8 @@ import cz.misa.quakedeck.data.DataSourceMode
 import cz.misa.quakedeck.data.EpicenterMarkerStyle
 import cz.misa.quakedeck.data.PlaceNameLanguage
 import cz.misa.quakedeck.data.MinimumNotificationIntensity
+import cz.misa.quakedeck.data.LocalEewAttentionMode
+import cz.misa.quakedeck.data.MinimumLocalEewAttentionIntensity
 import cz.misa.quakedeck.data.OfflineStationTranslationStatus
 import cz.misa.quakedeck.data.TsunamiGrade
 import cz.misa.quakedeck.data.ReportArchiveStatus
@@ -120,6 +122,8 @@ fun QuakeDeckSettings(
     onAppearanceChanged: (AppAppearance) -> Unit,
     notificationsEnabled: Boolean,
     onNotificationsEnabledChanged: (Boolean) -> Unit,
+    foregroundMonitoringEnabled: Boolean,
+    onForegroundMonitoringEnabledChanged: (Boolean) -> Unit,
     notificationPermissionGranted: Boolean,
     onRequestNotificationPermission: () -> Unit,
     notificationBatteryUnrestricted: Boolean,
@@ -133,6 +137,12 @@ fun QuakeDeckSettings(
     onEarthquakeNotificationsEnabledChanged: (Boolean) -> Unit,
     eewNotificationsEnabled: Boolean,
     onEewNotificationsEnabledChanged: (Boolean) -> Unit,
+    localEewAttentionMode: LocalEewAttentionMode,
+    onLocalEewAttentionModeChanged: (LocalEewAttentionMode) -> Unit,
+    minimumLocalEewAttentionIntensity: MinimumLocalEewAttentionIntensity,
+    onMinimumLocalEewAttentionIntensityChanged: (MinimumLocalEewAttentionIntensity) -> Unit,
+    fullScreenIntentAllowed: Boolean,
+    onRequestFullScreenIntentPermission: () -> Unit,
     tsunamiNotificationsEnabled: Boolean,
     onTsunamiNotificationsEnabledChanged: (Boolean) -> Unit,
     notificationUpdatesEnabled: Boolean,
@@ -293,6 +303,8 @@ fun QuakeDeckSettings(
                                 onAppearancePickerRequested = { appearanceDialogOpen = true },
                                 notificationsEnabled = notificationsEnabled,
                                 onNotificationsEnabledChanged = onNotificationsEnabledChanged,
+                                foregroundMonitoringEnabled = foregroundMonitoringEnabled,
+                                onForegroundMonitoringEnabledChanged = onForegroundMonitoringEnabledChanged,
                                 notificationPermissionGranted = notificationPermissionGranted,
                                 onRequestNotificationPermission = onRequestNotificationPermission,
                                 notificationBatteryUnrestricted = notificationBatteryUnrestricted,
@@ -301,6 +313,12 @@ fun QuakeDeckSettings(
                                 onEarthquakeNotificationsEnabledChanged = onEarthquakeNotificationsEnabledChanged,
                                 eewNotificationsEnabled = eewNotificationsEnabled,
                                 onEewNotificationsEnabledChanged = onEewNotificationsEnabledChanged,
+                                localEewAttentionMode = localEewAttentionMode,
+                                onLocalEewAttentionModeChanged = onLocalEewAttentionModeChanged,
+                                minimumLocalEewAttentionIntensity = minimumLocalEewAttentionIntensity,
+                                onMinimumLocalEewAttentionIntensityChanged = onMinimumLocalEewAttentionIntensityChanged,
+                                fullScreenIntentAllowed = fullScreenIntentAllowed,
+                                onRequestFullScreenIntentPermission = onRequestFullScreenIntentPermission,
                                 tsunamiNotificationsEnabled = tsunamiNotificationsEnabled,
                                 onTsunamiNotificationsEnabledChanged = onTsunamiNotificationsEnabledChanged,
                                 notificationUpdatesEnabled = notificationUpdatesEnabled,
@@ -524,6 +542,8 @@ private fun MainSettingsPage(
     onAppearancePickerRequested: () -> Unit,
     notificationsEnabled: Boolean,
     onNotificationsEnabledChanged: (Boolean) -> Unit,
+    foregroundMonitoringEnabled: Boolean,
+    onForegroundMonitoringEnabledChanged: (Boolean) -> Unit,
     notificationPermissionGranted: Boolean,
     onRequestNotificationPermission: () -> Unit,
     notificationBatteryUnrestricted: Boolean,
@@ -532,6 +552,12 @@ private fun MainSettingsPage(
     onEarthquakeNotificationsEnabledChanged: (Boolean) -> Unit,
     eewNotificationsEnabled: Boolean,
     onEewNotificationsEnabledChanged: (Boolean) -> Unit,
+    localEewAttentionMode: LocalEewAttentionMode,
+    onLocalEewAttentionModeChanged: (LocalEewAttentionMode) -> Unit,
+    minimumLocalEewAttentionIntensity: MinimumLocalEewAttentionIntensity,
+    onMinimumLocalEewAttentionIntensityChanged: (MinimumLocalEewAttentionIntensity) -> Unit,
+    fullScreenIntentAllowed: Boolean,
+    onRequestFullScreenIntentPermission: () -> Unit,
     tsunamiNotificationsEnabled: Boolean,
     onTsunamiNotificationsEnabledChanged: (Boolean) -> Unit,
     notificationUpdatesEnabled: Boolean,
@@ -674,6 +700,8 @@ private fun MainSettingsPage(
                 language = selectedLanguage,
                 enabled = notificationsEnabled,
                 onEnabledChanged = onNotificationsEnabledChanged,
+                foregroundMonitoringEnabled = foregroundMonitoringEnabled,
+                onForegroundMonitoringEnabledChanged = onForegroundMonitoringEnabledChanged,
                 permissionGranted = notificationPermissionGranted,
                 onRequestPermission = onRequestNotificationPermission,
                 batteryUnrestricted = notificationBatteryUnrestricted,
@@ -682,6 +710,12 @@ private fun MainSettingsPage(
                 onEarthquakeEnabledChanged = onEarthquakeNotificationsEnabledChanged,
                 eewEnabled = eewNotificationsEnabled,
                 onEewEnabledChanged = onEewNotificationsEnabledChanged,
+                localEewAttentionMode = localEewAttentionMode,
+                onLocalEewAttentionModeChanged = onLocalEewAttentionModeChanged,
+                minimumLocalEewAttentionIntensity = minimumLocalEewAttentionIntensity,
+                onMinimumLocalEewAttentionIntensityChanged = onMinimumLocalEewAttentionIntensityChanged,
+                fullScreenIntentAllowed = fullScreenIntentAllowed,
+                onRequestFullScreenIntentPermission = onRequestFullScreenIntentPermission,
                 tsunamiEnabled = tsunamiNotificationsEnabled,
                 onTsunamiEnabledChanged = onTsunamiNotificationsEnabledChanged,
                 updatesEnabled = notificationUpdatesEnabled,
@@ -934,6 +968,8 @@ private fun NotificationSettingsCard(
     language: PlaceNameLanguage,
     enabled: Boolean,
     onEnabledChanged: (Boolean) -> Unit,
+    foregroundMonitoringEnabled: Boolean,
+    onForegroundMonitoringEnabledChanged: (Boolean) -> Unit,
     permissionGranted: Boolean,
     onRequestPermission: () -> Unit,
     batteryUnrestricted: Boolean,
@@ -942,6 +978,12 @@ private fun NotificationSettingsCard(
     onEarthquakeEnabledChanged: (Boolean) -> Unit,
     eewEnabled: Boolean,
     onEewEnabledChanged: (Boolean) -> Unit,
+    localEewAttentionMode: LocalEewAttentionMode,
+    onLocalEewAttentionModeChanged: (LocalEewAttentionMode) -> Unit,
+    minimumLocalEewAttentionIntensity: MinimumLocalEewAttentionIntensity,
+    onMinimumLocalEewAttentionIntensityChanged: (MinimumLocalEewAttentionIntensity) -> Unit,
+    fullScreenIntentAllowed: Boolean,
+    onRequestFullScreenIntentPermission: () -> Unit,
     tsunamiEnabled: Boolean,
     onTsunamiEnabledChanged: (Boolean) -> Unit,
     updatesEnabled: Boolean,
@@ -969,6 +1011,8 @@ private fun NotificationSettingsCard(
     onTest: () -> Unit
 ) {
     val intensityOptions = MinimumNotificationIntensity.entries
+    val localEewAttentionOptions = LocalEewAttentionMode.entries
+    val localEewIntensityOptions = MinimumLocalEewAttentionIntensity.entries
     val tsunamiOptions = listOf(TsunamiGrade.ADVISORY, TsunamiGrade.WARNING, TsunamiGrade.MAJOR_WARNING)
     val controlSizing = responsiveControlSizing()
     // Dialog/AlertDialog content is hosted in a separate window. Capture the
@@ -1054,6 +1098,15 @@ private fun NotificationSettingsCard(
             )
 
             CardDivider()
+            SwitchSettingRow(
+                title = localizedString(R.string.foreground_monitoring, language),
+                supportingText = localizedString(R.string.foreground_monitoring_description, language),
+                checked = foregroundMonitoringEnabled,
+                onCheckedChange = onForegroundMonitoringEnabledChanged,
+                enabled = permissionGranted
+            )
+
+            CardDivider()
             NavigationSettingRow(
                 title = localizedString(R.string.notification_reference_location, language),
                 value = alertLocation.displayName,
@@ -1135,6 +1188,70 @@ private fun NotificationSettingsCard(
                     ),
                     onHelpRequested = { title, body -> helpDialog = title to body }
                 )
+                NestedNavigationSettingRow(
+                    title = localizedString(R.string.notification_local_eew_attention, language),
+                    value = localEewAttentionModeLabel(localEewAttentionMode, language),
+                    onClick = {
+                        val next = localEewAttentionOptions[
+                            (localEewAttentionOptions.indexOf(localEewAttentionMode) + 1) %
+                                localEewAttentionOptions.size
+                        ]
+                        onLocalEewAttentionModeChanged(next)
+                    },
+                    supportingText = localizedString(
+                        R.string.notification_local_eew_attention_description,
+                        language,
+                        alertLocation.displayName
+                    )
+                )
+                if (localEewAttentionMode != LocalEewAttentionMode.NONE) {
+                    NestedNavigationSettingRow(
+                        title = localizedString(
+                            R.string.notification_local_eew_attention_threshold,
+                            language
+                        ),
+                        value = minimumLocalEewAttentionIntensityLabel(
+                            minimumLocalEewAttentionIntensity,
+                            language
+                        ),
+                        onClick = {
+                            val next = localEewIntensityOptions[
+                                (localEewIntensityOptions.indexOf(
+                                    minimumLocalEewAttentionIntensity
+                                ) + 1) % localEewIntensityOptions.size
+                            ]
+                            onMinimumLocalEewAttentionIntensityChanged(next)
+                        },
+                        supportingText = localizedString(
+                            if (localEewAttentionMode == LocalEewAttentionMode.WAKE_SCREEN) {
+                                R.string.notification_local_eew_attention_wake_description
+                            } else {
+                                R.string.notification_local_eew_attention_full_screen_description
+                            },
+                            language
+                        )
+                    )
+                    if (
+                        localEewAttentionMode == LocalEewAttentionMode.FULL_SCREEN &&
+                        !fullScreenIntentAllowed
+                    ) {
+                        NestedNavigationSettingRow(
+                            title = localizedString(
+                                R.string.notification_local_eew_attention_permission,
+                                language
+                            ),
+                            value = localizedString(
+                                R.string.notification_local_eew_attention_permission_required,
+                                language
+                            ),
+                            onClick = onRequestFullScreenIntentPermission,
+                            supportingText = localizedString(
+                                R.string.notification_local_eew_attention_permission_description,
+                                language
+                            )
+                        )
+                    }
+                }
             }
 
             CardDivider()
@@ -3166,6 +3283,34 @@ private fun minimumIntensityLabel(
         MinimumNotificationIntensity.SHINDO_3 -> R.string.notification_intensity_shindo_3_plus
         MinimumNotificationIntensity.SHINDO_4 -> R.string.notification_intensity_shindo_4_plus
         MinimumNotificationIntensity.SHINDO_5_LOWER -> R.string.notification_intensity_shindo_5_lower_plus
+    },
+    language
+)
+
+@Composable
+private fun localEewAttentionModeLabel(
+    mode: LocalEewAttentionMode,
+    language: PlaceNameLanguage
+): String = localizedString(
+    when (mode) {
+        LocalEewAttentionMode.NONE -> R.string.notification_local_eew_attention_off
+        LocalEewAttentionMode.WAKE_SCREEN -> R.string.notification_local_eew_attention_wake_screen
+        LocalEewAttentionMode.FULL_SCREEN -> R.string.notification_local_eew_attention_full_screen
+    },
+    language
+)
+
+@Composable
+private fun minimumLocalEewAttentionIntensityLabel(
+    intensity: MinimumLocalEewAttentionIntensity,
+    language: PlaceNameLanguage
+): String = localizedString(
+    when (intensity) {
+        MinimumLocalEewAttentionIntensity.SHINDO_3 -> R.string.notification_intensity_shindo_3_plus
+        MinimumLocalEewAttentionIntensity.SHINDO_4 -> R.string.notification_intensity_shindo_4_plus
+        MinimumLocalEewAttentionIntensity.SHINDO_5_LOWER -> R.string.notification_intensity_shindo_5_lower_plus
+        MinimumLocalEewAttentionIntensity.SHINDO_5_UPPER ->
+            R.string.notification_intensity_shindo_5_upper_plus
     },
     language
 )

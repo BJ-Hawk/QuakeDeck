@@ -1,0 +1,10 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <!-- Monochrome radar/connection mark for the persistent monitor only. -->
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M7,10a2,2 0,1 0,0.01 0M10,8.05A5,5 0,0 1,14.95 13h-2A3,3 0,0 0,10 10.05zM10,4.05A9,9 0,0 1,18.95 13h-2A7,7 0,0 0,10 6.05z" />
+</vector>
