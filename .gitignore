@@ -46,3 +46,6 @@ keystore.properties
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# Local Android Studio commit-message template
+/.gitmessage

@@ -10,6 +10,19 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class CorePolicyTest {
+    private fun earthquakeEvent(stage: EarthquakeReportStage) = EarthquakeEvent(
+        id = "quake:2026-08-08T21:23:43+09:00",
+        place = "Test",
+        originTime = "2026-08-08 21:23:43 JST",
+        magnitude = 3.0,
+        depthKm = 10,
+        maxIntensity = "1",
+        latitude = 35.0,
+        longitude = 139.0,
+        points = emptyList(),
+        reportStage = stage
+    )
+
     private fun station(networkJa: String) = SeismicStation(
         code = "TEST",
         nameJa = "試験",
@@ -67,6 +80,28 @@ class CorePolicyTest {
         )
 
         assertEquals("20260808212614", officialJmaReportId(event))
+    }
+
+    @Test
+    fun onlyAWaitingDetailedReportUsesTheOfficialJmaPreparingStatus() {
+        assertTrue(
+            shouldShowOfficialJmaReportPreparing(
+                earthquakeEvent(EarthquakeReportStage.DETAILED),
+                JmaReportReadiness.PREPARING
+            )
+        )
+        assertFalse(
+            shouldShowOfficialJmaReportPreparing(
+                earthquakeEvent(EarthquakeReportStage.INITIAL_INTENSITY),
+                JmaReportReadiness.PREPARING
+            )
+        )
+        assertFalse(
+            shouldShowOfficialJmaReportPreparing(
+                earthquakeEvent(EarthquakeReportStage.DETAILED),
+                JmaReportReadiness.AVAILABLE
+            )
+        )
     }
 
     @Test

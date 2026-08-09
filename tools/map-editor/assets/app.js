@@ -1,5 +1,6 @@
 const PATHS = {
     placeNames: 'app/src/main/res/raw/jma_place_names.json',
+    stationCatalog: 'app/src/main/res/raw/jma_intensity_stations.json',
     municipality: {
         geometry: 'app/src/main/res/raw/jma_quake_municipalities_topology.gz',
         fine: 'app/src/main/res/raw/jma_municipality_fine_boundaries.gz',
@@ -49,6 +50,8 @@ const CLASS_COLORS = {
     deleted: '#ff6b6b',
     topologyError: '#ff3b30',
     topologyWarning: '#ffb020',
+    hierarchyError: '#ff5ea8',
+    hierarchyAmbiguous: '#ffb020',
     areaSelected: 'rgba(123,183,255,0.26)',
     areaHover: 'rgba(139,209,124,0.18)',
 };
@@ -63,6 +66,8 @@ const MIN_ZOOM_MULTIPLIER = 0.35;
 const HISTORY_LIMIT = 40;
 const OCEAN_CODE = '__OCEAN__';
 const CLASS_PRIORITY = { none: 0, fine: 1, warning: 2, prefecture: 3, coast: 4 };
+const UI_PREFERENCES_KEY = 'quakedeck.mapEditor.ui.v1';
+const PERSISTED_SHOW_KEYS = ['basemap', 'coast', 'fine', 'warning', 'prefecture', 'vertices', 'modified', 'errors', 'labels'];
 
 const BASEMAP = {
     tileUrl: (z, x, y) => `https://tile.openstreetmap.org/${z}/${x}/${y}.png`,
@@ -70,6 +75,7 @@ const BASEMAP = {
     maxZoom: 19,
     tileSize: 256,
     opacity: 0.72,
+    cacheLimit: 192,
     west: 118.0,
     east: 158.0,
     south: 18.0,
@@ -958,9 +964,93 @@ function isInternalSingleOwnerEdge(layer, edge) {
     return false;
 }
 
+function expectedHierarchyForEdge(layer, edge) {
+    if (!edge || edge.currentClass === 'none' || edge.ownerAreas.length !== 2) return null;
+    const [first, second] = edge.ownerAreas;
+    const firstHierarchy = first?.hierarchy || {};
+    const secondHierarchy = second?.hierarchy || {};
+
+    if (!firstHierarchy.prefectureId || !secondHierarchy.prefectureId) {
+        return { ambiguous: true, reason: 'Prefecture membership is unavailable for one or both owners.' };
+    }
+    if (firstHierarchy.prefectureId !== secondHierarchy.prefectureId) {
+        return {
+            expectedClass: 'prefecture',
+            reason: `${firstHierarchy.prefectureName || firstHierarchy.prefectureId} ↔ ${secondHierarchy.prefectureName || secondHierarchy.prefectureId}`,
+        };
+    }
+
+    if (layer.key === 'jma') {
+        return {
+            expectedClass: 'fine',
+            reason: `Both owners are in ${firstHierarchy.prefectureName || firstHierarchy.prefectureId}.`,
+        };
+    }
+
+    if (!firstHierarchy.warningZoneId || !secondHierarchy.warningZoneId) {
+        return { ambiguous: true, reason: 'Warning-zone membership is unavailable for one or both owners.' };
+    }
+    if (firstHierarchy.warningZoneId !== secondHierarchy.warningZoneId) {
+        return {
+            expectedClass: 'warning',
+            reason: `${firstHierarchy.warningZoneName || firstHierarchy.warningZoneId} ↔ ${secondHierarchy.warningZoneName || secondHierarchy.warningZoneId}`,
+        };
+    }
+    return {
+        expectedClass: 'fine',
+        reason: `Both owners are in ${firstHierarchy.warningZoneName || firstHierarchy.warningZoneId}.`,
+    };
+}
+
+function refreshHierarchyIssues(layer) {
+    const mismatches = [];
+    const ambiguous = [];
+    if (!layer?.hierarchyReady) {
+        layer.hierarchyIssues = mismatches;
+        layer.hierarchyAmbiguous = ambiguous;
+        return { mismatches, ambiguous };
+    }
+    for (const edge of layer.edges.values()) {
+        if (edge.currentClass === 'none' || edge.ownerAreas.length !== 2) continue;
+        const expectation = expectedHierarchyForEdge(layer, edge);
+        if (!expectation) continue;
+        if (expectation.ambiguous) {
+            ambiguous.push({
+                edgeId: edge.id,
+                type: 'hierarchy-ambiguous',
+                severity: 'warning',
+                label: 'Ambiguous hierarchy',
+                detail: expectation.reason,
+            });
+            continue;
+        }
+        // Coast with two owners is already a topology error. Do not duplicate it
+        // in hierarchy validation; fixing ownership comes first.
+        if (edge.currentClass === 'coast') continue;
+        if (edge.currentClass !== expectation.expectedClass) {
+            mismatches.push({
+                edgeId: edge.id,
+                type: 'hierarchy-mismatch',
+                severity: 'error',
+                expectedClass: expectation.expectedClass,
+                actualClass: edge.currentClass,
+                label: `Expected ${classLabel(layer, expectation.expectedClass)}, not ${classLabel(layer, edge.currentClass)}`,
+                detail: expectation.reason,
+            });
+        }
+    }
+    layer.hierarchyIssues = mismatches;
+    layer.hierarchyAmbiguous = ambiguous;
+    return { mismatches, ambiguous };
+}
+
 function refreshTopologyIssues(layer, previousEdges = null) {
     const issues = [];
     for (const edge of layer.edges.values()) {
+        // A deleted edge is intentionally excluded from the rendered/topological
+        // boundary set. Keep it available for persistence and Undo/Redo, but do
+        // not report ownership/class errors until it is restored.
+        if (edge.currentClass === 'none') continue;
         const ownerCount = edge.ownerIndexes.length;
         if (ownerCount === 0) {
             issues.push({ edgeId: edge.id, type: 'no-owner', severity: 'error', label: 'Edge has no owners' });
@@ -975,56 +1065,130 @@ function refreshTopologyIssues(layer, previousEdges = null) {
         }
     }
     layer.topologyIssues = issues;
+    refreshHierarchyIssues(layer);
     if (elements.issuesButton && activeLayer() === layer) updateTopologyIssueUi();
     return issues;
+}
+
+function issueOwnersLabel(edge) {
+    return edge?.ownerAreas?.map(area => area.nameEn || area.name).join(' / ') || 'no owners';
+}
+
+function appendIssueItem(layer, issue, kind) {
+    const edge = layer.edges.get(issue.edgeId);
+    if (!edge) return;
+    const item = document.createElement('div');
+    item.className = `result-item issue-item ${kind === 'ambiguous' ? 'warning' : ''}`;
+    const prefix = kind === 'topology' ? 'Topology' : kind === 'hierarchy' ? 'Hierarchy' : 'Ambiguous';
+    const detail = issue.detail ? ` • ${issue.detail}` : '';
+    item.innerHTML = `<strong>${prefix}: ${issue.label}</strong><small>${issueOwnersLabel(edge)}${detail} • ${issue.edgeId}</small>`;
+    item.addEventListener('click', () => {
+        setSelectedEdge(edge);
+        focusSelectedEdge();
+    });
+    elements.topologyIssueList.appendChild(item);
 }
 
 function updateTopologyIssueUi() {
     const layer = activeLayer();
     if (!layer || !elements.issuesButton) return;
-    const issues = layer.topologyIssues || [];
-    elements.issuesButton.textContent = `Issues: ${issues.length}`;
-    elements.issuesButton.classList.toggle('has-issues', issues.length > 0);
-    elements.issuesButton.disabled = issues.length === 0;
-    elements.topologySummary.textContent = issues.length
-        ? `${issues.length} topology error${issues.length === 1 ? '' : 's'}. Red lines are invalid edges.`
-        : 'No topology errors detected.';
+    const topology = layer.topologyIssues || [];
+    const hierarchy = layer.hierarchyIssues || [];
+    const ambiguous = layer.hierarchyAmbiguous || [];
+
+    elements.issuesButton.textContent = `Issues: ${topology.length}`;
+    elements.issuesButton.classList.toggle('has-issues', topology.length > 0);
+    elements.issuesButton.disabled = topology.length === 0;
+    if (elements.hierarchyButton) {
+        elements.hierarchyButton.textContent = `Hierarchy: ${hierarchy.length}`;
+        elements.hierarchyButton.classList.toggle('has-issues', hierarchy.length > 0);
+        elements.hierarchyButton.disabled = hierarchy.length === 0;
+    }
+    if (elements.ambiguousButton) {
+        elements.ambiguousButton.textContent = `Ambiguous: ${ambiguous.length}`;
+        elements.ambiguousButton.classList.toggle('has-issues', ambiguous.length > 0);
+        elements.ambiguousButton.disabled = ambiguous.length === 0;
+    }
+    if (elements.autoCorrectHierarchyButton) elements.autoCorrectHierarchyButton.disabled = hierarchy.length === 0;
+
+    const summaryParts = [];
+    summaryParts.push(`${topology.length} topology error${topology.length === 1 ? '' : 's'}`);
+    summaryParts.push(`${hierarchy.length} hierarchy mismatch${hierarchy.length === 1 ? '' : 'es'}`);
+    summaryParts.push(`${ambiguous.length} ambiguous edge${ambiguous.length === 1 ? '' : 's'}`);
+    elements.topologySummary.textContent = `${summaryParts.join(' · ')}. Red/pink lines are errors; amber lines need manual classification.`;
+
+    const total = topology.length + hierarchy.length + ambiguous.length;
     elements.topologyIssueList.innerHTML = '';
-    elements.topologyIssueList.className = issues.length ? 'result-list' : 'result-list empty';
-    if (!issues.length) {
-        elements.topologyIssueList.textContent = 'No topology issues.';
+    elements.topologyIssueList.className = total ? 'result-list' : 'result-list empty';
+    if (!total) {
+        elements.topologyIssueList.textContent = 'No topology or hierarchy issues.';
         return;
     }
-    for (const issue of issues.slice(0, 100)) {
-        const edge = layer.edges.get(issue.edgeId);
-        if (!edge) continue;
-        const item = document.createElement('div');
-        item.className = `result-item issue-item ${issue.severity === 'warning' ? 'warning' : ''}`;
-        const owners = edge.ownerAreas.map(area => area.nameEn || area.name).join(' / ') || 'no owners';
-        item.innerHTML = `<strong>${issue.label}</strong><small>${owners} • ${issue.edgeId}</small>`;
-        item.addEventListener('click', () => {
-            setSelectedEdge(edge);
-            focusSelectedEdge();
-        });
-        elements.topologyIssueList.appendChild(item);
-    }
+    for (const issue of topology.slice(0, 100)) appendIssueItem(layer, issue, 'topology');
+    for (const issue of hierarchy.slice(0, 100)) appendIssueItem(layer, issue, 'hierarchy');
+    for (const issue of ambiguous.slice(0, 100)) appendIssueItem(layer, issue, 'ambiguous');
+}
+
+function focusIssueList(issues, cursorKey, label) {
+    const layer = activeLayer();
+    if (!layer || !issues?.length) return;
+    state[cursorKey] = (state[cursorKey] + 1) % issues.length;
+    const issue = issues[state[cursorKey]];
+    const edge = layer.edges.get(issue.edgeId);
+    if (!edge) return;
+    setSelectedEdge(edge);
+    focusSelectedEdge();
+    setStatus(`${label}: ${issue.label}${issue.detail ? ` — ${issue.detail}` : ''} (${state[cursorKey] + 1}/${issues.length}).`);
 }
 
 function focusNextTopologyIssue() {
     const layer = activeLayer();
-    const issues = layer?.topologyIssues || [];
-    if (!issues.length) return;
-    state.issueCursor = (state.issueCursor + 1) % issues.length;
-    const edge = layer.edges.get(issues[state.issueCursor].edgeId);
-    if (!edge) return;
-    setSelectedEdge(edge);
-    focusSelectedEdge();
-    setStatus(`${issues[state.issueCursor].label} (${state.issueCursor + 1}/${issues.length}).`);
+    focusIssueList(layer?.topologyIssues || [], 'issueCursor', 'Topology');
+}
+
+function focusNextHierarchyIssue() {
+    const layer = activeLayer();
+    focusIssueList(layer?.hierarchyIssues || [], 'hierarchyCursor', 'Hierarchy');
+}
+
+function focusNextAmbiguousIssue() {
+    const layer = activeLayer();
+    focusIssueList(layer?.hierarchyAmbiguous || [], 'ambiguousCursor', 'Ambiguous');
+}
+
+function autoCorrectHierarchyIssues() {
+    const layer = activeLayer();
+    const issues = layer?.hierarchyIssues || [];
+    if (!layer || !issues.length) return;
+    const ambiguousCount = layer.hierarchyAmbiguous?.length || 0;
+    if (!window.confirm(`Auto-correct ${issues.length} unambiguous hierarchy mismatch${issues.length === 1 ? '' : 'es'} in ${layer.label}? ${ambiguousCount} ambiguous edge${ambiguousCount === 1 ? '' : 's'} will be left untouched.`)) return;
+    recordHistory('auto-correct hierarchy');
+    let changed = 0;
+    for (const issue of issues) {
+        const edge = layer.edges.get(issue.edgeId);
+        if (!edge || edge.currentClass === 'none' || edge.currentClass === 'coast') continue;
+        if (!layer.allowedClasses.includes(issue.expectedClass)) continue;
+        if (edge.currentClass === issue.expectedClass) continue;
+        edge.currentClass = issue.expectedClass;
+        changed += 1;
+    }
+    refreshTopologyIssues(layer);
+    updateModifiedUi();
+    updateSelectionUi();
+    updateTopologyIssueUi();
+    render();
+    setStatus(`Auto-corrected ${changed} hierarchy edge${changed === 1 ? '' : 's'}. ${layer.hierarchyAmbiguous?.length || 0} ambiguous edge${(layer.hierarchyAmbiguous?.length || 0) === 1 ? '' : 's'} remain for manual review.${topologyIssueSuffix(layer)}`);
 }
 
 function topologyIssueSuffix(layer) {
-    const count = layer?.topologyIssues?.length || 0;
-    return count ? ` WARNING: ${count} topology issue${count === 1 ? '' : 's'} detected.` : '';
+    const topology = layer?.topologyIssues?.length || 0;
+    const hierarchy = layer?.hierarchyIssues?.length || 0;
+    const ambiguous = layer?.hierarchyAmbiguous?.length || 0;
+    const parts = [];
+    if (topology) parts.push(`${topology} topology`);
+    if (hierarchy) parts.push(`${hierarchy} hierarchy`);
+    if (ambiguous) parts.push(`${ambiguous} ambiguous`);
+    return parts.length ? ` WARNING: ${parts.join(', ')} issue${topology + hierarchy + ambiguous === 1 ? '' : 's'} detected.` : '';
 }
 
 function shortestVertexPath(layer, startKey, targetKey) {
@@ -1105,6 +1269,7 @@ const state = {
     meta: null,
     translations: null,
     basemapTiles: new Map(),
+    basemapUseSerial: 0,
     layers: new Map(),
     activeLayerKey: 'municipality',
     selectedEdgeId: null,
@@ -1115,6 +1280,8 @@ const state = {
     searchHighlightCode: null,
     viewport: { scale: 1, offsetX: 0, offsetY: 0, fitScale: 1 },
     show: { basemap: true, coast: true, fine: true, warning: true, prefecture: true, vertices: true, modified: true, errors: true, labels: true },
+    rememberCamera: false,
+    savedCameras: {},
     advanced: false,
     moveMode: false,
     addPointMode: false,
@@ -1122,12 +1289,15 @@ const state = {
     selectedAreaCodes: new Set(),
     hoverAreaCode: null,
     issueCursor: -1,
+    hierarchyCursor: -1,
+    ambiguousCursor: -1,
     pointer: null,
     selectionBox: null,
     movePreview: null,
     undoStack: [],
     redoStack: [],
     restoringHistory: false,
+    altPressed: false,
 };
 
 const elements = {};
@@ -1136,6 +1306,99 @@ function activeLayer() { return state.layers.get(state.activeLayerKey); }
 function zoomRatio() { return state.viewport.scale / Math.max(state.viewport.fitScale, 1e-9); }
 function setStatus(text) { elements.statusText.textContent = text; }
 
+let preferenceSaveTimer = null;
+
+function currentCameraSnapshot() {
+    if (!elements.canvas || !state.viewport.scale) return null;
+    const center = screenToWorld(elements.canvas.width / 2, elements.canvas.height / 2);
+    return {
+        centerX: center.x,
+        centerY: center.y,
+        zoom: zoomRatio(),
+    };
+}
+
+function applyCameraSnapshot(camera) {
+    if (!camera || !elements.canvas || !Number.isFinite(camera.centerX) || !Number.isFinite(camera.centerY) || !Number.isFinite(camera.zoom)) return false;
+    const zoom = Math.max(MIN_ZOOM_MULTIPLIER, Math.min(MAX_ZOOM_MULTIPLIER, camera.zoom));
+    const scale = state.viewport.fitScale * zoom;
+    state.viewport.scale = scale;
+    state.viewport.offsetX = elements.canvas.width / 2 - camera.centerX * scale;
+    state.viewport.offsetY = elements.canvas.height / 2 - camera.centerY * scale;
+    updateZoomText();
+    return true;
+}
+
+function rememberCurrentCamera() {
+    if (!state.rememberCamera || !state.activeLayerKey || !state.layers.has(state.activeLayerKey)) return;
+    const camera = currentCameraSnapshot();
+    if (camera) state.savedCameras[state.activeLayerKey] = camera;
+}
+
+function restoreSavedCamera(layerKey) {
+    if (!state.rememberCamera) return false;
+    return applyCameraSnapshot(state.savedCameras[layerKey]);
+}
+
+function persistUiPreferences() {
+    try {
+        rememberCurrentCamera();
+        const show = {};
+        for (const key of PERSISTED_SHOW_KEYS) show[key] = Boolean(state.show[key]);
+        const payload = {
+            version: 1,
+            show,
+            rememberCamera: Boolean(state.rememberCamera),
+            cameras: state.rememberCamera ? state.savedCameras : {},
+        };
+        localStorage.setItem(UI_PREFERENCES_KEY, JSON.stringify(payload));
+    } catch { /* localStorage can be unavailable in locked-down browser profiles */ }
+}
+
+function schedulePreferenceSave() {
+    if (preferenceSaveTimer !== null) window.clearTimeout(preferenceSaveTimer);
+    preferenceSaveTimer = window.setTimeout(() => {
+        preferenceSaveTimer = null;
+        persistUiPreferences();
+    }, 180);
+}
+
+function loadUiPreferences() {
+    try {
+        const raw = localStorage.getItem(UI_PREFERENCES_KEY);
+        if (!raw) return;
+        const payload = JSON.parse(raw);
+        if (payload?.show && typeof payload.show === 'object') {
+            for (const key of PERSISTED_SHOW_KEYS) {
+                if (typeof payload.show[key] === 'boolean') state.show[key] = payload.show[key];
+            }
+        }
+        state.rememberCamera = payload?.rememberCamera === true;
+        state.savedCameras = payload?.cameras && typeof payload.cameras === 'object' ? payload.cameras : {};
+    } catch {
+        state.savedCameras = {};
+    }
+}
+
+function syncPreferenceControls() {
+    const toggleIds = {
+        basemap: 'toggle-basemap',
+        coast: 'toggle-coast',
+        fine: 'toggle-fine',
+        warning: 'toggle-warning',
+        prefecture: 'toggle-prefecture',
+        vertices: 'toggle-vertices',
+        modified: 'toggle-modified',
+        errors: 'toggle-errors',
+        labels: 'toggle-labels',
+    };
+    for (const [key, id] of Object.entries(toggleIds)) {
+        const control = document.getElementById(id);
+        if (control) control.checked = Boolean(state.show[key]);
+    }
+    if (elements.rememberCameraToggle) elements.rememberCameraToggle.checked = state.rememberCamera;
+    if (elements.basemapAttribution) elements.basemapAttribution.style.display = state.show.basemap ? '' : 'none';
+}
 
 function cloneRings(rings) {
     return rings.map(ring => ring.map(point => [point[0], point[1]]));
@@ -1400,11 +1663,39 @@ function updateLayerUi() {
     elements.searchResults.className = 'result-list empty';
     elements.searchResults.textContent = 'Search works in Japanese and English.';
     fitBounds(layer.bounds);
+    restoreSavedCamera(layer.key);
     updateSelectionUi();
     updateModifiedUi();
     updateTopologyIssueUi();
     updateAreaOperationUi();
     render();
+}
+
+function updateCanvasCursor() {
+    if (!elements.mapArea) return;
+    const classes = [
+        'cursor-panning',
+        'cursor-move',
+        'cursor-add-point',
+        'cursor-create-edge',
+        'cursor-area-pick',
+        'cursor-point-select',
+    ];
+    for (const className of classes) elements.mapArea.classList.remove(className);
+
+    if (state.pointer?.type === 'pan' || state.pointer?.type === 'area-pan') {
+        elements.mapArea.classList.add('cursor-panning');
+    } else if (state.areaOperation === 'create-edge') {
+        elements.mapArea.classList.add('cursor-create-edge');
+    } else if (state.areaOperation) {
+        elements.mapArea.classList.add('cursor-area-pick');
+    } else if (state.advanced && state.addPointMode) {
+        elements.mapArea.classList.add('cursor-add-point');
+    } else if (state.advanced && state.moveMode) {
+        elements.mapArea.classList.add('cursor-move');
+    } else if (state.advanced && state.altPressed) {
+        elements.mapArea.classList.add('cursor-point-select');
+    }
 }
 
 function updateAdvancedUi() {
@@ -1432,12 +1723,19 @@ function updateAdvancedUi() {
     elements.modeChip.classList.toggle('hidden', !geometryMode);
     elements.modeChip.textContent = geometryMode;
     updateHistoryUi();
+    updateCanvasCursor();
 }
 
 function resizeCanvas() {
     const rect = elements.canvas.getBoundingClientRect();
-    elements.canvas.width = Math.max(1, Math.floor(rect.width));
-    elements.canvas.height = Math.max(1, Math.floor(rect.height));
+    const width = Math.max(1, Math.floor(rect.width));
+    const height = Math.max(1, Math.floor(rect.height));
+    elements.canvas.width = width;
+    elements.canvas.height = height;
+    if (elements.basemapCanvas) {
+        elements.basemapCanvas.width = width;
+        elements.basemapCanvas.height = height;
+    }
 }
 
 function fitBounds(bounds, padding = 28) {
@@ -1504,7 +1802,7 @@ function findSelectableAreaAtScreen(clientX, clientY) {
     if (!layer) return null;
     const area = findAreaAtScreen(clientX, clientY);
     if (area) return area;
-    if (state.areaOperation !== 'mass-coast') return null;
+    if (!['mass-coast', 'reassign', 'create-edge', 'coast-selected'].includes(state.areaOperation)) return null;
     const rect = elements.canvas.getBoundingClientRect();
     const world = screenToWorld(clientX - rect.left, clientY - rect.top);
     if (!isInsideOceanSelectionBounds(layer, world)) return null;
@@ -1571,6 +1869,29 @@ function renderAreaSelection(ctx, layer) {
     }
 }
 
+function coastOwnershipPlan(layer, edgeIds = null) {
+    const result = new Map();
+    if (!state.selectedAreaCodes.has(OCEAN_CODE)) return result;
+    const selectedLand = new Set([...state.selectedAreaCodes].filter(code => code !== OCEAN_CODE));
+    const candidates = edgeIds
+        ? [...edgeIds].map(id => layer.edges.get(id)).filter(Boolean)
+        : [...layer.edges.values()];
+
+    for (const edge of candidates) {
+        if (edge.ownerAreas.length === 1) {
+            const ownerCode = edge.ownerAreas[0]?.code;
+            if (selectedLand.size && !selectedLand.has(ownerCode)) continue;
+            result.set(edge.id, { className: 'coast', ownerCodes: ownerCode ? [ownerCode] : [] });
+            continue;
+        }
+        if (edge.ownerAreas.length !== 2 || !selectedLand.size) continue;
+        const kept = edge.ownerAreas.filter(area => selectedLand.has(area.code));
+        if (kept.length !== 1) continue;
+        result.set(edge.id, { className: 'coast', ownerCodes: [kept[0].code] });
+    }
+    return result;
+}
+
 function areaOperationPlan(layer) {
     const selected = state.selectedAreaCodes;
     const result = new Map();
@@ -1582,29 +1903,22 @@ function areaOperationPlan(layer) {
         if (targetPriority < currentPriority) return;
         if (edge.currentClass !== targetClass) result.set(edge.id, targetClass);
     };
-
-    // Inner edges are intentionally normalized to Municipality for a selected
-    // Warning-area group. Coast and Prefecture remain protected, but an old
-    // Warning assignment must be cleared because it is no longer on the outer
-    // perimeter of the selected group.
-    const assignInnerMunicipality = edge => {
+    const assignInnerFine = edge => {
+        // Inner edges are explicitly normalized by the mass operation. Preserve
+        // true higher-order boundaries, but allow Warning -> Municipality/JMA.
         if (edge.currentClass === 'coast' || edge.currentClass === 'prefecture') return;
         if (edge.currentClass !== 'fine') result.set(edge.id, 'fine');
     };
 
     if (state.areaOperation === 'mass-coast') {
-        if (!selected.has(OCEAN_CODE)) return result;
-        const selectedLand = new Set([...selected].filter(code => code !== OCEAN_CODE));
-        for (const edge of layer.edges.values()) {
-            if (edge.ownerAreas.length !== 1) continue;
-            if (selectedLand.size && !selectedLand.has(edge.ownerAreas[0]?.code)) continue;
-            assignWithPriority(edge, 'coast');
-        }
+        for (const [edgeId, item] of coastOwnershipPlan(layer).entries()) result.set(edgeId, item.className);
+    } else if (state.areaOperation === 'coast-selected') {
+        for (const [edgeId, item] of coastOwnershipPlan(layer, state.selectedEdgeIds).entries()) result.set(edgeId, item.className);
     } else if (state.areaOperation === 'mass-warning') {
         for (const edge of layer.edges.values()) {
             const selectedOwners = edge.ownerAreas.filter(area => selected.has(area.code)).length;
             if (!selectedOwners) continue;
-            if (edge.ownerAreas.length === 2 && selectedOwners === 2) assignInnerMunicipality(edge);
+            if (edge.ownerAreas.length === 2 && selectedOwners === 2) assignInnerFine(edge);
             else if (selectedOwners === 1) assignWithPriority(edge, 'warning');
         }
     } else if (state.areaOperation === 'mass-prefecture') {
@@ -1669,15 +1983,20 @@ function updateAreaOperationUi() {
     elements.selectedAreaCount.textContent = state.selectedAreaCodes.has(OCEAN_CODE)
         ? `Ocean${state.selectedAreaCodes.size > 1 ? ` + ${state.selectedAreaCodes.size - 1}` : ''}`
         : String(state.selectedAreaCodes.size);
-    if (!mode) return;
+    if (!mode) {
+        updateCanvasCursor();
+        return;
+    }
     const labels = {
-        'reassign': ['Reassign areas', 'Click exactly two filled areas that should own the selected vortice(s).'],
-        'mass-coast': ['Set coast from fill', 'Click the bounded Ocean fill. Confirm marks every one-owner shoreline as Coast. You may also select land areas to limit the operation.'],
+        'reassign': ['Reassign areas', 'Click exactly two filled sides. Ocean may be one side; Land + Ocean creates a one-owner Coast edge.'],
+        'coast-selected': ['Make selected edges Coast', 'Ocean is selected automatically. Click the land area(s) to KEEP. A 2-owner edge is converted only when exactly one of its owners is selected.'],
+        'mass-coast': ['Set coast from fill', 'Select Ocean. With Ocean only, existing one-owner shores become Coast. Add land areas to convert the OUTER perimeter of that selected land group from two owners to one-owner Coast; selected-to-selected inner edges stay unchanged.'],
         'mass-warning': ['Set warning zone from areas', 'Select any number of areas. Outer edges become Warning zone; inner edges become Municipality. Higher-priority Coast/Prefecture assignments are preserved.'],
         'mass-prefecture': ['Set prefecture from areas', activeLayer()?.key === 'jma'
             ? 'Select all JMA areas in the prefecture. Outer edges become Prefecture; inner edges become JMA area. Coast is preserved.'
             : 'Select any number of municipalities. Outer edges become Prefecture; inner edges are left unchanged. Coast is preserved.'],
-        'create-edge': ['Create edge', 'Two geometry points are locked. Click exactly two filled owner areas, then Confirm.'],
+        'create-edge': ['Create edge', 'Two geometry points are locked. Pick exactly two sides. Land + Ocean creates a one-owner Coast edge; two land areas create a normal shared edge.'],
+        'delete-area': ['Delete area override', 'Select one or more filled areas to suppress their own polygon rings by override. Geometry still present in neighbouring areas is retained; any resulting ownership problems remain visible for correction.'],
     };
     const [label, help] = labels[mode] || ['Area operation', 'Click filled areas.'];
     elements.areaOperationLabel.textContent = label;
@@ -1685,15 +2004,18 @@ function updateAreaOperationUi() {
     const exactTwo = mode === 'reassign' || mode === 'create-edge';
     if (mode === 'mass-coast') {
         elements.areaOperationConfirm.disabled = !state.selectedAreaCodes.has(OCEAN_CODE);
+    } else if (mode === 'coast-selected') {
+        elements.areaOperationConfirm.disabled = !state.selectedAreaCodes.has(OCEAN_CODE) || state.selectedAreaCodes.size < 2;
     } else {
         elements.areaOperationConfirm.disabled = exactTwo ? state.selectedAreaCodes.size !== 2 : state.selectedAreaCodes.size < 1;
     }
+    updateCanvasCursor();
 }
 
 function startAreaOperation(mode) {
     const layer = activeLayer();
     if (!layer) return;
-    if (mode === 'reassign' && !state.selectedEdgeIds.size) {
+    if ((mode === 'reassign' || mode === 'coast-selected') && !state.selectedEdgeIds.size) {
         setStatus('Select one or more vortices first.');
         return;
     }
@@ -1706,6 +2028,7 @@ function startAreaOperation(mode) {
     }
     state.areaOperation = mode;
     state.selectedAreaCodes.clear();
+    if (mode === 'coast-selected') state.selectedAreaCodes.add(OCEAN_CODE);
     state.hoverAreaCode = null;
     state.moveMode = false;
     state.addPointMode = false;
@@ -1726,6 +2049,11 @@ function cancelAreaOperation() {
 function toggleAreaSelection(area) {
     if (!state.areaOperation || !area) return;
     const exactTwo = state.areaOperation === 'reassign' || state.areaOperation === 'create-edge';
+    if (state.areaOperation === 'coast-selected' && area.code === OCEAN_CODE) return;
+    if (state.areaOperation === 'delete-area' && area.code === OCEAN_CODE) {
+        setStatus('Ocean cannot be deleted. Select a filled map area.');
+        return;
+    }
     if (state.selectedAreaCodes.has(area.code)) {
         state.selectedAreaCodes.delete(area.code);
     } else {
@@ -1742,44 +2070,155 @@ function toggleAreaSelection(area) {
 function reassignSelectedEdgeOwners() {
     const layer = activeLayer();
     if (!layer || state.selectedAreaCodes.size !== 2 || !state.selectedEdgeIds.size) return false;
-    recordHistory('reassign edge areas');
-    const ownerCodes = [...state.selectedAreaCodes];
+    const hasOcean = state.selectedAreaCodes.has(OCEAN_CODE);
+    const ownerCodes = [...state.selectedAreaCodes].filter(code => code !== OCEAN_CODE);
+    if ((hasOcean && ownerCodes.length !== 1) || (!hasOcean && ownerCodes.length !== 2)) return false;
+
+    recordHistory(hasOcean ? 'reassign edge to coast' : 'reassign edge areas');
     layer.ownerOverrideById ??= new Map();
     layer.manualEdges ??= new Map();
+    const desiredClassById = new Map();
     for (const edgeId of state.selectedEdgeIds) {
+        const edge = layer.edges.get(edgeId);
+        if (!edge) continue;
+        desiredClassById.set(edgeId, hasOcean ? 'coast' : edge.currentClass);
         layer.ownerOverrideById.set(edgeId, [...ownerCodes]);
         const manual = layer.manualEdges.get(edgeId);
-        if (manual) manual.owners = [...ownerCodes];
+        if (manual) {
+            manual.owners = [...ownerCodes];
+            if (hasOcean) manual.class = 'coast';
+        }
     }
     layer.topologyRevision = (layer.topologyRevision || 0) + 1;
     const previousEdges = layer.edges;
     buildLayerModel(layer, previousEdges);
+    for (const [edgeId, desiredClass] of desiredClassById.entries()) {
+        const edge = layer.edges.get(edgeId);
+        if (edge) edge.currentClass = desiredClass;
+    }
+    refreshTopologyIssues(layer);
     state.selectedEdgeIds = new Set([...state.selectedEdgeIds].filter(id => layer.edges.has(id)));
     state.primaryEdgeId = layer.edges.has(state.primaryEdgeId) ? state.primaryEdgeId : [...state.selectedEdgeIds].at(-1) || null;
     state.selectedEdgeId = state.primaryEdgeId;
     updateModifiedUi();
     updateSelectionUi();
     updateTopologyIssueUi();
-    setStatus(`Reassigned ${state.selectedEdgeIds.size} vortice${state.selectedEdgeIds.size === 1 ? '' : 's'} to the two selected areas.${topologyIssueSuffix(layer)}`);
+    setStatus(hasOcean
+        ? `Converted ${state.selectedEdgeIds.size} selected vortice${state.selectedEdgeIds.size === 1 ? '' : 's'} to one-owner Coast using ${ownerCodes[0]} as the land owner.${topologyIssueSuffix(layer)}`
+        : `Reassigned ${state.selectedEdgeIds.size} vortice${state.selectedEdgeIds.size === 1 ? '' : 's'} to the two selected areas.${topologyIssueSuffix(layer)}`);
+    return true;
+}
+
+function applySelectedEdgesAsCoast() {
+    const layer = activeLayer();
+    if (!layer || !state.selectedEdgeIds.size || !state.selectedAreaCodes.has(OCEAN_CODE)) return false;
+    const plan = coastOwnershipPlan(layer, state.selectedEdgeIds);
+    if (!plan.size) {
+        setStatus('No selected edge has exactly one land owner selected to keep. Select the land side(s), then Confirm.');
+        return false;
+    }
+    recordHistory('make selected edges coast');
+    layer.ownerOverrideById ??= new Map();
+    layer.manualEdges ??= new Map();
+    let ownerChanges = 0;
+    const desiredClassById = new Map();
+    for (const [edgeId, item] of plan.entries()) {
+        const edge = layer.edges.get(edgeId);
+        if (!edge) continue;
+        const currentOwners = edge.ownerAreas.map(area => area.code).sort();
+        const nextOwners = [...item.ownerCodes].sort();
+        if (currentOwners.join('|') !== nextOwners.join('|')) {
+            layer.ownerOverrideById.set(edgeId, [...item.ownerCodes]);
+            const manual = layer.manualEdges.get(edgeId);
+            if (manual) manual.owners = [...item.ownerCodes];
+            ownerChanges += 1;
+        }
+        edge.currentClass = 'coast';
+        desiredClassById.set(edgeId, 'coast');
+        const manual = layer.manualEdges.get(edgeId);
+        if (manual) manual.class = 'coast';
+    }
+    if (ownerChanges) {
+        layer.topologyRevision = (layer.topologyRevision || 0) + 1;
+        const previousEdges = layer.edges;
+        buildLayerModel(layer, previousEdges);
+        for (const [edgeId, desiredClass] of desiredClassById.entries()) {
+            const edge = layer.edges.get(edgeId);
+            if (edge) edge.currentClass = desiredClass;
+        }
+    }
+    refreshTopologyIssues(layer);
+    updateModifiedUi();
+    updateSelectionUi();
+    updateTopologyIssueUi();
+    const skipped = state.selectedEdgeIds.size - plan.size;
+    setStatus(`Made ${plan.size} selected vortice${plan.size === 1 ? '' : 's'} Coast (${ownerChanges} owner reduction${ownerChanges === 1 ? '' : 's'}${skipped ? `; ${skipped} ambiguous edge${skipped === 1 ? '' : 's'} skipped` : ''}).${topologyIssueSuffix(layer)}`);
     return true;
 }
 
 function applyMassAreaClassification() {
     const layer = activeLayer();
     if (!layer || !state.selectedAreaCodes.size) return false;
+
+    if (state.areaOperation === 'mass-coast') {
+        const coastPlan = coastOwnershipPlan(layer);
+        const settingExteriorPolicy = state.selectedAreaCodes.has(OCEAN_CODE)
+            && [...state.selectedAreaCodes].every(code => code === OCEAN_CODE)
+            && !layer.coastAllExterior;
+        if (!coastPlan.size && !settingExteriorPolicy) {
+            setStatus('The selected Ocean/land set does not produce any coastline changes. For a 2-owner edge, select exactly the land owner that should remain.');
+            return false;
+        }
+        recordHistory('set coast from fill');
+        if (settingExteriorPolicy) layer.coastAllExterior = true;
+        layer.ownerOverrideById ??= new Map();
+        layer.manualEdges ??= new Map();
+        let ownerChanges = 0;
+        const desiredClassById = new Map();
+        for (const [edgeId, item] of coastPlan.entries()) {
+            const edge = layer.edges.get(edgeId);
+            if (!edge) continue;
+            const currentOwners = edge.ownerAreas.map(area => area.code).sort();
+            const nextOwners = [...item.ownerCodes].sort();
+            if (currentOwners.join('|') !== nextOwners.join('|')) {
+                layer.ownerOverrideById.set(edgeId, [...item.ownerCodes]);
+                const manual = layer.manualEdges.get(edgeId);
+                if (manual) manual.owners = [...item.ownerCodes];
+                ownerChanges += 1;
+            }
+            edge.currentClass = 'coast';
+            desiredClassById.set(edgeId, 'coast');
+            const manual = layer.manualEdges.get(edgeId);
+            if (manual) manual.class = 'coast';
+        }
+        if (ownerChanges) {
+            layer.topologyRevision = (layer.topologyRevision || 0) + 1;
+            const previousEdges = layer.edges;
+            buildLayerModel(layer, previousEdges);
+            for (const [edgeId, desiredClass] of desiredClassById.entries()) {
+                const edge = layer.edges.get(edgeId);
+                if (edge) edge.currentClass = desiredClass;
+            }
+        }
+        refreshTopologyIssues(layer);
+        updateModifiedUi();
+        updateSelectionUi();
+        updateTopologyIssueUi();
+        const selectedCount = [...state.selectedAreaCodes].filter(code => code !== OCEAN_CODE).length;
+        const scope = selectedCount
+            ? `Ocean + ${selectedCount} selected land area${selectedCount === 1 ? '' : 's'}`
+            : 'the bounded Ocean fill';
+        setStatus(`Updated ${coastPlan.size} coastline vortice${coastPlan.size === 1 ? '' : 's'} from ${scope}; ${ownerChanges} two-owner edge${ownerChanges === 1 ? '' : 's'} reduced to one owner.${topologyIssueSuffix(layer)}`);
+        return true;
+    }
+
     const plan = areaOperationPlan(layer);
     if (!plan.size) {
         setStatus('The selected areas do not produce any boundary changes.');
         return false;
     }
-    const historyLabel = state.areaOperation === 'mass-coast'
-        ? 'set coast from fill'
-        : state.areaOperation === 'mass-warning' ? 'set warning zone from areas' : 'set prefecture from areas';
+    const historyLabel = state.areaOperation === 'mass-warning' ? 'set warning zone from areas' : 'set prefecture from areas';
     recordHistory(historyLabel);
-    if (state.areaOperation === 'mass-coast' && state.selectedAreaCodes.has(OCEAN_CODE)
-        && [...state.selectedAreaCodes].every(code => code === OCEAN_CODE)) {
-        layer.coastAllExterior = true;
-    }
     let changed = 0;
     for (const [edgeId, className] of plan.entries()) {
         const edge = layer.edges.get(edgeId);
@@ -1791,10 +2230,7 @@ function applyMassAreaClassification() {
     updateModifiedUi();
     updateSelectionUi();
     updateTopologyIssueUi();
-    const selectedCount = [...state.selectedAreaCodes].filter(code => code !== OCEAN_CODE).length;
-    const scope = state.areaOperation === 'mass-coast'
-        ? (selectedCount ? `Ocean + ${selectedCount} selected land area${selectedCount === 1 ? '' : 's'}` : 'the bounded Ocean fill')
-        : `${state.selectedAreaCodes.size} selected area${state.selectedAreaCodes.size === 1 ? '' : 's'}`;
+    const scope = `${state.selectedAreaCodes.size} selected area${state.selectedAreaCodes.size === 1 ? '' : 's'}`;
     setStatus(`Updated ${changed} boundary vortice${changed === 1 ? '' : 's'} from ${scope}.${topologyIssueSuffix(layer)}`);
     return true;
 }
@@ -1810,13 +2246,17 @@ function createManualEdgeFromSelectedPoints() {
         setStatus('Create edge blocked: an edge already exists between those two points.');
         return false;
     }
-    recordHistory('create edge');
+    const hasOcean = state.selectedAreaCodes.has(OCEAN_CODE);
+    const ownerCodes = [...state.selectedAreaCodes].filter(code => code !== OCEAN_CODE);
+    if ((hasOcean && ownerCodes.length !== 1) || (!hasOcean && ownerCodes.length !== 2)) return false;
+    const edgeClass = hasOcean ? 'coast' : 'fine';
+    recordHistory(hasOcean ? 'create coast edge' : 'create edge');
     layer.manualEdges ??= new Map();
     layer.manualEdges.set(id, {
         id,
         points: points.map(point => [point[0], point[1]]),
-        owners: [...state.selectedAreaCodes],
-        class: 'fine',
+        owners: ownerCodes,
+        class: edgeClass,
         baselineClass: 'none',
     });
     layer.topologyRevision = (layer.topologyRevision || 0) + 1;
@@ -1833,7 +2273,45 @@ function createManualEdgeFromSelectedPoints() {
     updateModifiedUi();
     updateSelectionUi();
     updateTopologyIssueUi();
-    setStatus(`Created a new two-owner edge. It starts as ${classLabel(layer, 'fine')}; reclassify it if needed.${topologyIssueSuffix(layer)}`);
+    setStatus(hasOcean
+        ? `Created a new one-owner Coast edge with Ocean on the other side.${topologyIssueSuffix(layer)}`
+        : `Created a new two-owner edge. It starts as ${classLabel(layer, 'fine')}; reclassify it if needed.${topologyIssueSuffix(layer)}`);
+    return true;
+}
+
+function deleteSelectedAreaOverrides() {
+    const layer = activeLayer();
+    if (!layer) return false;
+    const codes = [...state.selectedAreaCodes].filter(code => code !== OCEAN_CODE);
+    const areas = codes.map(code => layer.areas.find(area => area.code === code)).filter(area => area?.rings?.length);
+    if (!areas.length) {
+        setStatus('No filled area geometry is selected for deletion.');
+        return false;
+    }
+    const names = areas.slice(0, 3).map(area => area.nameEn || area.name).join(', ');
+    const more = areas.length > 3 ? ` + ${areas.length - 3} more` : '';
+    if (!window.confirm(`Suppress the polygon-ring override for ${areas.length} area${areas.length === 1 ? '' : 's'} (${names}${more})? Area records remain, and geometry still present in neighbouring areas is preserved.`)) return false;
+
+    const affectedCodes = new Set(areas.map(area => area.code));
+    ensureSessionBaseForCodes(layer, affectedCodes);
+    recordHistory('delete area override');
+    const previousEdges = layer.edges;
+    for (const area of areas) {
+        area.rings = [];
+        layer.changedAreaCodes.add(area.code);
+    }
+    layer.geometryRevision += 1;
+    buildLayerModel(layer, previousEdges);
+    state.selectedEdgeIds = new Set([...state.selectedEdgeIds].filter(id => layer.edges.has(id)));
+    state.primaryEdgeId = layer.edges.has(state.primaryEdgeId) ? state.primaryEdgeId : [...state.selectedEdgeIds].at(-1) || null;
+    state.selectedEdgeId = state.primaryEdgeId;
+    state.selectedVertices = new Set([...state.selectedVertices].filter(key => layer.vertices.has(key)));
+    state.primaryVertexKey = layer.vertices.has(state.primaryVertexKey) ? state.primaryVertexKey : [...state.selectedVertices].at(-1) || null;
+    updateModifiedUi();
+    updateSelectionUi();
+    updateTopologyIssueUi();
+    render();
+    setStatus(`Suppressed polygon-ring override for ${areas.length} area${areas.length === 1 ? '' : 's'}. Geometry still owned by neighbouring areas was preserved.${topologyIssueSuffix(layer)}`);
     return true;
 }
 
@@ -1842,7 +2320,9 @@ function confirmAreaOperation() {
     if (!mode) return;
     let completed = false;
     if (mode === 'reassign') completed = reassignSelectedEdgeOwners();
+    else if (mode === 'coast-selected') completed = applySelectedEdgesAsCoast();
     else if (mode === 'create-edge') completed = createManualEdgeFromSelectedPoints();
+    else if (mode === 'delete-area') completed = deleteSelectedAreaOverrides();
     else completed = applyMassAreaClassification();
     if (completed) cancelAreaOperation();
 }
@@ -1892,26 +2372,85 @@ function worldToTileY(worldY, zoom) {
     return (worldY + Math.PI) / (Math.PI * 2) * count;
 }
 
+let basemapRenderFrame = null;
+
+function scheduleBasemapRender() {
+    if (basemapRenderFrame !== null || !elements.basemapCanvas) return;
+    basemapRenderFrame = window.requestAnimationFrame(() => {
+        basemapRenderFrame = null;
+        renderBasemap();
+    });
+}
+
+function pruneBasemapCache(protectedKeys = new Set()) {
+    if (state.basemapTiles.size <= BASEMAP.cacheLimit) return;
+    const candidates = [...state.basemapTiles.entries()]
+        .filter(([key]) => !protectedKeys.has(key))
+        .sort((a, b) => (a[1].lastUsed || 0) - (b[1].lastUsed || 0));
+    for (const [key, tile] of candidates) {
+        if (state.basemapTiles.size <= BASEMAP.cacheLimit) break;
+        if (!tile.loaded && !tile.failed) {
+            tile.cancelled = true;
+            try { tile.image.src = ''; } catch { /* best effort */ }
+        }
+        state.basemapTiles.delete(key);
+    }
+}
+
+function cancelPendingBasemapTiles() {
+    if (basemapRenderFrame !== null) {
+        window.cancelAnimationFrame(basemapRenderFrame);
+        basemapRenderFrame = null;
+    }
+    for (const [key, tile] of [...state.basemapTiles.entries()]) {
+        if (tile.loaded || tile.failed) continue;
+        tile.cancelled = true;
+        try { tile.image.src = ''; } catch { /* best effort */ }
+        state.basemapTiles.delete(key);
+    }
+    renderBasemap();
+}
+
 function requestBasemapTile(zoom, x, y) {
+    if (!state.show.basemap) return null;
     const count = 2 ** zoom;
     if (x < 0 || y < 0 || x >= count || y >= count) return null;
     const key = `${zoom}/${x}/${y}`;
     let tile = state.basemapTiles.get(key);
-    if (tile) return tile;
+    if (tile) {
+        tile.lastUsed = ++state.basemapUseSerial;
+        return tile;
+    }
     const image = new Image();
-    tile = { image, loaded: false, failed: false };
+    tile = { image, loaded: false, failed: false, cancelled: false, lastUsed: ++state.basemapUseSerial };
     state.basemapTiles.set(key, tile);
     image.addEventListener('load', () => {
+        if (tile.cancelled) return;
         tile.loaded = true;
-        if (state.show.basemap) render();
+        tile.lastUsed = ++state.basemapUseSerial;
+        if (state.show.basemap) scheduleBasemapRender();
+        pruneBasemapCache();
     }, { once: true });
-    image.addEventListener('error', () => { tile.failed = true; }, { once: true });
+    image.addEventListener('error', () => {
+        if (tile.cancelled) return;
+        tile.failed = true;
+        pruneBasemapCache();
+    }, { once: true });
     image.src = BASEMAP.tileUrl(zoom, x, y);
     return tile;
 }
 
-function renderBasemap(ctx) {
+function renderBasemap() {
+    const canvas = elements.basemapCanvas;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const width = canvas.width;
+    const height = canvas.height;
+    ctx.clearRect(0, 0, width, height);
+    ctx.fillStyle = '#09111c';
+    ctx.fillRect(0, 0, width, height);
     if (!state.show.basemap) return;
+
     const viewport = screenRectToWorld(0, 0, elements.canvas.width, elements.canvas.height);
     const japan = {
         minX: longitudeToWorldX(BASEMAP.west),
@@ -1933,13 +2472,17 @@ function renderBasemap(ctx) {
     const maxTileX = Math.min(count - 1, Math.floor(worldToTileX(visible.maxX, zoom)));
     const minTileY = Math.max(0, Math.floor(worldToTileY(visible.minY, zoom)));
     const maxTileY = Math.min(count - 1, Math.floor(worldToTileY(visible.maxY, zoom)));
+    const protectedKeys = new Set();
 
     ctx.save();
     ctx.globalAlpha = BASEMAP.opacity;
     for (let tileY = minTileY; tileY <= maxTileY; tileY += 1) {
         for (let tileX = minTileX; tileX <= maxTileX; tileX += 1) {
+            const key = `${zoom}/${tileX}/${tileY}`;
+            protectedKeys.add(key);
             const tile = requestBasemapTile(zoom, tileX, tileY);
             if (!tile?.loaded || tile.failed) continue;
+            tile.lastUsed = ++state.basemapUseSerial;
             const worldLeft = -Math.PI + (Math.PI * 2 * tileX / count);
             const worldTop = -Math.PI + (Math.PI * 2 * tileY / count);
             const worldRight = -Math.PI + (Math.PI * 2 * (tileX + 1) / count);
@@ -1950,6 +2493,7 @@ function renderBasemap(ctx) {
         }
     }
     ctx.restore();
+    pruneBasemapCache(protectedKeys);
 }
 
 function render() {
@@ -1958,16 +2502,13 @@ function render() {
     const width = elements.canvas.width;
     const height = elements.canvas.height;
     ctx.clearRect(0, 0, width, height);
-    ctx.fillStyle = '#09111c';
-    ctx.fillRect(0, 0, width, height);
+    if (state.show.basemap) scheduleBasemapRender();
     if (!layer) return;
 
     ctx.lineCap = 'round';
     ctx.lineJoin = 'round';
 
     renderAreaSelection(ctx, layer);
-
-    renderBasemap(ctx);
 
     for (const className of ['fine', 'warning', 'prefecture', 'coast']) {
         const visible = className === 'coast' ? state.show.coast : state.show[className];
@@ -2012,6 +2553,38 @@ function render() {
             ctx.lineTo(b.x, b.y);
         }
         ctx.stroke();
+    }
+
+    if (state.show.errors && layer.hierarchyIssues?.length) {
+        ctx.strokeStyle = CLASS_COLORS.hierarchyError;
+        ctx.lineWidth = 4.6;
+        ctx.beginPath();
+        for (const issue of layer.hierarchyIssues) {
+            const edge = layer.edges.get(issue.edgeId);
+            if (!edge) continue;
+            const a = worldToScreen(edge.x1, edge.y1);
+            const b = worldToScreen(edge.x2, edge.y2);
+            ctx.moveTo(a.x, a.y);
+            ctx.lineTo(b.x, b.y);
+        }
+        ctx.stroke();
+    }
+
+    if (state.show.errors && layer.hierarchyAmbiguous?.length) {
+        ctx.strokeStyle = CLASS_COLORS.hierarchyAmbiguous;
+        ctx.lineWidth = 3.8;
+        ctx.setLineDash([7, 5]);
+        ctx.beginPath();
+        for (const issue of layer.hierarchyAmbiguous) {
+            const edge = layer.edges.get(issue.edgeId);
+            if (!edge) continue;
+            const a = worldToScreen(edge.x1, edge.y1);
+            const b = worldToScreen(edge.x2, edge.y2);
+            ctx.moveTo(a.x, a.y);
+            ctx.lineTo(b.x, b.y);
+        }
+        ctx.stroke();
+        ctx.setLineDash([]);
     }
 
     renderAreaOperationPreview(ctx, layer);
@@ -2328,6 +2901,14 @@ function selectVerticesInBox(box) {
 function applyClassToSelected(className) {
     const layer = activeLayer();
     if (!layer || !layer.allowedClasses.includes(className) || !state.selectedEdgeIds.size) return;
+    if (className === 'coast') {
+        const needsOwnerChoice = [...state.selectedEdgeIds].some(id => layer.edges.get(id)?.ownerAreas?.length !== 1);
+        if (needsOwnerChoice) {
+            startAreaOperation('coast-selected');
+            setStatus('Coast needs one land owner. Ocean is selected; click the land area(s) to keep, then Confirm.');
+            return;
+        }
+    }
     const willChange = [...state.selectedEdgeIds].some(id => layer.edges.get(id)?.currentClass !== className);
     if (willChange) recordHistory('boundary classification');
     let changed = 0;
@@ -2380,6 +2961,7 @@ function focusBounds(bounds, targetZoom = 18) {
     state.viewport.offsetY = height / 2 - centerY * scale;
     updateZoomText();
     render();
+    if (state.rememberCamera) schedulePreferenceSave();
 }
 
 function focusSelectedEdge() {
@@ -2454,28 +3036,47 @@ function previewMove(clientX, clientY) {
     render();
 }
 
-function applyPointMapping(mapping, newPrimary = null, historyLabel = 'point edit') {
+function applyPointMapping(mapping, newPrimary = null, historyLabel = 'point edit', options = {}) {
     const layer = activeLayer();
     if (!layer || !mapping.size) return false;
+    const allowCollapsedRings = options.allowCollapsedRings === true;
     const previousEdges = layer.edges;
     const affectedCodes = new Set();
+    const collapsed = [];
     const proposed = layer.areas.map(area => {
         let changed = false;
-        const rings = area.rings.map(ring => {
+        const rings = [];
+        area.rings.forEach((ring, ringIndex) => {
             const moved = ring.map(point => {
                 const replacement = mapping.get(canonicalPointKey(point));
                 if (replacement) changed = true;
                 return replacement || point;
             });
-            return normalizeRing(moved);
+            const normalized = normalizeRing(moved);
+            if (changed && normalized.length < 3) {
+                collapsed.push({ area, ringIndex, originalPointCount: ring.length });
+                if (allowCollapsedRings) return;
+            }
+            rings.push(normalized);
         });
         if (changed) affectedCodes.add(area.code);
         return { ...area, rings };
     });
-    const invalid = proposed.find(area => area.rings.some(ring => ring.length < 3));
-    if (invalid) {
+    if (collapsed.length && !allowCollapsedRings) {
+        const invalid = collapsed[0].area;
         setStatus(`Geometry change blocked: ${invalid.name} would contain an invalid polygon ring.`);
         return false;
+    }
+    if (collapsed.length && allowCollapsedRings) {
+        const areaNames = [...new Map(collapsed.map(item => [item.area.code, item.area.nameEn || item.area.name])).values()];
+        const preview = areaNames.slice(0, 4).join(', ');
+        const extra = areaNames.length > 4 ? ` + ${areaNames.length - 4} more` : '';
+        const message = `This point merge collapses ${collapsed.length} polygon ring${collapsed.length === 1 ? '' : 's'} in ${areaNames.length} area${areaNames.length === 1 ? '' : 's'} (${preview}${extra}). ` +
+            `Those ring overrides will be suppressed; geometry still present in neighbouring areas is kept. Continue?`;
+        if (!window.confirm(message)) {
+            setStatus('Combine cancelled; no polygon rings were suppressed.');
+            return false;
+        }
     }
     ensureSessionBaseForCodes(layer, affectedCodes);
     if (historyLabel) recordHistory(historyLabel);
@@ -2500,7 +3101,10 @@ function applyPointMapping(mapping, newPrimary = null, historyLabel = 'point edi
     updateModifiedUi();
     updateSelectionUi();
     render();
-    return true;
+    return {
+        collapsedRings: collapsed.length,
+        collapsedAreas: new Set(collapsed.map(item => item.area.code)).size,
+    };
 }
 
 function combineSelectedPoints() {
@@ -2523,11 +3127,15 @@ function combineSelectedPoints() {
     }
     if (!mapping.size) return;
 
-    if (applyPointMapping(mapping, primaryKey, 'combine points')) {
-        state.selectedVertices = new Set([primaryKey]);
-        state.primaryVertexKey = primaryKey;
+    const result = applyPointMapping(mapping, primaryKey, 'combine points', { allowCollapsedRings: true });
+    if (result) {
+        state.selectedVertices = layer.vertices.has(primaryKey) ? new Set([primaryKey]) : new Set();
+        state.primaryVertexKey = layer.vertices.has(primaryKey) ? primaryKey : null;
         updateSelectionUi();
-        setStatus(`Combined ${selectedKeys.length} selected points into the primary point.${topologyIssueSuffix(layer)}`);
+        const collapseText = result.collapsedRings
+            ? ` Suppressed ${result.collapsedRings} collapsed ring${result.collapsedRings === 1 ? '' : 's'} in ${result.collapsedAreas} area${result.collapsedAreas === 1 ? '' : 's'}.`
+            : '';
+        setStatus(`Combined ${selectedKeys.length} selected points into the primary point.${collapseText}${topologyIssueSuffix(layer)}`);
     }
 }
 
@@ -2691,9 +3299,11 @@ function deleteSelectedEdges() {
     if (!window.confirm(`Delete ${editable.length} selected edge${editable.length === 1 ? '' : 's'} from the rendered boundary resources? Polygon fills remain intact.`)) return;
     recordHistory('delete edge');
     for (const edge of editable) edge.currentClass = 'none';
+    refreshTopologyIssues(layer);
     updateModifiedUi();
     updateSelectionUi();
-    setStatus(`Deleted ${editable.length} boundary edge${editable.length === 1 ? '' : 's'} from rendering. Undo or Revert restores them.`);
+    updateTopologyIssueUi();
+    setStatus(`Deleted ${editable.length} boundary edge${editable.length === 1 ? '' : 's'} from rendering. Deleted edges are ignored by topology validation; Undo or Revert restores them.${topologyIssueSuffix(layer)}`);
     render();
 }
 
@@ -2844,6 +3454,7 @@ function currentOverridePayload(layer) {
         .map(area => ({
             code: area.code,
             name: area.name,
+            deleted: area.rings.length === 0,
             rings: area.rings.map(ring => ring.map(point => [point[0], point[1]])),
         }));
     const geometryEdgeClasses = [...layer.edges.values()]
@@ -2899,7 +3510,10 @@ function applyGeometryAreaOverrides(areas, overridePayload) {
         const rings = override.rings
             .map(ring => normalizeRing(ring.map(point => [Number(point[0]), Number(point[1])])))
             .filter(ring => ring.length >= 3);
-        if (rings.length) {
+        if (override.deleted === true || override.rings.length === 0) {
+            area.rings = [];
+            applied.add(area.code);
+        } else if (rings.length) {
             area.rings = rings;
             applied.add(area.code);
         }
@@ -2989,10 +3603,19 @@ async function saveAll() {
         setStatus('Nothing new to save.');
         return;
     }
-    const issueCount = dirtyLayers.reduce((sum, layer) => sum + (layer.topologyIssues?.length || 0), 0);
-    if (issueCount && !window.confirm(`There are ${issueCount} topology error${issueCount === 1 ? '' : 's'} in the edited layer(s). Save anyway?`)) {
-        setStatus('Save cancelled because topology errors remain.');
-        return;
+    const topologyCount = dirtyLayers.reduce((sum, layer) => sum + (layer.topologyIssues?.length || 0), 0);
+    const hierarchyCount = dirtyLayers.reduce((sum, layer) => sum + (layer.hierarchyIssues?.length || 0), 0);
+    const ambiguousCount = dirtyLayers.reduce((sum, layer) => sum + (layer.hierarchyAmbiguous?.length || 0), 0);
+    const errorCount = topologyCount + hierarchyCount;
+    if (errorCount || ambiguousCount) {
+        const parts = [];
+        if (topologyCount) parts.push(`${topologyCount} topology error${topologyCount === 1 ? '' : 's'}`);
+        if (hierarchyCount) parts.push(`${hierarchyCount} hierarchy mismatch${hierarchyCount === 1 ? '' : 'es'}`);
+        if (ambiguousCount) parts.push(`${ambiguousCount} ambiguous hierarchy edge${ambiguousCount === 1 ? '' : 's'}`);
+        if (!window.confirm(`The edited layer(s) still contain ${parts.join(', ')}. Save anyway?`)) {
+            setStatus('Save cancelled because validation issues remain.');
+            return;
+        }
     }
     for (const layer of dirtyLayers) await saveLayer(layer);
     updateModifiedUi();
@@ -3040,6 +3663,65 @@ function applyTranslations(layer, kind) {
     for (const area of layer.areas) area.nameEn = dictionary[area.name] || area.name;
 }
 
+function addHierarchyValue(map, key, field, value) {
+    if (!key || !value) return;
+    if (!map.has(key)) map.set(key, {});
+    const record = map.get(key);
+    if (!record[field]) record[field] = new Set();
+    record[field].add(String(value));
+}
+
+function singleHierarchyValue(record, field) {
+    const values = record?.[field];
+    return values?.size === 1 ? [...values][0] : null;
+}
+
+function annotateHierarchyMetadata(municipalityLayer, jmaLayer, stationCatalog) {
+    const municipality = new Map();
+    const jma = new Map();
+    for (const row of stationCatalog?.stations || []) {
+        if (!Array.isArray(row)) continue;
+        const prefectureName = String(row[2] || '').trim();
+        const warningZoneId = String(row[6] || '').trim();
+        const warningZoneName = String(row[7] || '').trim();
+        const municipalityCode = String(row[8] || '').trim();
+        if (municipalityCode) {
+            addHierarchyValue(municipality, municipalityCode, 'prefecture', prefectureName);
+            addHierarchyValue(municipality, municipalityCode, 'warningZone', warningZoneId);
+            addHierarchyValue(municipality, municipalityCode, 'warningZoneName', warningZoneName);
+        }
+        if (warningZoneId) {
+            addHierarchyValue(jma, warningZoneId, 'prefecture', prefectureName);
+        }
+    }
+
+    for (const area of municipalityLayer.areas) {
+        const record = municipality.get(area.code);
+        const prefectureName = singleHierarchyValue(record, 'prefecture');
+        const warningZoneId = singleHierarchyValue(record, 'warningZone');
+        area.hierarchy = {
+            prefectureId: prefectureName,
+            prefectureName,
+            warningZoneId,
+            warningZoneName: singleHierarchyValue(record, 'warningZoneName') || warningZoneId,
+        };
+    }
+    for (const area of jmaLayer.areas) {
+        const record = jma.get(area.code);
+        const prefectureName = singleHierarchyValue(record, 'prefecture');
+        area.hierarchy = {
+            prefectureId: prefectureName,
+            prefectureName,
+            warningZoneId: area.code || null,
+            warningZoneName: area.name,
+        };
+    }
+    municipalityLayer.hierarchyReady = true;
+    jmaLayer.hierarchyReady = true;
+    refreshTopologyIssues(municipalityLayer);
+    refreshTopologyIssues(jmaLayer);
+}
+
 function prepareLoadedClasses(layer, sets, overridePayload) {
     const loadedClassById = new Map();
     if (layer.key === 'municipality') {
@@ -3084,10 +3766,11 @@ async function loadData() {
     state.meta = await fetchJson('/api/meta');
     elements.projectRoot.textContent = state.meta.projectRoot;
 
-    const [placeNamesBuffer,
+    const [placeNamesBuffer, stationCatalog,
         muniGeometryGz, muniFineGz, muniWarningGz, muniPrefectureGz, muniOverridesText,
         jmaGeometryGz, jmaBordersGz, jmaOverridesText] = await Promise.all([
         fetchArrayBuffer(PATHS.placeNames),
+        fetchArrayBuffer(PATHS.stationCatalog).then(buffer => JSON.parse(new TextDecoder().decode(buffer))),
         fetchArrayBuffer(PATHS.municipality.geometry),
         fetchArrayBuffer(PATHS.municipality.fine),
         fetchArrayBuffer(PATHS.municipality.warning),
@@ -3168,6 +3851,8 @@ async function loadData() {
     applyTopologyOverridePayload(jma, jmaOverrides);
     buildLayerModel(jma);
 
+    annotateHierarchyMetadata(municipality, jma, stationCatalog);
+
     state.layers = new Map([['municipality', municipality], ['jma', jma]]);
     if (!state.layers.has(state.activeLayerKey)) state.activeLayerKey = 'municipality';
     elements.layerSelect.value = state.activeLayerKey;
@@ -3196,6 +3881,7 @@ async function loadData() {
 }
 
 async function closeEditor() {
+    persistUiPreferences();
     elements.closeButton.disabled = true;
     setStatus('Stopping local editor server…');
     try {
@@ -3249,7 +3935,11 @@ function bindUi() {
     elements.massCoastButton = document.getElementById('mass-coast-button');
     elements.massWarningButton = document.getElementById('mass-warning-button');
     elements.massPrefectureButton = document.getElementById('mass-prefecture-button');
+    elements.deleteAreaButton = document.getElementById('delete-area-button');
     elements.issuesButton = document.getElementById('issues-button');
+    elements.hierarchyButton = document.getElementById('hierarchy-button');
+    elements.ambiguousButton = document.getElementById('ambiguous-button');
+    elements.autoCorrectHierarchyButton = document.getElementById('auto-correct-hierarchy-button');
     elements.topologySummary = document.getElementById('topology-summary');
     elements.topologyIssueList = document.getElementById('topology-issue-list');
     elements.areaOperationRow = document.getElementById('area-operation-row');
@@ -3262,12 +3952,15 @@ function bindUi() {
     elements.restoreBaselineButton = document.getElementById('restore-baseline-button');
     elements.advancedStatus = document.getElementById('advanced-status');
     elements.toggleWarning = document.getElementById('toggle-warning');
+    elements.rememberCameraToggle = document.getElementById('toggle-remember-camera');
+    elements.basemapCanvas = document.getElementById('basemap-canvas');
     elements.canvas = document.getElementById('map-canvas');
     elements.basemapAttribution = document.getElementById('basemap-attribution');
     elements.mapArea = document.querySelector('.map-area');
     elements.modeChip = document.getElementById('mode-chip');
 
     elements.layerSelect.addEventListener('change', event => {
+        rememberCurrentCamera();
         state.activeLayerKey = event.target.value;
         state.moveMode = false;
         state.addPointMode = false;
@@ -3276,6 +3969,7 @@ function bindUi() {
         state.hoverAreaCode = null;
         state.movePreview = null;
         updateLayerUi();
+        persistUiPreferences();
     });
     elements.saveButton.addEventListener('click', () => saveAll().catch(error => setStatus(error.message)));
     elements.reloadButton.addEventListener('click', () => loadData().catch(error => setStatus(error.message)));
@@ -3289,7 +3983,11 @@ function bindUi() {
     elements.massCoastButton.addEventListener('click', () => startAreaOperation('mass-coast'));
     elements.massWarningButton.addEventListener('click', () => startAreaOperation('mass-warning'));
     elements.massPrefectureButton.addEventListener('click', () => startAreaOperation('mass-prefecture'));
+    elements.deleteAreaButton.addEventListener('click', () => startAreaOperation('delete-area'));
     elements.issuesButton.addEventListener('click', focusNextTopologyIssue);
+    elements.hierarchyButton.addEventListener('click', focusNextHierarchyIssue);
+    elements.ambiguousButton.addEventListener('click', focusNextAmbiguousIssue);
+    elements.autoCorrectHierarchyButton.addEventListener('click', autoCorrectHierarchyIssues);
     elements.areaOperationClear.addEventListener('click', () => { state.selectedAreaCodes.clear(); updateAreaOperationUi(); render(); });
     elements.areaOperationConfirm.addEventListener('click', confirmAreaOperation);
     elements.areaOperationCancel.addEventListener('click', cancelAreaOperation);
@@ -3331,12 +4029,31 @@ function bindUi() {
     for (const [id, key] of Object.entries(toggles)) {
         document.getElementById(id).addEventListener('change', event => {
             state.show[key] = event.target.checked;
-            if (key === 'basemap' && elements.basemapAttribution) {
-                elements.basemapAttribution.style.display = state.show.basemap ? '' : 'none';
+            if (key === 'basemap') {
+                if (elements.basemapAttribution) {
+                    elements.basemapAttribution.style.display = state.show.basemap ? '' : 'none';
+                }
+                if (state.show.basemap) scheduleBasemapRender();
+                else cancelPendingBasemapTiles();
+                persistUiPreferences();
+                return;
             }
+            persistUiPreferences();
             render();
         });
     }
+
+    elements.rememberCameraToggle.addEventListener('change', event => {
+        state.rememberCamera = event.target.checked;
+        if (state.rememberCamera) {
+            rememberCurrentCamera();
+            setStatus('Camera memory enabled. Position and zoom will be remembered separately for each layer.');
+        } else {
+            state.savedCameras = {};
+            setStatus('Camera memory disabled. Layers will open fitted to the map.');
+        }
+        persistUiPreferences();
+    });
 
     elements.canvas.addEventListener('pointerdown', event => {
         const rect = elements.canvas.getBoundingClientRect();
@@ -3350,6 +4067,7 @@ function bindUi() {
                 moved: false,
             };
             elements.canvas.setPointerCapture(event.pointerId);
+            updateCanvasCursor();
             return;
         }
         const hitVertex = state.advanced && state.moveMode ? findVertexAtScreen(event.clientX, event.clientY) : null;
@@ -3386,6 +4104,7 @@ function bindUi() {
             };
         }
         elements.canvas.setPointerCapture(event.pointerId);
+        updateCanvasCursor();
     });
 
     elements.canvas.addEventListener('pointermove', event => {
@@ -3432,10 +4151,13 @@ function bindUi() {
         const pointer = state.pointer;
         state.pointer = null;
         try { elements.canvas.releasePointerCapture(event.pointerId); } catch { /* ignore */ }
+        updateCanvasCursor();
         if (pointer.type === 'area-pan') {
             if (!pointer.moved) {
                 const area = findSelectableAreaAtScreen(event.clientX, event.clientY);
                 if (area) toggleAreaSelection(area);
+            } else if (state.rememberCamera) {
+                schedulePreferenceSave();
             }
             return;
         }
@@ -3486,7 +4208,18 @@ function bindUi() {
             const edge = findEdgeAtScreen(event.clientX, event.clientY);
             if (edge) selectEdge(edge, pointer.clickEvent);
             else clearSelection();
+        } else if (pointer.type === 'pan' && state.rememberCamera) {
+            schedulePreferenceSave();
         }
+    });
+
+    elements.canvas.addEventListener('pointercancel', event => {
+        if (!state.pointer || state.pointer.pointerId !== event.pointerId) return;
+        state.pointer = null;
+        state.selectionBox = null;
+        state.movePreview = null;
+        updateCanvasCursor();
+        render();
     });
 
     elements.canvas.addEventListener('wheel', event => {
@@ -3503,21 +4236,28 @@ function bindUi() {
         state.viewport.offsetY = anchorY - before.y * state.viewport.scale;
         updateZoomText();
         render();
+        if (state.rememberCamera) schedulePreferenceSave();
     }, { passive: false });
 
     elements.canvas.addEventListener('dblclick', () => {
         fitBounds(activeLayer()?.bounds);
         render();
+        if (state.rememberCamera) schedulePreferenceSave();
     });
 
     window.addEventListener('resize', () => {
+        const camera = state.rememberCamera ? currentCameraSnapshot() : null;
         resizeCanvas();
         fitBounds(activeLayer()?.bounds);
+        if (camera) applyCameraSnapshot(camera);
         render();
+        if (state.rememberCamera) schedulePreferenceSave();
     });
 
     window.addEventListener('keydown', event => {
         if (event.key === 'Alt') {
+            state.altPressed = true;
+            updateCanvasCursor();
             event.preventDefault();
             event.stopPropagation();
             return;
@@ -3535,21 +4275,90 @@ function bindUi() {
             redoEdit();
             return;
         }
+        if (!typing && !event.ctrlKey && !event.metaKey && !event.altKey) {
+            const key = event.key.toLowerCase();
+            if (key === 'a') {
+                event.preventDefault();
+                state.advanced = !state.advanced;
+                elements.advancedToggle.checked = state.advanced;
+                if (!state.advanced) {
+                    state.moveMode = false;
+                    state.addPointMode = false;
+                    if (state.areaOperation === 'create-edge') cancelAreaOperation();
+                    state.movePreview = null;
+                    state.selectedVertices.clear();
+                    state.primaryVertexKey = null;
+                }
+                updateAdvancedUi();
+                updateSelectionUi();
+                render();
+                setStatus(`Advanced geometry ${state.advanced ? 'enabled' : 'disabled'}.`);
+                return;
+            }
+            if (state.advanced && key === 'm') {
+                event.preventDefault();
+                if (!state.selectedVertices.size) setStatus('Move points: select one or more geometry points first.');
+                else toggleMoveMode();
+                return;
+            }
+            if (state.advanced && key === 'p') {
+                event.preventDefault();
+                toggleAddPointMode();
+                return;
+            }
+            if (state.advanced && key === 'e') {
+                event.preventDefault();
+                startAreaOperation('create-edge');
+                return;
+            }
+            if (state.advanced && key === 'c') {
+                event.preventDefault();
+                if (state.selectedVertices.size < 2) setStatus('Combine points: select at least two geometry points first.');
+                else combineSelectedPoints();
+                return;
+            }
+            if (state.advanced && key === 'v') {
+                event.preventDefault();
+                if (state.selectedEdgeIds.size < 2) setStatus('Combine vortices: select at least two connected vortices first.');
+                else combineSelectedVortices();
+                return;
+            }
+            if (state.advanced && event.key === 'Delete') {
+                event.preventDefault();
+                if (event.shiftKey) {
+                    if (!state.selectedEdgeIds.size) setStatus('Delete edge: select one or more vortices first.');
+                    else deleteSelectedEdges();
+                } else if (!state.selectedVertices.size) {
+                    setStatus('Delete points: select one or more geometry points first. Use Shift+Delete for selected edges.');
+                } else {
+                    deleteSelectedVertices();
+                }
+                return;
+            }
+        }
         if (event.key === 'Escape' && (state.moveMode || state.addPointMode || state.areaOperation)) {
             state.moveMode = false;
             state.addPointMode = false;
             state.movePreview = null;
             if (state.areaOperation) cancelAreaOperation();
             updateAdvancedUi();
+            updateCanvasCursor();
             render();
         }
     }, true);
     window.addEventListener('keyup', event => {
         if (event.key === 'Alt') {
+            state.altPressed = false;
+            updateCanvasCursor();
             event.preventDefault();
             event.stopPropagation();
         }
     }, true);
+    window.addEventListener('blur', () => {
+        state.altPressed = false;
+        state.pointer = null;
+        updateCanvasCursor();
+    });
 }
 
 let lifecycleTimer = null;
@@ -3565,12 +4374,15 @@ function startEditorLifecycle() {
     lifecycleTimer = window.setInterval(pingEditorServer, 1500);
     window.addEventListener('pagehide', () => {
         if (lifecycleTimer !== null) window.clearInterval(lifecycleTimer);
+        persistUiPreferences();
         try { navigator.sendBeacon('/api/disconnect', ''); } catch { /* best effort */ }
     }, { once: true });
 }
 
 async function main() {
     bindUi();
+    loadUiPreferences();
+    syncPreferenceControls();
     startEditorLifecycle();
     resizeCanvas();
     try {

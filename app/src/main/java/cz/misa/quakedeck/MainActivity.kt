@@ -2546,10 +2546,10 @@ private fun EarthquakeReportStageStrip(
         }
     }
     val reportReady = reportReadiness == JmaReportReadiness.AVAILABLE
-    val reportLabel = when (reportReadiness) {
-        JmaReportReadiness.CHECKING -> uiText(R.string.checking_official_jma_report, language)
-        JmaReportReadiness.PREPARING -> uiText(R.string.official_jma_report_preparing, language)
-        JmaReportReadiness.AVAILABLE -> label
+    val reportLabel = if (shouldShowOfficialJmaReportPreparing(event, reportReadiness)) {
+        uiText(R.string.official_jma_report_preparing, language)
+    } else {
+        label
     }
     val (container, content) = when {
         !event.reportCorrection.isNullOrBlank() ->
@@ -2612,6 +2612,7 @@ private fun EarthquakeReportStageStrip(
                     text = "↗",
                     color = content.copy(alpha = 0.82f),
                     fontSize = 10.sp,
+                    lineHeight = 11.sp,
                     fontWeight = FontWeight.Bold
                 )
             }

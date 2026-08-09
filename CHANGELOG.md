@@ -1,7 +1,14 @@
 # Changelog
 
 QuakeDeck release history
+## v0.9.83k (in progress)
+
+- Keeps Initial, Hypocenter, and other report-stage statuses visible. Only a detailed report whose JMA payload is still unavailable says that the official JMA report is preparing; the link enables automatically once published.
+- Keeps the ready official-report strip exactly as thin as Initial and preparing report strips.
+- Bumps the Android hotfix version to `0.9.83k` (`versionCode` 177) and updates the README release marker.
+
 ## v0.9.83j (cumulative since v0.9.83c)
+
 - Makes official JMA report links wait until JMA has published the matching detail payload, then enables them automatically while the report card is open.
 - Prepared the high-resolution N03 source pipeline out of the app package for future experiments. A disabled source-isolation hook have been prepared and remain available without affecting normal rendering.
 - Map Editor: Improves the municipality-boundary workflow: refreshes corrected boundary data, clears obsolete inner warning-area borders, and adds an OpenStreetMap reference basemap plus separate coastline visibility.

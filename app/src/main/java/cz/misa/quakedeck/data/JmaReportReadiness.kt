@@ -17,6 +17,13 @@ enum class JmaReportReadiness {
     AVAILABLE
 }
 
+/** A pending JMA payload replaces only the final detailed-report status. */
+internal fun shouldShowOfficialJmaReportPreparing(
+    event: EarthquakeEvent,
+    readiness: JmaReportReadiness
+): Boolean = event.reportStage == EarthquakeReportStage.DETAILED &&
+    readiness == JmaReportReadiness.PREPARING
+
 private const val JMA_QUAKE_LIST_URL = "https://www.jma.go.jp/bosai/quake/data/list.json"
 private const val JMA_LIST_CACHE_MILLIS = 25_000L
 

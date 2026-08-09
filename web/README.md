@@ -21,7 +21,7 @@ A dependency-free static website and controlled DM-D.S.S OAuth capability probe.
 
 1. Create a public repository, for example `quakedeck-site`.
 2. Upload the contents of this folder to the repository root.
-3. Replace the placeholder in `contact.html` and optionally update `site-config.js`.
+3. Review the project contact links in `contact.html` and `site-config.js` before launch.
 4. In GitHub: **Settings → Pages → Deploy from a branch → main / root**.
 5. Wait for the HTTPS site URL, for example:
    `https://YOUR_NAME.github.io/quakedeck-site/`
@@ -62,6 +62,13 @@ For an OAuth localhost callback, DM-D.S.S documents special redirect matching fo
 ## Later Android App Links
 
 `.well-known/assetlinks.json.example` is a template only. Rename it to `assetlinks.json` after inserting the SHA-256 fingerprint of the final QuakeDeck **release** signing certificate. Do not use the debug certificate for the production association.
+
+## Public pages
+
+- `about.html` — project purpose, inspiration, current scope, and direction
+- `credits.html` — data-source attributions, licences, service terms, and review notes
+- `contact.html` — GitHub repository, issue tracker, and current GitHub account address
+- `diagnostics.html` — retained DM-D.S.S capability probe
 
 ## Important
 
