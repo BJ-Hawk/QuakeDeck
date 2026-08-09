@@ -28,13 +28,22 @@ The usable provider is currently the free P2PQuake feed. The DM-D.S.S adapter re
 
 ## Opening and building
 
-Open the extracted project folder in Android Studio. The checked-in project startup configuration runs `:app:assembleDebug` when the standalone version folder is opened. Android Studio should initially open `CHANGELOG.md`; after the first session, normal IDE workspace behaviour takes over.
+Open the repository root (the folder containing `settings.gradle.kts`) in Android Studio. The project targets Android API 36 and uses Java 17; Android Studio normally provisions the appropriate JDK and offers any missing SDK components during sync.
+
+To build a debug APK from a terminal, run:
+
+```powershell
+.\gradlew.bat :app:assembleDebug
+```
+
+The resulting APK is written below `app\build\outputs\apk\debug`. To run the unit tests, use `./gradlew.bat :app:testDebugUnitTest`.
 
 ## Documentation
 
 - [`CHANGELOG.md`](CHANGELOG.md) — documented release history, newest first
 - [`ROADMAP.md`](ROADMAP.md) — planned work and feature direction
 - [`THIRD_PARTY_DATA.md`](THIRD_PARTY_DATA.md) — source and licensing notes for bundled datasets
+- [`tools/map-editor/README.md`](tools/map-editor/README.md) — local visual editor for map geometry and boundary classes
 
 ## Important limitation
 

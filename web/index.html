@@ -30,19 +30,13 @@
       <div>
         <span class="eyebrow">Android development build</span>
         <h1>Japan live.<br>Without the clutter.</h1>
-        <p class="lead">QuakeDeck is an independent earthquake monitor built around a fast, detailed map of Japan, observed JMA intensities, and a future live DM-D.S.S early-warning stream.</p>
+        <p class="lead">QuakeDeck is an independent English-first Android earthquake monitor built around a fast, detailed map of Japan, observed JMA intensities, municipality-level visual Shindo, and a future live DM-D.S.S early-warning stream.</p>
         <div class="actions">
           <a class="button primary" href="diagnostics.html">Inspect DM-D.S.S access</a>
           <a class="button" href="about.html">About the project</a>
         </div>
       </div>
-      <div class="mock-panel" aria-label="Stylized QuakeDeck map preview">
-        <div class="mock-card">
-          <span class="mock-intensity">5−</span>
-          <div class="mock-title">Amakusa and Ashikita Region</div>
-          <div class="mock-meta">Kumamoto Prefecture · M 5.8 · 0 km</div>
-        </div>
-      </div>
+      <figure class="hero-screenshot"><img src="assets/screenshots/municipality-shindo.png" alt="QuakeDeck development build displaying municipality-level Shindo colouring around Kumamoto"><figcaption>In development · municipality-level visual Shindo</figcaption></figure>
     </section>
 
     <section id="about" class="section">
@@ -50,12 +44,32 @@
         <div class="section-header">
           <div class="kicker">What exists today</div>
           <h2>A serious map before the serious live feed.</h2>
-          <p class="lead">The current Android prototype already displays recent JMA earthquakes, historical events, prefecture shading by observed Shindo, station observations, progressive labels, and event-aware camera controls.</p>
+          <p class="lead">The current Android prototype already displays recent JMA earthquakes, historical events, municipality and prefecture shading by observed Shindo, station observations, progressive labels, and event-aware camera controls.</p>
         </div>
         <div class="grid">
           <article class="card"><div class="icon">🗾</div><h3>Detailed Japan map</h3><p>Prefecture geometry, progressive city and station labels, deep zoom, historical-event focus, and a lightweight regional context layer.</p></article>
-          <article class="card"><div class="icon">📍</div><h3>Observed intensities</h3><p>Current and historical events can color prefectures and reported stations using the JMA seismic-intensity scale.</p></article>
+          <article class="card"><div class="icon">📍</div><h3>Municipality-level visual Shindo</h3><p>At deep zoom, QuakeDeck colours individual municipalities and designated-city wards by their highest observed JMA intensity—not just an entire prefecture.</p></article>
           <article class="card"><div class="icon">⚡</div><h3>DM-D.S.S next</h3><p>The planned production milestone is browser-based OAuth, reliable WebSocket reception, successive EEW reports, cancellations, and live observations.</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section screenshots-section">
+      <div class="shell">
+        <div class="section-header">
+          <div class="kicker">In development</div>
+          <h2>The map is the interface.</h2>
+          <p class="lead">Real captures from the current Android build: live and historical reports, map detail, observed intensities, alert controls, and a browsable local archive.</p>
+        </div>
+        <div class="screenshot-grid">
+          <figure class="screenshot-card"><img src="assets/screenshots/overview.png" alt="QuakeDeck overview map of Japan"><figcaption><strong>Japan at a glance</strong><span>Map-first overview</span></figcaption></figure>
+          <figure class="screenshot-card"><img src="assets/screenshots/recent-earthquakes.png" alt="QuakeDeck recent earthquakes list below the Japan map"><figcaption><strong>Recent earthquakes</strong><span>Live event context</span></figcaption></figure>
+          <figure class="screenshot-card"><img src="assets/screenshots/observed-intensities.png" alt="QuakeDeck observed intensities list grouped by prefecture"><figcaption><strong>Observed intensities</strong><span>Station-level reports</span></figcaption></figure>
+          <figure class="screenshot-card"><img src="assets/screenshots/municipality-shindo.png" alt="QuakeDeck municipality-level Shindo map around Kumamoto"><figcaption><strong>Municipality Shindo</strong><span>Deep-zoom visual reporting</span></figcaption></figure>
+          <figure class="screenshot-card"><img src="assets/screenshots/prefecture-shindo.png" alt="QuakeDeck prefecture-level Shindo map around Kumamoto"><figcaption><strong>Prefecture Shindo</strong><span>Clear regional context</span></figcaption></figure>
+          <figure class="screenshot-card"><img src="assets/screenshots/notification-settings.png" alt="QuakeDeck notification and quiet-hours settings"><figcaption><strong>Alert controls</strong><span>Notifications on your terms</span></figcaption></figure>
+          <figure class="screenshot-card"><img src="assets/screenshots/history-map.png" alt="QuakeDeck historical earthquake report on a colored map"><figcaption><strong>Historical reports</strong><span>Replay the event context</span></figcaption></figure>
+          <figure class="screenshot-card"><img src="assets/screenshots/history-browser.png" alt="QuakeDeck past reports browser with filters"><figcaption><strong>Local archive</strong><span>Browse and filter reports</span></figcaption></figure>
         </div>
       </div>
     </section>
