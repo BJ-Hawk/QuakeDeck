@@ -157,6 +157,8 @@ class MainActivity : ComponentActivity() {
     companion object {
         const val EXTRA_NOTIFICATION_REPORT_ID =
             "cz.misa.quakedeck.extra.NOTIFICATION_REPORT_ID"
+        const val EXTRA_NOTIFICATION_EVENT =
+            "cz.misa.quakedeck.extra.NOTIFICATION_EVENT"
         const val EXTRA_FULL_SCREEN_EEW =
             "cz.misa.quakedeck.extra.FULL_SCREEN_EEW"
     }
@@ -165,6 +167,7 @@ class MainActivity : ComponentActivity() {
         (application as QuakeDeckApplication).runtime
     }
     private var notificationReportId by mutableStateOf<String?>(null)
+    private var notificationEventPayload by mutableStateOf<String?>(null)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         val savedAppearance = AppSettings(this).appearance
@@ -182,14 +185,18 @@ class MainActivity : ComponentActivity() {
         if (AppSettings(this).foregroundMonitoringEnabled) {
             ForegroundMonitoringService.start(this)
         }
-        notificationReportId = intent?.getStringExtra(EXTRA_NOTIFICATION_REPORT_ID)
+        updateNotificationNavigation(intent)
         WindowCompat.enableEdgeToEdge(window)
         setContent {
             QuakeDeckRoot(
                 runtime = runtime,
                 notificationReportId = notificationReportId,
+                notificationEventPayload = notificationEventPayload,
                 onNotificationReportHandled = { handledId ->
-                    if (notificationReportId == handledId) notificationReportId = null
+                    if (notificationReportId == handledId) {
+                        notificationReportId = null
+                        notificationEventPayload = null
+                    }
                 }
             )
         }
@@ -199,7 +206,12 @@ class MainActivity : ComponentActivity() {
         super.onNewIntent(intent)
         setIntent(intent)
         applyFullScreenEewWindowMode(intent)
-        notificationReportId = intent.getStringExtra(EXTRA_NOTIFICATION_REPORT_ID)
+        updateNotificationNavigation(intent)
+    }
+
+    private fun updateNotificationNavigation(intent: Intent?) {
+        notificationReportId = intent?.getStringExtra(EXTRA_NOTIFICATION_REPORT_ID)
+        notificationEventPayload = intent?.getStringExtra(EXTRA_NOTIFICATION_EVENT)
     }
 
     private fun applyFullScreenEewWindowMode(intent: Intent?) {
@@ -223,6 +235,7 @@ class MainActivity : ComponentActivity() {
 private fun QuakeDeckRoot(
     runtime: QuakeDeckRuntime,
     notificationReportId: String?,
+    notificationEventPayload: String?,
     onNotificationReportHandled: (String) -> Unit
 ) {
     val context = LocalContext.current
@@ -261,6 +274,7 @@ private fun QuakeDeckRoot(
                             appSettings.textScale = value
                         },
                         notificationReportId = notificationReportId,
+                        notificationEventPayload = notificationEventPayload,
                         onNotificationReportHandled = onNotificationReportHandled
                     )
                 }
@@ -278,11 +292,16 @@ private fun QuakeDeckApp(
     textScale: Float,
     onTextScaleChanged: (Float) -> Unit,
     notificationReportId: String?,
+    notificationEventPayload: String?,
     onNotificationReportHandled: (String) -> Unit
 ) {
     val context = LocalContext.current
     val provider: QuakeDataProvider = runtime
     val notificationCoordinator = runtime.notificationCoordinator
+    val notificationEventFromIntent = remember(notificationEventPayload) {
+        NotificationEventPayload.decode(notificationEventPayload)
+    }
+    var retainedNotificationEvent by remember { mutableStateOf<EarthquakeEvent?>(null) }
     var placeNameLanguage by remember { mutableStateOf(appSettings.placeNameLanguage) }
     var epicenterMarkerSizeDp by remember { mutableFloatStateOf(appSettings.epicenterMarkerSizeDp) }
     var epicenterMarkerStyle by remember { mutableStateOf(appSettings.epicenterMarkerStyle) }
@@ -665,6 +684,10 @@ private fun QuakeDeckApp(
     var mappedEventId by remember { mutableStateOf<String?>(null) }
     var lastAutoOpenedLiveEventId by remember { mutableStateOf<String?>(null) }
     var lastAutoFitHadFootprint by remember { mutableStateOf(false) }
+    // Compose enters this screen with clean focus state. Only a real Sandbox
+    // mode change should clear it; treating first composition as a change races
+    // an explicit notification destination during a cold launch.
+    var appliedTestingMode by remember { mutableStateOf<Boolean?>(null) }
     // Monotonic camera request used by the event-card focus button. Keeping the
     // request separate from event selection means the same event can be focused
     // again after the user pans away or presses Fit Japan.
@@ -710,8 +733,20 @@ private fun QuakeDeckApp(
     val historicalFrame = historicalIncident?.frames
         ?.getOrNull(historicalReportIndex)
     val historicalMode = historicalFrame != null
-    val regularSelectedEvent = remember(snapshot.event, snapshot.history, selectedEventId) {
-        selectedEventId?.let { id -> snapshot.history.firstOrNull { it.id == id } } ?: snapshot.event
+    val notificationFallbackEvent = notificationEventFromIntent ?: retainedNotificationEvent
+    val regularSelectedEvent = remember(
+        snapshot.event,
+        snapshot.activeEewEvent,
+        snapshot.history,
+        selectedEventId,
+        notificationFallbackEvent
+    ) {
+        selectedEventId?.let { id ->
+            snapshot.event.takeIf { it.id == id }
+                ?: snapshot.activeEewEvent?.takeIf { it.id == id }
+                ?: snapshot.history.firstOrNull { it.id == id }
+                ?: notificationFallbackEvent?.takeIf { it.id == id }
+        } ?: snapshot.event
     }
     val selectedEvent = historicalFrame?.event ?: regularSelectedEvent
     val browsingHistory = historicalMode || selectedEvent.id != snapshot.event.id
@@ -846,20 +881,40 @@ private fun QuakeDeckApp(
     // is tapped, retain the normal latest-report screen if appropriate, otherwise
     // select that report from history and issue the same explicit map-focus request
     // as the on-screen Focus event button.
-    LaunchedEffect(notificationReportId, snapshot.event, snapshot.history) {
+    LaunchedEffect(
+        notificationReportId,
+        notificationFallbackEvent,
+        snapshot.event,
+        snapshot.activeEewEvent,
+        snapshot.history,
+        snapshot.recentReportsRefreshing
+    ) {
         val requestedId = notificationReportId ?: return@LaunchedEffect
         val target = when {
             snapshot.event.id == requestedId -> snapshot.event
+            snapshot.activeEewEvent?.id == requestedId -> snapshot.activeEewEvent
             else -> snapshot.history.firstOrNull { it.id == requestedId }
-        }
+        } ?: notificationFallbackEvent?.takeIf { it.id == requestedId }
         if (target != null) {
+            // Keep the fallback synchronously before the Activity clears the
+            // Intent extras. A separate launch effect here races a cold-start
+            // recomposition and can leave selectedEvent pointing at the latest
+            // generic report instead of this notification's report.
+            retainedNotificationEvent = target
             if (target.id != selectedEvent.id) clearObservedIntensityExpansion()
             selectedEventId = target.id
+            // Cold launch can receive the same live snapshot after this effect.
+            // Its automatic camera policy must not override the explicit user
+            // choice to open this particular notification.
+            lastCameraHandledLiveSequence = maxOf(
+                lastCameraHandledLiveSequence,
+                snapshot.liveUpdateSequence
+            )
             requestEventMapFocus(target, manual = true)
             onNotificationReportHandled(requestedId)
-        } else if (snapshot.event.id != "waiting") {
+        } else if (!snapshot.recentReportsRefreshing && snapshot.event.id != "waiting") {
             // The report may already have aged out of the in-memory history. Do
-            // not keep replaying a stale navigation request on later snapshots.
+            // not discard the request while cold-start history is still loading.
             onNotificationReportHandled(requestedId)
         }
     }
@@ -900,6 +955,16 @@ private fun QuakeDeckApp(
     }
 
     LaunchedEffect(testingMode) {
+        val previousMode = appliedTestingMode
+        appliedTestingMode = testingMode
+        if (previousMode == null || previousMode == testingMode) {
+            return@LaunchedEffect
+        }
+        // A notification is an explicit user navigation command, and must win
+        // over the ordinary focus cleanup when the source mode changes.
+        if (retainedNotificationEvent != null || notificationReportId != null) {
+            return@LaunchedEffect
+        }
         clearObservedIntensityExpansion()
         if (testingMode) {
             historicalIncident = null
@@ -1322,6 +1387,7 @@ private fun QuakeDeckApp(
                             onBrowseEvents = ::openHistoricalBrowserFromMap,
                             onReturnToLive = ::exitHistoricalMode,
                             onFocusEvent = ::focusSelectedEvent,
+                            selectedStation = focusedStation,
                             onFocusStation = ::focusStation,
                             onStationFocusCleared = ::clearStationFocus,
                             modifier = Modifier.fillMaxHeight().weight(1f - landscapeMapFraction)
@@ -1349,6 +1415,7 @@ private fun QuakeDeckApp(
                                 focusedFootprintSignature = null
                             },
                             onFocusEvent = ::focusSelectedEvent,
+                            selectedStation = focusedStation,
                             onFocusStation = ::focusStation,
                             onStationFocusCleared = ::clearStationFocus,
                             modifier = Modifier.fillMaxHeight().weight(1f - landscapeMapFraction)
@@ -1463,6 +1530,7 @@ private fun QuakeDeckApp(
                         onBrowseEvents = ::openHistoricalBrowserFromMap,
                         onReturnToLive = ::exitHistoricalMode,
                         onFocusEvent = ::focusSelectedEvent,
+                        selectedStation = focusedStation,
                         onFocusStation = ::focusStation,
                         onStationFocusCleared = ::clearStationFocus,
                         onObservationsExpandedChanged = { expanded ->
@@ -1509,6 +1577,7 @@ private fun QuakeDeckApp(
                             portraitPendingObservationRestore = null
                         },
                         onFocusEvent = ::focusSelectedEvent,
+                        selectedStation = focusedStation,
                         onFocusStation = ::focusStation,
                         onStationFocusCleared = ::clearStationFocus,
                         onObservationsExpandedChanged = { expanded ->
@@ -2911,6 +2980,7 @@ private fun EventPanel(
     onSelectEvent: (EarthquakeEvent) -> Unit,
     onCloseReport: () -> Unit,
     onFocusEvent: () -> Unit,
+    selectedStation: IntensityPoint?,
     onFocusStation: (IntensityPoint) -> Unit,
     onStationFocusCleared: () -> Unit,
     modifier: Modifier = Modifier,
@@ -2986,12 +3056,26 @@ private fun EventPanel(
     var observationsExpanded by remember(selectedEvent.id) { mutableStateOf(false) }
     val listState = rememberLazyListState()
     var listViewportTopInRootPx by remember { mutableFloatStateOf(0f) }
+    var listViewportBottomInRootPx by remember { mutableFloatStateOf(0f) }
+    var reportGridHeightPx by remember(selectedEvent.id) { mutableIntStateOf(0) }
+    var selectedStationBottomDocked by remember { mutableStateOf(false) }
     val scrollScope = rememberCoroutineScope()
     var returnScrollAnchor by remember { mutableStateOf<EventListScrollAnchor?>(null) }
     val showTopButton by remember {
         derivedStateOf {
             listState.firstVisibleItemIndex > 0 || listState.firstVisibleItemScrollOffset > 48
         }
+    }
+    // Observed intensities is a dedicated scrolling mode: its report controls
+    // are fixed from the first frame, not merely after scrolling past them.
+    val reportGridPinned = observationsExpanded
+    val observedContentTopInRootPx = listViewportTopInRootPx + if (reportGridPinned) {
+        reportGridHeightPx
+    } else {
+        0
+    }
+    LaunchedEffect(observationsExpanded, selectedStation) {
+        if (!observationsExpanded || selectedStation == null) selectedStationBottomDocked = false
     }
 
     val normalRecentHistory = remember(snapshot.history, snapshot.event.id) {
@@ -3045,6 +3129,13 @@ private fun EventPanel(
         }
     }
 
+    val toggleObservations: () -> Unit = {
+        val expanded = !observationsExpanded
+        if (!expanded) onStationFocusCleared()
+        onObservationsExpandedChanged?.invoke(expanded)
+        observationsExpanded = expanded
+    }
+
     Box(
         modifier = modifier.background(MaterialTheme.colorScheme.surface)
     ) {
@@ -3054,6 +3145,8 @@ private fun EventPanel(
                 .fillMaxSize()
                 .onGloballyPositioned { coordinates ->
                     listViewportTopInRootPx = coordinates.positionInRoot().y
+                    listViewportBottomInRootPx =
+                        listViewportTopInRootPx + coordinates.size.height
                 }
                 .padding(horizontal = 8.dp),
             verticalArrangement = Arrangement.Top
@@ -3132,27 +3225,36 @@ private fun EventPanel(
                     Spacer(Modifier.height(8.dp))
                 }
 
-                ReportCardGrid(
-                    event = selectedEvent,
-                    officialReportEvent = selectedEvent,
-                    displayPlace = displayPlace,
-                    isEew = isEew,
-                    japaneseIntensity = japaneseIntensity,
-                    language = placeNameLanguage,
-                    cardScale = LocalDensity.current.fontScale.coerceIn(0.80f, 2.00f),
-                    eventMapped = eventMapped,
-                    focusNeedsRefocus = focusNeedsRefocus,
-                    browsingHistory = browsingHistory,
-                    observationsExpanded = observationsExpanded,
-                    onFocusEvent = onFocusEvent,
-                    onCloseReport = closeHistoricalReport,
-                    onToggleObservations = {
-                        val expanded = !observationsExpanded
-                        if (!expanded) onStationFocusCleared()
-                        onObservationsExpandedChanged?.invoke(expanded)
-                        observationsExpanded = expanded
+                if (observationsExpanded) {
+                    Spacer(
+                        Modifier.height(
+                            with(LocalDensity.current) { reportGridHeightPx.toDp() }
+                        )
+                    )
+                } else {
+                    Box(
+                        Modifier.onGloballyPositioned { coordinates ->
+                            reportGridHeightPx = coordinates.size.height
+                        }
+                    ) {
+                    ReportCardGrid(
+                        event = selectedEvent,
+                        officialReportEvent = selectedEvent,
+                        displayPlace = displayPlace,
+                        isEew = isEew,
+                        japaneseIntensity = japaneseIntensity,
+                        language = placeNameLanguage,
+                        cardScale = LocalDensity.current.fontScale.coerceIn(0.80f, 2.00f),
+                        eventMapped = eventMapped,
+                        focusNeedsRefocus = focusNeedsRefocus,
+                        browsingHistory = browsingHistory,
+                        observationsExpanded = observationsExpanded,
+                        onFocusEvent = onFocusEvent,
+                        onCloseReport = closeHistoricalReport,
+                        onToggleObservations = toggleObservations
+                    )
                     }
-                )
+                }
 
                 destinationPrediction?.let { prediction ->
                     Spacer(Modifier.height(8.dp))
@@ -3175,9 +3277,15 @@ private fun EventPanel(
                             expansionKey = selectedEvent.originTime,
                             listState = listState,
                             listViewportTopInRootPx = listViewportTopInRootPx,
+                            stickyContentTopInRootPx = observedContentTopInRootPx,
+                            listViewportBottomInRootPx = listViewportBottomInRootPx,
                             expandedPrefectures = observedIntensityExpandedPrefectures,
+                            selectedStation = selectedStation,
                             onFocusStation = onFocusStation,
-                            onStationFocusCleared = onStationFocusCleared
+                            onStationFocusCleared = onStationFocusCleared,
+                            onSelectedStationBottomDockChanged = {
+                                selectedStationBottomDocked = it
+                            }
                         )
                     } else {
                         selectedEvent.points.forEach { point ->
@@ -3187,6 +3295,7 @@ private fun EventPanel(
                                 japaneseIntensity = japaneseIntensity,
                                 offlineStationTranslator = offlineStationTranslator,
                                 offlineStationTranslationStatus = offlineStationTranslationStatus,
+                                selected = point == selectedStation,
                                 onFocusStation = onFocusStation
                             )
                         }
@@ -3318,11 +3427,43 @@ private fun EventPanel(
             item(key = "bottom-spacer") { Spacer(Modifier.height(52.dp)) }
         }
 
+        if (reportGridPinned) {
+            Surface(
+                modifier = Modifier
+                    .align(Alignment.TopStart)
+                    .fillMaxWidth()
+                    .onSizeChanged { reportGridHeightPx = it.height },
+                color = MaterialTheme.colorScheme.surface,
+                tonalElevation = 4.dp,
+                shadowElevation = 3.dp
+            ) {
+                ReportCardGrid(
+                    event = selectedEvent,
+                    officialReportEvent = selectedEvent,
+                    displayPlace = displayPlace,
+                    isEew = isEew,
+                    japaneseIntensity = japaneseIntensity,
+                    language = placeNameLanguage,
+                    cardScale = LocalDensity.current.fontScale.coerceIn(0.80f, 2.00f),
+                    eventMapped = eventMapped,
+                    focusNeedsRefocus = focusNeedsRefocus,
+                    browsingHistory = browsingHistory,
+                    observationsExpanded = observationsExpanded,
+                    onFocusEvent = onFocusEvent,
+                    onCloseReport = closeHistoricalReport,
+                    onToggleObservations = toggleObservations
+                )
+            }
+        }
+
         if (showTopButton) {
             Surface(
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
-                    .padding(end = 10.dp, bottom = 8.dp)
+                    .padding(
+                        end = 10.dp,
+                        bottom = if (selectedStationBottomDocked) 40.dp else 8.dp
+                    )
                     .clickable {
                         scrollScope.launch { listState.animateScrollToItem(0) }
                     },
@@ -3356,6 +3497,7 @@ private fun HistoricalEventPanel(
     onBrowseEvents: () -> Unit,
     onReturnToLive: () -> Unit,
     onFocusEvent: () -> Unit,
+    selectedStation: IntensityPoint?,
     onFocusStation: (IntensityPoint) -> Unit,
     onStationFocusCleared: () -> Unit,
     modifier: Modifier = Modifier,
@@ -3379,6 +3521,8 @@ private fun HistoricalEventPanel(
     var observationsExpanded by remember(incident.eventKey) { mutableStateOf(false) }
     val listState = rememberLazyListState()
     var listViewportTopInRootPx by remember { mutableFloatStateOf(0f) }
+    var listViewportBottomInRootPx by remember { mutableFloatStateOf(0f) }
+    var selectedStationBottomDocked by remember { mutableStateOf(false) }
     val scrollScope = rememberCoroutineScope()
     var associatedScrollAnchor by remember(incident.eventKey) {
         mutableStateOf<Pair<Int, Int>?>(null)
@@ -3387,6 +3531,9 @@ private fun HistoricalEventPanel(
         derivedStateOf {
             listState.firstVisibleItemIndex > 0 || listState.firstVisibleItemScrollOffset > 48
         }
+    }
+    LaunchedEffect(observationsExpanded, selectedStation) {
+        if (!observationsExpanded || selectedStation == null) selectedStationBottomDocked = false
     }
 
     LaunchedEffect(frame.archiveKey, event.points.isEmpty()) {
@@ -3409,6 +3556,8 @@ private fun HistoricalEventPanel(
                 .fillMaxSize()
                 .onGloballyPositioned { coordinates ->
                     listViewportTopInRootPx = coordinates.positionInRoot().y
+                    listViewportBottomInRootPx =
+                        listViewportTopInRootPx + coordinates.size.height
                 }
                 .padding(horizontal = 8.dp),
             verticalArrangement = Arrangement.Top
@@ -3540,9 +3689,15 @@ private fun HistoricalEventPanel(
                             expansionKey = incident.eventKey,
                             listState = listState,
                             listViewportTopInRootPx = listViewportTopInRootPx,
+                            stickyContentTopInRootPx = listViewportTopInRootPx,
+                            listViewportBottomInRootPx = listViewportBottomInRootPx,
                             expandedPrefectures = observedIntensityExpandedPrefectures,
+                            selectedStation = selectedStation,
                             onFocusStation = onFocusStation,
-                            onStationFocusCleared = onStationFocusCleared
+                            onStationFocusCleared = onStationFocusCleared,
+                            onSelectedStationBottomDockChanged = {
+                                selectedStationBottomDocked = it
+                            }
                         )
                     }
 
@@ -3585,7 +3740,7 @@ private fun HistoricalEventPanel(
             Surface(
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
-                    .padding(end = 10.dp, bottom = 8.dp)
+                    .padding(end = 10.dp, bottom = if (selectedStationBottomDocked) 40.dp else 8.dp)
                     .clickable { scrollScope.launch { listState.animateScrollToItem(0) } },
                 shape = RoundedCornerShape(50),
                 color = MaterialTheme.colorScheme.surfaceVariant,
@@ -3823,9 +3978,13 @@ private fun ObservedIntensityGroups(
     expansionKey: String,
     listState: LazyListState,
     listViewportTopInRootPx: Float,
+    stickyContentTopInRootPx: Float,
+    listViewportBottomInRootPx: Float,
     expandedPrefectures: MutableMap<String, Boolean>,
+    selectedStation: IntensityPoint?,
     onFocusStation: (IntensityPoint) -> Unit,
-    onStationFocusCleared: () -> Unit
+    onStationFocusCleared: () -> Unit,
+    onSelectedStationBottomDockChanged: (Boolean) -> Unit
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -3853,15 +4012,90 @@ private fun ObservedIntensityGroups(
                 }.thenBy { it.displayName }
             )
     }
+    val headerTopsInRootPx = remember(expansionKey) { mutableStateMapOf<String, Float>() }
+    val stationBoundsInRootPx = remember(expansionKey) {
+        mutableStateMapOf<IntensityPoint, ObservedStationRowBounds>()
+    }
+    var groupsTopInRootPx by remember(expansionKey) { mutableFloatStateOf(0f) }
+    var pinnedHeaderHeightPx by remember(expansionKey) { mutableIntStateOf(0) }
+    var pinnedStationHeightPx by remember(expansionKey) { mutableIntStateOf(0) }
+    // The fixed prefecture card starts flush with the fixed report card; its
+    // bottom edge is the effective top edge for the scrolling station rows.
+    val stickyHeaderTopInRootPx = stickyContentTopInRootPx
+    val scrollingStickyGroupIndex = groups.indexOfLast { group ->
+        (headerTopsInRootPx[group.prefecture] ?: Float.POSITIVE_INFINITY) <=
+            stickyHeaderTopInRootPx
+    }
+    val scrollingStickyGroup = groups.getOrNull(scrollingStickyGroupIndex)?.takeIf { group ->
+        expandedPrefectures["$expansionKey\u0000${group.prefecture}"] == true
+    }
+    val scrollingNextHeaderTopInRootPx = groups
+        .getOrNull(scrollingStickyGroupIndex + 1)
+        ?.let { group -> headerTopsInRootPx[group.prefecture] }
+        ?: Float.POSITIVE_INFINITY
+    val selectedStationGroupIndex = selectedStation?.let { station ->
+        groups.indexOfFirst { group -> station in group.points }
+    } ?: -1
+    val selectedStationGroup = groups.getOrNull(selectedStationGroupIndex)
+    val selectedStationGroupPinned = selectedStationGroup?.takeIf { group ->
+        expandedPrefectures["$expansionKey\u0000${group.prefecture}"] == true &&
+            (headerTopsInRootPx[group.prefecture] ?: Float.POSITIVE_INFINITY) <=
+                stickyHeaderTopInRootPx
+    }
+    // Once the selected station's own prefecture reaches the fixed report,
+    // preserve it as the first floating layer instead of replacing it with
+    // whichever later prefecture is currently passing the viewport edge.
+    val primaryStickyGroup = selectedStationGroupPinned ?: scrollingStickyGroup
+    val primaryNextHeaderTopInRootPx = if (selectedStationGroupPinned != null) {
+        Float.POSITIVE_INFINITY
+    } else {
+        scrollingNextHeaderTopInRootPx
+    }
+    val pinnedHeaderTopInRootPx = min(
+        stickyHeaderTopInRootPx,
+        primaryNextHeaderTopInRootPx - pinnedHeaderHeightPx
+    )
+    val selectedStationTopDockEdgeInRootPx = if (primaryStickyGroup != null) {
+        pinnedHeaderTopInRootPx + pinnedHeaderHeightPx
+    } else {
+        stickyHeaderTopInRootPx
+    }
+    val selectedStationBounds = selectedStation?.let { stationBoundsInRootPx[it] }
+    val selectedStationDockTop =
+        (selectedStationBounds?.top ?: Float.POSITIVE_INFINITY) <= selectedStationTopDockEdgeInRootPx
+    val selectedStationDockBottom =
+        (selectedStationBounds?.bottom ?: Float.NEGATIVE_INFINITY) >= listViewportBottomInRootPx
+    val selectedStationBottomDocked = !selectedStationDockTop && selectedStationDockBottom
+    SideEffect { onSelectedStationBottomDockChanged(selectedStationBottomDocked) }
+    val secondaryStickyAnchorInRootPx =
+        selectedStationTopDockEdgeInRootPx + pinnedStationHeightPx
+    val secondaryStickyGroupIndex = if (
+        selectedStationGroupPinned != null && selectedStationDockTop
+    ) {
+        groups.indices.lastOrNull { index ->
+            val group = groups[index]
+            index > selectedStationGroupIndex &&
+                expandedPrefectures["$expansionKey\u0000${group.prefecture}"] == true &&
+                (headerTopsInRootPx[group.prefecture] ?: Float.POSITIVE_INFINITY) <=
+                    secondaryStickyAnchorInRootPx
+        } ?: -1
+    } else {
+        -1
+    }
+    val secondaryStickyGroup = groups.getOrNull(secondaryStickyGroupIndex)
+
+    Box(
+        Modifier
+            .fillMaxWidth()
+            .onGloballyPositioned { coordinates ->
+                groupsTopInRootPx = coordinates.positionInRoot().y
+            }
+    ) {
+    Column(Modifier.fillMaxWidth()) {
     groups.forEach { group ->
         val expansionStateKey = "$expansionKey\u0000${group.prefecture}"
         val expanded = expandedPrefectures[expansionStateKey] == true
         var prefectureTopInRootPx by remember(group.prefecture) { mutableFloatStateOf(0f) }
-        val triangleRotation by animateFloatAsState(
-            targetValue = if (expanded) 90f else 0f,
-            animationSpec = tween(durationMillis = 180),
-            label = "prefecture-expansion-triangle"
-        )
         val railColor = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.62f)
         fun collapse() {
             expandedPrefectures.remove(expansionStateKey)
@@ -3880,44 +4114,22 @@ private fun ObservedIntensityGroups(
                 .padding(vertical = 2.dp)
                 .onGloballyPositioned { coordinates ->
                     prefectureTopInRootPx = coordinates.positionInRoot().y
+                    headerTopsInRootPx[group.prefecture] = prefectureTopInRootPx
                 },
             shape = RoundedCornerShape(7.dp),
             color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.56f)
         ) {
             Column(Modifier.padding(horizontal = 8.dp, vertical = 5.dp)) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clickable {
-                            if (expanded) collapse()
-                            else expandedPrefectures[expansionStateKey] = true
-                        },
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        "▶",
-                        modifier = Modifier
-                            .width(14.dp)
-                            .graphicsLayer { rotationZ = triangleRotation },
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Text(
-                        group.displayName,
-                        modifier = Modifier.weight(1f),
-                        fontSize = 12.5.sp,
-                        lineHeight = 15.sp,
-                        fontWeight = FontWeight.Bold,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                    Spacer(Modifier.width(8.dp))
-                    IntensityBadge(
-                        intensity = group.maximumIntensity,
-                        japaneseIntensity = japaneseIntensity
-                    )
-                }
+                ObservedIntensityPrefectureHeader(
+                    group = group,
+                    expanded = expanded,
+                    japaneseIntensity = japaneseIntensity,
+                    modifier = Modifier.fillMaxWidth(),
+                    onClick = {
+                        if (expanded) collapse()
+                        else expandedPrefectures[expansionStateKey] = true
+                    }
+                )
 
                 AnimatedVisibility(
                     visible = expanded,
@@ -3947,6 +4159,14 @@ private fun ObservedIntensityGroups(
                                     offlineStationTranslationStatus = offlineStationTranslationStatus,
                                     showSeparator = point != group.points.last(),
                                     showCloseTriangle = point == group.points.last(),
+                                    selected = point == selectedStation,
+                                    modifier = Modifier.onGloballyPositioned { coordinates ->
+                                        val top = coordinates.positionInRoot().y
+                                        stationBoundsInRootPx[point] = ObservedStationRowBounds(
+                                            top = top,
+                                            bottom = top + coordinates.size.height
+                                        )
+                                    },
                                     onFocusStation = onFocusStation
                                 )
                             }
@@ -3965,6 +4185,139 @@ private fun ObservedIntensityGroups(
             }
         }
     }
+    }
+
+    primaryStickyGroup?.let { group ->
+        val expansionStateKey = "$expansionKey\u0000${group.prefecture}"
+        Surface(
+            modifier = Modifier
+                .fillMaxWidth()
+                .graphicsLayer {
+                    translationY = pinnedHeaderTopInRootPx - groupsTopInRootPx
+                }
+                .onSizeChanged { pinnedHeaderHeightPx = it.height },
+            shape = RoundedCornerShape(7.dp),
+            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.98f),
+            tonalElevation = 3.dp,
+            shadowElevation = 2.dp
+        ) {
+            Column(Modifier.padding(horizontal = 8.dp, vertical = 5.dp)) {
+                ObservedIntensityPrefectureHeader(
+                    group = group,
+                    expanded = true,
+                    japaneseIntensity = japaneseIntensity,
+                    modifier = Modifier.fillMaxWidth(),
+                    onClick = {
+                        expandedPrefectures.remove(expansionStateKey)
+                        onStationFocusCleared()
+                    }
+                )
+            }
+        }
+    }
+    if (
+        selectedStation != null &&
+            (selectedStationDockTop || selectedStationDockBottom)
+    ) {
+        val stationTopInRootPx = if (selectedStationDockTop) {
+            selectedStationTopDockEdgeInRootPx
+        } else {
+            listViewportBottomInRootPx - pinnedStationHeightPx
+        }
+        Surface(
+            modifier = Modifier
+                .fillMaxWidth()
+                .graphicsLayer {
+                    translationY = stationTopInRootPx - groupsTopInRootPx
+                }
+                .onSizeChanged { pinnedStationHeightPx = it.height },
+            shape = RoundedCornerShape(7.dp),
+            color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.98f),
+            tonalElevation = 3.dp,
+            shadowElevation = 2.dp
+        ) {
+            ObservedStationRow(
+                point = selectedStation,
+                language = language,
+                japaneseIntensity = japaneseIntensity,
+                offlineStationTranslator = offlineStationTranslator,
+                offlineStationTranslationStatus = offlineStationTranslationStatus,
+                selected = true,
+                onFocusStation = onFocusStation
+            )
+        }
+    }
+    secondaryStickyGroup?.let { group ->
+        val expansionStateKey = "$expansionKey\u0000${group.prefecture}"
+        Surface(
+            modifier = Modifier
+                .fillMaxWidth()
+                .graphicsLayer {
+                    translationY = secondaryStickyAnchorInRootPx - groupsTopInRootPx
+                },
+            shape = RoundedCornerShape(7.dp),
+            color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.98f),
+            tonalElevation = 3.dp,
+            shadowElevation = 2.dp
+        ) {
+            Column(Modifier.padding(horizontal = 8.dp, vertical = 5.dp)) {
+                ObservedIntensityPrefectureHeader(
+                    group = group,
+                    expanded = true,
+                    japaneseIntensity = japaneseIntensity,
+                    modifier = Modifier.fillMaxWidth(),
+                    onClick = {
+                        expandedPrefectures.remove(expansionStateKey)
+                        onStationFocusCleared()
+                    }
+                )
+            }
+        }
+    }
+    }
+}
+
+@Composable
+private fun ObservedIntensityPrefectureHeader(
+    group: ObservedIntensityPrefectureGroup,
+    expanded: Boolean,
+    japaneseIntensity: Boolean,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
+) {
+    val triangleRotation by animateFloatAsState(
+        targetValue = if (expanded) 90f else 0f,
+        animationSpec = tween(durationMillis = 180),
+        label = "prefecture-expansion-triangle"
+    )
+    Row(
+        modifier = modifier.clickable(onClick = onClick),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            "▶",
+            modifier = Modifier
+                .width(14.dp)
+                .graphicsLayer { rotationZ = triangleRotation },
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            fontSize = 12.sp,
+            fontWeight = FontWeight.Bold
+        )
+        Text(
+            group.displayName,
+            modifier = Modifier.weight(1f),
+            fontSize = 12.5.sp,
+            lineHeight = 15.sp,
+            fontWeight = FontWeight.Bold,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
+        Spacer(Modifier.width(8.dp))
+        IntensityBadge(
+            intensity = group.maximumIntensity,
+            japaneseIntensity = japaneseIntensity
+        )
+    }
 }
 
 private data class ObservedIntensityPrefectureGroup(
@@ -3972,6 +4325,11 @@ private data class ObservedIntensityPrefectureGroup(
     val displayName: String,
     val points: List<IntensityPoint>,
     val maximumIntensity: String
+)
+
+private data class ObservedStationRowBounds(
+    val top: Float,
+    val bottom: Float
 )
 
 private fun observedIntensityRank(value: String): Int = when (value) {
@@ -3996,6 +4354,8 @@ private fun ObservedStationRow(
     offlineStationTranslationStatus: OfflineStationTranslationStatus,
     showSeparator: Boolean = false,
     showCloseTriangle: Boolean = false,
+    modifier: Modifier = Modifier,
+    selected: Boolean = false,
     onFocusStation: ((IntensityPoint) -> Unit)? = null
 ) {
     val context = LocalContext.current
@@ -4041,7 +4401,21 @@ private fun ObservedStationRow(
     val provider = point.stationName
         ?.takeIf { !point.isArea }
         ?.let { StationCatalog.lookup(point.prefecture, it)?.provider }
-    Column(Modifier.fillMaxWidth()) {
+    Column(
+        Modifier
+            .fillMaxWidth()
+            .then(modifier)
+            .then(
+                if (selected) {
+                    Modifier.background(
+                        MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.45f),
+                        RoundedCornerShape(6.dp)
+                    )
+                } else {
+                    Modifier
+                }
+            )
+    ) {
         val stationCanBeFocused = onFocusStation != null && !point.isArea &&
             point.latitude?.let { latitude ->
                 point.longitude?.let { longitude -> JapanMapCoverage.contains(latitude, longitude) }

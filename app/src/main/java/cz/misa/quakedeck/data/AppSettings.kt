@@ -2,6 +2,7 @@ package cz.misa.quakedeck.data
 
 import android.content.Context
 import androidx.core.content.edit
+import cz.misa.quakedeck.sandbox.SandboxFeature
 import java.util.Locale
 
 enum class PlaceNameLanguage { AUTO, ENGLISH, CZECH, JAPANESE }
@@ -107,9 +108,9 @@ class AppSettings(context: Context) {
         }
 
     var p2pSandboxMode: Boolean
-        get() = prefs.getBoolean("p2p_sandbox_mode", false)
+        get() = SandboxFeature.permitted(prefs.getBoolean("p2p_sandbox_mode", false))
         set(value) {
-            prefs.edit { putBoolean("p2p_sandbox_mode", value) }
+            prefs.edit { putBoolean("p2p_sandbox_mode", SandboxFeature.permitted(value)) }
         }
 
     var sandboxTestInjectionDelaySeconds: Int

@@ -1,13 +1,23 @@
 # Changelog
 
 QuakeDeck release history
-## v0.9.84b (in progress)
+## v0.9.84n (in progress)
 
 - Adds opt-in foreground monitoring that reuses the existing single live runtime and WebSocket, keeps Japan earthquake/EEW/tsunami reception active after QuakeDeck is closed, and shows only a one-line permanent silent `Japan monitoring · Connected/Reconnecting` status notification. It uses its own small radar/connection icon, does not echo report details or set an app-icon notification dot, and leaves real report notifications independent.
 - Gives live report notifications distinct small icons: a seismic wave for confirmed earthquake reports, a siren for EEW, and waves for tsunami alerts and their cancellations.
 - Adds an opt-in local-EEW attention mode: off, a brief wake-screen, or a full-screen QuakeDeck alert. The modes are exclusive, apply only once to a new warning affecting the configured alert location at the selected predicted Shindo threshold, and never apply to updates, reports, or Sandbox data. Full-screen alerts require Android's separate full-screen-notification approval and otherwise fall back to the ordinary heads-up EEW alert.
+- Makes report-notification navigation survive a cold app start: the notification carries its own bounded event snapshot, retains it synchronously before the launch Intent is consumed, and keeps the exact report selected and map-focused while live history is still loading or has moved on.
+- Prevents the launch-only Sandbox focus cleanup from erasing an explicit notification destination. Focus cleanup now runs only after a real Sandbox-mode change, and a notification destination wins during that transition.
+- Moves the single Sandbox master switch into the build configuration and enforces it independently across persisted settings, display time, UI, process runtime, and provider boundaries. Enabled builds behave exactly as before; disabled builds clear saved Sandbox mode and cannot enter Sandbox time, connect to the Sandbox feed, start built-in replays, or inject test reports even through a future internal caller.
 - Uses Android's declared special-use foreground-service type, keeps normal background behavior unchanged when monitoring is off, and retries non-rollover disconnections promptly while monitoring is enabled.
-- Bumps the Android hotfix version to `0.9.84b` (`versionCode` 183); this cumulative hotfix remains uncommitted until approved.
+- Keeps an expanded Observed intensities prefecture header pinned below the already-anchored report pane while its station rows scroll, with the next prefecture header naturally pushing it aside.
+- Keeps the currently selected observation highlighted in the ordinary list and docks a matching row below the pinned header or at the report-pane bottom only while its actual row is off-screen.
+- Keeps the event report controls fixed from the moment Observed intensities opens, reserves their space above the floating prefecture header, and raises the Top control so it cannot cover the bottom-docked selected station.
+- Removes the gap between the fixed report and prefecture cards, and docks the floating selected-station row as soon as its actual row reaches either viewport edge.
+- Moves Top upward only while the station row is actually bottom-docked, using the minimum clearance needed to keep it visible.
+- Makes the top-docked selected station engage at—and sit against—the lower edge of the floating prefecture card, including its push-away transition.
+- Keeps the selected station's prefecture fixed above it while scrolling into later prefectures, and gives each next expanded prefecture a second floating slot below the station when it reaches that edge.
+- Bumps the Android hotfix version to `0.9.84n` (`versionCode` 195); this cumulative hotfix remains uncommitted until approved.
 
 ## v0.9.84
 

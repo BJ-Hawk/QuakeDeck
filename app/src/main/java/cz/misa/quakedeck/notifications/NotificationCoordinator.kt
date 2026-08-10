@@ -32,6 +32,7 @@ import cz.misa.quakedeck.data.EarthquakeEvent
 import cz.misa.quakedeck.data.IntensityPoint
 import cz.misa.quakedeck.data.LiveUpdateKind
 import cz.misa.quakedeck.data.LocalEewAttentionMode
+import cz.misa.quakedeck.data.NotificationEventPayload
 import cz.misa.quakedeck.data.PlaceNameTranslator
 import cz.misa.quakedeck.data.QuietHoursMode
 import cz.misa.quakedeck.data.HolidayCountryDetector
@@ -486,6 +487,7 @@ class NotificationCoordinator(
             body = body,
             urgent = urgent,
             reportId = event.id,
+            reportEventPayload = NotificationEventPayload.encode(event),
             forceSilent = forceSilent,
             fullScreenIntent = localEewAttentionMode == LocalEewAttentionMode.FULL_SCREEN,
             smallIcon = if (visualKind == AlertVisualKind.EEW) {
@@ -685,6 +687,7 @@ class NotificationCoordinator(
         body: String,
         urgent: Boolean,
         reportId: String? = null,
+        reportEventPayload: String? = null,
         ignoreQuietHours: Boolean = false,
         forceSilent: Boolean = false,
         fullScreenIntent: Boolean = false,
@@ -707,6 +710,7 @@ class NotificationCoordinator(
         val intent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
             reportId?.let { putExtra(MainActivity.EXTRA_NOTIFICATION_REPORT_ID, it) }
+            reportEventPayload?.let { putExtra(MainActivity.EXTRA_NOTIFICATION_EVENT, it) }
             if (fullScreenIntent) {
                 putExtra(MainActivity.EXTRA_FULL_SCREEN_EEW, true)
             }

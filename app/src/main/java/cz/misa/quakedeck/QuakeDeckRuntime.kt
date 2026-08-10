@@ -69,7 +69,11 @@ class QuakeDeckRuntime(context: Context) : QuakeDataProvider {
         processStarted = true
 
         notificationCoordinator.createChannels()
-        provider.setTestingMode(SandboxFeature.permitted(settings.p2pSandboxMode))
+        val permittedTestingMode = SandboxFeature.permitted(settings.p2pSandboxMode)
+        if (settings.p2pSandboxMode != permittedTestingMode) {
+            settings.p2pSandboxMode = permittedTestingMode
+        }
+        provider.setTestingMode(permittedTestingMode)
         provider.setReportArchiveEnabled(settings.reportArchiveEnabled)
         provider.setAutomaticHistoricalDownload(
             settings.automaticHistoricalDownload && settings.reportArchiveEnabled
@@ -120,24 +124,38 @@ class QuakeDeckRuntime(context: Context) : QuakeDataProvider {
         uiCallback = null
     }
 
-    override fun setTestingMode(enabled: Boolean) = provider.setTestingMode(enabled)
+    override fun setTestingMode(enabled: Boolean) =
+        provider.setTestingMode(SandboxFeature.permitted(enabled))
 
-    override fun startBuiltInReplay(startDelayMillis: Long) =
+    override fun startBuiltInReplay(startDelayMillis: Long) {
+        if (!SandboxFeature.ENABLED) return
         provider.startBuiltInReplay(startDelayMillis)
+    }
 
-    override fun startBuiltInTsunamiReplay(startDelayMillis: Long) =
+    override fun startBuiltInTsunamiReplay(startDelayMillis: Long) {
+        if (!SandboxFeature.ENABLED) return
         provider.startBuiltInTsunamiReplay(startDelayMillis)
+    }
 
-    override fun startBuiltInCombinedReplay(startDelayMillis: Long) =
+    override fun startBuiltInCombinedReplay(startDelayMillis: Long) {
+        if (!SandboxFeature.ENABLED) return
         provider.startBuiltInCombinedReplay(startDelayMillis)
+    }
 
-    override fun injectTestEarthquakeReport(delayMillis: Long) =
+    override fun injectTestEarthquakeReport(delayMillis: Long) {
+        if (!SandboxFeature.ENABLED) return
         provider.injectTestEarthquakeReport(delayMillis)
+    }
 
-    override fun injectTestEewWarning(delayMillis: Long) = provider.injectTestEewWarning(delayMillis)
+    override fun injectTestEewWarning(delayMillis: Long) {
+        if (!SandboxFeature.ENABLED) return
+        provider.injectTestEewWarning(delayMillis)
+    }
 
-    override fun injectTestTsunamiWarning(delayMillis: Long) =
+    override fun injectTestTsunamiWarning(delayMillis: Long) {
+        if (!SandboxFeature.ENABLED) return
         provider.injectTestTsunamiWarning(delayMillis)
+    }
 
     override fun onAppForeground() = provider.onAppForeground()
 
