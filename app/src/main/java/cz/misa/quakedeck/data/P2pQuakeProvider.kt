@@ -5,6 +5,7 @@ import android.os.Handler
 import android.os.Looper
 import android.os.SystemClock
 import androidx.core.content.edit
+import cz.misa.quakedeck.sandbox.SandboxFeature
 import okhttp3.*
 import org.json.JSONArray
 import org.json.JSONObject
@@ -139,8 +140,9 @@ class P2pQuakeProvider(
     }
 
     override fun setTestingMode(enabled: Boolean) {
-        if (testingMode == enabled) return
-        testingMode = enabled
+        val permittedEnabled = SandboxFeature.permitted(enabled)
+        if (testingMode == permittedEnabled) return
+        testingMode = permittedEnabled
         recentReportsGeneration++
         freshRecentReportsLoaded = false
         showingRememberedReports = false
@@ -152,7 +154,7 @@ class P2pQuakeProvider(
         if (callback == null || stopped) return
 
         mainHandler.post {
-            if (stopped || callback == null || testingMode != enabled) return@post
+            if (stopped || callback == null || testingMode != permittedEnabled) return@post
 
             cancelBuiltInReplay()
             cancelScheduledReconnect()
@@ -175,18 +177,18 @@ class P2pQuakeProvider(
                 waitingSnapshot(
                     mode = sourceMode,
                     state = ConnectionState.CONNECTING,
-                    status = if (enabled) {
+                    status = if (permittedEnabled) {
                         "Testing mode · connecting to historical sandbox replays…"
                     } else {
                         "Testing mode off · reconnecting to the live feed…"
                     },
-                    testingMode = enabled,
+                    testingMode = permittedEnabled,
                     recentReportsRefreshing = recentReportsRefreshing
                 )
             )
 
             connectWebSocket()
-            if (!enabled) {
+            if (!permittedEnabled) {
                 val refreshGeneration = recentReportsGeneration
                 loadRememberedHistory(refreshGeneration)
                 loadConfirmedHistory(refreshGeneration)
@@ -196,6 +198,7 @@ class P2pQuakeProvider(
     }
 
     override fun startBuiltInReplay(startDelayMillis: Long) {
+        if (!SandboxFeature.ENABLED) return
         val armDelay = startDelayMillis.coerceIn(2_000L, 30_000L)
         mainHandler.post {
             if (stopped || callback == null) return@post
@@ -251,6 +254,7 @@ class P2pQuakeProvider(
     }
 
     override fun startBuiltInTsunamiReplay(startDelayMillis: Long) {
+        if (!SandboxFeature.ENABLED) return
         val armDelay = startDelayMillis.coerceIn(2_000L, 30_000L)
         mainHandler.post {
             if (stopped || callback == null) return@post
@@ -304,6 +308,7 @@ class P2pQuakeProvider(
     }
 
     override fun startBuiltInCombinedReplay(startDelayMillis: Long) {
+        if (!SandboxFeature.ENABLED) return
         val armDelay = startDelayMillis.coerceIn(2_000L, 30_000L)
         mainHandler.post {
             if (stopped || callback == null) return@post
@@ -356,14 +361,20 @@ class P2pQuakeProvider(
         }
     }
 
-    override fun injectTestEarthquakeReport(delayMillis: Long) =
+    override fun injectTestEarthquakeReport(delayMillis: Long) {
+        if (!SandboxFeature.ENABLED) return
         injectLivePipelineTest(InjectedTestKind.EARTHQUAKE, delayMillis)
+    }
 
-    override fun injectTestEewWarning(delayMillis: Long) =
+    override fun injectTestEewWarning(delayMillis: Long) {
+        if (!SandboxFeature.ENABLED) return
         injectLivePipelineTest(InjectedTestKind.EEW, delayMillis)
+    }
 
-    override fun injectTestTsunamiWarning(delayMillis: Long) =
+    override fun injectTestTsunamiWarning(delayMillis: Long) {
+        if (!SandboxFeature.ENABLED) return
         injectLivePipelineTest(InjectedTestKind.TSUNAMI, delayMillis)
+    }
 
     /**
      * Emit a one-shot synthetic snapshot through the exact process callback used by real

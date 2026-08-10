@@ -1,13 +1,15 @@
 # Changelog
 
 QuakeDeck release history
-## v0.9.84b (in progress)
+## v0.9.84d (in progress)
 
 - Adds opt-in foreground monitoring that reuses the existing single live runtime and WebSocket, keeps Japan earthquake/EEW/tsunami reception active after QuakeDeck is closed, and shows only a one-line permanent silent `Japan monitoring · Connected/Reconnecting` status notification. It uses its own small radar/connection icon, does not echo report details or set an app-icon notification dot, and leaves real report notifications independent.
 - Gives live report notifications distinct small icons: a seismic wave for confirmed earthquake reports, a siren for EEW, and waves for tsunami alerts and their cancellations.
 - Adds an opt-in local-EEW attention mode: off, a brief wake-screen, or a full-screen QuakeDeck alert. The modes are exclusive, apply only once to a new warning affecting the configured alert location at the selected predicted Shindo threshold, and never apply to updates, reports, or Sandbox data. Full-screen alerts require Android's separate full-screen-notification approval and otherwise fall back to the ordinary heads-up EEW alert.
+- Makes report-notification navigation survive a cold app start: the notification carries its own bounded event snapshot, so its exact report can be selected and map-focused even while the live history is still loading or has moved on.
+- Moves the single Sandbox master switch into the build configuration and enforces it independently across persisted settings, display time, UI, process runtime, and provider boundaries. Enabled builds behave exactly as before; disabled builds clear saved Sandbox mode and cannot enter Sandbox time, connect to the Sandbox feed, start built-in replays, or inject test reports even through a future internal caller.
 - Uses Android's declared special-use foreground-service type, keeps normal background behavior unchanged when monitoring is off, and retries non-rollover disconnections promptly while monitoring is enabled.
-- Bumps the Android hotfix version to `0.9.84b` (`versionCode` 183); this cumulative hotfix remains uncommitted until approved.
+- Bumps the Android hotfix version to `0.9.84d` (`versionCode` 185); this cumulative hotfix remains uncommitted until approved.
 
 ## v0.9.84
 

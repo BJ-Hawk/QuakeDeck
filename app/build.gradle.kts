@@ -7,6 +7,10 @@ plugins {
     id("org.jetbrains.kotlin.plugin.compose")
 }
 
+// Single build-time boundary for every Sandbox capability. Sandbox source stays
+// compiled, but all of its activation paths become inert when this is false.
+val sandboxEnabled = true
+
 val signingPropertiesFile = rootProject.file("keystore.properties")
 val signingProperties = Properties().apply {
     if (signingPropertiesFile.isFile) {
@@ -36,8 +40,9 @@ android {
         applicationId = "cz.misa.quakedeck"
         minSdk = 26
         targetSdk = 36
-        versionCode = 183
-        versionName = "0.9.84b"
+        versionCode = 185
+        versionName = "0.9.84d"
+        buildConfigField("boolean", "SANDBOX_ENABLED", sandboxEnabled.toString())
     }
 
     buildTypes {

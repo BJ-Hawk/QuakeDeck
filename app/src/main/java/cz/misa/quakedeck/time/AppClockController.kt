@@ -4,6 +4,7 @@ import android.os.SystemClock
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import cz.misa.quakedeck.sandbox.SandboxFeature
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -63,6 +64,10 @@ class AppClockController {
     }
 
     fun enterSandboxWaiting() {
+        if (!SandboxFeature.ENABLED) {
+            useLiveTime()
+            return
+        }
         mode = AppClockMode.SANDBOX_WAITING
         sandboxSourceAnchorMillis = null
         sandboxWallAnchorMillis = null
@@ -120,6 +125,10 @@ class AppClockController {
         startDelayMillis: Long,
         wallNowMillis: Long = System.currentTimeMillis()
     ) {
+        if (!SandboxFeature.ENABLED) {
+            useLiveTime()
+            return
+        }
         mode = AppClockMode.SANDBOX
         sandboxSourceAnchorMillis = firstPacketTimeMillis - startDelayMillis
         sandboxWallAnchorMillis = wallNowMillis
@@ -129,6 +138,10 @@ class AppClockController {
         sourceTimeMillis: Long,
         wallNowMillis: Long = System.currentTimeMillis()
     ) {
+        if (!SandboxFeature.ENABLED) {
+            useLiveTime()
+            return
+        }
         mode = AppClockMode.SANDBOX
         sandboxSourceAnchorMillis = sourceTimeMillis
         sandboxWallAnchorMillis = wallNowMillis

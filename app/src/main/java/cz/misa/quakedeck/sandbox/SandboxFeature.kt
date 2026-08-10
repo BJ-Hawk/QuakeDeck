@@ -3,15 +3,17 @@
 package cz.misa.quakedeck.sandbox
 
 import androidx.compose.runtime.Immutable
+import cz.misa.quakedeck.BuildConfig
 
 /**
- * Single compile-time boundary for every user-facing Sandbox feature.
+ * Single compile-time boundary for every Sandbox capability.
  *
- * Set [ENABLED] to false to remove Sandbox entry points and visual treatment,
- * force persisted test mode back to live, and make every replay callback inert.
+ * Change `sandboxEnabled` in app/build.gradle.kts to false to remove Sandbox
+ * entry points and visual treatment, force persisted test mode back to live,
+ * and make every provider, replay, and injection entry point inert.
  */
 object SandboxFeature {
-    const val ENABLED: Boolean = true
+    const val ENABLED: Boolean = BuildConfig.SANDBOX_ENABLED
 
     fun permitted(requested: Boolean): Boolean = ENABLED && requested
 }

@@ -157,6 +157,8 @@ class MainActivity : ComponentActivity() {
     companion object {
         const val EXTRA_NOTIFICATION_REPORT_ID =
             "cz.misa.quakedeck.extra.NOTIFICATION_REPORT_ID"
+        const val EXTRA_NOTIFICATION_EVENT =
+            "cz.misa.quakedeck.extra.NOTIFICATION_EVENT"
         const val EXTRA_FULL_SCREEN_EEW =
             "cz.misa.quakedeck.extra.FULL_SCREEN_EEW"
     }
@@ -165,6 +167,7 @@ class MainActivity : ComponentActivity() {
         (application as QuakeDeckApplication).runtime
     }
     private var notificationReportId by mutableStateOf<String?>(null)
+    private var notificationEventPayload by mutableStateOf<String?>(null)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         val savedAppearance = AppSettings(this).appearance
@@ -182,14 +185,18 @@ class MainActivity : ComponentActivity() {
         if (AppSettings(this).foregroundMonitoringEnabled) {
             ForegroundMonitoringService.start(this)
         }
-        notificationReportId = intent?.getStringExtra(EXTRA_NOTIFICATION_REPORT_ID)
+        updateNotificationNavigation(intent)
         WindowCompat.enableEdgeToEdge(window)
         setContent {
             QuakeDeckRoot(
                 runtime = runtime,
                 notificationReportId = notificationReportId,
+                notificationEventPayload = notificationEventPayload,
                 onNotificationReportHandled = { handledId ->
-                    if (notificationReportId == handledId) notificationReportId = null
+                    if (notificationReportId == handledId) {
+                        notificationReportId = null
+                        notificationEventPayload = null
+                    }
                 }
             )
         }
@@ -199,7 +206,12 @@ class MainActivity : ComponentActivity() {
         super.onNewIntent(intent)
         setIntent(intent)
         applyFullScreenEewWindowMode(intent)
-        notificationReportId = intent.getStringExtra(EXTRA_NOTIFICATION_REPORT_ID)
+        updateNotificationNavigation(intent)
+    }
+
+    private fun updateNotificationNavigation(intent: Intent?) {
+        notificationReportId = intent?.getStringExtra(EXTRA_NOTIFICATION_REPORT_ID)
+        notificationEventPayload = intent?.getStringExtra(EXTRA_NOTIFICATION_EVENT)
     }
 
     private fun applyFullScreenEewWindowMode(intent: Intent?) {
@@ -223,6 +235,7 @@ class MainActivity : ComponentActivity() {
 private fun QuakeDeckRoot(
     runtime: QuakeDeckRuntime,
     notificationReportId: String?,
+    notificationEventPayload: String?,
     onNotificationReportHandled: (String) -> Unit
 ) {
     val context = LocalContext.current
@@ -261,6 +274,7 @@ private fun QuakeDeckRoot(
                             appSettings.textScale = value
                         },
                         notificationReportId = notificationReportId,
+                        notificationEventPayload = notificationEventPayload,
                         onNotificationReportHandled = onNotificationReportHandled
                     )
                 }
@@ -278,11 +292,19 @@ private fun QuakeDeckApp(
     textScale: Float,
     onTextScaleChanged: (Float) -> Unit,
     notificationReportId: String?,
+    notificationEventPayload: String?,
     onNotificationReportHandled: (String) -> Unit
 ) {
     val context = LocalContext.current
     val provider: QuakeDataProvider = runtime
     val notificationCoordinator = runtime.notificationCoordinator
+    val notificationEventFromIntent = remember(notificationEventPayload) {
+        NotificationEventPayload.decode(notificationEventPayload)
+    }
+    var retainedNotificationEvent by remember { mutableStateOf<EarthquakeEvent?>(null) }
+    LaunchedEffect(notificationEventFromIntent) {
+        notificationEventFromIntent?.let { retainedNotificationEvent = it }
+    }
     var placeNameLanguage by remember { mutableStateOf(appSettings.placeNameLanguage) }
     var epicenterMarkerSizeDp by remember { mutableFloatStateOf(appSettings.epicenterMarkerSizeDp) }
     var epicenterMarkerStyle by remember { mutableStateOf(appSettings.epicenterMarkerStyle) }
@@ -710,8 +732,20 @@ private fun QuakeDeckApp(
     val historicalFrame = historicalIncident?.frames
         ?.getOrNull(historicalReportIndex)
     val historicalMode = historicalFrame != null
-    val regularSelectedEvent = remember(snapshot.event, snapshot.history, selectedEventId) {
-        selectedEventId?.let { id -> snapshot.history.firstOrNull { it.id == id } } ?: snapshot.event
+    val notificationFallbackEvent = notificationEventFromIntent ?: retainedNotificationEvent
+    val regularSelectedEvent = remember(
+        snapshot.event,
+        snapshot.activeEewEvent,
+        snapshot.history,
+        selectedEventId,
+        notificationFallbackEvent
+    ) {
+        selectedEventId?.let { id ->
+            snapshot.event.takeIf { it.id == id }
+                ?: snapshot.activeEewEvent?.takeIf { it.id == id }
+                ?: snapshot.history.firstOrNull { it.id == id }
+                ?: notificationFallbackEvent?.takeIf { it.id == id }
+        } ?: snapshot.event
     }
     val selectedEvent = historicalFrame?.event ?: regularSelectedEvent
     val browsingHistory = historicalMode || selectedEvent.id != snapshot.event.id
@@ -846,20 +880,35 @@ private fun QuakeDeckApp(
     // is tapped, retain the normal latest-report screen if appropriate, otherwise
     // select that report from history and issue the same explicit map-focus request
     // as the on-screen Focus event button.
-    LaunchedEffect(notificationReportId, snapshot.event, snapshot.history) {
+    LaunchedEffect(
+        notificationReportId,
+        notificationFallbackEvent,
+        snapshot.event,
+        snapshot.activeEewEvent,
+        snapshot.history,
+        snapshot.recentReportsRefreshing
+    ) {
         val requestedId = notificationReportId ?: return@LaunchedEffect
         val target = when {
             snapshot.event.id == requestedId -> snapshot.event
+            snapshot.activeEewEvent?.id == requestedId -> snapshot.activeEewEvent
             else -> snapshot.history.firstOrNull { it.id == requestedId }
-        }
+        } ?: notificationFallbackEvent?.takeIf { it.id == requestedId }
         if (target != null) {
             if (target.id != selectedEvent.id) clearObservedIntensityExpansion()
             selectedEventId = target.id
+            // Cold launch can receive the same live snapshot after this effect.
+            // Its automatic camera policy must not override the explicit user
+            // choice to open this particular notification.
+            lastCameraHandledLiveSequence = maxOf(
+                lastCameraHandledLiveSequence,
+                snapshot.liveUpdateSequence
+            )
             requestEventMapFocus(target, manual = true)
             onNotificationReportHandled(requestedId)
-        } else if (snapshot.event.id != "waiting") {
+        } else if (!snapshot.recentReportsRefreshing && snapshot.event.id != "waiting") {
             // The report may already have aged out of the in-memory history. Do
-            // not keep replaying a stale navigation request on later snapshots.
+            // not discard the request while cold-start history is still loading.
             onNotificationReportHandled(requestedId)
         }
     }
