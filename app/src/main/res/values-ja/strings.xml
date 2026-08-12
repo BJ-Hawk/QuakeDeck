@@ -540,4 +540,16 @@
 
     <string name="showing_saved_reports_stale">保存済みの情報を表示中・最新情報を更新できません</string>
 
+    <string name="activity_time_statistics">利用時間</string>
+    <string name="activity_time_statistics_explanation">アプリまたは監視状態が変化したときだけ記録します。バックグラウンドでタイマーは動作しません。</string>
+    <string name="activity_time_monitoring">監視サービス</string>
+    <string name="activity_time_ui_foreground">画面を操作中</string>
+    <string name="activity_time_ui_resident">画面非表示で常駐中</string>
+    <string name="activity_time_monitoring_only">監視のみ</string>
+    <string name="activity_time_today_value">今日 %1$s</string>
+    <string name="activity_time_since_reset_value">リセット後 %1$s</string>
+    <string name="reset_activity_time_statistics">統計をリセット</string>
+    <string name="activity_time_duration_minutes">%1$d分</string>
+    <string name="activity_time_duration_hours">%1$d時間%2$d分</string>
+    <string name="activity_time_duration_days">%1$d日%2$d時間%3$d分</string>
 </resources>

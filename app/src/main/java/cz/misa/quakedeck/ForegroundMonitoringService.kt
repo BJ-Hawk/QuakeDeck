@@ -11,6 +11,7 @@ import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import cz.misa.quakedeck.data.AppSettings
+import cz.misa.quakedeck.data.ActivityTimeTracker
 import cz.misa.quakedeck.data.AppSnapshot
 import cz.misa.quakedeck.data.ConnectionState
 import cz.misa.quakedeck.data.UiLocalization
@@ -27,8 +28,12 @@ class ForegroundMonitoringService : Service() {
     private val runtime: QuakeDeckRuntime
         get() = (application as QuakeDeckApplication).runtime
 
+    private val activityTimeTracker: ActivityTimeTracker
+        get() = (application as QuakeDeckApplication).activityTimeTracker
+
     override fun onCreate() {
         super.onCreate()
+        activityTimeTracker.setMonitoringActive(true)
         createChannel()
         runtime.startProcess()
         runtime.setForegroundMonitoringEnabled(true)
@@ -45,6 +50,7 @@ class ForegroundMonitoringService : Service() {
 
     override fun onDestroy() {
         runtime.setMonitoringSnapshotCallback(null)
+        activityTimeTracker.setMonitoringActive(false)
         if (!AppSettings(applicationContext).foregroundMonitoringEnabled) {
             runtime.setForegroundMonitoringEnabled(false)
         }

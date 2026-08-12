@@ -542,4 +542,16 @@
 
     <string name="showing_saved_reports_stale">Showing saved reports · latest update unavailable</string>
 
+    <string name="activity_time_statistics">Activity time</string>
+    <string name="activity_time_statistics_explanation">Recorded only when app or monitoring state changes; no timer runs in the background.</string>
+    <string name="activity_time_monitoring">Monitoring service</string>
+    <string name="activity_time_ui_foreground">UI active</string>
+    <string name="activity_time_ui_resident">Resident without active UI</string>
+    <string name="activity_time_monitoring_only">Monitoring only</string>
+    <string name="activity_time_today_value">Today %1$s</string>
+    <string name="activity_time_since_reset_value">Since reset %1$s</string>
+    <string name="reset_activity_time_statistics">Reset statistics</string>
+    <string name="activity_time_duration_minutes">%1$dm</string>
+    <string name="activity_time_duration_hours">%1$dh %2$dm</string>
+    <string name="activity_time_duration_days">%1$dd %2$dh %3$dm</string>
 </resources>

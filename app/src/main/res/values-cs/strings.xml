@@ -546,4 +546,16 @@
 
     <string name="showing_saved_reports_stale">Zobrazuji uložená hlášení · nejnovější se nepodařilo aktualizovat</string>
 
+    <string name="activity_time_statistics">Doba činnosti</string>
+    <string name="activity_time_statistics_explanation">Zaznamenává se jen při změně stavu aplikace nebo monitorování; na pozadí neběží žádný časovač.</string>
+    <string name="activity_time_monitoring">Monitorovací služba</string>
+    <string name="activity_time_ui_foreground">Aktivní rozhraní</string>
+    <string name="activity_time_ui_resident">Rezidentní bez aktivního rozhraní</string>
+    <string name="activity_time_monitoring_only">Pouze monitorování</string>
+    <string name="activity_time_today_value">Dnes %1$s</string>
+    <string name="activity_time_since_reset_value">Od resetu %1$s</string>
+    <string name="reset_activity_time_statistics">Resetovat statistiky</string>
+    <string name="activity_time_duration_minutes">%1$d min</string>
+    <string name="activity_time_duration_hours">%1$d h %2$d min</string>
+    <string name="activity_time_duration_days">%1$d d %2$d h %3$d min</string>
 </resources>

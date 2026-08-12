@@ -166,6 +166,9 @@ class MainActivity : ComponentActivity() {
     private val runtime: QuakeDeckRuntime by lazy {
         (application as QuakeDeckApplication).runtime
     }
+    private val activityTimeTracker: ActivityTimeTracker by lazy {
+        (application as QuakeDeckApplication).activityTimeTracker
+    }
     private var notificationReportId by mutableStateOf<String?>(null)
     private var notificationEventPayload by mutableStateOf<String?>(null)
 
@@ -222,10 +225,12 @@ class MainActivity : ComponentActivity() {
 
     override fun onResume() {
         super.onResume()
+        activityTimeTracker.setUiForeground(true)
         runtime.onAppForeground()
     }
 
     override fun onPause() {
+        activityTimeTracker.setUiForeground(false)
         runtime.onAppBackground()
         super.onPause()
     }
@@ -359,6 +364,8 @@ private fun QuakeDeckApp(
     var notificationSetupDialogOpen by rememberSaveable { mutableStateOf(false) }
     var openSetupAfterPermission by rememberSaveable { mutableStateOf(false) }
     val isPixelDevice = remember { isGooglePixelDevice() && Build.VERSION.SDK_INT >= 34 }
+    val activityTimeTracker = remember { (context.applicationContext as QuakeDeckApplication).activityTimeTracker }
+    var activityTimeStats by remember { mutableStateOf(activityTimeTracker.snapshot()) }
 
     LaunchedEffect(offlineStationTranslator) {
         offlineStationTranslator.refreshStatus { status ->
@@ -549,12 +556,14 @@ private fun QuakeDeckApp(
     }
 
     fun openMainSettings() {
+        activityTimeStats = activityTimeTracker.snapshot()
         settingsOpenSandboxPage = false
         settingsOpen = true
     }
 
     fun openSandboxSettings() {
         if (!SandboxFeature.ENABLED) return
+        activityTimeStats = activityTimeTracker.snapshot()
         settingsOpenSandboxPage = true
         settingsOpen = true
     }
@@ -1643,6 +1652,10 @@ private fun QuakeDeckApp(
                 } else {
                     ForegroundMonitoringService.stop(context)
                 }
+            },
+            activityTimeStats = activityTimeStats,
+            onResetActivityTimeStats = {
+                activityTimeStats = activityTimeTracker.reset()
             },
             notificationPermissionGranted = notificationPermissionGranted,
             onRequestNotificationPermission = {

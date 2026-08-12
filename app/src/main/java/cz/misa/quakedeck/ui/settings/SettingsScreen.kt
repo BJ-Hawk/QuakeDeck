@@ -82,6 +82,7 @@ import cz.misa.quakedeck.R
 import cz.misa.quakedeck.data.AlertLocation
 import cz.misa.quakedeck.data.AppAppearance
 import cz.misa.quakedeck.data.AppSnapshot
+import cz.misa.quakedeck.data.ActivityTimeStats
 import cz.misa.quakedeck.data.ConnectionState
 import cz.misa.quakedeck.data.DataSourceMode
 import cz.misa.quakedeck.data.EpicenterMarkerStyle
@@ -124,6 +125,8 @@ fun QuakeDeckSettings(
     onNotificationsEnabledChanged: (Boolean) -> Unit,
     foregroundMonitoringEnabled: Boolean,
     onForegroundMonitoringEnabledChanged: (Boolean) -> Unit,
+    activityTimeStats: ActivityTimeStats,
+    onResetActivityTimeStats: () -> Unit,
     notificationPermissionGranted: Boolean,
     onRequestNotificationPermission: () -> Unit,
     notificationBatteryUnrestricted: Boolean,
@@ -305,6 +308,8 @@ fun QuakeDeckSettings(
                                 onNotificationsEnabledChanged = onNotificationsEnabledChanged,
                                 foregroundMonitoringEnabled = foregroundMonitoringEnabled,
                                 onForegroundMonitoringEnabledChanged = onForegroundMonitoringEnabledChanged,
+                                activityTimeStats = activityTimeStats,
+                                onResetActivityTimeStats = onResetActivityTimeStats,
                                 notificationPermissionGranted = notificationPermissionGranted,
                                 onRequestNotificationPermission = onRequestNotificationPermission,
                                 notificationBatteryUnrestricted = notificationBatteryUnrestricted,
@@ -544,6 +549,8 @@ private fun MainSettingsPage(
     onNotificationsEnabledChanged: (Boolean) -> Unit,
     foregroundMonitoringEnabled: Boolean,
     onForegroundMonitoringEnabledChanged: (Boolean) -> Unit,
+    activityTimeStats: ActivityTimeStats,
+    onResetActivityTimeStats: () -> Unit,
     notificationPermissionGranted: Boolean,
     onRequestNotificationPermission: () -> Unit,
     notificationBatteryUnrestricted: Boolean,
@@ -692,6 +699,15 @@ private fun MainSettingsPage(
                     interactionDensity = sliderInteractionDensity
                 )
             }
+        }
+
+        item { SectionLabel(text(R.string.activity_time_statistics, selectedLanguage)) }
+        item {
+            ActivityTimeStatisticsCard(
+                language = selectedLanguage,
+                stats = activityTimeStats,
+                onReset = onResetActivityTimeStats
+            )
         }
 
         item { SectionLabel(localizedString(R.string.notifications, selectedLanguage)) }
@@ -878,6 +894,128 @@ private fun MainSettingsPage(
                 onDismiss = { offlineTranslationHelpDialog = null }
             )
         }
+    }
+}
+
+@Composable
+private fun ActivityTimeStatisticsCard(
+    language: PlaceNameLanguage,
+    stats: ActivityTimeStats,
+    onReset: () -> Unit
+) {
+    SettingsCard {
+        Text(
+            text = text(R.string.activity_time_statistics, language),
+            fontWeight = FontWeight.SemiBold,
+            fontSize = 13.sp,
+            lineHeight = 15.sp
+        )
+        Text(
+            text = text(R.string.activity_time_statistics_explanation, language),
+            modifier = Modifier.padding(top = 1.dp),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            fontSize = 10.sp,
+            lineHeight = 12.sp
+        )
+        Spacer(Modifier.height(8.dp))
+        ActivityTimeStatisticLine(
+            title = text(R.string.activity_time_monitoring, language),
+            today = stats.todayMonitoringMillis,
+            total = stats.monitoringMillis,
+            language = language
+        )
+        ActivityTimeStatisticLine(
+            title = text(R.string.activity_time_ui_foreground, language),
+            today = stats.todayUiForegroundMillis,
+            total = stats.uiForegroundMillis,
+            language = language
+        )
+        ActivityTimeStatisticLine(
+            title = text(R.string.activity_time_ui_resident, language),
+            today = stats.todayUiBackgroundResidentMillis,
+            total = stats.uiBackgroundResidentMillis,
+            language = language
+        )
+        ActivityTimeStatisticLine(
+            title = text(R.string.activity_time_monitoring_only, language),
+            today = stats.todayMonitoringOnlyMillis,
+            total = stats.monitoringOnlyMillis,
+            language = language
+        )
+        CardDivider()
+        OutlinedButton(
+            onClick = onReset,
+            modifier = Modifier.align(Alignment.End),
+            shape = RoundedCornerShape(10.dp)
+        ) {
+            Text(text(R.string.reset_activity_time_statistics, language), fontSize = 10.sp)
+        }
+    }
+}
+
+@Composable
+private fun ActivityTimeStatisticLine(
+    title: String,
+    today: Long,
+    total: Long,
+    language: PlaceNameLanguage
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth().padding(vertical = 3.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = title,
+            modifier = Modifier.weight(1f),
+            fontSize = 11.sp,
+            lineHeight = 13.sp
+        )
+        Column(horizontalAlignment = Alignment.End) {
+            Text(
+                text = localizedString(
+                    R.string.activity_time_today_value,
+                    language,
+                    formatActivityDuration(today, language)
+                ),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                fontSize = 9.sp,
+                lineHeight = 11.sp
+            )
+            Text(
+                text = localizedString(
+                    R.string.activity_time_since_reset_value,
+                    language,
+                    formatActivityDuration(total, language)
+                ),
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                fontSize = 9.sp,
+                lineHeight = 11.sp
+            )
+        }
+    }
+}
+
+@Composable
+private fun formatActivityDuration(millis: Long, language: PlaceNameLanguage): String {
+    val minutes = (millis.coerceAtLeast(0L) / 60_000L)
+    val days = minutes / (24L * 60L)
+    val hours = (minutes / 60L) % 24L
+    val remainingMinutes = minutes % 60L
+    return when {
+        days > 0L -> localizedString(
+            R.string.activity_time_duration_days,
+            language,
+            days,
+            hours,
+            remainingMinutes
+        )
+        hours > 0L -> localizedString(
+            R.string.activity_time_duration_hours,
+            language,
+            hours,
+            remainingMinutes
+        )
+        else -> localizedString(R.string.activity_time_duration_minutes, language, remainingMinutes)
     }
 }
 

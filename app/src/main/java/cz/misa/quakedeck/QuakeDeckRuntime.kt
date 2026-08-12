@@ -6,6 +6,7 @@ import android.os.Handler
 import android.os.Looper
 import android.os.Process
 import cz.misa.quakedeck.data.AppSettings
+import cz.misa.quakedeck.data.ActivityTimeTracker
 import cz.misa.quakedeck.data.AppSnapshot
 import cz.misa.quakedeck.data.DataSourceMode
 import cz.misa.quakedeck.data.HistoricalEventSummary
@@ -197,12 +198,17 @@ class QuakeDeckRuntime(context: Context) : QuakeDataProvider {
 }
 
 class QuakeDeckApplication : Application() {
+    val activityTimeTracker: ActivityTimeTracker by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
+        ActivityTimeTracker(this)
+    }
+
     val runtime: QuakeDeckRuntime by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
         QuakeDeckRuntime(this)
     }
 
     override fun onCreate() {
         super.onCreate()
+        activityTimeTracker.beginProcess()
 
         // Preload only the base map. Detailed JMA layers load when a report or
         // zoom level needs them, so they do not compete with the first frame.
