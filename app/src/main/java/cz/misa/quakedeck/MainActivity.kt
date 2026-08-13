@@ -2341,7 +2341,7 @@ private data class EventListScrollAnchor(
     val openedEventId: String
 )
 
-private data class ReportLocationParts(
+internal data class ReportLocationParts(
     val region: String,
     val prefecture: String?
 )
@@ -2369,8 +2369,15 @@ private val japanesePrefectureNames = listOf(
     "熊本県", "大分県", "宮崎県", "鹿児島県", "沖縄県"
 )
 
-private fun splitReportLocation(displayPlace: String, useEnglish: Boolean): ReportLocationParts {
+internal fun splitReportLocation(displayPlace: String, useEnglish: Boolean): ReportLocationParts {
     if (displayPlace.isBlank()) return ReportLocationParts(displayPlace, null)
+
+    if (displayPlace.equals("Hypocenter under assessment", ignoreCase = true)) {
+        return ReportLocationParts(
+            region = "Hypocenter under",
+            prefecture = "assessment"
+        )
+    }
 
     if (!useEnglish) {
         val prefecture = japanesePrefectureNames.firstOrNull { displayPlace.startsWith(it) }
@@ -3580,10 +3587,13 @@ private fun HistoricalEventPanel(
             // exactly where Recent events starts in live mode. When observations
             // are opened they replace that list and temporarily become part of
             // the measured summary, preserving the existing expand/restore logic.
-            item(key = "historical-${incident.eventKey}-${frame.archiveKey}") {
+            item(key = historicalSummaryItemKey(incident.eventKey)) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
+                        // Keep this layout node alive while archive data changes.
+                        // onSizeChanged then fires only for a genuine measured-size
+                        // change, not merely because Previous/Next replaced the item.
                         .onSizeChanged { onSummaryHeightChanged?.invoke(it.height) }
                 ) {
                     Spacer(Modifier.height(2.dp))
@@ -3769,6 +3779,14 @@ private fun HistoricalEventPanel(
         }
     }
 }
+
+internal fun historicalSummaryItemKey(eventKey: String): String = "historical-$eventKey"
+
+internal fun automaticEventFitAllowed(
+    focusEvent: Boolean,
+    eventId: String,
+    allowAutomaticEventRefit: Boolean
+): Boolean = focusEvent && eventId != "waiting" && allowAutomaticEventRefit
 
 @Composable
 private fun HistoricalAssociatedReportRow(
@@ -6162,12 +6180,16 @@ private fun JapanMap(
         // Automatic event changes respect a ten-second manual pan/zoom lease.
         // Divider resizing never starts that lease and only preserves geography.
         LaunchedEffect(event.id, focusEvent) {
-            if (focusEvent && event.id != "waiting") {
+            if (automaticEventFitAllowed(focusEvent, event.id, allowAutomaticEventRefit)) {
                 if (automaticCameraBlocked()) {
                     pendingAutomaticCameraRefit = activeEewEvent != null
                 } else {
                     applyBestAutomaticFit()
                 }
+            } else if (focusEvent && event.id != "waiting") {
+                // Historical frames have distinct report IDs, but Previous/Next
+                // is content navigation rather than a camera-focus request.
+                pendingAutomaticCameraRefit = false
             } else {
                 gestureScale = 1f
                 gesturePan = Offset.Zero

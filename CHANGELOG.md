@@ -1,7 +1,7 @@
 # Changelog
 
 QuakeDeck release history
-## v0.9.84o (in progress)
+## v0.9.84r (in progress)
 
 - Adds opt-in foreground monitoring that reuses the existing single live runtime and WebSocket, keeps Japan earthquake/EEW/tsunami reception active after QuakeDeck is closed, and shows only a one-line permanent silent `Japan monitoring · Connected/Reconnecting` status notification. It uses its own small radar/connection icon, does not echo report details or set an app-icon notification dot, and leaves real report notifications independent.
 - Gives live report notifications distinct small icons: a seismic wave for confirmed earthquake reports, a siren for EEW, and waves for tsunami alerts and their cancellations.
@@ -18,7 +18,8 @@ QuakeDeck release history
 - Moves Top upward only while the station row is actually bottom-docked, using the minimum clearance needed to keep it visible.
 - Makes the top-docked selected station engage at—and sit against—the lower edge of the floating prefecture card, including its push-away transition.
 - Keeps the selected station's prefecture fixed above it while scrolling into later prefectures, and gives each next expanded prefecture a second floating slot below the station when it reaches that edge.
-- Bumps the Android hotfix version to `0.9.84o` (`versionCode` 196); this cumulative hotfix remains uncommitted until approved.
+- Keeps previous/next navigation within a historical event from auto-fitting the camera. The historical event card now retains one stable layout identity while its report data changes, so equal-size date/time and value updates happen in place, while content that genuinely measures taller or shorter can still resize the card and portrait divider. In the shared Live/Historical report card, the pending-hypocenter placeholder uses the same two-row location grid as a resolved location (`Hypocenter under` / `assessment`), preventing that transition from adding or removing a text row. Initial event opening, explicit Re-focus, and the intentional Observed-intensities resize remain unchanged.
+- Bumps the Android hotfix version to `0.9.84r` (`versionCode` 199); this cumulative hotfix remains uncommitted until approved.
 
 ## v0.9.84
 
