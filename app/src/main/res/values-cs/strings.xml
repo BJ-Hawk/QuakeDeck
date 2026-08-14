@@ -520,6 +520,7 @@
     <string name="notification_badge_predicted">ODHAD</string>
     
     <string name="notification_badge_end">KONEC</string>
+    <string name="notification_watch_shindo">Šindó %1$s</string>
     
     <string name="notification_badge_tsunami_major">VELKÁ</string>
     

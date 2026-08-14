@@ -1,5 +1,6 @@
 package cz.misa.quakedeck.ui.history
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -12,14 +13,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
@@ -44,6 +44,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -121,7 +122,7 @@ private fun HistoricalHeader(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(58.dp)
+            .height(54.dp)
     ) {
         TextButton(
             onClick = onDismiss,
@@ -229,12 +230,12 @@ private fun HistoricalBrowserBody(
             state = listState,
             modifier = Modifier.fillMaxSize(),
             contentPadding = androidx.compose.foundation.layout.PaddingValues(
-                start = 14.dp,
-                top = 12.dp,
-                end = 14.dp,
-                bottom = 64.dp
+                start = 10.dp,
+                top = 10.dp,
+                end = 10.dp,
+                bottom = 58.dp
             ),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             item(key = "filters") {
                 FilterPanel(
@@ -342,21 +343,52 @@ private fun FilterPanel(
 ) {
     Surface(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
+        shape = RoundedCornerShape(14.dp),
         color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.62f)
     ) {
-        Column(Modifier.padding(12.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-            Text(historyText(R.string.sort, language), fontWeight = FontWeight.Bold, fontSize = 12.sp)
+        Column(Modifier.padding(10.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .horizontalScroll(rememberScrollState()),
-                horizontalArrangement = Arrangement.spacedBy(7.dp)
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                SortChip(HistoricalSort.DATE_NEWEST, sort, language, onSortChanged)
-                SortChip(HistoricalSort.DATE_OLDEST, sort, language, onSortChanged)
-                SortChip(HistoricalSort.INTENSITY_STRONGEST, sort, language, onSortChanged)
-                SortChip(HistoricalSort.INTENSITY_WEAKEST, sort, language, onSortChanged)
+                Text(
+                    historyText(R.string.sort, language),
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 12.sp
+                )
+                Text(
+                    UiLocalization.quantity(
+                        LocalContext.current,
+                        R.plurals.events_result_count,
+                        totalCount,
+                        language,
+                        resultCount,
+                        totalCount
+                    ),
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(start = 8.dp),
+                    color = MaterialTheme.colorScheme.primary,
+                    fontSize = 10.5.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    textAlign = androidx.compose.ui.text.style.TextAlign.End
+                )
+            }
+            CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides 38.dp) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .horizontalScroll(rememberScrollState()),
+                    horizontalArrangement = Arrangement.spacedBy(7.dp)
+                ) {
+                    SortChip(HistoricalSort.DATE_NEWEST, sort, language, onSortChanged)
+                    SortChip(HistoricalSort.DATE_OLDEST, sort, language, onSortChanged)
+                    SortChip(HistoricalSort.INTENSITY_STRONGEST, sort, language, onSortChanged)
+                    SortChip(HistoricalSort.INTENSITY_WEAKEST, sort, language, onSortChanged)
+                }
             }
 
             Row(
@@ -383,64 +415,87 @@ private fun FilterPanel(
                 )
             }
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(historyText(R.string.maximum_intensity, language), fontWeight = FontWeight.Bold, fontSize = 12.sp)
-                TextButton(onClick = onClearIntensity, enabled = selectedIntensities.isNotEmpty()) {
-                    Text(historyText(R.string.all, language), fontSize = 11.sp)
-                }
-            }
-            CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides 0.dp) {
-                EXACT_INTENSITIES.chunked(3).forEach { rowValues ->
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(5.dp)
-                    ) {
-                        rowValues.forEach { intensity ->
-                            Row(
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .clickable { onIntensityToggle(intensity) }
-                                    .padding(vertical = 2.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Checkbox(
-                                    checked = intensity in selectedIntensities,
-                                    onCheckedChange = null,
-                                    modifier = Modifier.size(30.dp)
-                                )
-                                Spacer(Modifier.width(3.dp))
-                                Text(
-                                    if (intensity == "—") {
-                                        historyText(R.string.unknown, language)
-                                    } else {
-                                        intensity
-                                    },
-                                    fontSize = 11.sp,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
-                                )
-                            }
-                        }
-                        repeat(3 - rowValues.size) { Spacer(Modifier.weight(1f)) }
+            HorizontalDivider(
+                modifier = Modifier.padding(vertical = 1.dp),
+                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.7f)
+            )
+
+            CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides 38.dp) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(historyText(R.string.maximum_intensity, language), fontWeight = FontWeight.Bold, fontSize = 12.sp)
+                    TextButton(onClick = onClearIntensity, enabled = selectedIntensities.isNotEmpty()) {
+                        Text(historyText(R.string.all, language), fontSize = 11.sp)
                     }
                 }
             }
+            EXACT_INTENSITIES.chunked(5).forEach { rowValues ->
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(5.dp)
+                ) {
+                    rowValues.forEach { intensity ->
+                        IntensityFilterTile(
+                            intensity = intensity,
+                            label = if (intensity == "—") {
+                                historyText(R.string.unknown, language)
+                            } else {
+                                intensity
+                            },
+                            selected = intensity in selectedIntensities,
+                            onClick = { onIntensityToggle(intensity) },
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun IntensityFilterTile(
+    intensity: String,
+    label: String,
+    selected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val palette = intensityColor(intensity)
+    Surface(
+        modifier = modifier
+            .height(38.dp)
+            .selectable(
+                selected = selected,
+                onClick = onClick,
+                role = Role.Checkbox
+            ),
+        shape = RoundedCornerShape(9.dp),
+        color = if (selected) {
+            palette
+        } else {
+            palette.copy(alpha = 0.18f)
+        },
+        border = BorderStroke(
+            width = 1.dp,
+            color = if (selected) {
+                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+            } else {
+                MaterialTheme.colorScheme.outlineVariant
+            }
+        )
+    ) {
+        Box(contentAlignment = Alignment.Center) {
             Text(
-                UiLocalization.quantity(
-                    LocalContext.current,
-                    R.plurals.events_result_count,
-                    totalCount,
-                    language,
-                    resultCount,
-                    totalCount
-                ),
-                color = MaterialTheme.colorScheme.primary,
-                fontSize = 11.sp,
-                fontWeight = FontWeight.SemiBold
+                text = label,
+                color = if (selected) Color.Black else MaterialTheme.colorScheme.onSurface,
+                fontSize = 10.5.sp,
+                fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
         }
     }
@@ -486,11 +541,11 @@ private fun HistoricalEventRow(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick),
-        shape = RoundedCornerShape(10.dp),
+        shape = RoundedCornerShape(12.dp),
         color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f)
     ) {
         Row(
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 9.dp),
+            modifier = Modifier.padding(horizontal = 11.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Column(Modifier.weight(1f)) {

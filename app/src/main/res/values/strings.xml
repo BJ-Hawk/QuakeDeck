@@ -518,6 +518,7 @@
     <string name="notification_badge_predicted">PRED.</string>
     
     <string name="notification_badge_end">ENDED</string>
+    <string name="notification_watch_shindo">Shindo %1$s</string>
     
     <string name="notification_badge_tsunami_major">MAJOR</string>
     

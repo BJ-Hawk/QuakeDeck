@@ -77,6 +77,8 @@ class NotificationCoordinator(
         val badgeForegroundColor: Int,
         val title: String,
         val primary: String,
+        val watchTitle: String = title,
+        val watchBody: String = primary,
         val secondary: String? = null,
         val tertiary: String? = null,
         val extra: String? = null
@@ -478,6 +480,18 @@ class NotificationCoordinator(
             localLine,
             maximumLine
         ).filter { it.isNotBlank() }.distinct().joinToString("\n")
+        val watchText = notificationWatchText(
+            intensityTitle = knownBadgeIntensity?.let { intensity ->
+                localized(
+                    R.string.notification_watch_shindo,
+                    displayNotificationIntensity(intensity)
+                )
+            },
+            intensityQualifier = badgeSub,
+            alertTitle = title,
+            place = displayPlace,
+            showIntensity = !cancelled
+        )
 
         post(
             tag = "earthquake:${event.id}",
@@ -504,6 +518,8 @@ class NotificationCoordinator(
                 badgeForegroundColor = badgeForeground,
                 title = title,
                 primary = displayPlace,
+                watchTitle = watchText.title,
+                watchBody = watchText.body,
                 secondary = secondary,
                 tertiary = tertiary,
                 extra = extra
@@ -723,8 +739,10 @@ class NotificationCoordinator(
         )
         val builder = NotificationCompat.Builder(context, effectiveChannel)
             .setSmallIcon(smallIcon)
-            .setContentTitle(title)
-            .setContentText(visual?.primary ?: body.lineSequence().firstOrNull().orEmpty())
+            // Paired watches generally ignore the custom phone RemoteViews and
+            // render these standard fields, so keep them concise and lead with Shindo.
+            .setContentTitle(visual?.watchTitle ?: title)
+            .setContentText(visual?.watchBody ?: body.lineSequence().firstOrNull().orEmpty())
             .setContentIntent(contentIntent)
             .setAutoCancel(true)
             .setOnlyAlertOnce(silent || !urgent)
@@ -807,8 +825,8 @@ class NotificationCoordinator(
             // standard multiline notification template.
             val fallback = NotificationCompat.Builder(context, effectiveChannel)
                 .setSmallIcon(smallIcon)
-                .setContentTitle(title)
-                .setContentText(body.lineSequence().firstOrNull().orEmpty())
+                .setContentTitle(visual.watchTitle)
+                .setContentText(visual.watchBody)
                 .setStyle(NotificationCompat.BigTextStyle().bigText(body))
                 .setContentIntent(contentIntent)
                 .setAutoCancel(true)

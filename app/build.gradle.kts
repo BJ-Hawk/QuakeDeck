@@ -41,7 +41,7 @@ android {
         minSdk = 26
         targetSdk = 36
         versionCode = 199
-        versionName = "0.9.84r"
+        versionName = "0.9.84t"
         buildConfigField("boolean", "SANDBOX_ENABLED", sandboxEnabled.toString())
     }
 

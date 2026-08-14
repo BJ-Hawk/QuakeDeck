@@ -517,6 +517,7 @@
     <string name="notification_badge_predicted">予測</string>
     
     <string name="notification_badge_end">終了</string>
+    <string name="notification_watch_shindo">震度%1$s</string>
     
     <string name="notification_badge_tsunami_major">大津波</string>
     
