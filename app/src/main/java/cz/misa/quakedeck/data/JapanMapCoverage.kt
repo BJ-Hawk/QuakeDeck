@@ -25,6 +25,14 @@ fun EarthquakeEvent.hasJapanMapEpicenter(): Boolean =
     hasHypocenter && JapanMapCoverage.contains(latitude, longitude)
 
 /**
+ * Rendering is intentionally less restrictive than automatic camera focus.
+ * A known epicentre just outside the bundled land bounds can still project
+ * into visible map padding, while a genuinely distant marker remains hidden.
+ */
+fun EarthquakeEvent.shouldDrawMapEpicenter(projectedMarkerVisible: Boolean): Boolean =
+    hasHypocenter && projectedMarkerVisible
+
+/**
  * A report is mappable when either its epicentre is inside the bundled map or
  * it has a Japanese observed/predicted footprint that can be resolved to JMA
  * stations/areas. This preserves useful Japanese shaking information for a

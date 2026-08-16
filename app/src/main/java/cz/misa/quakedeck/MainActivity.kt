@@ -7045,8 +7045,8 @@ private fun JapanMap(
                         }
                     }
 
-                if (event.hasJapanMapEpicenter()) {
-                    val epi = committedGeo(event.latitude, event.longitude)
+                val epi = committedGeo(event.latitude, event.longitude)
+                if (event.shouldDrawMapEpicenter(visibleMarker(epi))) {
                     drawEpicenterMarker(
                         center = epi,
                         markerSizeDp = markerSizeDp,
@@ -7782,16 +7782,21 @@ private fun legendTextColor(value: String): Color = when (value) {
  * the N03 prefecture names used by the map. Examples include 北海道道北 → 北海道,
  * 沖縄本島地方 → 沖縄県, 奄美地方 → 鹿児島県 and 伊豆諸島 → 東京都.
  */
-private fun matchMapPrefectures(rawValue: String, available: List<String>): List<String> {
+internal fun matchMapPrefectures(rawValue: String, available: List<String>): List<String> {
     val raw = rawValue.replace(" ", "").replace("　", "")
     if (raw.isBlank()) return emptyList()
+
+    // Prefer complete administrative names before trying suffix-free aliases.
+    // Otherwise 東京都 also matches 京都府 because it contains the base 京都.
+    val exact = available.filter(raw::contains)
+    if (exact.isNotEmpty()) return exact
 
     val direct = available.filter { prefecture ->
         val base = prefecture
             .removeSuffix("都")
             .removeSuffix("府")
             .removeSuffix("県")
-        raw.contains(prefecture) || (base.length >= 2 && raw.contains(base))
+        base.length >= 2 && raw.contains(base)
     }
     if (direct.isNotEmpty()) return direct
 

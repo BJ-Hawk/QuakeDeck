@@ -1,7 +1,7 @@
 # Changelog
 
 QuakeDeck release history
-## v0.9.84t (in progress)
+## v0.9.84v (in progress)
 
 - **Notifications and background monitoring:** Adds opt-in foreground monitoring using the existing live runtime and WebSocket, with Android’s special-use foreground-service type, prompt reconnection while monitoring, and a permanent silent one-line connection-status notification with its own icon, no report details, and no app-icon dot. Live earthquake, EEW, and tsunami notifications receive distinct icons; watch notifications prioritize local or Japan-wide Shindo when the phone badge is unavailable; and local EEW attention supports mutually exclusive off, wake-screen, and full-screen modes that trigger once for qualifying new non-Sandbox warnings, respect the configured location and predicted-Shindo threshold, require Android’s full-screen approval, and otherwise fall back to heads-up alerts. Background behavior remains unchanged while monitoring is disabled.
 
@@ -13,9 +13,15 @@ QuakeDeck release history
 
 - **Historical reports:** Compacts and refines the browser with tighter page rhythm, a result count beside the Sort heading, a subtle section divider, and two balanced rows of selectable Shindo-tinted intensity tiles in place of four sparse checkbox rows, while preserving all sorting, date filtering, selection, and navigation behavior. Keeps Previous/Next navigation within a historical event from automatically refitting the camera and gives the event card a stable layout identity so equal-size date, time, and value updates occur in place while genuine size changes remain supported. The shared Live/Historical pending-hypocenter placeholder retains the resolved location’s two-row grid, preventing layout jumps; initial opening, explicit Re-focus, and intentional Observed-intensities resizing remain unchanged.
 
+- **Map accuracy:** Prevents Tokyo reports from also colouring Kyoto by preferring complete Japanese prefecture names before suffix-free forecast-area aliases, while retaining multi-prefecture labels and adding regression coverage for both paths. Known epicentres that fall just outside the bundled land bounds now render whenever their projected marker is actually visible in the map viewport, without relaxing the stricter automatic-focus boundary for genuinely distant events.
+
+- **Place-name presentation:** Sentence-cases English epicentre names at the display boundary, correcting JMA's lower-case `the vicinity of Taiwan` label without altering the authoritative source dictionary.
+
+- **Build tooling:** Updates the Gradle wrapper to 9.7.0.
+
 ---
 
-**Release status:** Advances the cumulative uncommitted hotfix to `0.9.84t` (`versionCode` 199), pending approval.
+**Release status:** Advances the cumulative uncommitted hotfix to `0.9.84v` (`versionCode` 201), pending approval.
 
 ## v0.9.84
 

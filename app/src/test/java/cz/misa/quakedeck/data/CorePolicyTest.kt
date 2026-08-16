@@ -113,6 +113,24 @@ class CorePolicyTest {
     }
 
     @Test
+    fun visibleKnownEpicenterCanRenderOutsideStrictMapFocusBounds() {
+        val taiwan = earthquakeEvent(EarthquakeReportStage.DETAILED).copy(
+            latitude = 24.5,
+            longitude = 122.3
+        )
+
+        assertFalse(taiwan.hasJapanMapEpicenter())
+        assertTrue(taiwan.shouldDrawMapEpicenter(projectedMarkerVisible = true))
+        assertFalse(taiwan.shouldDrawMapEpicenter(projectedMarkerVisible = false))
+    }
+
+    @Test
+    fun englishEpicenterNamesAreSentenceCasedForDisplay() {
+        assertEquals("The vicinity of Taiwan", sentenceCaseEpicenterName("the vicinity of Taiwan"))
+        assertEquals("Tokyo Bay", sentenceCaseEpicenterName("Tokyo Bay"))
+    }
+
+    @Test
     fun stationProviderVisibilityDistinguishesAllThreeNetworks() {
         val niedOnly = StationProviderVisibility(
             jma = false,

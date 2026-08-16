@@ -53,17 +53,18 @@ object PlaceNameTranslator {
                 .filter { japanese.startsWith(it) }
                 .maxByOrNull { it.length }
                 ?.let(epicenters::get)
-        if (translated != null) return translated
+        if (translated != null) return sentenceCaseEpicenterName(translated)
 
         // Never machine-translate JMA place names. If an unexpected name is not
         // present in the official dictionary, avoid leaking a Japanese-only label
         // into a non-Japanese UI.
-        return if (containsJapanese(japanese)) {
+        val fallback = if (containsJapanese(japanese)) {
             when (untranslatedFallback) {
                 "Distant earthquake" -> UiLocalization.format(context, R.string.distant_earthquake, setting)
                 else -> UiLocalization.format(context, R.string.unknown_hypocenter, setting)
             }
         } else japanese
+        return sentenceCaseEpicenterName(fallback)
     }
 
     fun observation(context: Context, rawName: String, setting: PlaceNameLanguage): String {
@@ -153,3 +154,9 @@ object PlaceNameTranslator {
         return result
     }
 }
+
+/** JMA's English dictionary contains one lower-case sentence-style place name. */
+internal fun sentenceCaseEpicenterName(value: String): String =
+    value.replaceFirstChar { first ->
+        if (first.isLowerCase()) first.titlecase(Locale.ROOT) else first.toString()
+    }
