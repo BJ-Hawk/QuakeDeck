@@ -49,3 +49,6 @@ desktop.ini
 
 # Local Android Studio commit-message template
 /.gitmessage
+
+# Local station-name reference data
+/tools/source/mt_town_all.csv
