@@ -22,6 +22,12 @@ The eventual naming rule must be shared by report rows and deep-zoom map labels.
 - The future station-details UI may disclose: `English locality name based on
   Google Maps.`
 - Research/table preparation and app implementation are separate approval steps.
+- A municipality-level English name is acceptable when the full current bundled
+  station catalogue contains exactly one reporting station in that municipality.
+  The check must include already approved/mapped stations, not only unresolved
+  rows.
+- The user approved municipality-level names for the 13 singleton cases listed
+  below. Do not spend further time searching for neighbourhood names for them.
 
 ## Completed
 
@@ -44,6 +50,27 @@ The eventual naming rule must be shared by report rows and deep-zoom map labels.
   confirmed, 56 provider-coordinate matched, 365 coordinate matched, and 10
   coordinate-envelope matched. A further 50 have a known locality but no DAABR
   English romanization; 44 remain unresolved. No duplicate station codes exist.
+- Cross-checked all 94 research rows against all 4,360 stations in the current
+  bundled catalogue, including already approved mappings. Thirteen rows are the
+  sole reporting station in their municipality; the other 81 rows belong to 55
+  municipalities containing multiple reporting stations.
+- The user approved these 13 municipality-level English mappings:
+  - `0130431` `新篠津村第４７線` -> `Shinshinotsu`
+  - `0110740` `札幌西区琴似` -> `Sapporo Nishi Ward`
+  - `0111040` `札幌清田区平岡` -> `Sapporo Kiyota Ward`
+  - `0122632` `砂川市西７条` -> `Sunagawa`
+  - `0142831` `長沼町中央` -> `Naganuma`
+  - `0145332` `東神楽町南１条` -> `Higashikagura`
+  - `0145431` `当麻町３条` -> `Toma`
+  - `0154301` `美幌町東３条` -> `Bihoro`
+  - `0163820` `中札内村東２条` -> `Nakasatsunai`
+  - `2821633` `高砂市荒井町` -> `Takasago`
+  - `4038231` `水巻町頃末` -> `Mizumaki`
+  - `4120431` `多久市北多久町` -> `Taku`
+  - `4351331` `球磨村渡` -> `Kuma`
+- Updated `ambiguous_station_name_audit.xlsx`: those 13 Proposed Mapping rows
+  now carry the approved municipality English names and are marked ready; the
+  same 13 rows were removed from `Needs Research`, leaving 81 rows.
 
 ## Why this approach was used
 
@@ -57,14 +84,20 @@ will keep list and map labels consistent.
 ## Current unfinished point
 
 No Google Maps fallback lookups have been performed and no Google-derived names
-have been recorded. The next research pass is the 50 `Romanization missing` rows
-plus the 44 `Unresolved` rows. No station-code English mapping has been wired into
-the app, and the future station-details provenance disclosure is not implemented.
+have been recorded. After the 13 approved municipality-singleton fallbacks, the
+next research pass contains 46 `Romanization missing` rows plus 35 `Unresolved`
+rows. All 81 are in municipalities with multiple reporting stations, so they
+still require distinct locality names. No station-code English mapping has been
+wired into the app, and the future station-details provenance disclosure is not
+implemented.
 
 ## Do not redo or change
 
 - Do not rebuild the audit from scratch; continue from the workbook, builder,
   and caches already present.
+- Do not re-research, replace, or return the 13 approved municipality-singleton
+  mappings to `Needs Research` unless the user explicitly changes the decision
+  or the bundled catalogue later gains another station in that municipality.
 - Do not invent transliterations, silently relabel Google values as official, or
   force uncertain matches.
 - Do not alter Japanese names, parser/report merging, station coordinates, or
@@ -80,8 +113,8 @@ the app, and the future station-details provenance disclosure is not implemented
 
 ## Exact next steps
 
-1. Open the audit workbook and review the 50 `Romanization missing` and 44
-   `Unresolved` rows with the user, keeping the two categories distinct.
+1. Open the audit workbook and review the remaining 46 `Romanization missing`
+   and 35 `Unresolved` rows with the user, keeping the two categories distinct.
 2. For each candidate fallback, search Google Maps using the exact Japanese
    station name and coordinates, switch Maps to English, and copy the displayed
    locality exactly.
@@ -104,3 +137,6 @@ the app, and the future station-details provenance disclosure is not implemented
   synchronized with `origin/main` (`+0/-0`) and clean before this note was added.
 - App version remains `0.9.84v` / versionCode `201`; `CHANGELOG.md` was not
   changed for the research work.
+- The 13 municipality-singleton approvals are recorded only in the local audit
+  workbook and these coordination notes. No app implementation, version bump,
+  changelog edit, commit, push, or deployment was performed for this step.
