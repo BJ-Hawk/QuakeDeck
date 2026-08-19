@@ -9,4 +9,5 @@
   * Selecting a station should not only focus, but in the current event card instead of Earthquake info display station info (Name, adress if known, provider...) using the exact same layout so as not to have the UI jump around when switching between Eartquake/station info
 * \[OPTIONAL IN SETTINGS] Deeper zoom - above 112x switch to neighborhood border display (data need to be prepared first), following same logic as other levels as for the coloring etc.
 * \[OPTIONAL IN SETTINGS] Above zoom 112x show semitransparent OSM background
+* Deeper and deeper zoom should show recorded intensity of higher tier layer in dimmer colors so there are no uncolored areas in the preceding region. Meaning in middle layer, I should still see prefecture intenzity if some JMA reporting ara has none assigned.
 
