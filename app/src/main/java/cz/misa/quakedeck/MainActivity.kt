@@ -4394,7 +4394,10 @@ private fun ObservedStationRow(
     val sourcePlaceName = point.stationName
         ?.takeIf { it.isNotBlank() }
         ?: point.name.substringAfterLast(" · ")
-    val officialPlaceLabel = if (point.isArea) {
+    val auditedStationLabel = if (point.isArea) null else {
+        StationCatalog.approvedEnglishName(context, point.prefecture, sourcePlaceName)
+    }
+    val officialPlaceLabel = auditedStationLabel ?: if (point.isArea) {
         PlaceNameTranslator.intensityReportingArea(
             context,
             sourcePlaceName,
@@ -6938,7 +6941,8 @@ private fun JapanMap(
                         val bestOfficialName = if (useJapaneseNames) {
                             station.nameJa
                         } else {
-                            PlaceNameTranslator.observation(context, raw, language)
+                            StationCatalog.approvedEnglishName(context, station)
+                                ?: PlaceNameTranslator.observation(context, raw, language)
                                 .substringAfterLast(" · ")
                                 .ifBlank { station.code }
                         }
@@ -6990,7 +6994,11 @@ private fun JapanMap(
                         val label = if (useJapaneseNames) {
                             point.stationName.orEmpty()
                         } else {
-                            PlaceNameTranslator.observation(context, point.name, language)
+                            StationCatalog.approvedEnglishName(
+                                context,
+                                point.prefecture,
+                                point.stationName.orEmpty()
+                            ) ?: PlaceNameTranslator.observation(context, point.name, language)
                                 .substringAfterLast(" · ")
                         }
                         drawMapText(label, p)

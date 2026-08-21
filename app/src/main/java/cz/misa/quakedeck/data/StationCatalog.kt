@@ -81,8 +81,20 @@ object StationCatalog {
     @Volatile private var byPrefAndName: Map<String, SeismicStation> = emptyMap()
     @Volatile private var byName: Map<String, SeismicStation> = emptyMap()
     @Volatile private var loaded = false
+    @Volatile private var englishNames: Map<String, String>? = null
 
     fun allStations(): List<SeismicStation> = stations
+
+    fun approvedEnglishName(
+        context: Context,
+        prefectureJa: String,
+        stationNameJa: String
+    ): String? = lookup(prefectureJa, stationNameJa)
+        ?.let { englishStationNames(context)[it.code] }
+        ?.takeIf { it.isNotBlank() }
+
+    fun approvedEnglishName(context: Context, station: SeismicStation): String? =
+        englishStationNames(context)[station.code]?.takeIf { it.isNotBlank() }
 
     fun lookup(prefectureJa: String, stationNameJa: String): SeismicStation? {
         if (!loaded || stationNameJa.isBlank()) return null
@@ -192,6 +204,29 @@ object StationCatalog {
             )
         }
         publish(parsed)
+    }
+
+    private fun englishStationNames(context: Context): Map<String, String> {
+        englishNames?.let { return it }
+        return synchronized(this) {
+            englishNames ?: loadEnglishNameMap(context, R.raw.station_english_names)
+                .also { englishNames = it }
+        }
+    }
+
+    private fun loadEnglishNameMap(context: Context, resourceId: Int): Map<String, String> {
+        val root = context.resources.openRawResource(resourceId)
+            .bufferedReader(Charsets.UTF_8)
+            .use { JSONObject(it.readText()) }
+        require(root.getInt("version") == 1) { "Unsupported station English-name map" }
+        val names = root.getJSONObject("names")
+        return HashMap<String, String>(names.length()).apply {
+            val keys = names.keys()
+            while (keys.hasNext()) {
+                val code = keys.next()
+                put(code, names.optString(code))
+            }
+        }
     }
 
     private fun publish(parsed: List<SeismicStation>) {

@@ -1,7 +1,9 @@
 # Changelog
 
 QuakeDeck release history
-## v0.9.84v (in progress)
+## v0.9.84w (in progress)
+
+- **Station names:** Bundles an audited code-keyed active English map for all 4,360 stations. English observed-station rows and idle/report map labels now prefer it while Japanese mode remains unchanged. The previous automatic English names are retained as an exact baseline outside the APK with the station-audit data.
 
 - **Notifications and background monitoring:** Adds opt-in foreground monitoring using the existing live runtime and WebSocket, with Android’s special-use foreground-service type, prompt reconnection while monitoring, and a permanent silent one-line connection-status notification with its own icon, no report details, and no app-icon dot. Live earthquake, EEW, and tsunami notifications receive distinct icons; watch notifications prioritize local or Japan-wide Shindo when the phone badge is unavailable; and local EEW attention supports mutually exclusive off, wake-screen, and full-screen modes that trigger once for qualifying new non-Sandbox warnings, respect the configured location and predicted-Shindo threshold, require Android’s full-screen approval, and otherwise fall back to heads-up alerts. Background behavior remains unchanged while monitoring is disabled.
 
@@ -21,7 +23,7 @@ QuakeDeck release history
 
 ---
 
-**Release status:** Advances the cumulative uncommitted hotfix to `0.9.84v` (`versionCode` 201), pending approval.
+**Release status:** Advances the cumulative uncommitted hotfix to `0.9.84w` (`versionCode` 202), pending approval.
 
 ## v0.9.84
 

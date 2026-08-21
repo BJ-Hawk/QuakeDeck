@@ -28,6 +28,13 @@ The eventual naming rule must be shared by report rows and deep-zoom map labels.
   rows.
 - The user approved municipality-level names for the 13 singleton cases listed
   below. Do not spend further time searching for neighbourhood names for them.
+- Prefer a verified official facility identity over a street/locality label when
+  it more clearly identifies the physical reporting station for non-Japanese
+  users.
+- Maintain detailed provenance for every bundled station so a future details UI
+  can show an exact published address, facility name, provider-station identity,
+  coordinates, and evidence links where known. A blank exact address means
+  unknown; never manufacture one from the catalogue's rounded coordinates.
 
 ## Completed
 
@@ -40,9 +47,18 @@ The eventual naming rule must be shared by report rows and deep-zoom map labels.
 - Used official JMA/NIED metadata where available and GSI reverse geocoding for
   coordinate-based candidate matching.
 - Generated `outputs/station-name-audit/ambiguous_station_name_audit.xlsx` with
-  `Summary`, `Proposed Mapping`, `DAABR Candidates`, and `Needs Research` sheets.
-  Recorded workbook SHA-256:
-  `8F40E352F3F79047740D85B48A32F96DD2FC369E4D75872BD00E7D5FAE463F58`.
+  `Summary`, `Proposed Mapping`, `DAABR Candidates`, `Needs Research`, and
+  `Station Sources` sheets. The final sheet contains one provenance row for
+  every bundled station. Recorded workbook SHA-256:
+  `55054D49123B3DF117C498759EC1FD01BAB3AC0DAA5707C5B7AC2BF5C6F64B09`.
+- Generated machine-readable
+  `outputs/station-name-audit/station_metadata_sources.json` from the same
+  repeatable builder. It contains 4,360 unique station codes, 673 sourced
+  addresses, 790 precise NIED provider-coordinate matches out of 800 NIED
+  catalogue stations, and 2,898 catalogue-only records. The ten unmatched NIED
+  records are explicitly counted; catalogue-only coordinates are not treated
+  as exact addresses. Recorded JSON SHA-256:
+  `1ADEF220938B106479CC1B0AED78C3883DC9CEC37100A10F571458E9B0E1DFF9`.
 - Added repeatable audit tooling and caches under `tools/station_names/`.
 - Confirmed station `4320231` (`八代市鏡町`) from its official installation
   address as `鏡町内田` / `Kagamimachi Uchida`, not `Kagamimachi Kagami`.
@@ -70,7 +86,35 @@ The eventual naming rule must be shared by report rows and deep-zoom map labels.
   - `4351331` `球磨村渡` -> `Kuma`
 - Updated `ambiguous_station_name_audit.xlsx`: those 13 Proposed Mapping rows
   now carry the approved municipality English names and are marked ready; the
-  same 13 rows were removed from `Needs Research`, leaving 81 rows.
+  same 13 rows were removed from `Needs Research`.
+- The user approved two verified Sapporo facility identities:
+  - `0110100` `札幌中央区北２条` -> `JMA Sapporo Regional Headquarters`.
+    JMA publishes `札幌市中央区北2条西18-2（札幌管区気象台）` and officially
+    uses the English facility name `Sapporo Regional Headquarters`.
+  - `0110140` `札幌中央区南４条` -> `Sapporo Chuo Fire Station`. Sapporo
+    identifies ward intensity as measured at the ward fire station, locates the
+    Chuo Fire Station at `札幌市中央区南4条西10丁目`, and publishes that English
+    name.
+- Encoded all 13 municipality approvals, both Sapporo facility approvals, and
+  the existing `4320231` Yatsushiro confirmation in the repeatable builder so a
+  workbook regeneration preserves the decisions. `0110140` was removed from
+  `Needs Research`, leaving 80 rows.
+- The user approved both Kutchan identities:
+  - `0140000` `倶知安町南１条` ->
+    `JMA Kutchan Special Automated Weather Station`. JMA publishes the address
+    `虻田郡倶知安町南1条東3-1（倶知安特別地域気象観測所）`.
+  - `0140020` `倶知安町北４条` -> `K-NET Kutchan`. NIED identifies the
+    precise provider station as K-NET `HKD144` `KUCCHAN`; the user-supplied
+    Google Street View link visibly places its enclosure at
+    `北海道虻田郡倶知安町北6条東7丁目` / `7 Chome Kita 6 Johigashi, Kutchan,
+    Abuta District, Hokkaido 044-0006`.
+- Recorded the future station-card location note for `0140020`: `Located in the
+  southwestern corner of the grounds of the Shu Ogawara Museum of Art.`
+- Encoded both Kutchan approvals and their provenance in the repeatable builder,
+  workbook, and JSON source export. `0140020` was removed from `Needs Research`,
+  leaving 79 rows; `0140000` was already research-ready from its official JMA
+  address, so its approval changes the selected English identity without
+  reducing the research count a second time.
 
 ## Why this approach was used
 
@@ -83,13 +127,10 @@ will keep list and map labels consistent.
 
 ## Current unfinished point
 
-No Google Maps fallback lookups have been performed and no Google-derived names
-have been recorded. After the 13 approved municipality-singleton fallbacks, the
-next research pass contains 46 `Romanization missing` rows plus 35 `Unresolved`
-rows. All 81 are in municipalities with multiple reporting stations, so they
-still require distinct locality names. No station-code English mapping has been
-wired into the app, and the future station-details provenance disclosure is not
-implemented.
+The complete audited 4,360-station English map is now active in the app. Exact
+facility addresses are still incomplete: only 673 have a published source
+address, and no coordinate-derived locality may be recorded as a street address.
+The future station-details address/provenance UI is not implemented.
 
 ## Do not redo or change
 
@@ -98,6 +139,13 @@ implemented.
 - Do not re-research, replace, or return the 13 approved municipality-singleton
   mappings to `Needs Research` unless the user explicitly changes the decision
   or the bundled catalogue later gains another station in that municipality.
+- Do not replace the two approved Sapporo facility labels with neighbourhood
+  names unless the user explicitly changes the decision.
+- Do not replace the two approved Kutchan labels with neighbourhood names unless
+  the user explicitly changes the decision. Preserve the verified `0140020`
+  parcel address and museum-grounds location note.
+- Do not infer exact addresses from catalogue or provider coordinates. Record a
+  street address only when a source actually publishes it, with its evidence URL.
 - Do not invent transliterations, silently relabel Google values as official, or
   force uncertain matches.
 - Do not alter Japanese names, parser/report merging, station coordinates, or
@@ -106,27 +154,23 @@ implemented.
   belongs in the shared naming path.
 - Do not commit `tools/source/mt_town_all.csv`; it is a large local reference and
   is ignored by `.gitignore`.
-- Do not implement app changes, bump the version, or edit `CHANGELOG.md` until
-  the user explicitly authorises the implementation phase.
+- Do not re-bundle the preserved baseline map in the APK. It is retained at
+  `outputs/station-name-audit/station_english_names_baseline.json` as the exact
+  pre-implementation snapshot. The active APK resource is
+  `app/src/main/res/raw/station_english_names.json`.
 - Preserve unrelated local edits. These notes describe shared task state and do
   not claim exclusive ownership of any file.
 
 ## Exact next steps
 
-1. Open the audit workbook and review the remaining 46 `Romanization missing`
-   and 35 `Unresolved` rows with the user, keeping the two categories distinct.
-2. For each candidate fallback, search Google Maps using the exact Japanese
-   station name and coordinates, switch Maps to English, and copy the displayed
-   locality exactly.
-3. Verify that the Japanese locality and municipality agree with the station
-   source and stronger official-address evidence; otherwise keep the existing
-   city-level fallback.
-4. Record the Maps URL, date checked, Japanese/English labels, provenance status,
-   and verification note in the research table. Recalculate category totals and
-   workbook checksum after the reviewed research update.
-5. Ask for explicit implementation approval. Only then design the stable
-   station-code mapping and shared resolver used by both report rows and map
-   labels, with focused tests and the required letter version/changelog update.
+1. For each station, first seek an official installation address or facility
+   identity. Record any verified address/facility and its evidence in `Station
+   Sources` / `station_metadata_sources.json`, even if the user ultimately
+   chooses a shorter display name.
+2. Maintain the JSON and workbook as identical `Station Sources` projections;
+   verify the 4,360 records and all exported fields after any data change.
+3. Regenerate the active code-keyed APK map from the JSON after approved English
+   name changes. Keep the baseline snapshot outside APK resources.
 
 ## Logical changes and Git state
 
@@ -135,8 +179,12 @@ implemented.
 - `5bf125a` also added `/tools/source/mt_town_all.csv` to `.gitignore`.
 - Current branch is `main`; HEAD is merge commit `f0e0c55`, and the checkout was
   synchronized with `origin/main` (`+0/-0`) and clean before this note was added.
-- App version remains `0.9.84v` / versionCode `201`; `CHANGELOG.md` was not
-  changed for the research work.
-- The 13 municipality-singleton approvals are recorded only in the local audit
-  workbook and these coordination notes. No app implementation, version bump,
-  changelog edit, commit, push, or deployment was performed for this step.
+- App version is `0.9.84w` / versionCode `202`; the cumulative changelog entry
+  records the active station-name implementation.
+- The station-code resolver now drives English observed-station rows and idle and
+  report map labels. The baseline resource was deliberately moved out of the APK
+  to `outputs/station-name-audit/station_english_names_baseline.json`.
+- The current `Station Sources` workbook and metadata JSON were compared record
+  by record: 4,360 records, zero missing rows, and zero mismatches across all 32
+  exported fields. The workbook was also opened successfully in Excel after its
+  package repair.

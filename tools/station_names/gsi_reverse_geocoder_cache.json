@@ -35,6 +35,12 @@
     "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=139.24&lat=36.42",
     "error": ""
   },
+  "1020602": {
+    "municipalityCode": "10443",
+    "localityJa": "大字幡谷",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=139.22&lat=36.73",
+    "error": ""
+  },
   "1020631": {
     "municipalityCode": "10206",
     "localityJa": "白沢町高平",
@@ -95,6 +101,30 @@
     "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=139.27&lat=36.43",
     "error": ""
   },
+  "1042130": {
+    "municipalityCode": "10421",
+    "localityJa": "大字西中之条",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=138.84&lat=36.59",
+    "error": ""
+  },
+  "1120200": {
+    "municipalityCode": "11202",
+    "localityJa": "石原三丁目",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=139.38&lat=36.15",
+    "error": ""
+  },
+  "1120230": {
+    "municipalityCode": "11202",
+    "localityJa": "高本",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=139.41&lat=36.10",
+    "error": ""
+  },
+  "1120232": {
+    "municipalityCode": "11202",
+    "localityJa": "樋春",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=139.34&lat=36.12",
+    "error": ""
+  },
   "1120731": {
     "municipalityCode": "11207",
     "localityJa": "下吉田",
@@ -107,16 +137,52 @@
     "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=139.03&lat=35.96",
     "error": ""
   },
+  "1120931": {
+    "municipalityCode": "11209",
+    "localityJa": "大字上名栗",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=139.18&lat=35.88",
+    "error": ""
+  },
+  "1121032": {
+    "municipalityCode": "11210",
+    "localityJa": "麦倉",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=139.66&lat=36.19",
+    "error": ""
+  },
+  "1121033": {
+    "municipalityCode": "11210",
+    "localityJa": "生出",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=139.66&lat=36.14",
+    "error": ""
+  },
   "1121101": {
     "municipalityCode": "11211",
     "localityJa": "児玉町児玉",
     "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=139.13&lat=36.19",
     "error": ""
   },
+  "1121733": {
+    "municipalityCode": "11217",
+    "localityJa": "広田",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=139.51&lat=36.11",
+    "error": ""
+  },
   "1123230": {
     "municipalityCode": "11232",
     "localityJa": "菖蒲町新堀",
     "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=139.60&lat=36.06",
+    "error": ""
+  },
+  "1136531": {
+    "municipalityCode": "11365",
+    "localityJa": "両神薄",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=138.97&lat=36.01",
+    "error": ""
+  },
+  "1221133": {
+    "municipalityCode": "12211",
+    "localityJa": "上町",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=140.32&lat=35.78",
     "error": ""
   },
   "1223031": {
@@ -131,10 +197,40 @@
     "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=140.02&lat=35.04",
     "error": ""
   },
+  "1223602": {
+    "municipalityCode": "12236",
+    "localityJa": "佐原イ",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=140.51&lat=35.89",
+    "error": ""
+  },
+  "1223630": {
+    "municipalityCode": "12236",
+    "localityJa": "佐原ロ",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=140.50&lat=35.90",
+    "error": ""
+  },
   "1234931": {
     "municipalityCode": "12349",
     "localityJa": "笹川い",
     "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=140.67&lat=35.84",
+    "error": ""
+  },
+  "1242700": {
+    "municipalityCode": "12427",
+    "localityJa": "報恩寺",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=140.24&lat=35.38",
+    "error": ""
+  },
+  "1310531": {
+    "municipalityCode": "13105",
+    "localityJa": "小石川五丁目",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=139.74&lat=35.72",
+    "error": ""
+  },
+  "1311102": {
+    "municipalityCode": "13111",
+    "localityJa": "羽田空港三丁目",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=139.80&lat=35.54",
     "error": ""
   },
   "1311501": {
@@ -147,6 +243,54 @@
     "municipalityCode": "13115",
     "localityJa": "高井戸東四丁目",
     "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=139.62&lat=35.69",
+    "error": ""
+  },
+  "1311730": {
+    "municipalityCode": "13117",
+    "localityJa": "西ケ原二丁目",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=139.74&lat=35.75",
+    "error": ""
+  },
+  "1320850": {
+    "municipalityCode": "13208",
+    "localityJa": "西つつじケ丘一丁目",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=139.57&lat=35.66",
+    "error": ""
+  },
+  "1330740": {
+    "municipalityCode": "13307",
+    "localityJa": "−",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=139.155&lat=35.73",
+    "error": ""
+  },
+  "1336300": {
+    "municipalityCode": "13363",
+    "localityJa": "−",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=139.27&lat=34.36",
+    "error": ""
+  },
+  "1336401": {
+    "municipalityCode": "13364",
+    "localityJa": "−",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=139.13&lat=34.19",
+    "error": ""
+  },
+  "1336431": {
+    "municipalityCode": "",
+    "localityJa": "",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=139.13&lat=34.21",
+    "error": ""
+  },
+  "1342100": {
+    "municipalityCode": "13421",
+    "localityJa": "父島",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=142.19&lat=27.09",
+    "error": ""
+  },
+  "1342101": {
+    "municipalityCode": "",
+    "localityJa": "",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=142.18&lat=27.10",
     "error": ""
   },
   "1411842": {
@@ -167,6 +311,42 @@
     "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=139.64&lat=35.16",
     "error": ""
   },
+  "1510200": {
+    "municipalityCode": "15102",
+    "localityJa": "河渡",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=139.11&lat=37.95",
+    "error": ""
+  },
+  "1510331": {
+    "municipalityCode": "15103",
+    "localityJa": "寺裏通二番町",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=139.04&lat=37.92",
+    "error": ""
+  },
+  "1522401": {
+    "municipalityCode": "15224",
+    "localityJa": "上相川町",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=138.26&lat=38.04",
+    "error": ""
+  },
+  "1522445": {
+    "municipalityCode": "",
+    "localityJa": "",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=138.44&lat=38.08",
+    "error": ""
+  },
+  "1558600": {
+    "municipalityCode": "15586",
+    "localityJa": "−",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=139.25&lat=38.46",
+    "error": ""
+  },
+  "1558631": {
+    "municipalityCode": "15586",
+    "localityJa": "−",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=139.25&lat=38.47",
+    "error": ""
+  },
   "1620233": {
     "municipalityCode": "16202",
     "localityJa": "福岡町荒屋敷",
@@ -179,6 +359,12 @@
     "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=136.99&lat=36.58",
     "error": ""
   },
+  "1720401": {
+    "municipalityCode": "17204",
+    "localityJa": "海士町",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=136.92&lat=37.85",
+    "error": ""
+  },
   "1720500": {
     "municipalityCode": "",
     "localityJa": "",
@@ -189,6 +375,12 @@
     "municipalityCode": "17205",
     "localityJa": "正院町小路",
     "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=137.29&lat=37.45",
+    "error": ""
+  },
+  "1920631": {
+    "municipalityCode": "19206",
+    "localityJa": "大月町大月",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=138.945&lat=35.61",
     "error": ""
   },
   "1920930": {
@@ -221,10 +413,64 @@
     "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=138.34&lat=35.81",
     "error": ""
   },
+  "1920941": {
+    "municipalityCode": "19209",
+    "localityJa": "須玉町藤田",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=138.42&lat=35.78",
+    "error": ""
+  },
   "1920942": {
     "municipalityCode": "19209",
     "localityJa": "大泉町西井出",
     "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=138.39&lat=35.86",
+    "error": ""
+  },
+  "1921140": {
+    "municipalityCode": "19211",
+    "localityJa": "石和町市部",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=138.64&lat=35.65",
+    "error": ""
+  },
+  "1921233": {
+    "municipalityCode": "19212",
+    "localityJa": "上野原",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=139.11&lat=35.63",
+    "error": ""
+  },
+  "1921333": {
+    "municipalityCode": "19213",
+    "localityJa": "塩山下於曽",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=138.73499999999999&lat=35.70",
+    "error": ""
+  },
+  "1934631": {
+    "municipalityCode": "19346",
+    "localityJa": "市川大門",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=138.50&lat=35.57",
+    "error": ""
+  },
+  "1934632": {
+    "municipalityCode": "19346",
+    "localityJa": "岩間",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=138.46&lat=35.50",
+    "error": ""
+  },
+  "1936532": {
+    "municipalityCode": "19365",
+    "localityJa": "寺沢",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=138.44&lat=35.47",
+    "error": ""
+  },
+  "1936833": {
+    "municipalityCode": "19368",
+    "localityJa": "最勝寺",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=138.46&lat=35.56",
+    "error": ""
+  },
+  "1943036": {
+    "municipalityCode": "19430",
+    "localityJa": "小立",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=138.75&lat=35.50",
     "error": ""
   },
   "2020102": {
@@ -251,6 +497,18 @@
     "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=137.93&lat=35.32",
     "error": ""
   },
+  "2020831": {
+    "municipalityCode": "20208",
+    "localityJa": "甲",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=138.44&lat=36.31",
+    "error": ""
+  },
+  "2021200": {
+    "municipalityCode": "20212",
+    "localityJa": "大町",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=137.85&lat=36.50",
+    "error": ""
+  },
   "2022033": {
     "municipalityCode": "20220",
     "localityJa": "堀金烏川",
@@ -267,6 +525,36 @@
     "municipalityCode": "20220",
     "localityJa": "三郷明盛",
     "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=137.89&lat=36.26",
+    "error": ""
+  },
+  "2041400": {
+    "municipalityCode": "20414",
+    "localityJa": "田本",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=137.86&lat=35.36",
+    "error": ""
+  },
+  "2041431": {
+    "municipalityCode": "20414",
+    "localityJa": "平島田",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=137.85&lat=35.38",
+    "error": ""
+  },
+  "2042330": {
+    "municipalityCode": "20423",
+    "localityJa": "読書",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=137.61&lat=35.60",
+    "error": ""
+  },
+  "2042930": {
+    "municipalityCode": "20429",
+    "localityJa": "−",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=137.55&lat=35.81",
+    "error": ""
+  },
+  "2060240": {
+    "municipalityCode": "20602",
+    "localityJa": "大字堺",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=138.63&lat=36.87",
     "error": ""
   },
   "2120231": {
@@ -449,6 +737,18 @@
     "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=136.48&lat=35.47",
     "error": ""
   },
+  "2210130": {
+    "municipalityCode": "22101",
+    "localityJa": "追手町",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=138.38&lat=34.98",
+    "error": ""
+  },
+  "2210131": {
+    "municipalityCode": "22101",
+    "localityJa": "駿府城公園",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=138.385&lat=34.98",
+    "error": ""
+  },
   "2213833": {
     "municipalityCode": "22138",
     "localityJa": "舞阪町舞阪",
@@ -491,10 +791,46 @@
     "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=137.83&lat=34.97",
     "error": ""
   },
+  "2221000": {
+    "municipalityCode": "22210",
+    "localityJa": "大淵",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=138.69&lat=35.19",
+    "error": ""
+  },
+  "2221034": {
+    "municipalityCode": "22210",
+    "localityJa": "岩淵",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=138.62&lat=35.15",
+    "error": ""
+  },
+  "2221035": {
+    "municipalityCode": "22210",
+    "localityJa": "比奈",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=138.72&lat=35.16",
+    "error": ""
+  },
   "2221600": {
     "municipalityCode": "22216",
     "localityJa": "田町一丁目",
     "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=137.92&lat=34.75",
+    "error": ""
+  },
+  "2222200": {
+    "municipalityCode": "22222",
+    "localityJa": "八幡",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=139.01&lat=34.96",
+    "error": ""
+  },
+  "2310630": {
+    "municipalityCode": "23102",
+    "localityJa": "東外堀町",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=136.91&lat=35.18",
+    "error": ""
+  },
+  "2310632": {
+    "municipalityCode": "23106",
+    "localityJa": "三の丸一丁目",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=136.90&lat=35.18",
     "error": ""
   },
   "2320100": {
@@ -533,6 +869,12 @@
     "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=137.07&lat=34.80",
     "error": ""
   },
+  "2321601": {
+    "municipalityCode": "23216",
+    "localityJa": "セントレア一丁目",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=136.81&lat=34.86",
+    "error": ""
+  },
   "2321731": {
     "municipalityCode": "23217",
     "localityJa": "赤童子町藤宮",
@@ -551,6 +893,12 @@
     "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=137.04&lat=35.21",
     "error": ""
   },
+  "2323534": {
+    "municipalityCode": "23235",
+    "localityJa": "前ケ須町",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=136.72&lat=35.11",
+    "error": ""
+  },
   "2323733": {
     "municipalityCode": "23237",
     "localityJa": "七宝町桂",
@@ -563,10 +911,28 @@
     "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=137.80&lat=35.18",
     "error": ""
   },
+  "2420334": {
+    "municipalityCode": "24203",
+    "localityJa": "吹上一丁目",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=136.71&lat=34.49",
+    "error": ""
+  },
   "2420830": {
     "municipalityCode": "24208",
     "localityJa": "鴻之台一番町",
     "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=136.11&lat=34.63",
+    "error": ""
+  },
+  "2447230": {
+    "municipalityCode": "24472",
+    "localityJa": "五ヶ所浦",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=136.70&lat=34.35",
+    "error": ""
+  },
+  "2456100": {
+    "municipalityCode": "24561",
+    "localityJa": "大字上市木",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=136.03&lat=33.82",
     "error": ""
   },
   "2520901": {
@@ -591,6 +957,12 @@
     "municipalityCode": "25209",
     "localityJa": "信楽町長野",
     "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=136.06&lat=34.88",
+    "error": ""
+  },
+  "2521130": {
+    "municipalityCode": "25211",
+    "localityJa": "石部中央一丁目",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=136.06&lat=35.01",
     "error": ""
   },
   "2521230": {
@@ -621,6 +993,12 @@
     "municipalityCode": "26104",
     "localityJa": "西ノ京大炊御門町",
     "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=135.73&lat=35.02",
+    "error": ""
+  },
+  "2610440": {
+    "municipalityCode": "26104",
+    "localityJa": "下丸屋町",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=135.77&lat=35.01",
     "error": ""
   },
   "2610740": {
@@ -689,6 +1067,36 @@
     "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=135.03&lat=35.68",
     "error": ""
   },
+  "2712831": {
+    "municipalityCode": "27128",
+    "localityJa": "大手前一丁目",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=135.52&lat=34.69",
+    "error": ""
+  },
+  "2714131": {
+    "municipalityCode": "27141",
+    "localityJa": "南安井町六丁",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=135.48&lat=34.57",
+    "error": ""
+  },
+  "2720230": {
+    "municipalityCode": "27202",
+    "localityJa": "宮本町",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=135.375&lat=34.46",
+    "error": ""
+  },
+  "2720300": {
+    "municipalityCode": "28207",
+    "localityJa": "小阪田",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=135.44&lat=34.79",
+    "error": ""
+  },
+  "2720732": {
+    "municipalityCode": "27207",
+    "localityJa": "津之江町一丁目",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=135.61&lat=34.84",
+    "error": ""
+  },
   "2721332": {
     "municipalityCode": "27213",
     "localityJa": "りんくう往来北",
@@ -699,6 +1107,12 @@
     "municipalityCode": "27213",
     "localityJa": "中庄",
     "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=135.33&lat=34.41",
+    "error": ""
+  },
+  "2736200": {
+    "municipalityCode": "27362",
+    "localityJa": "泉州空港中",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=135.24&lat=34.43",
     "error": ""
   },
   "2811001": {
@@ -965,16 +1379,52 @@
     "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=135.16&lat=33.91",
     "error": ""
   },
+  "3040102": {
+    "municipalityCode": "30401",
+    "localityJa": "−",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=135.36&lat=33.67",
+    "error": ""
+  },
+  "3042230": {
+    "municipalityCode": "30422",
+    "localityJa": "大字太地",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=135.94&lat=33.59",
+    "error": ""
+  },
   "3120230": {
     "municipalityCode": "31202",
     "localityJa": "淀江町西原",
     "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=133.42&lat=35.45",
     "error": ""
   },
+  "3220341": {
+    "municipalityCode": "32203",
+    "localityJa": "佐田町反辺",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=132.72&lat=35.25",
+    "error": ""
+  },
   "3220536": {
     "municipalityCode": "32205",
     "localityJa": "大田町大田",
     "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=132.50&lat=35.20",
+    "error": ""
+  },
+  "3244800": {
+    "municipalityCode": "32448",
+    "localityJa": "京覧原",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=132.51&lat=35.06",
+    "error": ""
+  },
+  "3244833": {
+    "municipalityCode": "32448",
+    "localityJa": "粕渕",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=132.59&lat=35.08",
+    "error": ""
+  },
+  "3244936": {
+    "municipalityCode": "32449",
+    "localityJa": "山田",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=132.54&lat=34.86",
     "error": ""
   },
   "3310132": {
@@ -1073,6 +1523,12 @@
     "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=134.10&lat=34.70",
     "error": ""
   },
+  "3321600": {
+    "municipalityCode": "33445",
+    "localityJa": "大字里見",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=133.58&lat=34.53",
+    "error": ""
+  },
   "3321633": {
     "municipalityCode": "33445",
     "localityJa": "大字里見",
@@ -1089,6 +1545,18 @@
     "municipalityCode": "34104",
     "localityJa": "己斐上四丁目",
     "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=132.42&lat=34.41",
+    "error": ""
+  },
+  "3410832": {
+    "municipalityCode": "34108",
+    "localityJa": "湯来町大字和田",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=132.27&lat=34.49",
+    "error": ""
+  },
+  "3420202": {
+    "municipalityCode": "34202",
+    "localityJa": "音戸町大字渡子",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=132.53&lat=34.18",
     "error": ""
   },
   "3420230": {
@@ -1143,6 +1611,12 @@
     "municipalityCode": "34202",
     "localityJa": "豊町大長",
     "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=132.86&lat=34.18",
+    "error": ""
+  },
+  "3420401": {
+    "municipalityCode": "34204",
+    "localityJa": "本郷町善入寺",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=132.92&lat=34.44",
     "error": ""
   },
   "3420433": {
@@ -1349,6 +1823,42 @@
     "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=132.41&lat=34.26",
     "error": ""
   },
+  "3520102": {
+    "municipalityCode": "35201",
+    "localityJa": "豊浦町大字川棚",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=130.92&lat=34.15",
+    "error": ""
+  },
+  "3520138": {
+    "municipalityCode": "35201",
+    "localityJa": "豊北町大字角島",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=130.87&lat=34.36",
+    "error": ""
+  },
+  "3520140": {
+    "municipalityCode": "35201",
+    "localityJa": "豊北町大字滝部",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=130.95&lat=34.29",
+    "error": ""
+  },
+  "3520143": {
+    "municipalityCode": "35201",
+    "localityJa": "豊田町大字殿敷",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=131.08&lat=34.20",
+    "error": ""
+  },
+  "3520144": {
+    "municipalityCode": "35201",
+    "localityJa": "上田中町三丁目",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=130.94&lat=33.96",
+    "error": ""
+  },
+  "3520145": {
+    "municipalityCode": "35201",
+    "localityJa": "菊川町大字田部",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=131.03&lat=34.12",
+    "error": ""
+  },
   "3520323": {
     "municipalityCode": "35203",
     "localityJa": "阿東生雲中",
@@ -1373,6 +1883,12 @@
     "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=131.48&lat=34.43",
     "error": ""
   },
+  "3520851": {
+    "municipalityCode": "35208",
+    "localityJa": "玖珂町",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=132.08&lat=34.09",
+    "error": ""
+  },
   "3521132": {
     "municipalityCode": "35211",
     "localityJa": "日置中",
@@ -1385,10 +1901,22 @@
     "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=131.25&lat=34.36",
     "error": ""
   },
+  "3521137": {
+    "municipalityCode": "35211",
+    "localityJa": "油谷新別名",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=131.06&lat=34.37",
+    "error": ""
+  },
   "3521335": {
     "municipalityCode": "35213",
     "localityJa": "大嶺町東分",
     "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=131.21&lat=34.17",
+    "error": ""
+  },
+  "3530540": {
+    "municipalityCode": "35305",
+    "localityJa": "大字森",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=132.365&lat=33.91",
     "error": ""
   },
   "3534433": {
@@ -1467,6 +1995,24 @@
     "municipalityCode": "36208",
     "localityJa": "山城町大川持",
     "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=133.75&lat=33.96",
+    "error": ""
+  },
+  "3636836": {
+    "municipalityCode": "36368",
+    "localityJa": "坂州",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=134.30&lat=33.82",
+    "error": ""
+  },
+  "3636838": {
+    "municipalityCode": "36368",
+    "localityJa": "小浜",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=134.37&lat=33.81",
+    "error": ""
+  },
+  "3720101": {
+    "municipalityCode": "37201",
+    "localityJa": "香南町岡",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=134.02&lat=34.22",
     "error": ""
   },
   "3720131": {
@@ -1757,6 +2303,12 @@
     "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=133.20&lat=34.26",
     "error": ""
   },
+  "3848800": {
+    "municipalityCode": "38488",
+    "localityJa": "大字北川",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=132.62&lat=33.22",
+    "error": ""
+  },
   "3850631": {
     "municipalityCode": "38506",
     "localityJa": "城辺甲",
@@ -1769,10 +2321,22 @@
     "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=132.58&lat=32.96",
     "error": ""
   },
+  "3921137": {
+    "municipalityCode": "39211",
+    "localityJa": "赤岡町",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=133.72&lat=33.54",
+    "error": ""
+  },
   "3938633": {
     "municipalityCode": "39386",
     "localityJa": "上八川下分",
     "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=133.34&lat=33.65",
+    "error": ""
+  },
+  "3938635": {
+    "municipalityCode": "39386",
+    "localityJa": "−",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=133.43&lat=33.55",
     "error": ""
   },
   "4020333": {
@@ -1961,6 +2525,12 @@
     "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=129.95&lat=33.20",
     "error": ""
   },
+  "4120637": {
+    "municipalityCode": "41206",
+    "localityJa": "武雄町大字富岡",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=130.02&lat=33.20",
+    "error": ""
+  },
   "4120638": {
     "municipalityCode": "41206",
     "localityJa": "北方町大字大崎",
@@ -1991,10 +2561,22 @@
     "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=130.20&lat=33.25",
     "error": ""
   },
+  "4120900": {
+    "municipalityCode": "41209",
+    "localityJa": "嬉野町大字不動山",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=129.95&lat=33.10",
+    "error": ""
+  },
   "4120932": {
     "municipalityCode": "41209",
     "localityJa": "塩田町大字馬場下",
     "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=130.06&lat=33.13",
+    "error": ""
+  },
+  "4120933": {
+    "municipalityCode": "41209",
+    "localityJa": "嬉野町大字下宿",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=129.99&lat=33.10",
     "error": ""
   },
   "4121034": {
@@ -2013,6 +2595,42 @@
     "municipalityCode": "41210",
     "localityJa": "神埼町鶴",
     "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=130.37&lat=33.31",
+    "error": ""
+  },
+  "4132732": {
+    "municipalityCode": "41327",
+    "localityJa": "豆田",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=130.40&lat=33.32",
+    "error": ""
+  },
+  "4132733": {
+    "municipalityCode": "41327",
+    "localityJa": "三津",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=130.40&lat=33.35",
+    "error": ""
+  },
+  "4134633": {
+    "municipalityCode": "41346",
+    "localityJa": "大字原古賀",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=130.44&lat=33.35",
+    "error": ""
+  },
+  "4134635": {
+    "municipalityCode": "41345",
+    "localityJa": "大字江迎",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=130.43&lat=33.30",
+    "error": ""
+  },
+  "4134636": {
+    "municipalityCode": "41346",
+    "localityJa": "大字中津隈",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=130.45&lat=33.32",
+    "error": ""
+  },
+  "4142535": {
+    "municipalityCode": "41425",
+    "localityJa": "大字坂田",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=130.12&lat=33.15",
     "error": ""
   },
   "4220221": {
@@ -2135,6 +2753,12 @@
     "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=129.32&lat=34.40",
     "error": ""
   },
+  "4220934": {
+    "municipalityCode": "42209",
+    "localityJa": "美津島町雞知",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=129.31&lat=34.27",
+    "error": ""
+  },
   "4220935": {
     "municipalityCode": "42209",
     "localityJa": "峰町三根",
@@ -2225,6 +2849,12 @@
     "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=130.20&lat=32.78",
     "error": ""
   },
+  "4221335": {
+    "municipalityCode": "42213",
+    "localityJa": "小浜町雲仙",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=130.265&lat=32.74",
+    "error": ""
+  },
   "4221337": {
     "municipalityCode": "42213",
     "localityJa": "吾妻町牛口名",
@@ -2301,6 +2931,12 @@
     "municipalityCode": "43202",
     "localityJa": "東陽町北",
     "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=130.72&lat=32.55",
+    "error": ""
+  },
+  "4320237": {
+    "municipalityCode": "43202",
+    "localityJa": "泉町柿迫",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=130.815&lat=32.55",
     "error": ""
   },
   "4320238": {
@@ -2507,6 +3143,12 @@
     "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=130.93&lat=32.24",
     "error": ""
   },
+  "4351433": {
+    "municipalityCode": "43514",
+    "localityJa": "須恵",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=130.90&lat=32.27",
+    "error": ""
+  },
   "4351434": {
     "municipalityCode": "43514",
     "localityJa": "深田南",
@@ -2561,6 +3203,18 @@
     "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=130.92&lat=33.21",
     "error": ""
   },
+  "4420501": {
+    "municipalityCode": "44205",
+    "localityJa": "蒲江大字蒲江浦",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=131.92&lat=32.80",
+    "error": ""
+  },
+  "4420503": {
+    "municipalityCode": "44205",
+    "localityJa": "蒲江大字猪串浦",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=131.90&lat=32.80",
+    "error": ""
+  },
   "4420534": {
     "municipalityCode": "44205",
     "localityJa": "直川大字上直見",
@@ -2589,6 +3243,12 @@
     "municipalityCode": "",
     "localityJa": "",
     "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=131.98&lat=32.92",
+    "error": ""
+  },
+  "4420543": {
+    "municipalityCode": "44205",
+    "localityJa": "中村南町",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=131.90&lat=32.96",
     "error": ""
   },
   "4420544": {
@@ -2625,6 +3285,12 @@
     "municipalityCode": "44208",
     "localityJa": "荻町恵良原",
     "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=131.30&lat=32.92",
+    "error": ""
+  },
+  "4420930": {
+    "municipalityCode": "44209",
+    "localityJa": "中真玉",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=131.48&lat=33.61",
     "error": ""
   },
   "4421033": {
@@ -2699,6 +3365,12 @@
     "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=131.43&lat=33.18",
     "error": ""
   },
+  "4421401": {
+    "municipalityCode": "44214",
+    "localityJa": "国東町安国寺",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=131.73&lat=33.56",
+    "error": ""
+  },
   "4421434": {
     "municipalityCode": "44214",
     "localityJa": "安岐町成久",
@@ -2709,6 +3381,30 @@
     "municipalityCode": "44214",
     "localityJa": "武蔵町古市",
     "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=131.72&lat=33.50",
+    "error": ""
+  },
+  "4520136": {
+    "municipalityCode": "45201",
+    "localityJa": "田野町乙",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=131.30&lat=31.84",
+    "error": ""
+  },
+  "4520304": {
+    "municipalityCode": "45203",
+    "localityJa": "北方町角田",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=131.53&lat=32.56",
+    "error": ""
+  },
+  "4520333": {
+    "municipalityCode": "45203",
+    "localityJa": "北川町川内名",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=131.69&lat=32.69",
+    "error": ""
+  },
+  "4520337": {
+    "municipalityCode": "45203",
+    "localityJa": "北方町角田",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=131.535&lat=32.56",
     "error": ""
   },
   "4520401": {
@@ -2723,10 +3419,58 @@
     "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=131.38&lat=31.68",
     "error": ""
   },
+  "4520533": {
+    "municipalityCode": "45205",
+    "localityJa": "須木中原",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=131.07&lat=32.08",
+    "error": ""
+  },
+  "4520602": {
+    "municipalityCode": "45206",
+    "localityJa": "大字日知屋",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=131.64&lat=32.44",
+    "error": ""
+  },
+  "4520730": {
+    "municipalityCode": "45207",
+    "localityJa": "東町",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=131.23&lat=31.46",
+    "error": ""
+  },
+  "4538331": {
+    "municipalityCode": "45383",
+    "localityJa": "大字南俣",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=131.25&lat=32.00",
+    "error": ""
+  },
+  "4543130": {
+    "municipalityCode": "45431",
+    "localityJa": "南郷神門",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=131.33&lat=32.39",
+    "error": ""
+  },
+  "4543133": {
+    "municipalityCode": "45431",
+    "localityJa": "西郷田代",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=131.42&lat=32.44",
+    "error": ""
+  },
+  "4620132": {
+    "municipalityCode": "",
+    "localityJa": "",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=130.72&lat=31.62",
+    "error": ""
+  },
   "4620136": {
     "municipalityCode": "46201",
     "localityJa": "郡山町",
     "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=130.48&lat=31.68",
+    "error": ""
+  },
+  "4620830": {
+    "municipalityCode": "",
+    "localityJa": "",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=130.26&lat=32.15",
     "error": ""
   },
   "4620835": {
@@ -2771,10 +3515,142 @@
     "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=130.38&lat=31.82",
     "error": ""
   },
+  "4621837": {
+    "municipalityCode": "46218",
+    "localityJa": "福山町福山",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=130.85&lat=31.67",
+    "error": ""
+  },
+  "4622235": {
+    "municipalityCode": "46222",
+    "localityJa": "住用町大字神屋",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=129.41&lat=28.27",
+    "error": ""
+  },
+  "4640434": {
+    "municipalityCode": "46404",
+    "localityJa": "鷹巣",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=130.21&lat=32.22",
+    "error": ""
+  },
+  "4645232": {
+    "municipalityCode": "46452",
+    "localityJa": "木場",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=130.72&lat=31.95",
+    "error": ""
+  },
+  "4645233": {
+    "municipalityCode": "46452",
+    "localityJa": "川西",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=130.74&lat=32.01",
+    "error": ""
+  },
   "4649132": {
     "municipalityCode": "46491",
     "localityJa": "根占川北",
     "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=130.77&lat=31.22",
+    "error": ""
+  },
+  "4652531": {
+    "municipalityCode": "46525",
+    "localityJa": "大字池地",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=129.23&lat=28.03",
+    "error": ""
+  },
+  "4652535": {
+    "municipalityCode": "46525",
+    "localityJa": "大字瀬相",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=129.25&lat=28.12",
+    "error": ""
+  },
+  "4720101": {
+    "municipalityCode": "47201",
+    "localityJa": "字当間",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=127.65&lat=26.20",
+    "error": ""
+  },
+  "4721400": {
+    "municipalityCode": "47214",
+    "localityJa": "平良",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=125.28&lat=24.79",
+    "error": ""
+  },
+  "4721403": {
+    "municipalityCode": "",
+    "localityJa": "",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=125.25&lat=24.92",
+    "error": ""
+  },
+  "4721435": {
+    "municipalityCode": "47214",
+    "localityJa": "下地",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=125.27&lat=24.75",
+    "error": ""
+  },
+  "4721439": {
+    "municipalityCode": "47214",
+    "localityJa": "伊良部",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=125.15&lat=24.83",
+    "error": ""
+  },
+  "4721533": {
+    "municipalityCode": "47215",
+    "localityJa": "佐敷字佐敷",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=127.79&lat=26.17",
+    "error": ""
+  },
+  "4721535": {
+    "municipalityCode": "47215",
+    "localityJa": "玉城字糸数",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=127.77&lat=26.16",
+    "error": ""
+  },
+  "4735532": {
+    "municipalityCode": "47355",
+    "localityJa": "字東",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=127.23&lat=26.58",
+    "error": ""
+  },
+  "4735730": {
+    "municipalityCode": "47357",
+    "localityJa": "字南",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=131.23499999999999&lat=25.83",
+    "error": ""
+  },
+  "4735800": {
+    "municipalityCode": "47358",
+    "localityJa": "字中野",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=131.30&lat=25.95",
+    "error": ""
+  },
+  "4735930": {
+    "municipalityCode": "",
+    "localityJa": "",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=127.975&lat=27.04",
+    "error": ""
+  },
+  "4738104": {
+    "municipalityCode": "47381",
+    "localityJa": "字南風見",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=123.88&lat=24.27",
+    "error": ""
+  },
+  "4738200": {
+    "municipalityCode": "47382",
+    "localityJa": "字与那国",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=123.01&lat=24.47",
+    "error": ""
+  },
+  "4738202": {
+    "municipalityCode": "47382",
+    "localityJa": "字与那国",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=122.95&lat=24.45",
+    "error": ""
+  },
+  "4738230": {
+    "municipalityCode": "",
+    "localityJa": "",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=123.00&lat=24.47",
     "error": ""
   },
   "0110100": {
@@ -2867,6 +3743,12 @@
     "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=143.21&lat=42.93",
     "error": ""
   },
+  "0120803": {
+    "municipalityCode": "01208",
+    "localityJa": "常呂町字東浜",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=144.09&lat=44.12",
+    "error": ""
+  },
   "0121000": {
     "municipalityCode": "01210",
     "localityJa": "日の出北三丁目",
@@ -2877,6 +3759,12 @@
     "municipalityCode": "01211",
     "localityJa": "新町三丁目",
     "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=144.26&lat=44.02",
+    "error": ""
+  },
+  "0121401": {
+    "municipalityCode": "01214",
+    "localityJa": "大字声問村",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=141.89&lat=45.32",
     "error": ""
   },
   "0121501": {
@@ -2927,10 +3815,28 @@
     "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=142.41&lat=44.29",
     "error": ""
   },
+  "0122401": {
+    "municipalityCode": "01224",
+    "localityJa": "美々",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=141.68&lat=42.78",
+    "error": ""
+  },
   "0122632": {
     "municipalityCode": "01226",
     "localityJa": "オアシス",
     "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=141.90&lat=43.49",
+    "error": ""
+  },
+  "0123100": {
+    "municipalityCode": "01231",
+    "localityJa": "盤尻",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=141.45&lat=42.84",
+    "error": ""
+  },
+  "0123501": {
+    "municipalityCode": "01235",
+    "localityJa": "厚田区聚富",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=141.42&lat=43.28",
     "error": ""
   },
   "0123520": {
@@ -2949,6 +3855,12 @@
     "municipalityCode": "01304",
     "localityJa": "第四十七線北",
     "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=141.65&lat=43.23",
+    "error": ""
+  },
+  "0139201": {
+    "municipalityCode": "01392",
+    "localityJa": "字矢追町",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=140.22&lat=42.80",
     "error": ""
   },
   "0140000": {
@@ -2987,10 +3899,22 @@
     "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=141.66&lat=44.15",
     "error": ""
   },
+  "0151700": {
+    "municipalityCode": "",
+    "localityJa": "",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=141.07&lat=45.42",
+    "error": ""
+  },
   "0154301": {
     "municipalityCode": "01543",
     "localityJa": "字西一条南四丁目",
     "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=144.10&lat=43.82",
+    "error": ""
+  },
+  "0155500": {
+    "municipalityCode": "01555",
+    "localityJa": "若咲内",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=143.36&lat=44.01",
     "error": ""
   },
   "0163820": {
@@ -3017,6 +3941,12 @@
     "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=144.07&lat=42.96",
     "error": ""
   },
+  "0169100": {
+    "municipalityCode": "01691",
+    "localityJa": "別海川上町",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=145.12&lat=43.39",
+    "error": ""
+  },
   "0169320": {
     "municipalityCode": "01693",
     "localityJa": "北一条西二丁目",
@@ -3029,10 +3959,22 @@
     "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=140.60&lat=40.71",
     "error": ""
   },
+  "0220301": {
+    "municipalityCode": "02203",
+    "localityJa": "南郷大字島守",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=141.51&lat=40.38",
+    "error": ""
+  },
   "0220331": {
     "municipalityCode": "02203",
     "localityJa": "南郷大字市野沢",
     "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=141.44&lat=40.40",
+    "error": ""
+  },
+  "0220801": {
+    "municipalityCode": "02208",
+    "localityJa": "大畑町",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=141.04&lat=41.38",
     "error": ""
   },
   "0220932": {
@@ -3059,6 +4001,18 @@
     "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=140.38&lat=40.81",
     "error": ""
   },
+  "0230733": {
+    "municipalityCode": "02307",
+    "localityJa": "字平舘根岸湯の沢",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=140.63&lat=41.15",
+    "error": ""
+  },
+  "0230735": {
+    "municipalityCode": "02307",
+    "localityJa": "字蟹田丑ケ沢",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=140.63&lat=41.04",
+    "error": ""
+  },
   "0320500": {
     "municipalityCode": "03205",
     "localityJa": "大迫町大迫",
@@ -3069,6 +4023,12 @@
     "municipalityCode": "03205",
     "localityJa": "石鳥谷町八幡",
     "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=141.15&lat=39.48",
+    "error": ""
+  },
+  "0320531": {
+    "municipalityCode": "03205",
+    "localityJa": "大迫町大迫",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=141.29&lat=39.47",
     "error": ""
   },
   "0320537": {
@@ -3149,6 +4109,30 @@
     "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=141.08&lat=39.73",
     "error": ""
   },
+  "0330231": {
+    "municipalityCode": "03302",
+    "localityJa": "葛巻",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=141.44&lat=40.04",
+    "error": ""
+  },
+  "0336631": {
+    "municipalityCode": "03366",
+    "localityJa": "沢内字太田",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=140.75&lat=39.43",
+    "error": ""
+  },
+  "0348430": {
+    "municipalityCode": "03484",
+    "localityJa": "田野畑",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=141.89&lat=39.93",
+    "error": ""
+  },
+  "0410142": {
+    "municipalityCode": "04101",
+    "localityJa": "昭和町",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=140.87&lat=38.28",
+    "error": ""
+  },
   "0420227": {
     "municipalityCode": "04202",
     "localityJa": "北上町十三浜",
@@ -3183,6 +4167,12 @@
     "municipalityCode": "04205",
     "localityJa": "本吉町津谷新明戸",
     "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=141.50&lat=38.79",
+    "error": ""
+  },
+  "0420700": {
+    "municipalityCode": "04207",
+    "localityJa": "下増田",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=140.93&lat=38.14",
     "error": ""
   },
   "0421200": {
@@ -3239,6 +4229,18 @@
     "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=141.10&lat=38.48",
     "error": ""
   },
+  "0444530": {
+    "municipalityCode": "04445",
+    "localityJa": "字町裏",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=140.86&lat=38.57",
+    "error": ""
+  },
+  "0444531": {
+    "municipalityCode": "04445",
+    "localityJa": "字中原南",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=140.78&lat=38.58",
+    "error": ""
+  },
   "0520632": {
     "municipalityCode": "05206",
     "localityJa": "船川港船川",
@@ -3251,10 +4253,22 @@
     "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=139.90&lat=38.72",
     "error": ""
   },
+  "0632132": {
+    "municipalityCode": "06321",
+    "localityJa": "谷地",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=140.31&lat=38.43",
+    "error": ""
+  },
   "0640232": {
     "municipalityCode": "06402",
     "localityJa": "大字荒砥乙",
     "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=140.10&lat=38.18",
+    "error": ""
+  },
+  "0646131": {
+    "municipalityCode": "06461",
+    "localityJa": "遊佐",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=139.915&lat=39.01",
     "error": ""
   },
   "0720232": {
@@ -3291,6 +4305,12 @@
     "municipalityCode": "07205",
     "localityJa": "大信増見",
     "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=140.25&lat=37.20",
+    "error": ""
+  },
+  "0720735": {
+    "municipalityCode": "07207",
+    "localityJa": "柱田",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=140.28&lat=37.32",
     "error": ""
   },
   "0720820": {
@@ -3347,10 +4367,52 @@
     "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=140.61&lat=37.73",
     "error": ""
   },
+  "0721336": {
+    "municipalityCode": "07213",
+    "localityJa": "前川原",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=140.51&lat=37.82",
+    "error": ""
+  },
   "0721337": {
     "municipalityCode": "07213",
     "localityJa": "霊山町掛田",
     "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=140.59&lat=37.78",
+    "error": ""
+  },
+  "0732201": {
+    "municipalityCode": "07322",
+    "localityJa": "大山",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=140.33&lat=37.56",
+    "error": ""
+  },
+  "0744734": {
+    "municipalityCode": "07447",
+    "localityJa": "鶴野辺",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=139.83&lat=37.51",
+    "error": ""
+  },
+  "0754400": {
+    "municipalityCode": "07544",
+    "localityJa": "大字下川内",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=140.87&lat=37.37",
+    "error": ""
+  },
+  "0754430": {
+    "municipalityCode": "07544",
+    "localityJa": "大字上川内",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=140.815&lat=37.34",
+    "error": ""
+  },
+  "0820232": {
+    "municipalityCode": "08202",
+    "localityJa": "助川町一丁目",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=140.65&lat=36.60",
+    "error": ""
+  },
+  "0820532": {
+    "municipalityCode": "08205",
+    "localityJa": "柿岡",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=140.20&lat=36.25",
     "error": ""
   },
   "0821530": {
@@ -3365,6 +4427,18 @@
     "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=140.73&lat=36.78",
     "error": ""
   },
+  "0822834": {
+    "municipalityCode": "08228",
+    "localityJa": "岩井",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=139.89&lat=36.05",
+    "error": ""
+  },
+  "0822934": {
+    "municipalityCode": "08229",
+    "localityJa": "犬塚",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=140.30&lat=35.97",
+    "error": ""
+  },
   "0823134": {
     "municipalityCode": "08231",
     "localityJa": "真壁町伊佐々",
@@ -3375,6 +4449,12 @@
     "municipalityCode": "08233",
     "localityJa": "玉造甲",
     "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=140.42&lat=36.10",
+    "error": ""
+  },
+  "0921531": {
+    "municipalityCode": "09215",
+    "localityJa": "中央一丁目",
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=140.15&lat=36.66",
     "error": ""
   },
   "env:0110140:0": {
