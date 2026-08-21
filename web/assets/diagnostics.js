@@ -5,49 +5,83 @@
   const TOKEN_URL = "https://manager.dmdata.jp/account/oauth2/v1/token";
   const REVOKE_URL = "https://manager.dmdata.jp/account/oauth2/v1/revoke";
   const CONTRACT_URL = "https://api.dmdata.jp/v2/contract";
-  const SOCKET_LIST_URL = "https://api.dmdata.jp/v2/socket?limit=100";
-  const SOCKET_START_URL = "https://api.dmdata.jp/v2/socket";
-  const SCOPES = [
-    "contract.list",
-    "socket.list",
-    "socket.start",
-    "socket.close",
-    "telegram.get.earthquake",
-    "eew.get.forecast"
-  ];
+  const SCOPES = ["contract.list"];
   const OAUTH_SESSION_KEYS = [
     "qd_oauth_verifier",
     "qd_oauth_state",
     "qd_oauth_client_id",
     "qd_oauth_redirect_uri"
   ];
-  const SOCKET_TEST_REQUEST = Object.freeze({
-    classifications: ["telegram.earthquake", "eew.forecast"],
-    types: ["VXSE51", "VXSE52", "VXSE53", "VXSE61", "VTSE41", "VXSE43", "VXSE45"],
-    test: "no",
-    appName: "QuakeDeck-Probe",
-    formatMode: "raw"
-  });
+
+  const CAPABILITIES = Object.freeze([
+    {
+      id: "eew-forecast",
+      classification: "eew.forecast",
+      title: "Full EEW forecast updates",
+      description: "Forecast-level early earthquake warnings, including updates for events that never become a public warning."
+    },
+    {
+      id: "eew-warning",
+      classification: "eew.warning",
+      title: "Direct EEW warning feed",
+      description: "DM-D.S.S warning telegrams delivered directly, with P2PQuake remaining available as QuakeDeck’s public-warning fallback."
+    },
+    {
+      id: "eew-realtime",
+      classification: "eew.realtime",
+      title: "Realtime intensity / PLUM data",
+      description: "Realtime intensity observations used by JMA’s PLUM method, available for future live-observation features."
+    },
+    {
+      id: "earthquake-detail",
+      classification: "telegram.earthquake",
+      title: "Richer official earthquake reports",
+      description: "JMA prefecture, region, city and station hierarchy, plus official revision states and additional report detail."
+    },
+    {
+      id: "tsunami-observations",
+      classification: "telegram.earthquake",
+      title: "Observed tsunami data",
+      description: "First-wave times and direction, measured maximum heights, tide-gauge stations, and offshore observations."
+    },
+    {
+      id: "long-period-motion",
+      classification: "telegram.earthquake",
+      title: "Long-period ground motion",
+      description: "JMA long-period ground-motion classes and observations that are especially relevant inside tall buildings."
+    },
+    {
+      id: "earthquake-activity",
+      classification: "telegram.earthquake",
+      title: "Earthquake activity and official updates",
+      description: "Felt-earthquake counts, activity reports, and revised hypocentre information for significant earthquakes."
+    },
+    {
+      id: "special-advisories",
+      classification: "telegram.earthquake",
+      title: "Special earthquake advisories",
+      description: "Nankai Trough information and Hokkaidō / Sanriku subsequent-earthquake advisories."
+    }
+  ]);
 
   const el = (id) => document.getElementById(id);
-  const clientIdInput = el("client-id");
-  const redirectInput = el("redirect-uri");
   const connectButton = el("connect-button");
   const clearButton = el("clear-button");
   const statusText = el("status-text");
   const statusDot = el("status-dot");
   const message = el("message");
   const results = el("results");
-  const contractsList = el("contracts-list");
-  const socketsList = el("sockets-list");
-  const interpretationList = el("interpretation-list");
-  const socketTestList = el("socket-test-list");
-  const summaryPre = el("summary-json");
-  const copyRedirectButton = el("copy-redirect");
-  const copyReportButton = el("copy-report");
+  const resultSummary = el("result-summary");
+  const availableList = el("available-list");
+  const unavailableList = el("unavailable-list");
+  const jquakeNote = el("jquake-note");
   const downloadReportButton = el("download-report");
 
   let sanitizedReport = null;
+
+  function configuredClientId() {
+    return String(window.QUAKEDECK_CONFIG?.clientId || "").trim();
+  }
 
   function clearOauthSession() {
     OAUTH_SESSION_KEYS.forEach((key) => sessionStorage.removeItem(key));
@@ -63,7 +97,7 @@
   }
 
   function showMessage(kind, text) {
-    message.className = `notice ${kind || "info"}`;
+    message.className = `notice ${kind || "info"} connection-message`;
     message.textContent = text;
     message.classList.remove("hidden");
   }
@@ -74,7 +108,7 @@
 
   function base64Url(bytes) {
     let binary = "";
-    bytes.forEach((b) => { binary += String.fromCharCode(b); });
+    bytes.forEach((byte) => { binary += String.fromCharCode(byte); });
     return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
   }
 
@@ -94,7 +128,7 @@
     try {
       body = await response.json();
     } catch {
-      throw new Error(`${context} returned HTTP ${response.status} with a non-JSON body.`);
+      throw new Error(`${context} returned an unreadable response (HTTP ${response.status}).`);
     }
     if (!response.ok || body.status === "error" || body.error) {
       const detail = body?.error?.message || body?.error_description || body?.error || response.statusText;
@@ -103,157 +137,12 @@
     return body;
   }
 
-  async function apiGet(url, accessToken, context) {
-    const response = await fetch(url, {
+  async function readContracts(accessToken) {
+    const response = await fetch(CONTRACT_URL, {
       headers: { Authorization: `Bearer ${accessToken}` },
       cache: "no-store"
     });
-    return readJsonResponse(response, context);
-  }
-
-  async function readOptionalJson(response) {
-    const text = await response.text();
-    if (!text) return null;
-    try {
-      return JSON.parse(text);
-    } catch {
-      return { nonJsonBody: true };
-    }
-  }
-
-  function apiErrorDetails(response, body) {
-    return {
-      httpStatus: response.status,
-      errorCode: body?.error?.code ?? response.status,
-      errorMessage: body?.error?.message || body?.error_description || body?.error || response.statusText || null
-    };
-  }
-
-  async function closeCreatedSocket(socketId, accessToken) {
-    const response = await fetch(`${SOCKET_START_URL}/${encodeURIComponent(socketId)}`, {
-      method: "DELETE",
-      headers: { Authorization: `Bearer ${accessToken}` },
-      cache: "no-store"
-    });
-    const body = await readOptionalJson(response);
-    const details = apiErrorDetails(response, body);
-    return {
-      attempted: true,
-      succeeded: response.ok,
-      httpStatus: details.httpStatus,
-      errorCode: response.ok ? null : details.errorCode,
-      errorMessage: response.ok ? null : details.errorMessage
-    };
-  }
-
-  async function runSocketEntitlementTest(accessToken) {
-    const request = {
-      classifications: [...SOCKET_TEST_REQUEST.classifications],
-      types: [...SOCKET_TEST_REQUEST.types],
-      test: SOCKET_TEST_REQUEST.test,
-      appName: SOCKET_TEST_REQUEST.appName,
-      formatMode: SOCKET_TEST_REQUEST.formatMode
-    };
-
-    let response;
-    try {
-      response = await fetch(SOCKET_START_URL, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify(request),
-        cache: "no-store"
-      });
-    } catch (error) {
-      return {
-        attemptedAt: new Date().toISOString(),
-        request,
-        outcome: "network_error",
-        httpStatus: null,
-        errorCode: null,
-        errorMessage: error instanceof Error ? error.message : String(error),
-        interpretation: "The browser could not reach Socket Start, so entitlement was not tested.",
-        cleanup: { attempted: false, succeeded: null, httpStatus: null, errorCode: null, errorMessage: null }
-      };
-    }
-
-    const body = await readOptionalJson(response);
-    const details = apiErrorDetails(response, body);
-    const result = {
-      attemptedAt: new Date().toISOString(),
-      request,
-      outcome: "unknown_error",
-      httpStatus: details.httpStatus,
-      errorCode: response.ok ? null : details.errorCode,
-      errorMessage: response.ok ? null : details.errorMessage,
-      interpretation: "DM-D.S.S returned an unrecognized result.",
-      cleanup: { attempted: false, succeeded: null, httpStatus: null, errorCode: null, errorMessage: null }
-    };
-
-    if (response.ok && body?.status === "ok") {
-      const socketId = body?.websocket?.id ?? null;
-      result.createdSocketId = socketId;
-      result.returnedClassifications = Array.isArray(body.classifications) ? body.classifications : [];
-      result.returnedTypes = Array.isArray(body.types) ? body.types : null;
-      result.returnedFormats = Array.isArray(body.formats) ? body.formats : [];
-      result.returnedAppName = body.appName ?? null;
-
-      if (socketId === null) {
-        result.outcome = "authorized_cleanup_impossible";
-        result.interpretation = "Socket Start succeeded, proving access, but no socket ID was returned for immediate cleanup. Check the DM-D.S.S control panel for QuakeDeck-Probe.";
-        result.cleanup.errorMessage = "No socket ID was returned.";
-        return result;
-      }
-
-      try {
-        result.cleanup = await closeCreatedSocket(socketId, accessToken);
-      } catch (error) {
-        result.cleanup = {
-          attempted: true,
-          succeeded: false,
-          httpStatus: null,
-          errorCode: null,
-          errorMessage: error instanceof Error ? error.message : String(error)
-        };
-      }
-
-      if (result.cleanup.succeeded) {
-        result.outcome = "authorized_socket_created_and_closed";
-        result.interpretation = "The QuakeDeck OAuth client was allowed to create the requested earthquake + EEW socket. The probe never connected to it and immediately closed the exact socket ID returned by DM-D.S.S.";
-      } else {
-        result.outcome = "authorized_cleanup_failed";
-        result.interpretation = "The QuakeDeck OAuth client was allowed to create the requested earthquake + EEW socket, but automatic Socket Close failed. Close QuakeDeck-Probe manually in the DM-D.S.S control panel.";
-      }
-      return result;
-    }
-
-    if (response.status === 409 || details.errorCode === 409) {
-      result.outcome = "connection_limit_full";
-      result.interpretation = "DM-D.S.S returned the simultaneous-connection limit while JQuake occupied the only slot. This is strong evidence that the requested earthquake + EEW socket is usable by the QuakeDeck OAuth client, although the API does not document validation order.";
-      return result;
-    }
-
-    if (response.status === 402 || details.errorCode === 402) {
-      result.outcome = "no_contract";
-      result.interpretation = "DM-D.S.S says this OAuth client has no contract usable for the requested earthquake + EEW socket. The JQuake-exclusive entitlement may be restricted to JQuake.";
-      return result;
-    }
-
-    if (response.status === 403 || details.errorCode === 403) {
-      result.outcome = "insufficient_scope_or_restricted_client";
-      result.interpretation = "The request was forbidden. Check that all six probe scopes are enabled and granted; if they are, the JQuake-exclusive entitlement may be restricted to JQuake's client.";
-      return result;
-    }
-
-    if (response.status === 400 || details.errorCode === 400) {
-      result.outcome = "invalid_socket_request";
-      result.interpretation = "DM-D.S.S rejected the socket request itself. The error text should show which requested field or data type it disliked.";
-      return result;
-    }
-
-    return result;
+    return readJsonResponse(response, "DM-D.S.S plan check");
   }
 
   async function revokeToken(clientId, token) {
@@ -270,7 +159,6 @@
   function cleanContract(item) {
     return {
       planName: item.planName ?? null,
-      planId: item.planId ?? null,
       classification: item.classification ?? null,
       isValid: Boolean(item.isValid),
       connectionCounts: Number(item.connectionCounts || 0),
@@ -278,214 +166,96 @@
     };
   }
 
-  function cleanSocket(item) {
-    return {
-      id: item.id ?? null,
-      status: item.status ?? null,
-      appName: item.appName ?? null,
-      classifications: Array.isArray(item.classifications) ? item.classifications : [],
-      types: Array.isArray(item.types) ? item.types : null,
-      formats: Array.isArray(item.formats) ? item.formats : [],
-      test: item.test ?? null,
-      start: item.start ?? null,
-      end: item.end ?? null,
-      ping: item.ping ?? null,
-      server: item.server ?? null
-    };
-  }
-
-  function classifyMeaning(classification) {
-    switch (classification) {
-      case "telegram.earthquake": return "Detailed JMA earthquake and tsunami telegrams";
-      case "eew.forecast": return "Full EEW forecast stream";
-      case "eew.warning": return "EEW warning-only stream";
-      case "eew.realtime": return "Realtime intensity / PLUM-related stream";
-      default: return "Other DM-D.S.S classification";
-    }
-  }
-
-  function buildReport(contractBody, socketBody, grantedScope, socketEntitlementTest) {
+  function buildReport(contractBody, grantedScope) {
     const contracts = (contractBody.items || []).map(cleanContract);
-    const sockets = (socketBody.items || []).map(cleanSocket);
     const validContracts = contracts.filter((item) => item.isValid);
-    const activeClassifications = [...new Set(validContracts.map((item) => item.classification).filter(Boolean))].sort();
-    const totalConnectionAllowance = validContracts.reduce((sum, item) => sum + item.connectionCounts, 0);
-    const openSockets = sockets.filter((item) => item.status === "open");
+    const activeClassifications = [...new Set(
+      validContracts.map((item) => item.classification).filter(Boolean)
+    )].sort();
+    const activeSet = new Set(activeClassifications);
+    const capabilities = CAPABILITIES.map((capability) => ({
+      ...capability,
+      available: activeSet.has(capability.classification)
+    }));
+    const hasJquakeOnlyPlan = contracts.some((contract) => {
+      const searchable = `${contract.planName || ""} ${contract.classification || ""}`.toLowerCase();
+      return contract.isValid && searchable.includes("jquake");
+    });
 
     return {
       generatedAt: new Date().toISOString(),
-      probeVersion: "0.2",
+      checkVersion: "1.0",
       requestedScopes: SCOPES,
       grantedScopes: String(grantedScope || "").split(/\s+/).filter(Boolean),
-      capabilitySummary: {
-        activeClassifications,
-        totalConnectionAllowance,
-        openSocketCount: openSockets.length,
-        freeConnectionSlotsEstimate: Math.max(0, totalConnectionAllowance - openSockets.length),
-        note: "The free-slot value is an estimate based on valid contract connection counts and currently open sockets."
-      },
-      socketEntitlementTest,
-      contracts,
-      sockets
+      activeClassifications,
+      capabilities,
+      hasJquakeOnlyPlan,
+      contracts
     };
   }
 
-  function renderReport(report) {
-    contractsList.innerHTML = "";
-    socketsList.innerHTML = "";
-    interpretationList.innerHTML = "";
-    socketTestList.innerHTML = "";
+  function appendCapability(container, capability, available) {
+    const item = document.createElement("div");
+    item.className = "result-item capability-item";
 
-    if (report.contracts.length === 0) {
-      contractsList.innerHTML = '<div class="notice info">No contract entries were returned.</div>';
+    const copy = document.createElement("div");
+    copy.className = "capability-copy";
+    const title = document.createElement("strong");
+    title.textContent = capability.title;
+    const description = document.createElement("small");
+    description.textContent = capability.description;
+    copy.append(title, description);
+
+    const badge = document.createElement("span");
+    badge.className = `badge ${available ? "ok" : "off"}`;
+    badge.textContent = available ? "Available" : "Not enabled";
+
+    item.append(copy, badge);
+    container.appendChild(item);
+  }
+
+  function renderReport(report, revokeSucceeded) {
+    availableList.innerHTML = "";
+    unavailableList.innerHTML = "";
+    jquakeNote.classList.add("hidden");
+
+    const available = report.capabilities.filter((capability) => capability.available);
+    const unavailable = report.capabilities.filter((capability) => !capability.available);
+
+    if (available.length === 0) {
+      const empty = document.createElement("div");
+      empty.className = "notice info";
+      empty.textContent = "No DM-D.S.S data capability that QuakeDeck can use is active on this account. The P2PQuake foundation remains available.";
+      availableList.appendChild(empty);
+      resultSummary.textContent = "Your account does not currently add a QuakeDeck-compatible DM-D.S.S data feed. QuakeDeck’s normal P2PQuake features are unaffected.";
     } else {
-      report.contracts.forEach((contract) => {
-        const item = document.createElement("div");
-        item.className = "result-item";
-        item.innerHTML = `
-          <div>
-            <strong>${escapeHtml(contract.planName || "Unnamed plan")}</strong>
-            <small>${escapeHtml(contract.classification || "No classification")} · ${escapeHtml(classifyMeaning(contract.classification))}</small>
-          </div>
-          <span class="badge ${contract.isValid ? "ok" : "off"}">${contract.isValid ? "Active" : "Inactive"} · +${contract.connectionCounts}</span>
-        `;
-        contractsList.appendChild(item);
-      });
+      available.forEach((capability) => appendCapability(availableList, capability, true));
+      const noun = available.length === 1 ? "capability" : "capabilities";
+      resultSummary.textContent = `Your account provides ${available.length} DM-D.S.S data ${noun} that QuakeDeck can use.`;
     }
 
-    if (report.sockets.length === 0) {
-      socketsList.innerHTML = '<div class="notice info">No sockets were returned.</div>';
-    } else {
-      report.sockets.forEach((socket) => {
-        const item = document.createElement("div");
-        item.className = "result-item";
-        const badgeClass = socket.status === "open" ? "busy" : "off";
-        const appName = socket.appName || "Unnamed application";
-        item.innerHTML = `
-          <div>
-            <strong>${escapeHtml(appName)}</strong>
-            <small>${escapeHtml((socket.classifications || []).join(", ") || "No classifications")} · started ${escapeHtml(formatTime(socket.start))}</small>
-          </div>
-          <span class="badge ${badgeClass}">${escapeHtml(socket.status || "unknown")}</span>
-        `;
-        socketsList.appendChild(item);
-      });
+    unavailable.forEach((capability) => appendCapability(unavailableList, capability, false));
+
+    if (report.hasJquakeOnlyPlan && !report.activeClassifications.includes("telegram.earthquake")) {
+      jquakeNote.textContent = "A JQuake-only plan is visible, but it is not counted here because that access is restricted to JQuake and cannot be used by QuakeDeck.";
+      jquakeNote.classList.remove("hidden");
     }
 
-    const active = report.capabilitySummary.activeClassifications;
-    const capabilityRows = [
-      ["Detailed earthquake reports", active.includes("telegram.earthquake")],
-      ["Full EEW forecasts", active.includes("eew.forecast")],
-      ["Warning-only EEW", active.includes("eew.warning")],
-      ["Realtime intensity / PLUM", active.includes("eew.realtime")]
-    ];
-    capabilityRows.forEach(([label, available]) => {
-      const item = document.createElement("div");
-      item.className = "result-item";
-      item.innerHTML = `<strong>${escapeHtml(label)}</strong><span class="badge ${available ? "ok" : "off"}">${available ? "Contract visible" : "Not visible"}</span>`;
-      interpretationList.appendChild(item);
-    });
-
-    const connectionItem = document.createElement("div");
-    connectionItem.className = "result-item";
-    connectionItem.innerHTML = `
-      <div>
-        <strong>WebSocket capacity</strong>
-        <small>${report.capabilitySummary.openSocketCount} open now; estimate excludes waiting/stale edge cases.</small>
-      </div>
-      <span class="badge ${report.capabilitySummary.freeConnectionSlotsEstimate > 0 ? "ok" : "busy"}">${report.capabilitySummary.freeConnectionSlotsEstimate} free of ${report.capabilitySummary.totalConnectionAllowance}</span>
-    `;
-    interpretationList.appendChild(connectionItem);
-
-    const test = report.socketEntitlementTest;
-    const outcomeLabels = {
-      connection_limit_full: ["409 · slot full", "busy"],
-      authorized_socket_created_and_closed: ["Authorized · cleaned up", "ok"],
-      authorized_cleanup_failed: ["Authorized · cleanup failed", "busy"],
-      authorized_cleanup_impossible: ["Authorized · check control panel", "busy"],
-      no_contract: ["402 · no contract", "off"],
-      insufficient_scope_or_restricted_client: ["403 · forbidden", "off"],
-      invalid_socket_request: ["400 · invalid request", "off"],
-      network_error: ["Network error", "off"],
-      unknown_error: [`HTTP ${test?.httpStatus ?? "?"}`, "off"]
-    };
-    const [testLabel, testClass] = outcomeLabels[test?.outcome] || outcomeLabels.unknown_error;
-
-    const resultItem = document.createElement("div");
-    resultItem.className = "result-item";
-    resultItem.innerHTML = `
-      <div>
-        <strong>Socket Start result</strong>
-        <small>${escapeHtml(test?.interpretation || "No socket test result was recorded.")}</small>
-      </div>
-      <span class="badge ${testClass}">${escapeHtml(testLabel)}</span>
-    `;
-    socketTestList.appendChild(resultItem);
-
-    const requestItem = document.createElement("div");
-    requestItem.className = "result-item";
-    requestItem.innerHTML = `
-      <div>
-        <strong>Requested stream</strong>
-        <small>${escapeHtml((test?.request?.classifications || []).join(", "))}<br>${escapeHtml((test?.request?.types || []).join(", "))}</small>
-      </div>
-      <span class="badge off">${escapeHtml(test?.request?.formatMode || "raw")}</span>
-    `;
-    socketTestList.appendChild(requestItem);
-
-    if (test?.errorMessage) {
-      const errorItem = document.createElement("div");
-      errorItem.className = "result-item";
-      errorItem.innerHTML = `
-        <div>
-          <strong>DM-D.S.S response</strong>
-          <small>${escapeHtml(test.errorMessage)}</small>
-        </div>
-        <span class="badge off">${escapeHtml(test.errorCode ?? test.httpStatus ?? "error")}</span>
-      `;
-      socketTestList.appendChild(errorItem);
-    }
-
-    if (test?.cleanup?.attempted) {
-      const cleanupItem = document.createElement("div");
-      cleanupItem.className = "result-item";
-      cleanupItem.innerHTML = `
-        <div>
-          <strong>Automatic cleanup</strong>
-          <small>${test.cleanup.succeeded
-            ? "The exact socket returned by Socket Start was closed before OAuth tokens were revoked."
-            : escapeHtml(test.cleanup.errorMessage || "Socket Close could not be confirmed. Check the DM-D.S.S control panel.")}</small>
-        </div>
-        <span class="badge ${test.cleanup.succeeded ? "ok" : "busy"}">${test.cleanup.succeeded ? "Closed" : "Check manually"}</span>
-      `;
-      socketTestList.appendChild(cleanupItem);
-    }
-
-    summaryPre.textContent = JSON.stringify(report, null, 2);
     results.classList.remove("hidden");
-  }
-
-  function escapeHtml(value) {
-    return String(value ?? "")
-      .replaceAll("&", "&amp;")
-      .replaceAll("<", "&lt;")
-      .replaceAll(">", "&gt;")
-      .replaceAll('"', "&quot;")
-      .replaceAll("'", "&#039;");
-  }
-
-  function formatTime(value) {
-    if (!value) return "unknown time";
-    const date = new Date(value);
-    return Number.isNaN(date.valueOf()) ? value : date.toLocaleString();
+    if (revokeSucceeded) {
+      setStatus("ok", "Access checked — disconnected");
+      showMessage("success", "Your DM-D.S.S access was checked and the temporary authorization was revoked.");
+    } else {
+      setStatus("bad", "Access checked — revoke manually");
+      showMessage("error", "Your result is ready, but automatic sign-out could not be confirmed. Revoke QuakeDeck from the DM-D.S.S control panel.");
+    }
   }
 
   async function startAuthorization() {
     hideMessage();
-    const clientId = clientIdInput.value.trim();
+    const clientId = configuredClientId();
     if (!clientId.startsWith("CId.")) {
-      showMessage("error", "Enter the public DM-D.S.S OAuth client ID. It should begin with CId.");
-      clientIdInput.focus();
+      showMessage("error", "The DM-D.S.S connection is temporarily unavailable. Please try again after the site connection is configured.");
       return;
     }
 
@@ -498,7 +268,6 @@
     sessionStorage.setItem("qd_oauth_state", state);
     sessionStorage.setItem("qd_oauth_client_id", clientId);
     sessionStorage.setItem("qd_oauth_redirect_uri", redirectUri);
-    localStorage.setItem("qd_public_client_id", clientId);
 
     const params = new URLSearchParams({
       client_id: clientId,
@@ -511,7 +280,7 @@
       code_challenge_method: "S256"
     });
 
-    setStatus("working", "Opening DM-D.S.S authorization…");
+    setStatus("working", "Opening secure DM-D.S.S sign-in…");
     window.location.assign(`${AUTH_URL}?${params}`);
   }
 
@@ -528,16 +297,19 @@
     history.replaceState({}, document.title, redirectUri || currentRedirectUri());
 
     if (oauthError) {
-      throw new Error(`Authorization failed: ${oauthErrorDescription || oauthError}.`);
+      clearOauthSession();
+      throw new Error(`DM-D.S.S sign-in was not completed: ${oauthErrorDescription || oauthError}.`);
     }
     if (!code || !clientId || !verifier || !redirectUri || !expectedState) {
-      throw new Error("The OAuth callback is missing its saved PKCE session. Start the connection again in this browser tab.");
+      clearOauthSession();
+      throw new Error("This sign-in session is incomplete or expired. Please connect again in this browser tab.");
     }
     if (returnedState !== expectedState) {
-      throw new Error("OAuth state mismatch. The request was rejected for safety.");
+      clearOauthSession();
+      throw new Error("The sign-in response did not match this browser session, so it was rejected for safety.");
     }
 
-    setStatus("working", "Exchanging the authorization code…");
+    setStatus("working", "Finishing secure sign-in…");
     const tokenBody = new URLSearchParams({
       client_id: clientId,
       grant_type: "authorization_code",
@@ -550,59 +322,32 @@
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
       body: tokenBody
     });
-    const token = await readJsonResponse(tokenResponse, "Token exchange");
+    const token = await readJsonResponse(tokenResponse, "DM-D.S.S sign-in");
 
-    let revokeSucceeded = true;
+    let report = null;
+    let revokeSucceeded = false;
     try {
-      setStatus("working", "Reading contracts and socket status…");
-      const [contracts, sockets] = await Promise.all([
-        apiGet(CONTRACT_URL, token.access_token, "Contract list"),
-        apiGet(SOCKET_LIST_URL, token.access_token, "Socket list")
-      ]);
-
-      setStatus("working", "Testing the QuakeDeck earthquake + EEW socket entitlement…");
-      const socketEntitlementTest = await runSocketEntitlementTest(token.access_token);
-      sanitizedReport = buildReport(contracts, sockets, token.scope, socketEntitlementTest);
-      renderReport(sanitizedReport);
+      setStatus("working", "Checking your available data…");
+      const contracts = await readContracts(token.access_token);
+      report = buildReport(contracts, token.scope);
     } finally {
-      setStatus("working", "Revoking the temporary diagnostic authorization…");
+      setStatus("working", "Disconnecting safely…");
       const accessRevoked = await revokeToken(clientId, token.access_token).catch(() => false);
       const refreshRevoked = await revokeToken(clientId, token.refresh_token).catch(() => false);
       revokeSucceeded = accessRevoked && refreshRevoked;
       clearOauthSession();
     }
 
-    setStatus("ok", "Capability report complete");
-    if (revokeSucceeded) {
-      const cleanupFailed = sanitizedReport?.socketEntitlementTest?.outcome === "authorized_cleanup_failed"
-        || sanitizedReport?.socketEntitlementTest?.outcome === "authorized_cleanup_impossible";
-      if (cleanupFailed) {
-        showMessage("error", "The diagnostic completed and OAuth tokens were revoked, but the temporary QuakeDeck-Probe socket could not be confirmed closed. Close it manually in the DM-D.S.S control panel.");
-      } else {
-        showMessage("success", "The diagnostic completed. No WebSocket connection was opened, any socket ticket created was immediately closed, and the temporary OAuth tokens were revoked.");
-      }
-    } else {
-      showMessage("error", "The report was read, but automatic token revocation could not be confirmed. Revoke QuakeDeck Capability Probe from the DM-D.S.S control panel before continuing.");
-    }
+    sanitizedReport = report;
+    renderReport(report, revokeSucceeded);
   }
 
-  function clearLocalData() {
-    localStorage.removeItem("qd_public_client_id");
+  function clearResult() {
     clearOauthSession();
-    clientIdInput.value = window.QUAKEDECK_CONFIG?.clientId || "";
     sanitizedReport = null;
     results.classList.add("hidden");
     hideMessage();
-    setStatus("", "Not connected");
-  }
-
-  async function copyText(text, successText) {
-    try {
-      await navigator.clipboard.writeText(text);
-      showMessage("success", successText);
-    } catch {
-      showMessage("error", "Clipboard access was blocked. Select and copy the value manually.");
-    }
+    setStatus("", "Ready to connect");
   }
 
   function downloadReport() {
@@ -611,20 +356,21 @@
     const url = URL.createObjectURL(blob);
     const anchor = document.createElement("a");
     anchor.href = url;
-    anchor.download = `quakedeck-dmdss-capabilities-${new Date().toISOString().replaceAll(":", "-")}.json`;
+    anchor.download = `quakedeck-dmdss-access-${new Date().toISOString().replaceAll(":", "-")}.json`;
     anchor.click();
     URL.revokeObjectURL(url);
   }
 
   async function init() {
-    redirectInput.value = currentRedirectUri();
-    clientIdInput.value = localStorage.getItem("qd_public_client_id") || window.QUAKEDECK_CONFIG?.clientId || "";
-
     connectButton.addEventListener("click", startAuthorization);
-    clearButton.addEventListener("click", clearLocalData);
-    copyRedirectButton.addEventListener("click", () => copyText(redirectInput.value, "Redirect URI copied."));
-    copyReportButton.addEventListener("click", () => sanitizedReport && copyText(JSON.stringify(sanitizedReport, null, 2), "Sanitized report copied. It contains no OAuth tokens, socket tickets, or IP addresses."));
+    clearButton.addEventListener("click", clearResult);
     downloadReportButton.addEventListener("click", downloadReport);
+
+    if (!configuredClientId().startsWith("CId.")) {
+      connectButton.disabled = true;
+      setStatus("bad", "Connection setup pending");
+      showMessage("info", "DM-D.S.S sign-in will be available here as soon as QuakeDeck’s public connection is registered.");
+    }
 
     const params = new URLSearchParams(window.location.search);
     if (params.has("code") || params.has("error")) {
@@ -632,16 +378,16 @@
       try {
         await handleCallback(params);
       } catch (error) {
-        setStatus("bad", "Capability probe failed");
+        setStatus("bad", "Could not check access");
         showMessage("error", error instanceof Error ? error.message : String(error));
       } finally {
-        connectButton.disabled = false;
+        connectButton.disabled = !configuredClientId().startsWith("CId.");
       }
     }
   }
 
   init().catch((error) => {
-    setStatus("bad", "Initialization failed");
+    setStatus("bad", "Could not start connection");
     showMessage("error", error instanceof Error ? error.message : String(error));
   });
 })();
