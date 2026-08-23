@@ -90,6 +90,23 @@ object UiLocalization {
             "DM-D.S.S not configured · FREE fallback disconnected" -> R.string.status_dmdss_free_disconnected
             "DM-D.S.S not configured · using SANDBOX fallback" -> R.string.status_dmdss_using_sandbox
             "DM-D.S.S not configured · using FREE fallback" -> R.string.status_dmdss_using_free
+            "Connect DM-D.S.S to use EEW forecasts · using P2PQuake fallback" ->
+                R.string.status_dmdss_connect_for_forecast
+            "Checking DM-D.S.S account access… · using P2PQuake fallback" ->
+                R.string.status_dmdss_checking_access
+            "No active DM-D.S.S EEW forecast plan · using P2PQuake fallback" ->
+                R.string.status_dmdss_no_forecast_plan
+            "Connecting DM-D.S.S EEW forecast… · using P2PQuake fallback" ->
+                R.string.status_dmdss_connecting_forecast
+            "DM-D.S.S EEW forecast connected · P2PQuake baseline active" ->
+                R.string.status_dmdss_forecast_connected
+            "DM-D.S.S EEW forecast" -> R.string.status_dmdss_forecast_received
+            "DM-D.S.S EEW forecast · final bulletin" ->
+                R.string.status_dmdss_forecast_final
+            "DM-D.S.S EEW forecast cancelled" -> R.string.status_dmdss_forecast_cancelled
+            "DM-D.S.S recovered recent EEW" -> R.string.status_dmdss_eew_recovered
+            "DM-D.S.S recovered recent EEW · final bulletin" ->
+                R.string.status_dmdss_eew_recovered_final
             "EEW detection expired" -> R.string.status_eew_detection_expired
             "EEW active · another earthquake report added" -> R.string.status_eew_active_other_report
             "Tsunami information received" -> R.string.status_tsunami_received

@@ -34,6 +34,42 @@ data class SeismicStation(
     val municipalityCode: String = ""
 )
 
+data class StationDetails(
+    val publishedAddressJa: String? = null,
+    val facilityNameJa: String? = null,
+    val facilityNameEn: String? = null,
+    val metadataStatus: String? = null,
+    val providerStationCode: String? = null,
+    val providerStationNetwork: String? = null,
+    val providerStationNameJa: String? = null,
+    val providerStationNameEn: String? = null,
+    val providerLatitude: Double? = null,
+    val providerLongitude: Double? = null,
+    val note: String? = null,
+    val municipalityEnglishName: String? = null
+)
+
+data class JmaReportingAreaMetadata(
+    val nameJa: String,
+    val nameEn: String,
+    val prefectureJa: String
+)
+
+data class MunicipalityParentMetadata(
+    val areaCode: String,
+    val prefectureJa: String
+)
+
+data class StationAdministrativeMetadata(
+    val reportingAreas: Map<String, JmaReportingAreaMetadata>,
+    val municipalityParents: Map<String, MunicipalityParentMetadata>
+)
+
+private data class StationRuntimeMetadata(
+    val stationDetails: Map<String, StationDetails>,
+    val administrative: StationAdministrativeMetadata
+)
+
 enum class SeismicStationProvider {
     JMA,
     NIED,
@@ -82,6 +118,7 @@ object StationCatalog {
     @Volatile private var byName: Map<String, SeismicStation> = emptyMap()
     @Volatile private var loaded = false
     @Volatile private var englishNames: Map<String, String>? = null
+    @Volatile private var runtimeMetadata: StationRuntimeMetadata? = null
 
     fun allStations(): List<SeismicStation> = stations
 
@@ -95,6 +132,28 @@ object StationCatalog {
 
     fun approvedEnglishName(context: Context, station: SeismicStation): String? =
         englishStationNames(context)[station.code]?.takeIf { it.isNotBlank() }
+
+    fun details(context: Context, station: SeismicStation): StationDetails? =
+        stationDetails(context)[station.code]
+
+    fun details(
+        context: Context,
+        prefectureJa: String,
+        stationNameJa: String
+    ): StationDetails? = lookup(prefectureJa, stationNameJa)?.let { details(context, it) }
+
+    fun reportingAreaEnglishName(
+        context: Context,
+        areaCode: String,
+        areaNameJa: String
+    ): String? = stationRuntimeMetadata(context)
+        .administrative
+        .reportingAreas[areaCode]
+        ?.takeIf { it.nameJa == areaNameJa }
+        ?.nameEn
+
+    fun administrativeMetadata(context: Context): StationAdministrativeMetadata =
+        stationRuntimeMetadata(context).administrative
 
     fun lookup(prefectureJa: String, stationNameJa: String): SeismicStation? {
         if (!loaded || stationNameJa.isBlank()) return null
@@ -122,6 +181,10 @@ object StationCatalog {
             if (!loadedFromCache) {
                 runCatching { parseBundled(appContext) }
             }
+            // Parse generated display resources on this same worker so opening
+            // Observed Intensities never performs a large JSON read on Compose.
+            runCatching { englishStationNames(appContext) }
+            runCatching { stationDetails(appContext) }
             // The live feed must remain usable even if both catalogue sources
             // are damaged. In a normal build, the bundled snapshot always wins
             // before this fallback is reached.
@@ -227,6 +290,108 @@ object StationCatalog {
                 put(code, names.optString(code))
             }
         }
+    }
+
+    private fun stationDetails(context: Context): Map<String, StationDetails> =
+        stationRuntimeMetadata(context).stationDetails
+
+    private fun stationRuntimeMetadata(context: Context): StationRuntimeMetadata {
+        runtimeMetadata?.let { return it }
+        return synchronized(this) {
+            runtimeMetadata ?: loadStationRuntimeMetadata(context).also { runtimeMetadata = it }
+        }
+    }
+
+    private fun loadStationRuntimeMetadata(context: Context): StationRuntimeMetadata {
+        val root = context.resources.openRawResource(R.raw.station_details)
+            .bufferedReader(Charsets.UTF_8)
+            .use { JSONObject(it.readText()) }
+        require(root.getInt("version") == 2) { "Unsupported station-details resource" }
+        val stations = root.getJSONObject("stations")
+        val details = HashMap<String, StationDetails>(stations.length()).apply {
+            val keys = stations.keys()
+            while (keys.hasNext()) {
+                val code = keys.next()
+                val row = stations.getJSONArray(code)
+                fun text(index: Int): String? = row.optString(index)
+                    .trim()
+                    .takeIf { it.isNotEmpty() && it != "null" }
+                fun number(index: Int): Double? = if (row.isNull(index)) {
+                    null
+                } else {
+                    row.optDouble(index).takeIf { it.isFinite() }
+                }
+                put(
+                    code,
+                    StationDetails(
+                        publishedAddressJa = text(0),
+                        facilityNameJa = text(1),
+                        facilityNameEn = text(2),
+                        metadataStatus = text(3),
+                        providerStationCode = text(4),
+                        providerStationNetwork = text(5),
+                        providerStationNameJa = text(6),
+                        providerStationNameEn = text(7),
+                        providerLatitude = number(8),
+                        providerLongitude = number(9),
+                        note = text(10),
+                        municipalityEnglishName = text(11)
+                    )
+                )
+            }
+        }.also {
+            require(it.size == 4_360) {
+                "Incomplete station-details resource: ${it.size}"
+            }
+        }
+        val reportingAreasJson = root.getJSONObject("reportingAreas")
+        val reportingAreas = HashMap<String, JmaReportingAreaMetadata>(reportingAreasJson.length()).apply {
+            val keys = reportingAreasJson.keys()
+            while (keys.hasNext()) {
+                val code = keys.next()
+                val row = reportingAreasJson.getJSONArray(code)
+                put(
+                    code,
+                    JmaReportingAreaMetadata(
+                        nameJa = row.getString(0),
+                        nameEn = row.getString(1),
+                        prefectureJa = row.getString(2)
+                    )
+                )
+            }
+        }.also {
+            require(it.size == 188) {
+                "Incomplete JMA reporting-area metadata: ${it.size}"
+            }
+        }
+        val municipalityParentsJson = root.getJSONObject("municipalityParents")
+        val municipalityParents = HashMap<String, MunicipalityParentMetadata>(
+            municipalityParentsJson.length()
+        ).apply {
+            val keys = municipalityParentsJson.keys()
+            while (keys.hasNext()) {
+                val code = keys.next()
+                val row = municipalityParentsJson.getJSONArray(code)
+                put(
+                    code,
+                    MunicipalityParentMetadata(
+                        areaCode = row.getString(0),
+                        prefectureJa = row.getString(1)
+                    )
+                )
+            }
+        }.also {
+            require(it.size == 1_894) {
+                "Incomplete municipality parent metadata: ${it.size}"
+            }
+        }
+        return StationRuntimeMetadata(
+            stationDetails = details,
+            administrative = StationAdministrativeMetadata(
+                reportingAreas = reportingAreas,
+                municipalityParents = municipalityParents
+            )
+        )
     }
 
     private fun publish(parsed: List<SeismicStation>) {

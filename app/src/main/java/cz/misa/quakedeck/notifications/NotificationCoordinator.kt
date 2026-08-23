@@ -28,11 +28,18 @@ import cz.misa.quakedeck.R
 import cz.misa.quakedeck.data.AlertLocationPolicy
 import cz.misa.quakedeck.data.AppSettings
 import cz.misa.quakedeck.data.AppSnapshot
+import cz.misa.quakedeck.data.DmDssDiagnosticsStore
 import cz.misa.quakedeck.data.EarthquakeEvent
+import cz.misa.quakedeck.data.EewAlertLevel
 import cz.misa.quakedeck.data.IntensityPoint
 import cz.misa.quakedeck.data.LiveUpdateKind
 import cz.misa.quakedeck.data.LocalEewAttentionMode
 import cz.misa.quakedeck.data.NotificationEventPayload
+import cz.misa.quakedeck.data.notificationEnabled
+import cz.misa.quakedeck.data.notificationPolicy
+import cz.misa.quakedeck.data.isReachedBy
+import cz.misa.quakedeck.data.eewAttentionIdentity
+import cz.misa.quakedeck.data.eewNotificationIdentity
 import cz.misa.quakedeck.data.PlaceNameTranslator
 import cz.misa.quakedeck.data.QuietHoursMode
 import cz.misa.quakedeck.data.HolidayCountryDetector
@@ -55,6 +62,7 @@ class NotificationCoordinator(
     private val settings: AppSettings
 ) {
     private val manager = NotificationManagerCompat.from(context)
+    private val dmdssDiagnostics = DmDssDiagnosticsStore(context)
     private val locationPolicy by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
         AlertLocationPolicy(context)
     }
@@ -67,6 +75,12 @@ class NotificationCoordinator(
 
     private enum class AlertVisualKind { EARTHQUAKE, EEW }
     private enum class BadgeVisualKind { SHINDO, TSUNAMI, STATUS }
+    private enum class PostResult(val diagnostic: String) {
+        POSTED("Notification posted"),
+        QUIET_HOURS("Suppressed by quiet hours"),
+        PERMISSION_DENIED("Android notification permission denied"),
+        SYSTEM_REJECTED("Android rejected the notification")
+    }
 
     private data class NotificationVisual(
         val accentColor: Int,
@@ -93,6 +107,14 @@ class NotificationCoordinator(
                 NotificationManager.IMPORTANCE_HIGH
             ).apply {
                 description = localized(R.string.notification_channel_eew_description)
+                enableVibration(true)
+            },
+            NotificationChannel(
+                CHANNEL_EEW_FORECAST,
+                localized(R.string.notification_channel_eew_forecast_name),
+                NotificationManager.IMPORTANCE_HIGH
+            ).apply {
+                description = localized(R.string.notification_channel_eew_forecast_description)
                 enableVibration(true)
             },
             NotificationChannel(
@@ -147,19 +169,48 @@ class NotificationCoordinator(
         // path and appearance as production data. Only QuakeDeck's deterministic,
         // user-started replay fixtures are muted to prevent intentional replay loops
         // from producing real device alerts.
-        if (!settings.notificationsEnabled || snapshot.builtInReplayActive) return
+        if (!settings.notificationsEnabled) {
+            recordDmdssEewDecision(snapshot, "All notifications disabled")
+            return
+        }
+        if (snapshot.builtInReplayActive) {
+            recordDmdssEewDecision(snapshot, "Built-in replay intentionally muted")
+            return
+        }
         val sequence = snapshot.liveUpdateSequence
         if (sequence <= 0L || sequence <= lastHandledSequence) return
         lastHandledSequence = sequence
-        if (!hasPermission()) return
+        if (!hasPermission()) {
+            recordDmdssEewDecision(snapshot, "Android notification permission denied")
+            return
+        }
 
         val locationFiltering = settings.locationBasedNotificationsEnabled
         val alertLocation = settings.alertLocation
 
         when (snapshot.liveUpdateKind) {
             LiveUpdateKind.EEW_DETECTED,
-            LiveUpdateKind.EEW -> if (settings.eewNotificationsEnabled) {
+            LiveUpdateKind.EEW -> {
                 val event = snapshot.activeEewEvent ?: snapshot.event
+                val forecastOnly = event.eewAlertLevel == EewAlertLevel.FORECAST
+                val notificationPolicy = event.eewAlertLevel.notificationPolicy(
+                    warningEnabled = settings.eewNotificationsEnabled,
+                    forecastEnabled = settings.eewForecastNotificationsEnabled
+                )
+                if (!forecastOnly) {
+                    manager.cancel(
+                        event.copy(eewAlertLevel = EewAlertLevel.FORECAST)
+                            .eewNotificationIdentity(),
+                        ID_EARTHQUAKE
+                    )
+                }
+                if (!notificationPolicy.enabled) {
+                    recordDmdssEewDecision(
+                        snapshot,
+                        if (forecastOnly) "Forecast notifications disabled" else "Warning notifications disabled"
+                    )
+                    return
+                }
                 val localPoint = if (locationFiltering) {
                     locationPolicy.eewForecastPoint(event, alertLocation)
                 } else {
@@ -168,28 +219,43 @@ class NotificationCoordinator(
                 if (!locationFiltering || localPoint != null) {
                     locationRelevantEews += event.id
                     trimIncidentSets()
-                    val attentionMode = localEewAttentionMode(
-                        updateKind = snapshot.liveUpdateKind,
+                    val attentionMode = if (notificationPolicy.allowsLocalAttention) {
+                        localEewAttentionMode(
+                            updateKind = snapshot.liveUpdateKind,
+                            event = event,
+                            testingMode = snapshot.testingMode
+                        )
+                    } else {
+                        LocalEewAttentionMode.NONE
+                    }
+                    val result = postEarthquake(
                         event = event,
-                        testingMode = snapshot.testingMode
-                    )
-                    postEarthquake(
-                        event = event,
-                        channel = CHANNEL_EEW,
-                        titleRes = R.string.notification_eew_title,
-                        urgent = true,
+                        channel = if (forecastOnly) CHANNEL_EEW_FORECAST else CHANNEL_EEW,
+                        titleRes = if (forecastOnly) {
+                            R.string.notification_eew_forecast_title
+                        } else {
+                            R.string.notification_eew_title
+                        },
+                        urgent = notificationPolicy.urgent,
                         localPoint = localPoint,
                         visualKind = AlertVisualKind.EEW,
                         localEewAttentionMode = attentionMode
                     )
+                    recordDmdssEewDecision(snapshot, result.diagnostic)
+                } else {
+                    recordDmdssEewDecision(snapshot, "Outside the selected notification location")
                 }
             }
 
             LiveUpdateKind.EEW_ENDED -> if (
-                settings.eewNotificationsEnabled && settings.notificationUpdatesEnabled
+                settings.notificationUpdatesEnabled
             ) {
                 val event = snapshot.event
-                if (!locationFiltering || event.id in locationRelevantEews) {
+                val notificationEnabled = event.eewAlertLevel.notificationEnabled(
+                    warningEnabled = settings.eewNotificationsEnabled,
+                    forecastEnabled = settings.eewForecastNotificationsEnabled
+                )
+                if (notificationEnabled && (!locationFiltering || event.id in locationRelevantEews)) {
                     postEarthquake(
                         event = event,
                         channel = CHANNEL_UPDATES,
@@ -315,6 +381,8 @@ class NotificationCoordinator(
                         title = title,
                         body = body,
                         urgent = highestRelevantGrade.severity >= TsunamiGrade.WARNING.severity,
+                        reportId = report.id,
+                        reportEventPayload = NotificationEventPayload.encodeTsunami(report),
                         smallIcon = R.drawable.ic_notification_tsunami,
                         visual = tsunamiVisual(
                             title = title,
@@ -385,7 +453,7 @@ class NotificationCoordinator(
         visualKind: AlertVisualKind = AlertVisualKind.EARTHQUAKE,
         localEewAttentionMode: LocalEewAttentionMode = LocalEewAttentionMode.NONE,
         cancelled: Boolean = false
-    ) {
+    ): PostResult {
         // Magnitude notation deliberately stays locale-neutral (4.6, never 4,6).
         val magnitudeValue = event.magnitude
             .takeIf { it > 0.0 }
@@ -493,8 +561,12 @@ class NotificationCoordinator(
             showIntensity = !cancelled
         )
 
-        post(
-            tag = "earthquake:${event.id}",
+        return post(
+            tag = if (visualKind == AlertVisualKind.EEW) {
+                event.eewNotificationIdentity()
+            } else {
+                "earthquake:${event.id}"
+            },
             id = ID_EARTHQUAKE,
             channel = channel,
             title = title,
@@ -709,12 +781,12 @@ class NotificationCoordinator(
         fullScreenIntent: Boolean = false,
         smallIcon: Int = R.drawable.ic_notification,
         visual: NotificationVisual? = null
-    ) {
+    ): PostResult {
         val withinQuietHours = !ignoreQuietHours && isQuietHours()
         if (withinQuietHours) {
             when (settings.quietHoursMode) {
-                QuietHoursMode.NOTHING -> return
-                QuietHoursMode.CRITICAL_ONLY -> if (!urgent) return
+                QuietHoursMode.NOTHING -> return PostResult.QUIET_HOURS
+                QuietHoursMode.CRITICAL_ONLY -> if (!urgent) return PostResult.QUIET_HOURS
                 QuietHoursMode.ALL_SILENT -> Unit
             }
         }
@@ -813,12 +885,13 @@ class NotificationCoordinator(
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
             ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) !=
             PackageManager.PERMISSION_GRANTED
-        ) return
+        ) return PostResult.PERMISSION_DENIED
         val notification = builder.build()
         try {
             manager.notify(tag, id, notification)
+            return PostResult.POSTED
         } catch (customViewFailure: RuntimeException) {
-            if (visual == null) throw customViewFailure
+            if (visual == null) return PostResult.SYSTEM_REJECTED
 
             // A device skin may reject a valid custom RemoteViews hierarchy. Never let
             // presentation failure suppress the actual warning: retry with Android's
@@ -852,8 +925,18 @@ class NotificationCoordinator(
                     }
                 }
                 .build()
-            manager.notify(tag, id, fallback)
+            return runCatching { manager.notify(tag, id, fallback) }
+                .fold(
+                    onSuccess = { PostResult.POSTED },
+                    onFailure = { PostResult.SYSTEM_REJECTED }
+                )
         }
+    }
+
+    private fun recordDmdssEewDecision(snapshot: AppSnapshot, result: String) {
+        if (!snapshot.dmdssEewUpdate || snapshot.liveUpdateKind != LiveUpdateKind.EEW) return
+        val event = snapshot.activeEewEvent ?: snapshot.event
+        dmdssDiagnostics.recordNotification(event.id, result)
     }
 
     private fun notificationRemoteViews(
@@ -1033,7 +1116,17 @@ class NotificationCoordinator(
         event: EarthquakeEvent,
         testingMode: Boolean
     ): LocalEewAttentionMode {
-        val selectedMode = settings.localEewAttentionMode
+        val forecast = event.eewAlertLevel == EewAlertLevel.FORECAST
+        val selectedMode = if (forecast) {
+            settings.localEewForecastAttentionMode
+        } else {
+            settings.localEewAttentionMode
+        }
+        val minimumIntensity = if (forecast) {
+            settings.minimumLocalEewForecastAttentionIntensity
+        } else {
+            settings.minimumLocalEewAttentionIntensity
+        }
         if (
             selectedMode == LocalEewAttentionMode.NONE ||
             updateKind != LiveUpdateKind.EEW ||
@@ -1041,19 +1134,16 @@ class NotificationCoordinator(
         ) {
             return LocalEewAttentionMode.NONE
         }
-        // Claim the warning before examining its predicted intensity. A later
-        // revision must never turn an already-seen EEW into a new wake/full-screen
-        // interruption merely because its forecast became stronger.
-        if (!attentionPresentedEews.add(event.id)) return LocalEewAttentionMode.NONE
-        trimIncidentSets()
         val localPoint = locationPolicy.eewForecastPoint(event, settings.alertLocation)
             ?: return LocalEewAttentionMode.NONE
-        if (
-            AlertLocationPolicy.intensityRank(localPoint.intensity) <
-            settings.minimumLocalEewAttentionIntensity.rank
-        ) {
+        if (!minimumIntensity.isReachedBy(localPoint.intensity)) {
             return LocalEewAttentionMode.NONE
         }
+        // Forecast and warning attention are independent. Each may activate once,
+        // on the first revision that actually crosses its configured JMA floor.
+        val attentionKey = event.eewAttentionIdentity()
+        if (!attentionPresentedEews.add(attentionKey)) return LocalEewAttentionMode.NONE
+        trimIncidentSets()
         if (selectedMode == LocalEewAttentionMode.WAKE_SCREEN) wakeScreen()
         return selectedMode
     }
@@ -1080,6 +1170,7 @@ class NotificationCoordinator(
         private val COLOR_STATUS_BORDER = Color.rgb(120, 144, 156)
 
         const val CHANNEL_EEW = "eew"
+        const val CHANNEL_EEW_FORECAST = "eew_forecasts"
         const val CHANNEL_TSUNAMI = "tsunami"
         const val CHANNEL_EARTHQUAKE = "earthquake_reports"
         const val CHANNEL_UPDATES = "report_updates"

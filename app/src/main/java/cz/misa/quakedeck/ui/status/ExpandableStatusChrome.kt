@@ -98,6 +98,10 @@ private val COMPACT_CLOCK_FORMAT = DateTimeFormatter.ofPattern("HH:mm:ss 'JST'")
 fun ExpandableStatusChrome(
     snapshot: AppSnapshot,
     rawSnapshot: AppSnapshot,
+    p2pSnapshot: AppSnapshot,
+    dmdssSnapshot: AppSnapshot,
+    dmdssAuthorized: Boolean,
+    dmdssAuthorizationUpdateRequired: Boolean,
     requestedMode: DataSourceMode,
     language: PlaceNameLanguage,
     sandbox: SandboxUiState,
@@ -262,6 +266,10 @@ fun ExpandableStatusChrome(
                         displayClock = drawerClock,
                         actualClock = actualClock,
                         rawSnapshot = rawSnapshot,
+                        p2pSnapshot = p2pSnapshot,
+                        dmdssSnapshot = dmdssSnapshot,
+                        dmdssAuthorized = dmdssAuthorized,
+                        dmdssAuthorizationUpdateRequired = dmdssAuthorizationUpdateRequired,
                         requestedMode = requestedMode,
                         language = language,
                         sandbox = sandbox,
@@ -503,6 +511,10 @@ private fun StatusDrawer(
     displayClock: String,
     actualClock: String,
     rawSnapshot: AppSnapshot,
+    p2pSnapshot: AppSnapshot,
+    dmdssSnapshot: AppSnapshot,
+    dmdssAuthorized: Boolean,
+    dmdssAuthorizationUpdateRequired: Boolean,
     requestedMode: DataSourceMode,
     language: PlaceNameLanguage,
     sandbox: SandboxUiState,
@@ -735,9 +747,9 @@ private fun StatusDrawer(
 
             ServiceStatusRow(
                 title = "P2PQuake",
-                state = connectionLabel(rawSnapshot.connectionState, language),
-                stateColor = connectionColor(rawSnapshot.connectionState),
-                detail = localizedStatus(rawSnapshot.statusText, language),
+                state = connectionLabel(p2pSnapshot.connectionState, language),
+                stateColor = connectionColor(p2pSnapshot.connectionState),
+                detail = localizedStatus(p2pSnapshot.statusText, language),
                 trailing = formatLastUpdate(
                     wallNowMillis = wallNowMillis,
                     lastProviderUpdateMillis = lastProviderUpdateMillis,
@@ -748,20 +760,28 @@ private fun StatusDrawer(
             Spacer(Modifier.height(8.dp))
             ServiceStatusRow(
                 title = "DM-D.S.S",
-                state = if (requestedMode == DataSourceMode.DMDSS) {
-                    localized(R.string.not_configured, language)
-                } else {
-                    localized(R.string.data_source_not_selected, language)
+                state = when {
+                    requestedMode != DataSourceMode.DMDSS ->
+                        localized(R.string.data_source_not_selected, language)
+                    !dmdssAuthorized -> localized(R.string.not_authorized, language)
+                    else -> connectionLabel(dmdssSnapshot.connectionState, language)
                 },
-                stateColor = if (requestedMode == DataSourceMode.DMDSS) {
-                    Color(0xFFFFA94D)
-                } else {
-                    MaterialTheme.colorScheme.outline
+                stateColor = when {
+                    requestedMode != DataSourceMode.DMDSS -> MaterialTheme.colorScheme.outline
+                    !dmdssAuthorized -> Color(0xFFFFA94D)
+                    else -> connectionColor(dmdssSnapshot.connectionState)
                 },
-                detail = if (requestedMode == DataSourceMode.DMDSS) {
-                    localized(R.string.free_fallback_in_use, language)
-                } else {
-                    localized(R.string.dmdss_not_selected_detail, language)
+                detail = when {
+                    requestedMode != DataSourceMode.DMDSS ->
+                        localized(R.string.dmdss_not_selected_detail, language)
+                    !dmdssAuthorized -> localized(R.string.dmdss_connect_subtitle, language)
+                    else -> buildString {
+                        append(localizedStatus(dmdssSnapshot.statusText, language))
+                        if (dmdssAuthorizationUpdateRequired) {
+                            append('\n')
+                            append(localized(R.string.dmdss_authorization_update_short, language))
+                        }
+                    }
                 }
             )
 
@@ -776,7 +796,13 @@ private fun StatusDrawer(
             Spacer(Modifier.height(2.dp))
             InfoRow(
                 label = localized(R.string.actual_provider, language),
-                value = actualProviderLabel(rawSnapshot, sandbox, language)
+                value = actualProviderLabel(
+                    rawSnapshot = rawSnapshot,
+                    dmdssSnapshot = dmdssSnapshot,
+                    requestedMode = requestedMode,
+                    sandbox = sandbox,
+                    language = language
+                )
             )
 
             Spacer(Modifier.height(8.dp))
@@ -1197,12 +1223,17 @@ private fun connectionLabel(state: ConnectionState, language: PlaceNameLanguage)
 @Composable
 private fun actualProviderLabel(
     rawSnapshot: AppSnapshot,
+    dmdssSnapshot: AppSnapshot,
+    requestedMode: DataSourceMode,
     sandbox: SandboxUiState,
     language: PlaceNameLanguage
 ): String = when {
     sandbox.active && rawSnapshot.statusText.contains("built-in", ignoreCase = true) ->
         localized(R.string.built_in_replay, language)
     sandbox.active -> localized(R.string.p2pquake_sandbox, language)
+    requestedMode == DataSourceMode.DMDSS &&
+        dmdssSnapshot.connectionState == ConnectionState.CONNECTED ->
+        localized(R.string.p2pquake_plus_dmdss, language)
     else -> localized(R.string.p2pquake_live, language)
 }
 

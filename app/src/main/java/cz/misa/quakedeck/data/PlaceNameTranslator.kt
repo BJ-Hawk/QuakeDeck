@@ -96,13 +96,23 @@ object PlaceNameTranslator {
     fun intensityReportingArea(
         context: Context,
         japanese: String,
-        setting: PlaceNameLanguage
+        setting: PlaceNameLanguage,
+        areaCode: String? = null
     ): String {
         if (!shouldUseEnglish(setting) || japanese.isBlank()) return japanese
         val dictionaries = getDictionaries(context)
-        return dictionaries.epicenter[japanese]
+        val translated = areaCode
+            ?.takeIf { it.isNotBlank() }
+            ?.let { StationCatalog.reportingAreaEnglishName(context, it, japanese) }
+            ?: dictionaries.epicenter[japanese]
             ?: dictionaries.epicenter["${japanese}地方"]
             ?: observation(context, japanese, setting)
+        if (translated.isNotBlank()) return translated
+        if (!containsJapanese(japanese)) return japanese
+        return areaCode
+            ?.takeIf { it.isNotBlank() }
+            ?.let { "JMA reporting area $it" }
+            ?: "JMA reporting area"
     }
 
     private fun translateLongestMunicipalityPrefix(

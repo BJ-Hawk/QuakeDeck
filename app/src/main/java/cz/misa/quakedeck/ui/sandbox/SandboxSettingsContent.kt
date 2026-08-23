@@ -116,6 +116,7 @@ fun SandboxSettingsPage(
     onTestInjectionDelaySecondsChanged: (Int) -> Unit,
     onInjectEarthquakeReport: (Long) -> Unit,
     onInjectEewWarning: (Long) -> Unit,
+    onInjectEewForecast: (Long) -> Unit,
     onInjectTsunamiWarning: (Long) -> Unit
 ) {
     if (!SandboxFeature.ENABLED) return
@@ -262,6 +263,13 @@ fun SandboxSettingsPage(
                     description = localized(R.string.inject_test_eew_explanation, language),
                     runLabel = localized(R.string.inject, language),
                     onRun = { onInjectEewWarning(testInjectionDelaySeconds * 1_000L) }
+                )
+                HorizontalDivider(Modifier.padding(vertical = 7.dp))
+                ReplayRow(
+                    title = localized(R.string.inject_test_eew_forecast, language),
+                    description = localized(R.string.inject_test_eew_forecast_explanation, language),
+                    runLabel = localized(R.string.inject, language),
+                    onRun = { onInjectEewForecast(testInjectionDelaySeconds * 1_000L) }
                 )
                 HorizontalDivider(Modifier.padding(vertical = 7.dp))
                 ReplayRow(

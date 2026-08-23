@@ -115,6 +115,21 @@ The eventual naming rule must be shared by report rows and deep-zoom map labels.
   leaving 79 rows; `0140000` was already research-ready from its official JMA
   address, so its approval changes the selected English identity without
   reducing the research count a second time.
+- The station-information card now consumes a compact runtime projection of
+  `station_metadata_sources.json`. The APK pre-build regenerates that projection
+  every time, validates the source schema, requires exactly 4,360 unique
+  seven-digit station codes, and carries published address, facility, provider
+  identity, coordinates, note, and municipality English-name fields. The audit
+  JSON itself remains authoritative and is not moved or rewritten.
+- The same generated projection now derives the complete stable administrative
+  relationships already present in the audit source: 188 code-keyed JMA
+  reporting areas and 1,894 code-keyed municipality parents. The build combines
+  those records with the bundled JMA English dictionary and validates that every
+  station-backed reporting area has a non-Japanese English label. No audit-source
+  row or workbook field was edited for this extension.
+- The card explicitly reports an unavailable address when the published-address
+  field is blank; it does not promote catalogue or provider coordinates into an
+  inferred street address.
 
 ## Why this approach was used
 
@@ -127,15 +142,32 @@ will keep list and map labels consistent.
 
 ## Current unfinished point
 
-The complete audited 4,360-station English map is now active in the app. Exact
-facility addresses are still incomplete: only 673 have a published source
-address, and no coordinate-derived locality may be recorded as a street address.
-The future station-details address/provenance UI is not implemented.
+The complete audited 4,360-station English map and the first station-information
+card are active in the app. Placement research is underway in
+`outputs/station-name-audit/station_metadata_sources.json` only:
+
+- 2,944 stations have source-supported facility and/or address data.
+- 2,734 have an exact published Japanese address.
+- 210 have a confirmed facility but no exact address yet.
+- 1,416 remain locality-only and require further research.
+- Address/precision validation currently reports zero mismatches.
+
+The latest completed official-source batches added 45 placements: 13 in
+Kagoshima, 26 in Toyama, one in Hokkaido, one in Yamaguchi, and four in Fukui.
+They include exact municipal and prefectural installation addresses where
+published, and facility-only records where the official source directly names
+the host but does not give a street address. Fukui additions are `1820932`
+(`今立総合支所東側`), `1821030` (`丸岡総合支所`), `1821032` (`坂井市役所`), and
+`1821033` (`春江総合支所`). `3321538` (`美作市美来`) remains deliberately
+unmapped: available evidence does not directly map the reporting station to a
+candidate facility. Evidence URLs and the full research provenance remain
+outside the compact runtime projection.
 
 ## Do not redo or change
 
-- Do not rebuild the audit from scratch; continue from the workbook, builder,
-  and caches already present.
+- Do not rebuild the audit from scratch. For the current placement-research
+  phase, use only `station_metadata_sources.json`; do not read, edit, regenerate,
+  or synchronize the workbook unless the user explicitly requests it.
 - Do not re-research, replace, or return the 13 approved municipality-singleton
   mappings to `Needs Research` unless the user explicitly changes the decision
   or the bundled catalogue later gains another station in that municipality.
@@ -164,23 +196,28 @@ The future station-details address/provenance UI is not implemented.
 ## Exact next steps
 
 1. For each station, first seek an official installation address or facility
-   identity. Record any verified address/facility and its evidence in `Station
-   Sources` / `station_metadata_sources.json`, even if the user ultimately
-   chooses a shorter display name.
-2. Maintain the JSON and workbook as identical `Station Sources` projections;
-   verify the 4,360 records and all exported fields after any data change.
-3. Regenerate the active code-keyed APK map from the JSON after approved English
-   name changes. Keep the baseline snapshot outside APK resources.
+   identity. Record any verified address/facility and its evidence in
+   `station_metadata_sources.json`, even if the user ultimately chooses a
+   shorter display name.
+2. Do not infer a placement from coordinates, Street View, nearby facilities,
+   or a generic municipality statement. Leave the record at the highest
+   source-supported precision when a direct mapping is unavailable.
+3. After a bounded research batch, run the JSON address/precision consistency
+   check. Do not re-read or update the workbook for this phase. The
+   station-details APK projection will refresh automatically on the next build.
+4. Regenerate the active code-keyed English-name APK map from the JSON after
+   approved English name changes. Keep the baseline snapshot outside APK
+   resources; this remains separate from the automatic details projection.
 
 ## Logical changes and Git state
 
 - Research artifacts were committed as `15adfa0` and `5bf125a`, both titled
   `Prepared sources for better English-name association for stations.`
 - `5bf125a` also added `/tools/source/mt_town_all.csv` to `.gitignore`.
-- Current branch is `main`; HEAD is merge commit `f0e0c55`, and the checkout was
-  synchronized with `origin/main` (`+0/-0`) and clean before this note was added.
-- App version is `0.9.84w` / versionCode `202`; the cumulative changelog entry
-  records the active station-name implementation.
+- Current branch is local `main`; this workstream was resumed from `82c8c05`.
+- App version is `0.9.84aa` / versionCode `206`; the cumulative changelog entry
+  records the active station-name implementation and the unapproved station-card
+  hotfix.
 - The station-code resolver now drives English observed-station rows and idle and
   report map labels. The baseline resource was deliberately moved out of the APK
   to `outputs/station-name-audit/station_english_names_baseline.json`.
@@ -188,3 +225,6 @@ The future station-details address/provenance UI is not implemented.
   by record: 4,360 records, zero missing rows, and zero mismatches across all 32
   exported fields. The workbook was also opened successfully in Excel after its
   package repair.
+- No source metadata row was edited for the station-card or administrative
+  projection implementations. The build-derived compact resource is generated
+  below `app/build/` and is not a second hand-maintained source.

@@ -1,0 +1,4 @@
+import {readFileSync,writeFileSync} from 'node:fs';
+const p='outputs/station-name-audit/station_metadata_sources.json',u='https://www.city.sagamihara.kanagawa.jp/_res/projects/default_project/_page_/001/008/827/2026/202606_shuusei.pdf';
+const rows=[['1415120','大沢分署'],['1415121','藤野総合事務所'],['1415130','津久井総合事務所'],['1415131','相模湖総合事務所'],['1415133','城山総合事務所'],['1415142','北消防署'],['1415244','田名分署'],['1415341','新磯まちづくりセンター'],['1415342','南消防署']];
+const d=JSON.parse(readFileSync(p,'utf8')),m=new Map(d.stations.map(s=>[s.code,s]));for(const [c,f]of rows){const s=m.get(c);if(!s||s.prefectureJa!=='神奈川県'||s.facilityNameJa)throw Error(c);s.facilityNameJa=f;s.sourceUrls=[...new Set([...(s.sourceUrls||[]),u])];s.metadataStatus='source_verified';s.note='Verified against Sagamihara City’s 2026 seismic-observation placement table.'}writeFileSync(p,`${JSON.stringify(d,null,2)}\n`);console.log(`updated ${rows.length}`);

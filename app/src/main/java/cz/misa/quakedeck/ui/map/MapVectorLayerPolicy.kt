@@ -80,3 +80,35 @@ internal fun shindoRank(value: String): Int = when (value) {
     "7" -> 9
     else -> -1
 }
+
+internal data class TierIntensity(
+    val value: String,
+    val fallbackDepth: Int
+)
+
+/** Direct detail wins; each missing tier falls back one deliberately dimmer step. */
+internal fun inheritedTierIntensity(
+    direct: String?,
+    parent: String?,
+    grandparent: String? = null
+): TierIntensity? = when {
+    direct != null && shindoRank(direct) >= 0 -> TierIntensity(direct, 0)
+    parent != null && shindoRank(parent) >= 0 -> TierIntensity(parent, 1)
+    grandparent != null && shindoRank(grandparent) >= 0 -> TierIntensity(grandparent, 2)
+    else -> null
+}
+
+internal fun municipalityTierIntensity(
+    municipalityCode: String,
+    directByMunicipalityCode: Map<String, String>,
+    parentsByMunicipalityCode: Map<String, Pair<String, String>>,
+    directByAreaCode: Map<String, String>,
+    directByPrefecture: Map<String, String>
+): TierIntensity? {
+    val parents = parentsByMunicipalityCode[municipalityCode]
+    return inheritedTierIntensity(
+        direct = directByMunicipalityCode[municipalityCode],
+        parent = parents?.first?.let(directByAreaCode::get),
+        grandparent = parents?.second?.let(directByPrefecture::get)
+    )
+}

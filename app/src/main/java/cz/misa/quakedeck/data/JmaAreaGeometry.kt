@@ -103,6 +103,8 @@ class JmaRegionalMapData(
         }
     }
 
+    fun quakeArea(code: String): JmaAreaShape? = quakeByCode[code]
+
     /**
      * Resolve an intensity entry to the finest official geometry available.
      * Detailed ~200-area polygons win; public EEW warning areas are fallback.
@@ -267,6 +269,8 @@ class JmaMunicipalityMapData(
                 }
             }
         }
+
+    fun area(code: String): JmaAreaShape? = byCode[code]
 
     /** Resolve one actual observation station to its JMA municipality or ward. */
     fun resolveObservation(point: IntensityPoint): JmaAreaShape? {

@@ -15,8 +15,31 @@ enum class MinimumLocalEewAttentionIntensity(val rank: Int) {
     SHINDO_3(3),
     SHINDO_4(4),
     SHINDO_5_LOWER(5),
-    SHINDO_5_UPPER(6)
+    SHINDO_5_UPPER(6),
+    SHINDO_6_LOWER(7),
+    SHINDO_6_UPPER(8),
+    SHINDO_7(9)
 }
+
+fun EewAlertLevel.officialMinimumAttentionIntensity(): MinimumLocalEewAttentionIntensity =
+    when (this) {
+        EewAlertLevel.FORECAST -> MinimumLocalEewAttentionIntensity.SHINDO_3
+        EewAlertLevel.WARNING -> MinimumLocalEewAttentionIntensity.SHINDO_5_LOWER
+    }
+
+fun EewAlertLevel.allowedAttentionIntensities(): List<MinimumLocalEewAttentionIntensity> =
+    MinimumLocalEewAttentionIntensity.entries.filter { intensity ->
+        when (this) {
+            EewAlertLevel.FORECAST -> intensity.rank in
+                MinimumLocalEewAttentionIntensity.SHINDO_3.rank..
+                    MinimumLocalEewAttentionIntensity.SHINDO_4.rank
+            EewAlertLevel.WARNING ->
+                intensity.rank >= MinimumLocalEewAttentionIntensity.SHINDO_5_LOWER.rank
+        }
+    }
+
+fun MinimumLocalEewAttentionIntensity.isReachedBy(predictedIntensity: String): Boolean =
+    AlertLocationPolicy.intensityRank(predictedIntensity) >= rank
 
 data class MainMapCameraState(
     val centerXFraction: Float,
@@ -40,6 +63,16 @@ enum class MinimumNotificationIntensity(val rank: Int) {
  */
 class AppSettings(context: Context) {
     private val prefs = context.getSharedPreferences("quakedeck_settings", Context.MODE_PRIVATE)
+
+    var dataSourceMode: DataSourceMode
+        get() = runCatching {
+            DataSourceMode.valueOf(
+                prefs.getString("data_source_mode", DataSourceMode.FREE.name)!!
+            )
+        }.getOrDefault(DataSourceMode.FREE)
+        set(value) {
+            prefs.edit { putString("data_source_mode", value.name) }
+        }
 
     var placeNameLanguage: PlaceNameLanguage
         get() = runCatching {
@@ -283,6 +316,10 @@ class AppSettings(context: Context) {
         get() = prefs.getBoolean("eew_notifications_enabled", true)
         set(value) { prefs.edit { putBoolean("eew_notifications_enabled", value) } }
 
+    var eewForecastNotificationsEnabled: Boolean
+        get() = prefs.getBoolean("eew_forecast_notifications_enabled", true)
+        set(value) { prefs.edit { putBoolean("eew_forecast_notifications_enabled", value) } }
+
     var localEewAttentionMode: LocalEewAttentionMode
         get() = runCatching {
             LocalEewAttentionMode.valueOf(
@@ -296,13 +333,55 @@ class AppSettings(context: Context) {
             MinimumLocalEewAttentionIntensity.valueOf(
                 prefs.getString(
                     "minimum_local_eew_attention_intensity",
-                    MinimumLocalEewAttentionIntensity.SHINDO_4.name
+                    EewAlertLevel.WARNING.officialMinimumAttentionIntensity().name
                 )!!
             )
-        }.getOrDefault(MinimumLocalEewAttentionIntensity.SHINDO_4)
+        }.getOrDefault(EewAlertLevel.WARNING.officialMinimumAttentionIntensity())
+            .takeIf {
+                it.rank >= EewAlertLevel.WARNING.officialMinimumAttentionIntensity().rank
+            }
+            ?: EewAlertLevel.WARNING.officialMinimumAttentionIntensity()
         set(value) {
             prefs.edit {
-                putString("minimum_local_eew_attention_intensity", value.name)
+                putString(
+                    "minimum_local_eew_attention_intensity",
+                    value.takeIf {
+                        it.rank >= EewAlertLevel.WARNING.officialMinimumAttentionIntensity().rank
+                    }?.name ?: EewAlertLevel.WARNING.officialMinimumAttentionIntensity().name
+                )
+            }
+        }
+
+    var localEewForecastAttentionMode: LocalEewAttentionMode
+        get() = runCatching {
+            LocalEewAttentionMode.valueOf(
+                prefs.getString(
+                    "local_eew_forecast_attention_mode",
+                    LocalEewAttentionMode.NONE.name
+                )!!
+            )
+        }.getOrDefault(LocalEewAttentionMode.NONE)
+        set(value) { prefs.edit { putString("local_eew_forecast_attention_mode", value.name) } }
+
+    var minimumLocalEewForecastAttentionIntensity: MinimumLocalEewAttentionIntensity
+        get() = runCatching {
+            MinimumLocalEewAttentionIntensity.valueOf(
+                prefs.getString(
+                    "minimum_local_eew_forecast_attention_intensity",
+                    EewAlertLevel.FORECAST.officialMinimumAttentionIntensity().name
+                )!!
+            )
+        }.getOrDefault(EewAlertLevel.FORECAST.officialMinimumAttentionIntensity())
+            .takeIf { it in EewAlertLevel.FORECAST.allowedAttentionIntensities() }
+            ?: EewAlertLevel.FORECAST.officialMinimumAttentionIntensity()
+        set(value) {
+            prefs.edit {
+                putString(
+                    "minimum_local_eew_forecast_attention_intensity",
+                    value.takeIf {
+                        it in EewAlertLevel.FORECAST.allowedAttentionIntensities()
+                    }?.name ?: EewAlertLevel.FORECAST.officialMinimumAttentionIntensity().name
+                )
             }
         }
 

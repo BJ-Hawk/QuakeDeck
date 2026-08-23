@@ -5,6 +5,32 @@ import androidx.compose.runtime.Immutable
 enum class DataSourceMode { FREE, DMDSS }
 enum class ConnectionState { CONNECTED, CONNECTING, FREE_FALLBACK, DISCONNECTED }
 enum class EarthquakeEventKind { CONFIRMED, EEW }
+enum class EewAlertLevel { FORECAST, WARNING }
+
+data class EewNotificationPolicy(
+    val enabled: Boolean,
+    val urgent: Boolean,
+    val allowsLocalAttention: Boolean
+)
+
+fun EewAlertLevel.notificationEnabled(
+    warningEnabled: Boolean,
+    forecastEnabled: Boolean
+): Boolean = when (this) {
+    EewAlertLevel.WARNING -> warningEnabled
+    EewAlertLevel.FORECAST -> forecastEnabled
+}
+
+fun EewAlertLevel.notificationPolicy(
+    warningEnabled: Boolean,
+    forecastEnabled: Boolean
+): EewNotificationPolicy = EewNotificationPolicy(
+    enabled = notificationEnabled(warningEnabled, forecastEnabled),
+    // A forecast is the earlier paid EEW alert, not a low-value status update.
+    // Once enabled it receives the same audible and local-attention path as a warning.
+    urgent = true,
+    allowsLocalAttention = true
+)
 
 enum class EarthquakeReportStage {
     UNKNOWN,
@@ -87,6 +113,7 @@ data class EarthquakeEvent(
     val longitude: Double,
     val points: List<IntensityPoint>,
     val kind: EarthquakeEventKind = EarthquakeEventKind.CONFIRMED,
+    val eewAlertLevel: EewAlertLevel = EewAlertLevel.WARNING,
     val reportSerial: String? = null,
     val reportIssuedAt: String? = null,
     val reportStage: EarthquakeReportStage = EarthquakeReportStage.UNKNOWN,
@@ -104,6 +131,10 @@ data class EarthquakeEvent(
      */
     val timelineOffsetMillis: Long = 0L
 )
+
+fun EarthquakeEvent.eewAttentionIdentity(): String = "$eewAlertLevel:$id"
+
+fun EarthquakeEvent.eewNotificationIdentity(): String = "eew:$eewAlertLevel:$id"
 
 
 
@@ -188,6 +219,7 @@ data class AppSnapshot(
     val statusText: String = "",
     val liveUpdateKind: LiveUpdateKind = LiveUpdateKind.NONE,
     val liveUpdateSequence: Long = 0L,
+    val dmdssEewUpdate: Boolean = false,
     val testingMode: Boolean = false,
     val builtInReplayActive: Boolean = false,
     val showingRememberedReports: Boolean = false,

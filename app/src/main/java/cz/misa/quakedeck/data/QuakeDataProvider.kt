@@ -32,6 +32,9 @@ interface QuakeDataProvider {
     /** Inject one clearly labelled EEW warning without replacing the live connection. */
     fun injectTestEewWarning(delayMillis: Long = 0L) = Unit
 
+    /** Inject one clearly labelled forecast-level EEW without replacing the live connection. */
+    fun injectTestEewForecast(delayMillis: Long = 0L) = Unit
+
     /** Inject one clearly labelled tsunami warning without replacing the live connection. */
     fun injectTestTsunamiWarning(delayMillis: Long = 0L) = Unit
 
@@ -67,28 +70,4 @@ interface QuakeDataProvider {
         eventKey: String,
         onResult: (Result<HistoricalIncident>) -> Unit
     ) = onResult(Result.failure(IllegalArgumentException("Historical archive unavailable")))
-}
-
-/**
- * Placeholder for the real DM-D.S.S adapter.
- *
- * Important: this class intentionally does NOT create its own P2PQuake fallback
- * connection. The app-level controller owns the single FREE socket and reuses it
- * while DM-D.S.S is not configured. That prevents duplicate P2PQuake /ws sessions.
- */
-@Suppress("unused")
-class DmDssProvider : QuakeDataProvider {
-    override val mode = DataSourceMode.DMDSS
-
-    override fun start(onSnapshot: (AppSnapshot) -> Unit) {
-        onSnapshot(
-            waitingSnapshot(
-                mode = DataSourceMode.DMDSS,
-                state = ConnectionState.DISCONNECTED,
-                status = "DM-D.S.S adapter not configured"
-            )
-        )
-    }
-
-    override fun stop() = Unit
 }

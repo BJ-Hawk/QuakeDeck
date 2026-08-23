@@ -67,4 +67,56 @@ class MapVectorLayerPolicyTest {
 
         assertEquals("0", values["municipality"])
     }
+
+    @Test
+    fun detailedIntensityFallsBackThroughParentTiers() {
+        assertEquals(TierIntensity("5+", 0), inheritedTierIntensity("5+", "4", "3"))
+        assertEquals(TierIntensity("4", 1), inheritedTierIntensity(null, "4", "3"))
+        assertEquals(TierIntensity("3", 2), inheritedTierIntensity(null, null, "3"))
+        assertEquals(null, inheritedTierIntensity(null, "—", null))
+    }
+
+    @Test
+    fun municipalityUsesStableCodeParentageForFadedAreaAndPrefectureColours() {
+        val parents = mapOf(
+            "1320100" to ("351" to "東京都"),
+            "1320200" to ("352" to "東京都")
+        )
+
+        assertEquals(
+            TierIntensity("2", 1),
+            municipalityTierIntensity(
+                municipalityCode = "1320100",
+                directByMunicipalityCode = emptyMap(),
+                parentsByMunicipalityCode = parents,
+                directByAreaCode = mapOf("351" to "2"),
+                directByPrefecture = mapOf("東京都" to "3")
+            )
+        )
+        assertEquals(
+            TierIntensity("3", 2),
+            municipalityTierIntensity(
+                municipalityCode = "1320200",
+                directByMunicipalityCode = emptyMap(),
+                parentsByMunicipalityCode = parents,
+                directByAreaCode = emptyMap(),
+                directByPrefecture = mapOf("東京都" to "3")
+            )
+        )
+    }
+
+    @Test
+    fun directMunicipalityColourStillWinsOverGeneratedParents() {
+        assertEquals(
+            TierIntensity("1", 0),
+            municipalityTierIntensity(
+                municipalityCode = "1320100",
+                directByMunicipalityCode = mapOf("1320100" to "1"),
+                parentsByMunicipalityCode = mapOf("1320100" to ("351" to "東京都")),
+                directByAreaCode = mapOf("351" to "2"),
+                directByPrefecture = mapOf("東京都" to "3")
+            )
+        )
+    }
+
 }

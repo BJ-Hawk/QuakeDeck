@@ -5,13 +5,56 @@ import org.json.JSONObject
 
 /**
  * A notification survives longer than the app process that created it. Keep a
- * compact copy of its report in the notification Intent so a cold launch can
- * still open and focus the correct event before live history has returned.
+ * compact copy of its earthquake/EEW or tsunami incident in the notification
+ * Intent so a cold launch can restore the detail card and camera before live
+ * runtime state has returned.
  */
 object NotificationEventPayload {
     private const val MAX_PAYLOAD_CHARS = 450_000
 
     fun encode(event: EarthquakeEvent): String? = runCatching {
+        encodeEvent(event)
+            .put(
+                "launchKind",
+                if (event.kind == EarthquakeEventKind.EEW) {
+                    NotificationLaunchKind.EEW.name
+                } else {
+                    NotificationLaunchKind.EARTHQUAKE.name
+                }
+            )
+            .toString()
+    }.getOrNull()?.takeIf { it.length <= MAX_PAYLOAD_CHARS }
+
+    fun encodeTsunami(report: TsunamiReport): String? = runCatching {
+        JSONObject()
+            .put("launchKind", NotificationLaunchKind.TSUNAMI.name)
+            .put("tsunami", encodeTsunamiReport(report))
+            .toString()
+    }.getOrNull()?.takeIf { it.length <= MAX_PAYLOAD_CHARS }
+
+    fun decode(payload: String?): EarthquakeEvent? = decodeLaunch(payload)?.event
+
+    fun decodeLaunch(payload: String?): NotificationLaunchPayload? = runCatching {
+        val json = JSONObject(payload ?: return null)
+        val event = decodeEvent(json)
+        val tsunami = json.optJSONObject("tsunami")?.let(::decodeTsunamiReport)
+        val launchKind = enumValueOrDefault(
+            json.optString("launchKind"),
+            when {
+                tsunami != null -> NotificationLaunchKind.TSUNAMI
+                event?.kind == EarthquakeEventKind.EEW -> NotificationLaunchKind.EEW
+                else -> NotificationLaunchKind.EARTHQUAKE
+            }
+        )
+        if (event == null && tsunami == null) return null
+        NotificationLaunchPayload(
+            kind = launchKind,
+            event = event,
+            tsunami = tsunami
+        )
+    }.getOrNull()
+
+    private fun encodeEvent(event: EarthquakeEvent): JSONObject =
         JSONObject()
             .put("id", event.id)
             .put("place", event.place)
@@ -22,6 +65,7 @@ object NotificationEventPayload {
             .putNullable("latitude", event.latitude.takeIf { it.isFinite() })
             .putNullable("longitude", event.longitude.takeIf { it.isFinite() })
             .put("kind", event.kind.name)
+            .put("eewAlertLevel", event.eewAlertLevel.name)
             .putNullable("reportSerial", event.reportSerial)
             .putNullable("reportIssuedAt", event.reportIssuedAt)
             .put("reportStage", event.reportStage.name)
@@ -31,6 +75,7 @@ object NotificationEventPayload {
             .put("hasHypocenter", event.hasHypocenter)
             .putNullable("reportCorrection", event.reportCorrection)
             .put("isCancelled", event.isCancelled)
+            .put("timelineOffsetMillis", event.timelineOffsetMillis)
             .put("points", JSONArray().apply {
                 event.points.forEach { point ->
                     put(
@@ -48,11 +93,8 @@ object NotificationEventPayload {
                     )
                 }
             })
-            .toString()
-    }.getOrNull()?.takeIf { it.length <= MAX_PAYLOAD_CHARS }
 
-    fun decode(payload: String?): EarthquakeEvent? = runCatching {
-        val json = JSONObject(payload ?: return null)
+    private fun decodeEvent(json: JSONObject): EarthquakeEvent? {
         val id = json.optString("id")
         val originTime = json.optString("originTime")
         if (id.isBlank() || originTime.isBlank()) return null
@@ -79,7 +121,7 @@ object NotificationEventPayload {
                 )
             }
         }
-        EarthquakeEvent(
+        return EarthquakeEvent(
             id = id,
             place = json.optString("place"),
             originTime = originTime,
@@ -90,6 +132,10 @@ object NotificationEventPayload {
             longitude = json.nullableDouble("longitude") ?: Double.NaN,
             points = points,
             kind = enumValueOrDefault(json.optString("kind"), EarthquakeEventKind.CONFIRMED),
+            eewAlertLevel = enumValueOrDefault(
+                json.optString("eewAlertLevel"),
+                EewAlertLevel.WARNING
+            ),
             reportSerial = json.nullableString("reportSerial"),
             reportIssuedAt = json.nullableString("reportIssuedAt"),
             reportStage = enumValueOrDefault(
@@ -101,9 +147,69 @@ object NotificationEventPayload {
             reportCount = json.optInt("reportCount", 1).coerceAtLeast(1),
             hasHypocenter = json.optBoolean("hasHypocenter", true),
             reportCorrection = json.nullableString("reportCorrection"),
-            isCancelled = json.optBoolean("isCancelled", false)
+            isCancelled = json.optBoolean("isCancelled", false),
+            timelineOffsetMillis = json.optLong("timelineOffsetMillis", 0L)
         )
-    }.getOrNull()
+    }
+
+    private fun encodeTsunamiReport(report: TsunamiReport): JSONObject = JSONObject()
+        .put("id", report.id)
+        .put("issueTime", report.issueTime)
+        .put("issueType", report.issueType)
+        .putNullable("expiresAt", report.expiresAt)
+        .put("cancelled", report.cancelled)
+        .put("timelineOffsetMillis", report.timelineOffsetMillis)
+        .put("areas", JSONArray().apply {
+            report.areas.forEach { area ->
+                put(
+                    JSONObject()
+                        .put("name", area.name)
+                        .put("grade", area.grade.name)
+                        .put("immediate", area.immediate)
+                        .putNullable("arrivalTime", area.arrivalTime)
+                        .putNullable("arrivalCondition", area.arrivalCondition)
+                        .putNullable("maxHeightDescription", area.maxHeightDescription)
+                        .putNullable("maxHeightMeters", area.maxHeightMeters)
+                )
+            }
+        })
+
+    private fun decodeTsunamiReport(json: JSONObject): TsunamiReport? {
+        val id = json.optString("id")
+        val issueTime = json.optString("issueTime")
+        if (id.isBlank() || issueTime.isBlank()) return null
+        val areas = buildList {
+            val source = json.optJSONArray("areas") ?: return@buildList
+            for (index in 0 until source.length()) {
+                val area = source.optJSONObject(index) ?: continue
+                val name = area.optString("name")
+                if (name.isBlank()) continue
+                add(
+                    TsunamiArea(
+                        name = name,
+                        grade = enumValueOrDefault(
+                            area.optString("grade"),
+                            TsunamiGrade.UNKNOWN
+                        ),
+                        immediate = area.optBoolean("immediate", false),
+                        arrivalTime = area.nullableString("arrivalTime"),
+                        arrivalCondition = area.nullableString("arrivalCondition"),
+                        maxHeightDescription = area.nullableString("maxHeightDescription"),
+                        maxHeightMeters = area.nullableDouble("maxHeightMeters")
+                    )
+                )
+            }
+        }
+        return TsunamiReport(
+            id = id,
+            issueTime = issueTime,
+            issueType = json.optString("issueType"),
+            expiresAt = json.nullableString("expiresAt"),
+            cancelled = json.optBoolean("cancelled", false),
+            areas = areas,
+            timelineOffsetMillis = json.optLong("timelineOffsetMillis", 0L)
+        )
+    }
 
     private fun JSONObject.putNullable(name: String, value: Any?): JSONObject =
         put(name, value ?: JSONObject.NULL)
@@ -123,4 +229,53 @@ object NotificationEventPayload {
 
     private inline fun <reified T : Enum<T>> enumValueOrDefault(value: String, fallback: T): T =
         enumValues<T>().firstOrNull { it.name == value } ?: fallback
+}
+
+enum class NotificationLaunchKind { EARTHQUAKE, EEW, TSUNAMI }
+
+data class NotificationLaunchPayload(
+    val kind: NotificationLaunchKind,
+    val event: EarthquakeEvent? = null,
+    val tsunami: TsunamiReport? = null
+)
+
+/**
+ * Rehydrates the transient incident state that Android outlived when it retained
+ * a notification after the QuakeDeck process was removed. A matching live
+ * runtime incident always wins once it has been recovered.
+ */
+fun AppSnapshot.withNotificationLaunch(payload: NotificationLaunchPayload?): AppSnapshot {
+    payload ?: return this
+    return when (payload.kind) {
+        NotificationLaunchKind.EARTHQUAKE -> this
+        NotificationLaunchKind.EEW -> {
+            val notificationEvent = payload.event ?: return this
+            if (activeEew && activeEewEvent?.id == notificationEvent.id) {
+                this
+            } else {
+                copy(
+                    activeEew = !notificationEvent.isCancelled,
+                    activeEewEvent = notificationEvent.takeUnless { it.isCancelled },
+                    event = notificationEvent,
+                    liveUpdateKind = LiveUpdateKind.NONE
+                )
+            }
+        }
+        NotificationLaunchKind.TSUNAMI -> {
+            val notificationTsunami = payload.tsunami ?: return this
+            if (
+                activeTsunami &&
+                tsunami?.id == notificationTsunami.id &&
+                !notificationTsunami.cancelled
+            ) {
+                this
+            } else {
+                copy(
+                    activeTsunami = !notificationTsunami.cancelled,
+                    tsunami = notificationTsunami,
+                    liveUpdateKind = LiveUpdateKind.NONE
+                )
+            }
+        }
+    }
 }
