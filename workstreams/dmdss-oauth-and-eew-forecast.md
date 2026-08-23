@@ -1,5 +1,11 @@
 # DM-D.S.S OAuth and EEW forecast
 
+## Status — pending testing with live EEW events
+
+**This integration is not yet live-event validated or production-verified.** The repository implementation, Sandbox exercises, compilation, and automated tests are complete, but those checks cannot prove real DM-D.S.S delivery. Validation remains pending against actual live EEW Forecast events, including notification delivery, successive revisions, Forecast-to-Warning escalation, cancellation/final bulletins, socket interruption and foreground-service reconnection, and bounded `gd.eew` recovery after a genuinely missed live bulletin.
+
+Until that validation is observed on a real authorized device/account, documentation must describe the DM-D.S.S integration as **pending live-event testing**, not complete or proven reliable. P2PQuake remains the permanent baseline and fallback throughout testing.
+
 ## Objective
 
 Implement the first production-shaped Android DM-D.S.S integration: user OAuth and live `eew.forecast` reception, while retaining the existing P2PQuake provider as the single baseline for earthquake reports, tsunami information, archives, Sandbox tooling, and fallback EEW warnings.
@@ -46,7 +52,8 @@ Implement the first production-shaped Android DM-D.S.S integration: user OAuth a
 
 ## Current unfinished state
 
-- The repository implementation is complete and awaits live device/account validation plus user review. Existing authorizations must use Update authorization once to add `socket.close` and `gd.eew`; cancelling that flow deliberately leaves the working authorization and live forecast access intact, but post-event recovery remains unavailable.
+- The repository implementation is code-complete, but the DM-D.S.S integration remains **pending testing with live EEW events** and is not production-verified. Existing authorizations must use Update authorization once to add `socket.close` and `gd.eew`; cancelling that flow deliberately leaves the working authorization and live forecast access intact, but post-event recovery remains unavailable.
+- Sandbox injections and automated tests verify internal routing and policy only. They do not establish that a real DM-D.S.S WebSocket envelope will arrive, parse, notify, survive long-running foreground monitoring, or recover correctly after a real connection interruption.
 - The public OAuth client must have the exact Android redirect URI `cz.misa.quakedeck://oauth/dmdss` registered in the DM-D.S.S control panel before a live device authorization can complete. Repository code cannot verify that account-side setting.
 
 ## Important things not to redo or change
@@ -59,14 +66,15 @@ Implement the first production-shaped Android DM-D.S.S integration: user OAuth a
 ## Exact next steps
 
 1. Confirm the exact callback URI is registered for the supplied public OAuth client.
-2. Exercise authorization on a device with an account that has `eew.forecast`, then confirm live forecast receipt, reconnect, cancellation, and P2PQuake continuity.
+2. Exercise authorization on a device with an account that has `eew.forecast`, then wait for and document at least one actual live Forecast event; confirm intake diagnostics, detail state, and audible notification delivery.
 3. Exercise authorization with an account lacking `eew.forecast`, confirm its other active plans remain visible, and confirm P2PQuake remains the effective EEW fallback without a DM-D.S.S socket attempt.
 4. Confirm Warning and Forecast notifications are independently audible and default on, with Forecast choices limited to Shindo 3/4 and Warning choices covering Shindo 5−/5+/6−/6+/7.
 5. Confirm a later Forecast or Warning revision activates attention exactly once when it first crosses its own selected threshold, and that the same active event crossing from Forecast to Warning produces a new Warning notification.
 6. Exercise both one-shot Sandbox EEW injectors with the configured delay and confirm each follows its own notification control while active Sandbox mode retains the existing no-wake/no-takeover protection.
 7. Swipe QuakeDeck away, then open newly posted Forecast, Warning, earthquake, and tsunami Sandbox notifications. Confirm their detail cards and camera state restore, including EEW rings/countdown and flashing tsunami forecast areas framed around the affected coasts.
 8. Update authorization on the live account, reconnect, and confirm the diagnostics show a successful post-event recovery check without duplicating a live event.
-9. Obtain user approval before finalizing or committing the cumulative release.
+9. Validate a real successive-revision sequence, including Forecast-to-Warning escalation if one occurs, and retain the pending status for any path that has not actually occurred live.
+10. Remove the pending-live-event status only after the user reviews the observed live evidence, then obtain approval before finalizing or committing the cumulative release.
 
 ## Relevant logical changes and Git state
 

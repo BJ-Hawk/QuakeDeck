@@ -25,7 +25,7 @@ Current development version: **0.9.84ai (in progress)**. QuakeDeck is still pre-
 
 ## Data sources
 
-P2PQuake remains the always-running free baseline and fallback. Users may optionally authorize DM-D.S.S to overlay live EEW forecasts when their account has an active `eew.forecast` plan; the source panel also shows their other active DM-D.S.S plans without using those data feeds yet. See `THIRD_PARTY_DATA.md` for bundled-data attribution and licensing notes.
+P2PQuake remains the always-running free baseline and fallback. Users may optionally authorize DM-D.S.S to overlay live EEW forecasts when their account has an active `eew.forecast` plan; the source panel also shows their other active DM-D.S.S plans without using those data feeds yet. **DM-D.S.S integration status: pending testing with actual live EEW events.** Sandbox injections, compilation, and automated tests do not yet establish production reliability for live reception, notification delivery, escalation, foreground reconnection, or post-event recovery. See `THIRD_PARTY_DATA.md` for bundled-data attribution and licensing notes.
 
 ## Opening and building
 
