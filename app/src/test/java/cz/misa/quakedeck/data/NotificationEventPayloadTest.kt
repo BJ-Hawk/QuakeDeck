@@ -96,6 +96,46 @@ class NotificationEventPayloadTest {
         assertFalse(restored.activeEewEvent == notificationEvent)
     }
 
+    @Test
+    fun expiredNotificationPayloadCannotResurrectAnEndedEew() {
+        val event = testEvent(kind = EarthquakeEventKind.EEW)
+        val activeUntil = 4_000L
+        val launch = NotificationEventPayload.decodeLaunch(
+            NotificationEventPayload.encode(event, activeUntilMillis = activeUntil)
+        )!!
+
+        assertEquals(activeUntil, launch.activeUntilMillis)
+        val restored = waitingSnapshot().withNotificationLaunch(
+            payload = launch,
+            nowEpochMillis = activeUntil
+        )
+
+        assertFalse(restored.activeEew)
+        assertEquals(null, restored.activeEewEvent)
+    }
+
+    @Test
+    fun explicitProviderEndWinsOverAStillFreshNotificationPayload() {
+        val event = testEvent(kind = EarthquakeEventKind.EEW)
+        val ended = waitingSnapshot().copy(
+            activeEew = false,
+            activeEewEvent = null,
+            event = event,
+            liveUpdateKind = LiveUpdateKind.EEW_ENDED,
+            liveUpdateSequence = 7L
+        )
+        val launch = NotificationLaunchPayload(
+            kind = NotificationLaunchKind.EEW,
+            event = event,
+            activeUntilMillis = 10_000L
+        )
+
+        assertEquals(
+            ended,
+            ended.withNotificationLaunch(payload = launch, nowEpochMillis = 5_000L)
+        )
+    }
+
     private fun testEvent(kind: EarthquakeEventKind): EarthquakeEvent = EarthquakeEvent(
         id = "notification-event",
         place = "Off Chiba Prefecture",

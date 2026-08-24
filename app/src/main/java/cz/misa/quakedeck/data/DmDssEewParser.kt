@@ -1,10 +1,15 @@
 package cz.misa.quakedeck.data
 
 import org.json.JSONObject
+import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
+import java.nio.charset.StandardCharsets
 import java.time.LocalDateTime
 import java.time.OffsetDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import java.util.Base64
+import java.util.zip.GZIPInputStream
 
 internal data class DmDssEewUpdate(
     val event: EarthquakeEvent,
@@ -23,6 +28,11 @@ internal enum class DmDssEewRejection(val diagnostic: String) {
     WRONG_TYPE("Unexpected EEW bulletin type"),
     MISSING_BODY("Bulletin body was missing"),
     UNREADABLE_BODY("Bulletin body could not be read"),
+    UNSUPPORTED_BODY_ENCODING("Unsupported bulletin body encoding"),
+    INVALID_BASE64_BODY("Bulletin body Base64 could not be decoded"),
+    UNSUPPORTED_BODY_COMPRESSION("Unsupported bulletin body compression"),
+    INVALID_GZIP_BODY("Bulletin body GZIP could not be decompressed"),
+    BODY_TOO_LARGE("Decoded bulletin body exceeded the safety limit"),
     WRONG_SCHEMA("Unexpected converted-data schema"),
     NON_STANDARD_STATUS("Non-standard bulletin status"),
     MISSING_EVENT_BODY("Converted EEW body was missing"),
@@ -40,6 +50,7 @@ internal sealed interface DmDssEewParseResult {
 }
 
 internal object DmDssEewParser {
+    private const val FORECAST_ACTIVE_MILLIS = 180_000L
     private val jstZone = ZoneId.of("Asia/Tokyo")
     private val jstFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss 'JST'")
 
@@ -70,7 +81,11 @@ internal object DmDssEewParser {
         }
         val bodyText = envelope.optString("body")
         if (bodyText.isBlank()) return rejected(DmDssEewRejection.MISSING_BODY)
-        val report = runCatching { JSONObject(bodyText) }.getOrNull()
+        val decodedBody = when (val decoded = decodeBody(envelope, bodyText)) {
+            is DmDssBodyDecodeResult.Decoded -> decoded.text
+            is DmDssBodyDecodeResult.Rejected -> return rejected(decoded.reason)
+        }
+        val report = runCatching { JSONObject(decodedBody) }.getOrNull()
             ?: return rejected(DmDssEewRejection.UNREADABLE_BODY)
         if (report.optJSONObject("_schema")?.optString("type") != "eew-information") {
             return rejected(DmDssEewRejection.WRONG_SCHEMA)
@@ -166,11 +181,7 @@ internal object DmDssEewParser {
             ?: "—"
         val originTimeRaw = earthquake.optString("originTime")
             .ifBlank { earthquake.optString("arrivalTime") }
-        val expiry = forecastExpiryMillis(
-            points = points,
-            originTime = originTimeRaw,
-            reportTime = issuedAtRaw
-        )
+        val expiry = forecastExpiryMillis(originTimeRaw, issuedAtRaw)
         val finalLabel = if (payload.optBoolean("isLastInfo", false)) " · final bulletin" else ""
         val event = EarthquakeEvent(
             id = eventId.ifBlank { "dmdss-$issuedAtRaw" },
@@ -211,6 +222,58 @@ internal object DmDssEewParser {
 
     private fun rejected(reason: DmDssEewRejection) = DmDssEewParseResult.Rejected(reason)
 
+    private fun decodeBody(envelope: JSONObject, bodyText: String): DmDssBodyDecodeResult {
+        if (bodyText.length > MAX_ENCODED_BODY_CHARS) {
+            return DmDssBodyDecodeResult.Rejected(DmDssEewRejection.BODY_TOO_LARGE)
+        }
+        val encodedBytes = when (envelope.optString("encoding").lowercase()) {
+            "" -> bodyText.toByteArray(StandardCharsets.UTF_8)
+            "base64" -> runCatching { Base64.getDecoder().decode(bodyText) }.getOrElse {
+                return DmDssBodyDecodeResult.Rejected(DmDssEewRejection.INVALID_BASE64_BODY)
+            }
+            else -> return DmDssBodyDecodeResult.Rejected(
+                DmDssEewRejection.UNSUPPORTED_BODY_ENCODING
+            )
+        }
+        val decodedBytes = when (envelope.optString("compression").lowercase()) {
+            "" -> encodedBytes
+            "gzip" -> decodeBoundedGzip(encodedBytes).getOrElse { failure ->
+                return DmDssBodyDecodeResult.Rejected(
+                    if (failure is DmDssBodyTooLargeException) {
+                        DmDssEewRejection.BODY_TOO_LARGE
+                    } else {
+                        DmDssEewRejection.INVALID_GZIP_BODY
+                    }
+                )
+            }
+            else -> return DmDssBodyDecodeResult.Rejected(
+                DmDssEewRejection.UNSUPPORTED_BODY_COMPRESSION
+            )
+        }
+        if (decodedBytes.size > MAX_DECODED_BODY_BYTES) {
+            return DmDssBodyDecodeResult.Rejected(DmDssEewRejection.BODY_TOO_LARGE)
+        }
+        return DmDssBodyDecodeResult.Decoded(
+            decodedBytes.toString(StandardCharsets.UTF_8)
+        )
+    }
+
+    private fun decodeBoundedGzip(bytes: ByteArray): Result<ByteArray> = runCatching {
+        GZIPInputStream(ByteArrayInputStream(bytes)).use { input ->
+            val output = ByteArrayOutputStream()
+            val buffer = ByteArray(GZIP_BUFFER_BYTES)
+            while (true) {
+                val count = input.read(buffer)
+                if (count < 0) break
+                if (output.size() + count > MAX_DECODED_BODY_BYTES) {
+                    throw DmDssBodyTooLargeException()
+                }
+                output.write(buffer, 0, count)
+            }
+            output.toByteArray()
+        }
+    }
+
     private fun parseRegions(regions: org.json.JSONArray?): List<IntensityPoint> = buildList {
         if (regions == null) return@buildList
         for (index in 0 until regions.length()) {
@@ -246,15 +309,14 @@ internal object DmDssEewParser {
         else -> "—" to false
     }
 
-    private fun forecastExpiryMillis(
-        points: List<IntensityPoint>,
-        originTime: String,
-        reportTime: String
-    ): Long? {
-        val latestArrival = points.mapNotNull { parseMillis(it.arrivalTime) }.maxOrNull()
-        if (latestArrival != null) return latestArrival + 60_000L
-        return (parseMillis(originTime) ?: parseMillis(reportTime))?.plus(180_000L)
-    }
+    private fun forecastExpiryMillis(originTime: String, reportTime: String): Long? =
+        (parseMillis(originTime) ?: parseMillis(reportTime))?.plus(FORECAST_ACTIVE_MILLIS)
+
+    fun forecastExpiryMillis(
+        event: EarthquakeEvent,
+        receivedAtMillis: Long = System.currentTimeMillis()
+    ): Long = (parseMillis(event.originTime) ?: parseMillis(event.reportIssuedAt) ?: receivedAtMillis)
+        .plus(FORECAST_ACTIVE_MILLIS)
 
     private fun parseMillis(value: String?): Long? {
         if (value.isNullOrBlank() || value == "—") return null
@@ -284,4 +346,26 @@ internal object DmDssEewParser {
         "0" -> 0
         else -> -1
     }
+
+    private const val MAX_ENCODED_BODY_CHARS = 512 * 1024
+    private const val MAX_DECODED_BODY_BYTES = 1024 * 1024
+    private const val GZIP_BUFFER_BYTES = 8 * 1024
+}
+
+private sealed interface DmDssBodyDecodeResult {
+    data class Decoded(val text: String) : DmDssBodyDecodeResult
+    data class Rejected(val reason: DmDssEewRejection) : DmDssBodyDecodeResult
+}
+
+private class DmDssBodyTooLargeException : RuntimeException()
+
+internal fun isDuplicateDmDssRevision(
+    candidate: EarthquakeEvent,
+    current: EarthquakeEvent
+): Boolean {
+    if (candidate.id != current.id) return false
+    if (candidate.reportSerial.isNullOrBlank() || candidate.reportSerial != current.reportSerial) {
+        return false
+    }
+    return candidate.copy(reportType = null) == current.copy(reportType = null)
 }

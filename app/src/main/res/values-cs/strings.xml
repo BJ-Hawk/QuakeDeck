@@ -394,6 +394,10 @@
     <string name="notification_tsunami_alerts">Upozornění na tsunami</string>
     <string name="notification_tsunami_alerts_description">Upozornění, varování, nejvyšší varování a jejich odvolání.</string>
     <string name="notification_minimum_tsunami_level">Minimální úroveň tsunami</string>
+    <string name="notification_tsunami_attention">Probuzení / celá obrazovka</string>
+    <string name="notification_tsunami_attention_description">Používá rozsah %1$s. První výstraha před tsunami, která dosáhne zvolené úrovně, může probudit obrazovku nebo otevřít QuakeDeck.</string>
+    <string name="notification_tsunami_attention_threshold">Probudit / otevřít od</string>
+    <string name="notification_tsunami_attention_threshold_description">Probuzení a zobrazení přes celou obrazovku je dostupné pro varování před tsunami a nejvyšší varování.</string>
     <string name="notification_updates">Aktualizace a odvolání hlášení</string>
 <string name="notification_quiet_hours">Doba klidu</string>
 <string name="notification_send_test">Odeslat testovací oznámení</string>
@@ -407,10 +411,10 @@
     <string name="notification_intensity_shindo_6_lower_plus">Shindo 6− a vyšší</string>
     <string name="notification_intensity_shindo_6_upper_plus">Shindo 6+ a vyšší</string>
     <string name="notification_intensity_shindo_7">Shindo 7</string>
-    <string name="notification_local_eew_attention">Probuzení / celá obrazovka pro varování</string>
-    <string name="notification_local_eew_attention_description">Nové varování s předpovědí šindó 5− nebo vyšší pro %1$s může použít toto nastavení.</string>
-    <string name="notification_local_eew_forecast_attention">Probuzení / celá obrazovka pro předpověď</string>
-    <string name="notification_local_eew_forecast_attention_description">Předpověď, která pro %1$s dosáhne zvolené úrovně, může použít toto nastavení. Přechod na varování odešle samostatné upozornění.</string>
+    <string name="notification_local_eew_attention">Probuzení / celá obrazovka</string>
+    <string name="notification_local_eew_attention_description">Používá rozsah %1$s. První varování, které dosáhne zvolené úrovně, může probudit obrazovku nebo otevřít QuakeDeck.</string>
+    <string name="notification_local_eew_forecast_attention">Probuzení / celá obrazovka</string>
+    <string name="notification_local_eew_forecast_attention_description">Používá rozsah %1$s. První předpověď, která dosáhne úrovně plného oznámení, může probudit obrazovku nebo otevřít QuakeDeck. Přechod na varování zůstává samostatný.</string>
     <string name="notification_local_eew_attention_off">Vypnuto</string>
     <string name="notification_local_eew_attention_wake_screen">Probudit obrazovku</string>
     <string name="notification_local_eew_attention_full_screen">Upozornění přes celou obrazovku</string>

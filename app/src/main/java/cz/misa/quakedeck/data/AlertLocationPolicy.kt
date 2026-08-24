@@ -7,6 +7,61 @@ import java.util.Locale
 class AlertLocationPolicy(context: Context) {
     private val geometry = JmaAreaGeometry.load(context.applicationContext)
 
+    fun eewAlertScope(
+        event: EarthquakeEvent,
+        location: AlertLocation,
+        locationFiltering: Boolean
+    ): EewAlertScopeDecision {
+        if (!locationFiltering) return resolveEewAlertScope(
+            locationFiltering = false,
+            eventMaximum = event.maxIntensity
+        )
+
+        val officialPoint = eewForecastPoint(event, location)
+        if (officialPoint != null || event.points.isNotEmpty()) {
+            return resolveEewAlertScope(
+                locationFiltering = true,
+                eventMaximum = event.maxIntensity,
+                officialPoint = officialPoint
+            )
+        }
+
+        val targetArea = location.eewAreaNameJa
+            ?.takeIf { it.isNotBlank() }
+            ?: geometry.eewAreaAt(location.latitude, location.longitude)?.nameJa
+        val epicentreArea = geometry.eewAreaAt(event.latitude, event.longitude)?.nameJa
+        if (
+            !targetArea.isNullOrBlank() &&
+            !epicentreArea.isNullOrBlank() &&
+            sameArea(targetArea, epicentreArea)
+        ) {
+            return resolveEewAlertScope(
+                locationFiltering = true,
+                eventMaximum = event.maxIntensity,
+                emptyRegionFallback = EewAlertScopeBasis.EMPTY_REGIONS_SAME_EEW_AREA
+            )
+        }
+
+        val distance = EewWaveModel.greatCircleDistanceKm(
+            event.latitude,
+            event.longitude,
+            location.latitude,
+            location.longitude
+        )
+        if (distance <= EMPTY_REGION_EPICENTRE_FALLBACK_KM) {
+            return resolveEewAlertScope(
+                locationFiltering = true,
+                eventMaximum = event.maxIntensity,
+                emptyRegionFallback = EewAlertScopeBasis.EMPTY_REGIONS_NEAR_EPICENTRE
+            )
+        }
+
+        return resolveEewAlertScope(
+            locationFiltering = true,
+            eventMaximum = event.maxIntensity
+        )
+    }
+
     fun eewForecastPoint(event: EarthquakeEvent, location: AlertLocation): IntensityPoint? {
         val targetArea = location.eewAreaNameJa
             ?.takeIf { it.isNotBlank() }
@@ -140,6 +195,7 @@ class AlertLocationPolicy(context: Context) {
         .trim()
 
     companion object {
+        private const val EMPTY_REGION_EPICENTRE_FALLBACK_KM = 75.0
         private const val EEW_POINT_FALLBACK_KM = 80.0
         private const val OBSERVATION_FALLBACK_KM = 55.0
 
@@ -166,3 +222,82 @@ class AlertLocationPolicy(context: Context) {
         }
     }
 }
+
+internal fun resolveEewAlertScope(
+    locationFiltering: Boolean,
+    eventMaximum: String,
+    officialPoint: IntensityPoint? = null,
+    emptyRegionFallback: EewAlertScopeBasis? = null
+): EewAlertScopeDecision {
+    if (!locationFiltering) {
+        return EewAlertScopeDecision(
+            inScope = true,
+            relevantIntensity = eventMaximum,
+            localPoint = null,
+            basis = EewAlertScopeBasis.JAPAN_WIDE_MAXIMUM
+        )
+    }
+    if (officialPoint != null) {
+        return EewAlertScopeDecision(
+            inScope = true,
+            relevantIntensity = officialPoint.intensity,
+            localPoint = officialPoint,
+            basis = EewAlertScopeBasis.OFFICIAL_REGIONAL_FORECAST
+        )
+    }
+    if (emptyRegionFallback != null) {
+        return EewAlertScopeDecision(
+            inScope = true,
+            relevantIntensity = eventMaximum,
+            localPoint = null,
+            basis = emptyRegionFallback
+        )
+    }
+    return EewAlertScopeDecision.outsideLocation()
+}
+
+internal fun resolveTsunamiAlertScope(
+    candidateAreas: List<TsunamiArea>,
+    minimumDeliveryGrade: TsunamiGrade,
+    minimumAttentionGrade: TsunamiGrade
+): TsunamiAlertScopeDecision {
+    val highestGrade = candidateAreas
+        .maxByOrNull { it.grade.severity }
+        ?.grade
+        ?: TsunamiGrade.NONE
+    return TsunamiAlertScopeDecision(
+        highestGrade = highestGrade,
+        shouldDeliver = highestGrade.severity >= minimumDeliveryGrade.severity,
+        mayUseAttention = highestGrade.severity >= minimumAttentionGrade.severity
+    )
+}
+
+enum class EewAlertScopeBasis(val diagnostic: String) {
+    JAPAN_WIDE_MAXIMUM("Japan-wide maximum"),
+    OFFICIAL_REGIONAL_FORECAST("Official forecast for the selected location"),
+    EMPTY_REGIONS_SAME_EEW_AREA("Empty regional forecast · same JMA EEW area"),
+    EMPTY_REGIONS_NEAR_EPICENTRE("Empty regional forecast · within 75 km of hypocentre"),
+    OUTSIDE_SELECTED_LOCATION("Outside the selected notification location")
+}
+
+data class EewAlertScopeDecision(
+    val inScope: Boolean,
+    val relevantIntensity: String?,
+    val localPoint: IntensityPoint?,
+    val basis: EewAlertScopeBasis
+) {
+    companion object {
+        fun outsideLocation() = EewAlertScopeDecision(
+            inScope = false,
+            relevantIntensity = null,
+            localPoint = null,
+            basis = EewAlertScopeBasis.OUTSIDE_SELECTED_LOCATION
+        )
+    }
+}
+
+data class TsunamiAlertScopeDecision(
+    val highestGrade: TsunamiGrade,
+    val shouldDeliver: Boolean,
+    val mayUseAttention: Boolean
+)

@@ -385,9 +385,7 @@ class DmDssProvider(
             emitCurrent()
             return
         }
-        if (reference?.id == update.event.id && update.event.reportSerial == reference.reportSerial &&
-            update.event == reference
-        ) {
+        if (reference != null && isDuplicateDmDssRevision(update.event, reference)) {
             diagnostics.recordRejected("Duplicate EEW serial ignored")
             emitCurrent()
             return
@@ -400,8 +398,11 @@ class DmDssProvider(
     private fun applyUpdate(update: DmDssEewUpdate) {
         lastEvent = update.event
         activeEvent = update.event.takeIf { update.active }
-        if (update.active) scheduleExpiry(update.event.id, update.expiresAtMillis)
-        else expiryGeneration++
+        if (update.active) {
+            scheduleExpiry(update.event.id, update.expiresAtMillis)
+        } else {
+            expiryGeneration++
+        }
         emit(
             state = ConnectionState.CONNECTED,
             status = update.status,

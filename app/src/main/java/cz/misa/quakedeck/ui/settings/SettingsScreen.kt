@@ -160,6 +160,10 @@ fun QuakeDeckSettings(
     onRequestFullScreenIntentPermission: () -> Unit,
     tsunamiNotificationsEnabled: Boolean,
     onTsunamiNotificationsEnabledChanged: (Boolean) -> Unit,
+    tsunamiAttentionMode: LocalEewAttentionMode,
+    onTsunamiAttentionModeChanged: (LocalEewAttentionMode) -> Unit,
+    minimumTsunamiAttentionGrade: TsunamiGrade,
+    onMinimumTsunamiAttentionGradeChanged: (TsunamiGrade) -> Unit,
     notificationUpdatesEnabled: Boolean,
     onNotificationUpdatesEnabledChanged: (Boolean) -> Unit,
     minimumNotificationIntensity: MinimumNotificationIntensity,
@@ -352,6 +356,11 @@ fun QuakeDeckSettings(
                                 onRequestFullScreenIntentPermission = onRequestFullScreenIntentPermission,
                                 tsunamiNotificationsEnabled = tsunamiNotificationsEnabled,
                                 onTsunamiNotificationsEnabledChanged = onTsunamiNotificationsEnabledChanged,
+                                tsunamiAttentionMode = tsunamiAttentionMode,
+                                onTsunamiAttentionModeChanged = onTsunamiAttentionModeChanged,
+                                minimumTsunamiAttentionGrade = minimumTsunamiAttentionGrade,
+                                onMinimumTsunamiAttentionGradeChanged =
+                                    onMinimumTsunamiAttentionGradeChanged,
                                 notificationUpdatesEnabled = notificationUpdatesEnabled,
                                 onNotificationUpdatesEnabledChanged = onNotificationUpdatesEnabledChanged,
                                 minimumNotificationIntensity = minimumNotificationIntensity,
@@ -605,6 +614,10 @@ private fun MainSettingsPage(
     onRequestFullScreenIntentPermission: () -> Unit,
     tsunamiNotificationsEnabled: Boolean,
     onTsunamiNotificationsEnabledChanged: (Boolean) -> Unit,
+    tsunamiAttentionMode: LocalEewAttentionMode,
+    onTsunamiAttentionModeChanged: (LocalEewAttentionMode) -> Unit,
+    minimumTsunamiAttentionGrade: TsunamiGrade,
+    onMinimumTsunamiAttentionGradeChanged: (TsunamiGrade) -> Unit,
     notificationUpdatesEnabled: Boolean,
     onNotificationUpdatesEnabledChanged: (Boolean) -> Unit,
     minimumNotificationIntensity: MinimumNotificationIntensity,
@@ -784,6 +797,10 @@ private fun MainSettingsPage(
                 onRequestFullScreenIntentPermission = onRequestFullScreenIntentPermission,
                 tsunamiEnabled = tsunamiNotificationsEnabled,
                 onTsunamiEnabledChanged = onTsunamiNotificationsEnabledChanged,
+                tsunamiAttentionMode = tsunamiAttentionMode,
+                onTsunamiAttentionModeChanged = onTsunamiAttentionModeChanged,
+                minimumTsunamiAttentionGrade = minimumTsunamiAttentionGrade,
+                onMinimumTsunamiAttentionGradeChanged = onMinimumTsunamiAttentionGradeChanged,
                 updatesEnabled = notificationUpdatesEnabled,
                 onUpdatesEnabledChanged = onNotificationUpdatesEnabledChanged,
                 minimumIntensity = minimumNotificationIntensity,
@@ -1158,8 +1175,7 @@ private fun EewNotificationControlGroup(
     @StringRes descriptionRes: Int,
     enabled: Boolean,
     onEnabledChanged: (Boolean) -> Unit,
-    coverage: String,
-    alertLocation: AlertLocation,
+    attentionScope: String,
     @StringRes attentionTitleRes: Int,
     @StringRes attentionDescriptionRes: Int,
     attentionMode: LocalEewAttentionMode,
@@ -1170,9 +1186,6 @@ private fun EewNotificationControlGroup(
     intensityOptions: List<MinimumLocalEewAttentionIntensity>,
     forecastBelowThresholdMode: ForecastBelowThresholdMode? = null,
     onForecastBelowThresholdModeChanged: ((ForecastBelowThresholdMode) -> Unit)? = null,
-    fullScreenIntentAllowed: Boolean,
-    onRequestFullScreenIntentPermission: () -> Unit,
-    onHelpRequested: (String, String) -> Unit
 ) {
     SwitchSettingRow(
         title = localizedString(titleRes, language),
@@ -1182,16 +1195,6 @@ private fun EewNotificationControlGroup(
     )
     if (!enabled) return
 
-    NestedInformationSettingRow(
-        title = localizedString(R.string.notification_coverage, language),
-        value = coverage,
-        helpText = localizedString(
-            R.string.notification_eew_coverage_help,
-            language,
-            alertLocation.displayName
-        ),
-        onHelpRequested = onHelpRequested
-    )
     NestedNavigationSettingRow(
         title = localizedString(attentionTitleRes, language),
         value = localEewAttentionModeLabel(attentionMode, language),
@@ -1204,7 +1207,7 @@ private fun EewNotificationControlGroup(
         supportingText = localizedString(
             attentionDescriptionRes,
             language,
-            alertLocation.displayName
+            attentionScope
         )
     )
     if (
@@ -1263,23 +1266,6 @@ private fun EewNotificationControlGroup(
             )
         )
     }
-    if (attentionMode == LocalEewAttentionMode.FULL_SCREEN && !fullScreenIntentAllowed) {
-        NestedNavigationSettingRow(
-            title = localizedString(
-                R.string.notification_local_eew_attention_permission,
-                language
-            ),
-            value = localizedString(
-                R.string.notification_local_eew_attention_permission_required,
-                language
-            ),
-            onClick = onRequestFullScreenIntentPermission,
-            supportingText = localizedString(
-                R.string.notification_local_eew_attention_permission_description,
-                language
-            )
-        )
-    }
 }
 
 @Composable
@@ -1313,6 +1299,10 @@ private fun NotificationSettingsCard(
     onRequestFullScreenIntentPermission: () -> Unit,
     tsunamiEnabled: Boolean,
     onTsunamiEnabledChanged: (Boolean) -> Unit,
+    tsunamiAttentionMode: LocalEewAttentionMode,
+    onTsunamiAttentionModeChanged: (LocalEewAttentionMode) -> Unit,
+    minimumTsunamiAttentionGrade: TsunamiGrade,
+    onMinimumTsunamiAttentionGradeChanged: (TsunamiGrade) -> Unit,
     updatesEnabled: Boolean,
     onUpdatesEnabledChanged: (Boolean) -> Unit,
     minimumIntensity: MinimumNotificationIntensity,
@@ -1342,6 +1332,7 @@ private fun NotificationSettingsCard(
     val warningEewIntensityOptions = EewAlertLevel.WARNING.allowedAttentionIntensities()
     val forecastEewIntensityOptions = EewAlertLevel.FORECAST.allowedAttentionIntensities()
     val tsunamiOptions = listOf(TsunamiGrade.ADVISORY, TsunamiGrade.WARNING, TsunamiGrade.MAJOR_WARNING)
+    val tsunamiAttentionOptions = listOf(TsunamiGrade.WARNING, TsunamiGrade.MAJOR_WARNING)
     val controlSizing = responsiveControlSizing()
     // Dialog/AlertDialog content is hosted in a separate window. Capture the
     // Settings preview density here and explicitly provide it to every nested
@@ -1366,16 +1357,23 @@ private fun NotificationSettingsCard(
     val allJapanCoverage = localizedString(R.string.notification_coverage_all_japan, language)
     val coverage = if (locationBasedNotificationsEnabled) selectedCoverage else allJapanCoverage
     val intensityLabel = minimumIntensityLabel(minimumIntensity, language)
-
-    SettingsCard {
-        SwitchSettingRow(
-            title = localizedString(R.string.notifications_enable, language),
-            supportingText = localizedString(R.string.notifications_enable_description, language),
-            checked = enabled,
-            onCheckedChange = onEnabledChanged
+    val fullScreenPermissionNeeded = !fullScreenIntentAllowed && (
+        eewEnabled && localEewAttentionMode == LocalEewAttentionMode.FULL_SCREEN ||
+            eewForecastEnabled &&
+            localEewForecastAttentionMode == LocalEewAttentionMode.FULL_SCREEN ||
+            tsunamiEnabled && tsunamiAttentionMode == LocalEewAttentionMode.FULL_SCREEN
         )
 
-        if (enabled) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        SettingsCard {
+            SwitchSettingRow(
+                title = localizedString(R.string.notifications_enable, language),
+                supportingText = localizedString(R.string.notifications_enable_description, language),
+                checked = enabled,
+                onCheckedChange = onEnabledChanged
+            )
+
+            if (!enabled) return@SettingsCard
             if (!permissionGranted) {
                 CardDivider()
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -1434,7 +1432,28 @@ private fun NotificationSettingsCard(
                 enabled = permissionGranted
             )
 
-            CardDivider()
+            if (fullScreenPermissionNeeded) {
+                CardDivider()
+                NavigationSettingRow(
+                    title = localizedString(
+                        R.string.notification_local_eew_attention_permission,
+                        language
+                    ),
+                    value = localizedString(
+                        R.string.notification_local_eew_attention_permission_required,
+                        language
+                    ),
+                    onClick = onRequestFullScreenIntentPermission,
+                    supportingText = localizedString(
+                        R.string.notification_local_eew_attention_permission_description,
+                        language
+                    )
+                )
+            }
+        }
+
+        if (enabled) {
+            SettingsCard {
             NavigationSettingRow(
                 title = localizedString(R.string.notification_reference_location, language),
                 value = alertLocation.displayName,
@@ -1453,8 +1472,9 @@ private fun NotificationSettingsCard(
                 ),
                 onHelpRequested = { title, body -> helpDialog = title to body }
             )
+            }
 
-            CardDivider()
+            SettingsCard {
             SwitchSettingRow(
                 title = localizedString(R.string.notification_earthquake_reports, language),
                 supportingText = localizedString(R.string.notification_earthquake_reports_description, language),
@@ -1497,38 +1517,16 @@ private fun NotificationSettingsCard(
                     onHelpRequested = { title, body -> helpDialog = title to body }
                 )
             }
+            }
 
-            CardDivider()
-            EewNotificationControlGroup(
-                language = language,
-                titleRes = R.string.notification_eew,
-                descriptionRes = R.string.notification_eew_description,
-                enabled = eewEnabled,
-                onEnabledChanged = onEewEnabledChanged,
-                coverage = coverage,
-                alertLocation = alertLocation,
-                attentionTitleRes = R.string.notification_local_eew_attention,
-                attentionDescriptionRes = R.string.notification_local_eew_attention_description,
-                attentionMode = localEewAttentionMode,
-                onAttentionModeChanged = onLocalEewAttentionModeChanged,
-                minimumAttentionIntensity = minimumLocalEewAttentionIntensity,
-                onMinimumAttentionIntensityChanged = onMinimumLocalEewAttentionIntensityChanged,
-                attentionModes = localEewAttentionOptions,
-                intensityOptions = warningEewIntensityOptions,
-                fullScreenIntentAllowed = fullScreenIntentAllowed,
-                onRequestFullScreenIntentPermission = onRequestFullScreenIntentPermission,
-                onHelpRequested = { title, body -> helpDialog = title to body }
-            )
-
-            CardDivider()
+            SettingsCard {
             EewNotificationControlGroup(
                 language = language,
                 titleRes = R.string.notification_eew_forecasts,
                 descriptionRes = R.string.notification_eew_forecasts_description,
                 enabled = eewForecastEnabled,
                 onEnabledChanged = onEewForecastEnabledChanged,
-                coverage = coverage,
-                alertLocation = alertLocation,
+                attentionScope = coverage,
                 attentionTitleRes = R.string.notification_local_eew_forecast_attention,
                 attentionDescriptionRes =
                     R.string.notification_local_eew_forecast_attention_description,
@@ -1541,13 +1539,30 @@ private fun NotificationSettingsCard(
                 intensityOptions = forecastEewIntensityOptions,
                 forecastBelowThresholdMode = eewForecastBelowThresholdMode,
                 onForecastBelowThresholdModeChanged =
-                    onEewForecastBelowThresholdModeChanged,
-                fullScreenIntentAllowed = fullScreenIntentAllowed,
-                onRequestFullScreenIntentPermission = onRequestFullScreenIntentPermission,
-                onHelpRequested = { title, body -> helpDialog = title to body }
+                    onEewForecastBelowThresholdModeChanged
             )
+            }
 
-            CardDivider()
+            SettingsCard {
+            EewNotificationControlGroup(
+                language = language,
+                titleRes = R.string.notification_eew,
+                descriptionRes = R.string.notification_eew_description,
+                enabled = eewEnabled,
+                onEnabledChanged = onEewEnabledChanged,
+                attentionScope = coverage,
+                attentionTitleRes = R.string.notification_local_eew_attention,
+                attentionDescriptionRes = R.string.notification_local_eew_attention_description,
+                attentionMode = localEewAttentionMode,
+                onAttentionModeChanged = onLocalEewAttentionModeChanged,
+                minimumAttentionIntensity = minimumLocalEewAttentionIntensity,
+                onMinimumAttentionIntensityChanged = onMinimumLocalEewAttentionIntensityChanged,
+                attentionModes = localEewAttentionOptions,
+                intensityOptions = warningEewIntensityOptions
+            )
+            }
+
+            SettingsCard {
             SwitchSettingRow(
                 title = localizedString(R.string.notification_tsunami_alerts, language),
                 supportingText = localizedString(R.string.notification_tsunami_alerts_description, language),
@@ -1555,32 +1570,65 @@ private fun NotificationSettingsCard(
                 onCheckedChange = onTsunamiEnabledChanged
             )
             if (tsunamiEnabled) {
-                val tsunamiLabel = when (minimumTsunamiGrade) {
+                val deliveryLabel = when (minimumTsunamiGrade) {
                     TsunamiGrade.MAJOR_WARNING -> localizedString(R.string.major_warning, language)
                     TsunamiGrade.WARNING -> localizedString(R.string.warning, language)
                     else -> localizedString(R.string.advisory, language)
                 }
                 NestedNavigationSettingRow(
                     title = localizedString(R.string.notification_minimum_tsunami_level, language),
-                    value = tsunamiLabel,
+                    value = deliveryLabel,
                     onClick = {
                         val next = tsunamiOptions[(tsunamiOptions.indexOf(minimumTsunamiGrade).coerceAtLeast(0) + 1) % tsunamiOptions.size]
                         onMinimumTsunamiGradeChanged(next)
                     }
                 )
-                NestedInformationSettingRow(
-                    title = localizedString(R.string.notification_coverage, language),
-                    value = coverage,
-                    helpText = localizedString(
-                        R.string.notification_tsunami_coverage_help,
+                NestedNavigationSettingRow(
+                    title = localizedString(R.string.notification_tsunami_attention, language),
+                    value = localEewAttentionModeLabel(tsunamiAttentionMode, language),
+                    onClick = {
+                        val next = localEewAttentionOptions[
+                            (localEewAttentionOptions.indexOf(tsunamiAttentionMode) + 1) %
+                                localEewAttentionOptions.size
+                        ]
+                        onTsunamiAttentionModeChanged(next)
+                    },
+                    supportingText = localizedString(
+                        R.string.notification_tsunami_attention_description,
                         language,
-                        alertLocation.displayName
-                    ),
-                    onHelpRequested = { title, body -> helpDialog = title to body }
+                        coverage
+                    )
                 )
+                if (tsunamiAttentionMode != LocalEewAttentionMode.NONE) {
+                    val attentionLabel = when (minimumTsunamiAttentionGrade) {
+                        TsunamiGrade.MAJOR_WARNING ->
+                            localizedString(R.string.major_warning, language)
+                        else -> localizedString(R.string.warning, language)
+                    }
+                    NestedNavigationSettingRow(
+                        title = localizedString(
+                            R.string.notification_tsunami_attention_threshold,
+                            language
+                        ),
+                        value = attentionLabel,
+                        onClick = {
+                            val index = tsunamiAttentionOptions
+                                .indexOf(minimumTsunamiAttentionGrade)
+                                .coerceAtLeast(0)
+                            onMinimumTsunamiAttentionGradeChanged(
+                                tsunamiAttentionOptions[(index + 1) % tsunamiAttentionOptions.size]
+                            )
+                        },
+                        supportingText = localizedString(
+                            R.string.notification_tsunami_attention_threshold_description,
+                            language
+                        )
+                    )
+                }
+            }
             }
 
-            CardDivider()
+            SettingsCard {
             SwitchSettingRow(
                 title = localizedString(R.string.notification_updates, language),
                 supportingText = localizedString(R.string.notification_updates_short_description, language),
@@ -1641,6 +1689,7 @@ private fun NotificationSettingsCard(
                 ) {
                     Text(localizedString(R.string.notification_send_test, language), fontSize = 10.sp)
                 }
+            }
             }
         }
     }

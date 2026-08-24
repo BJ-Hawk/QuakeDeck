@@ -29,6 +29,7 @@ import cz.misa.quakedeck.data.AlertLocationPolicy
 import cz.misa.quakedeck.data.AppSettings
 import cz.misa.quakedeck.data.AppSnapshot
 import cz.misa.quakedeck.data.DmDssDiagnosticsStore
+import cz.misa.quakedeck.data.DmDssEewParser
 import cz.misa.quakedeck.data.EarthquakeEvent
 import cz.misa.quakedeck.data.EewAlertLevel
 import cz.misa.quakedeck.data.ForecastNotificationDelivery
@@ -40,6 +41,7 @@ import cz.misa.quakedeck.data.notificationEnabled
 import cz.misa.quakedeck.data.notificationPolicy
 import cz.misa.quakedeck.data.forecastNotificationDelivery
 import cz.misa.quakedeck.data.isReachedBy
+import cz.misa.quakedeck.data.resolveTsunamiAlertScope
 import cz.misa.quakedeck.data.eewAttentionIdentity
 import cz.misa.quakedeck.data.eewNotificationIdentity
 import cz.misa.quakedeck.data.PlaceNameTranslator
@@ -53,6 +55,26 @@ import cz.misa.quakedeck.data.TsunamiGrade
 import cz.misa.quakedeck.data.UiLocalization
 import java.time.LocalDateTime
 import java.util.Locale
+
+internal class EewNotificationAlertTracker(
+    private val maximumEntries: Int = 64
+) {
+    private val lastAlertedIntensityByIdentity = LinkedHashMap<String, String>()
+
+    fun shouldSuppress(identity: String, relevantIntensity: String): Boolean =
+        lastAlertedIntensityByIdentity[identity] == relevantIntensity
+
+    fun recordPosted(identity: String, relevantIntensity: String) {
+        lastAlertedIntensityByIdentity[identity] = relevantIntensity
+        while (lastAlertedIntensityByIdentity.size > maximumEntries) {
+            lastAlertedIntensityByIdentity.remove(lastAlertedIntensityByIdentity.keys.first())
+        }
+    }
+
+    fun reset(identity: String) {
+        lastAlertedIntensityByIdentity.remove(identity)
+    }
+}
 
 /**
  * The single gateway between live incident state and Android notifications.
@@ -71,10 +93,12 @@ class NotificationCoordinator(
     private var lastHandledSequence = 0L
     private val locationRelevantEews = LinkedHashSet<String>()
     private val attentionPresentedEews = LinkedHashSet<String>()
+    private val eewNotificationAlerts = EewNotificationAlertTracker()
     private val fullForecastPresentedEews = LinkedHashSet<String>()
     private val notifiedEarthquakes = LinkedHashSet<String>()
     private val audiblyAlertedEarthquakes = LinkedHashSet<String>()
     private val locationRelevantTsunamis = LinkedHashSet<String>()
+    private val attentionPresentedTsunamis = LinkedHashSet<String>()
 
     private enum class AlertVisualKind { EARTHQUAKE, EEW }
     private enum class BadgeVisualKind { SHINDO, TSUNAMI, STATUS }
@@ -214,15 +238,16 @@ class NotificationCoordinator(
                     )
                     return
                 }
-                val localPoint = if (locationFiltering) {
-                    locationPolicy.eewForecastPoint(event, alertLocation)
-                } else {
-                    null
-                }
-                if (!locationFiltering || localPoint != null) {
+                val scope = locationPolicy.eewAlertScope(
+                    event = event,
+                    location = alertLocation,
+                    locationFiltering = locationFiltering
+                )
+                if (scope.inScope) {
+                    val relevantIntensity = scope.relevantIntensity ?: event.maxIntensity
                     val forecastDelivery = if (forecastOnly) {
                         forecastNotificationDelivery(
-                            predictedIntensity = localPoint?.intensity ?: event.maxIntensity,
+                            predictedIntensity = relevantIntensity,
                             minimumFullIntensity =
                                 settings.minimumLocalEewForecastAttentionIntensity,
                             belowThresholdMode = settings.eewForecastBelowThresholdMode
@@ -248,22 +273,26 @@ class NotificationCoordinator(
                         if (firstFullDelivery) {
                             // A lower revision may already occupy this identity. Reposting the
                             // first full-level revision ensures its sound/attention is fresh.
-                            manager.cancel(event.eewNotificationIdentity(), ID_EARTHQUAKE)
+                            val identity = event.eewNotificationIdentity()
+                            manager.cancel(identity, ID_EARTHQUAKE)
+                            eewNotificationAlerts.reset(identity)
                         }
                     }
                     val attentionMode = if (
                         notificationPolicy.allowsLocalAttention &&
                         (!forecastOnly || fullForecast)
                     ) {
-                        localEewAttentionMode(
+                        eewAttentionMode(
                             updateKind = snapshot.liveUpdateKind,
                             event = event,
-                            testingMode = snapshot.testingMode
+                            testingMode = snapshot.testingMode,
+                            relevantIntensity = relevantIntensity
                         )
                     } else {
                         LocalEewAttentionMode.NONE
                     }
                     val forceSilent = forecastDelivery == ForecastNotificationDelivery.SILENT
+                    val notificationIdentity = event.eewNotificationIdentity()
                     val result = postEarthquake(
                         event = event,
                         channel = if (forecastOnly) CHANNEL_EEW_FORECAST else CHANNEL_EEW,
@@ -273,11 +302,26 @@ class NotificationCoordinator(
                             R.string.notification_eew_title
                         },
                         urgent = notificationPolicy.urgent && !forceSilent,
-                        localPoint = localPoint,
+                        localPoint = scope.localPoint,
                         forceSilent = forceSilent,
+                        suppressAlert = eewNotificationAlerts.shouldSuppress(
+                            notificationIdentity,
+                            relevantIntensity
+                        ),
+                        activeUntilMillis = if (snapshot.dmdssEewUpdate) {
+                            DmDssEewParser.forecastExpiryMillis(event)
+                        } else {
+                            null
+                        },
                         visualKind = AlertVisualKind.EEW,
                         localEewAttentionMode = attentionMode
                     )
+                    if (result == PostResult.POSTED) {
+                        eewNotificationAlerts.recordPosted(
+                            notificationIdentity,
+                            relevantIntensity
+                        )
+                    }
                     recordDmdssEewDecision(
                         snapshot,
                         when (forecastDelivery) {
@@ -287,9 +331,10 @@ class NotificationCoordinator(
                                 "${result.diagnostic} · Below selected Forecast level: regular"
                             else -> result.diagnostic
                         }
+                            + " · Scope: ${scope.basis.diagnostic}"
                     )
                 } else {
-                    recordDmdssEewDecision(snapshot, "Outside the selected notification location")
+                    recordDmdssEewDecision(snapshot, scope.basis.diagnostic)
                 }
             }
 
@@ -382,11 +427,13 @@ class NotificationCoordinator(
                 } else {
                     report.areas
                 }
-                val highestRelevantGrade = candidateAreas
-                    .maxByOrNull { it.grade.severity }
-                    ?.grade
-                    ?: TsunamiGrade.NONE
-                if (highestRelevantGrade.severity >= settings.minimumTsunamiGrade.severity) {
+                val scope = resolveTsunamiAlertScope(
+                    candidateAreas = candidateAreas,
+                    minimumDeliveryGrade = settings.minimumTsunamiGrade,
+                    minimumAttentionGrade = settings.minimumTsunamiAttentionGrade
+                )
+                val highestRelevantGrade = scope.highestGrade
+                if (scope.shouldDeliver) {
                     val titleRes = when (highestRelevantGrade) {
                         TsunamiGrade.MAJOR_WARNING -> R.string.notification_major_tsunami_warning_title
                         TsunamiGrade.WARNING -> R.string.notification_tsunami_warning_title
@@ -420,6 +467,11 @@ class NotificationCoordinator(
                     } else {
                         displayedAreaText
                     }
+                    val attentionMode = tsunamiAttentionMode(
+                        reportId = report.id,
+                        mayUseAttention = scope.mayUseAttention,
+                        testingMode = snapshot.testingMode
+                    )
                     post(
                         tag = "tsunami:${report.id}",
                         id = ID_TSUNAMI,
@@ -429,6 +481,7 @@ class NotificationCoordinator(
                         urgent = highestRelevantGrade.severity >= TsunamiGrade.WARNING.severity,
                         reportId = report.id,
                         reportEventPayload = NotificationEventPayload.encodeTsunami(report),
+                        fullScreenIntent = attentionMode == LocalEewAttentionMode.FULL_SCREEN,
                         smallIcon = R.drawable.ic_notification_tsunami,
                         visual = tsunamiVisual(
                             title = title,
@@ -496,6 +549,8 @@ class NotificationCoordinator(
         urgent: Boolean,
         localPoint: IntensityPoint? = null,
         forceSilent: Boolean = false,
+        suppressAlert: Boolean = false,
+        activeUntilMillis: Long? = null,
         visualKind: AlertVisualKind = AlertVisualKind.EARTHQUAKE,
         localEewAttentionMode: LocalEewAttentionMode = LocalEewAttentionMode.NONE,
         cancelled: Boolean = false
@@ -619,8 +674,14 @@ class NotificationCoordinator(
             body = body,
             urgent = urgent,
             reportId = event.id,
-            reportEventPayload = NotificationEventPayload.encode(event),
+            reportEventPayload = NotificationEventPayload.encode(
+                event = event,
+                // Ended/cancelled cards remain navigable but must never restore
+                // an active wave display after a cold launch.
+                activeUntilMillis = if (cancelled) 0L else activeUntilMillis
+            ),
             forceSilent = forceSilent,
+            suppressAlert = suppressAlert,
             fullScreenIntent = localEewAttentionMode == LocalEewAttentionMode.FULL_SCREEN,
             smallIcon = if (visualKind == AlertVisualKind.EEW) {
                 R.drawable.ic_notification_eew
@@ -824,6 +885,7 @@ class NotificationCoordinator(
         reportEventPayload: String? = null,
         ignoreQuietHours: Boolean = false,
         forceSilent: Boolean = false,
+        suppressAlert: Boolean = false,
         fullScreenIntent: Boolean = false,
         smallIcon: Int = R.drawable.ic_notification,
         visual: NotificationVisual? = null
@@ -837,9 +899,10 @@ class NotificationCoordinator(
             }
         }
 
-        val silent = forceSilent ||
-            (withinQuietHours && settings.quietHoursMode == QuietHoursMode.ALL_SILENT)
-        val effectiveChannel = if (silent) CHANNEL_SILENT else channel
+        val quietHoursSilent =
+            withinQuietHours && settings.quietHoursMode == QuietHoursMode.ALL_SILENT
+        val silent = forceSilent || suppressAlert || quietHoursSilent
+        val effectiveChannel = if (forceSilent || quietHoursSilent) CHANNEL_SILENT else channel
 
         val intent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
@@ -863,7 +926,7 @@ class NotificationCoordinator(
             .setContentText(visual?.watchBody ?: body.lineSequence().firstOrNull().orEmpty())
             .setContentIntent(contentIntent)
             .setAutoCancel(true)
-            .setOnlyAlertOnce(silent || !urgent)
+            .setOnlyAlertOnce(suppressAlert || silent || !urgent)
             .setSilent(silent)
             .setCategory(
                 if (urgent && !silent) {
@@ -1152,6 +1215,9 @@ class NotificationCoordinator(
         while (locationRelevantTsunamis.size > 32) {
             locationRelevantTsunamis.remove(locationRelevantTsunamis.first())
         }
+        while (attentionPresentedTsunamis.size > 32) {
+            attentionPresentedTsunamis.remove(attentionPresentedTsunamis.first())
+        }
         while (attentionPresentedEews.size > 64) {
             attentionPresentedEews.remove(attentionPresentedEews.first())
         }
@@ -1160,10 +1226,11 @@ class NotificationCoordinator(
         }
     }
 
-    private fun localEewAttentionMode(
+    private fun eewAttentionMode(
         updateKind: LiveUpdateKind,
         event: EarthquakeEvent,
-        testingMode: Boolean
+        testingMode: Boolean,
+        relevantIntensity: String
     ): LocalEewAttentionMode {
         val forecast = event.eewAlertLevel == EewAlertLevel.FORECAST
         val selectedMode = if (forecast) {
@@ -1183,15 +1250,32 @@ class NotificationCoordinator(
         ) {
             return LocalEewAttentionMode.NONE
         }
-        val localPoint = locationPolicy.eewForecastPoint(event, settings.alertLocation)
-            ?: return LocalEewAttentionMode.NONE
-        if (!minimumIntensity.isReachedBy(localPoint.intensity)) {
+        if (!minimumIntensity.isReachedBy(relevantIntensity)) {
             return LocalEewAttentionMode.NONE
         }
         // Forecast and warning attention are independent. Each may activate once,
         // on the first revision that actually crosses its configured JMA floor.
         val attentionKey = event.eewAttentionIdentity()
         if (!attentionPresentedEews.add(attentionKey)) return LocalEewAttentionMode.NONE
+        trimIncidentSets()
+        if (selectedMode == LocalEewAttentionMode.WAKE_SCREEN) wakeScreen()
+        return selectedMode
+    }
+
+    private fun tsunamiAttentionMode(
+        reportId: String,
+        mayUseAttention: Boolean,
+        testingMode: Boolean
+    ): LocalEewAttentionMode {
+        val selectedMode = settings.tsunamiAttentionMode
+        if (
+            selectedMode == LocalEewAttentionMode.NONE ||
+            testingMode ||
+            !mayUseAttention
+        ) {
+            return LocalEewAttentionMode.NONE
+        }
+        if (!attentionPresentedTsunamis.add(reportId)) return LocalEewAttentionMode.NONE
         trimIncidentSets()
         if (selectedMode == LocalEewAttentionMode.WAKE_SCREEN) wakeScreen()
         return selectedMode

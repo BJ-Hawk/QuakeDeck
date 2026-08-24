@@ -12,8 +12,9 @@ import org.json.JSONObject
 object NotificationEventPayload {
     private const val MAX_PAYLOAD_CHARS = 450_000
 
-    fun encode(event: EarthquakeEvent): String? = runCatching {
+    fun encode(event: EarthquakeEvent, activeUntilMillis: Long? = null): String? = runCatching {
         encodeEvent(event)
+            .putNullable("activeUntilMillis", activeUntilMillis)
             .put(
                 "launchKind",
                 if (event.kind == EarthquakeEventKind.EEW) {
@@ -50,7 +51,8 @@ object NotificationEventPayload {
         NotificationLaunchPayload(
             kind = launchKind,
             event = event,
-            tsunami = tsunami
+            tsunami = tsunami,
+            activeUntilMillis = json.nullableLong("activeUntilMillis")
         )
     }.getOrNull()
 
@@ -220,6 +222,9 @@ object NotificationEventPayload {
     private fun JSONObject.nullableDouble(name: String): Double? =
         takeUnless { isNull(name) }?.optDouble(name, Double.NaN)?.takeIf { it.isFinite() }
 
+    private fun JSONObject.nullableLong(name: String): Long? =
+        takeUnless { isNull(name) }?.optLong(name)
+
     private fun JSONArray?.toStringList(): List<String> = buildList {
         val source = this@toStringList ?: return@buildList
         for (index in 0 until source.length()) {
@@ -236,7 +241,8 @@ enum class NotificationLaunchKind { EARTHQUAKE, EEW, TSUNAMI }
 data class NotificationLaunchPayload(
     val kind: NotificationLaunchKind,
     val event: EarthquakeEvent? = null,
-    val tsunami: TsunamiReport? = null
+    val tsunami: TsunamiReport? = null,
+    val activeUntilMillis: Long? = null
 )
 
 /**
@@ -244,12 +250,26 @@ data class NotificationLaunchPayload(
  * a notification after the QuakeDeck process was removed. A matching live
  * runtime incident always wins once it has been recovered.
  */
-fun AppSnapshot.withNotificationLaunch(payload: NotificationLaunchPayload?): AppSnapshot {
+fun AppSnapshot.withNotificationLaunch(
+    payload: NotificationLaunchPayload?,
+    nowEpochMillis: Long = System.currentTimeMillis()
+): AppSnapshot {
     payload ?: return this
     return when (payload.kind) {
         NotificationLaunchKind.EARTHQUAKE -> this
         NotificationLaunchKind.EEW -> {
             val notificationEvent = payload.event ?: return this
+            if (payload.activeUntilMillis?.let { nowEpochMillis >= it } == true) return this
+            if (
+                !activeEew &&
+                event.id == notificationEvent.id &&
+                (liveUpdateKind == LiveUpdateKind.EEW_ENDED ||
+                    liveUpdateKind == LiveUpdateKind.CANCELLED ||
+                    event.kind != EarthquakeEventKind.EEW ||
+                    event.isCancelled)
+            ) {
+                return this
+            }
             if (activeEew && activeEewEvent?.id == notificationEvent.id) {
                 this
             } else {

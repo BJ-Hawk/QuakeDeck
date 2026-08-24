@@ -421,6 +421,38 @@ class AppSettings(context: Context) {
         get() = prefs.getBoolean("tsunami_notifications_enabled", true)
         set(value) { prefs.edit { putBoolean("tsunami_notifications_enabled", value) } }
 
+    var tsunamiAttentionMode: LocalEewAttentionMode
+        get() = runCatching {
+            LocalEewAttentionMode.valueOf(
+                prefs.getString(
+                    "tsunami_attention_mode",
+                    LocalEewAttentionMode.NONE.name
+                )!!
+            )
+        }.getOrDefault(LocalEewAttentionMode.NONE)
+        set(value) { prefs.edit { putString("tsunami_attention_mode", value.name) } }
+
+    var minimumTsunamiAttentionGrade: TsunamiGrade
+        get() = runCatching {
+            TsunamiGrade.valueOf(
+                prefs.getString(
+                    "minimum_tsunami_attention_grade",
+                    TsunamiGrade.WARNING.name
+                )!!
+            )
+        }.getOrDefault(TsunamiGrade.WARNING)
+            .takeIf { it.severity >= TsunamiGrade.WARNING.severity }
+            ?: TsunamiGrade.WARNING
+        set(value) {
+            prefs.edit {
+                putString(
+                    "minimum_tsunami_attention_grade",
+                    value.takeIf { it.severity >= TsunamiGrade.WARNING.severity }?.name
+                        ?: TsunamiGrade.WARNING.name
+                )
+            }
+        }
+
     var notificationUpdatesEnabled: Boolean
         get() = prefs.getBoolean("notification_updates_enabled", true)
         set(value) { prefs.edit { putBoolean("notification_updates_enabled", value) } }

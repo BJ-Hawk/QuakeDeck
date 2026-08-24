@@ -70766,10 +70766,10 @@
       "areaNameJa": "富山県東部",
       "municipalityCode": "1620100",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
+      "publishedAddressJa": "富山県富山市新桜町7番38号",
       "facilityNameJa": "富山市役所",
       "facilityNameEn": null,
-      "metadataStatus": "Official prefectural seismic-network facility",
+      "metadataStatus": "Official prefectural placement and municipal address",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -70778,11 +70778,12 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
-        "https://www.pref.toyama.jp/documents/25269/02.pdf"
+        "https://www.pref.toyama.jp/documents/25269/02.pdf",
+        "https://www.city.toyama.lg.jp/bosai/bosai/1010655/1017500.html"
       ],
-      "note": "Toyama Prefecture lists this station, its host facility, and its locality in the official earthquake-observation table; no street number is published there.",
+      "note": "Toyama Prefecture's official seismic-network table identifies Toyama City Hall as the host site; Toyama City publishes the city hall address.",
       "placementLocalityJa": "富山市",
-      "placementPrecision": "municipality_or_ward"
+      "placementPrecision": "exact_address"
     },
     {
       "code": "1620133",
@@ -71100,10 +71101,10 @@
       "areaNameJa": "富山県東部",
       "municipalityCode": "1620600",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
+      "publishedAddressJa": "富山県滑川市寺家町104",
       "facilityNameJa": "滑川市役所",
       "facilityNameEn": null,
-      "metadataStatus": "Official prefectural seismic-network facility",
+      "metadataStatus": "Official prefectural placement and municipal address",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -71112,11 +71113,12 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
-        "https://www.pref.toyama.jp/documents/25269/02.pdf"
+        "https://www.pref.toyama.jp/documents/25269/02.pdf",
+        "https://www.city.namerikawa.toyama.jp/soshiki/4/2/1/711.html"
       ],
-      "note": "Toyama Prefecture lists this station, its host facility, and its locality in the official earthquake-observation table; no street number is published there.",
+      "note": "富山県 Prefecture's official seismic-network table identifies 滑川市役所 as the host site; the municipality publishes the facility address.",
       "placementLocalityJa": "滑川市",
-      "placementPrecision": "municipality_or_ward"
+      "placementPrecision": "exact_address"
     },
     {
       "code": "1620720",
@@ -71226,10 +71228,10 @@
       "areaNameJa": "富山県東部",
       "municipalityCode": "1632100",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
+      "publishedAddressJa": "富山県中新川郡舟橋村仏生寺55",
       "facilityNameJa": "舟橋村役場",
       "facilityNameEn": null,
-      "metadataStatus": "Official prefectural seismic-network facility",
+      "metadataStatus": "Official prefectural placement and municipal address",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -71238,11 +71240,12 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://www.jma.go.jp/jma/kishou/books/saigaiji/saigaiji_202101/denbun/202101/17/VP20210117013000_3.html",
-        "https://www.pref.toyama.jp/documents/25269/02.pdf"
+        "https://www.pref.toyama.jp/documents/25269/02.pdf",
+        "https://www.vill.funahashi.toyama.jp/gyosei_new/"
       ],
-      "note": "Toyama Prefecture lists this station, its host facility, and its locality in the official earthquake-observation table; no street number is published there.",
+      "note": "富山県 Prefecture's official seismic-network table identifies 舟橋村役場 as the host site; the municipality publishes the facility address.",
       "placementLocalityJa": "舟橋村",
-      "placementPrecision": "municipality_or_ward"
+      "placementPrecision": "exact_address"
     },
     {
       "code": "1632231",
@@ -71433,10 +71436,10 @@
       "areaNameJa": "富山県東部",
       "municipalityCode": "1634200",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
+      "publishedAddressJa": "富山県下新川郡入善町入膳423",
       "facilityNameJa": "入善町役場",
       "facilityNameEn": null,
-      "metadataStatus": "Official prefectural seismic-network facility",
+      "metadataStatus": "Official prefectural placement and municipal address",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -71445,11 +71448,12 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
-        "https://www.pref.toyama.jp/documents/25269/02.pdf"
+        "https://www.pref.toyama.jp/documents/25269/02.pdf",
+        "https://www.town.nyuzen.toyama.jp/gyosei/chosei/yakuba/index.html"
       ],
-      "note": "Toyama Prefecture lists this station, its host facility, and its locality in the official earthquake-observation table; no street number is published there.",
+      "note": "富山県 Prefecture's official seismic-network table identifies 入善町役場 as the host site; the municipality publishes the facility address.",
       "placementLocalityJa": "入善町",
-      "placementPrecision": "municipality_or_ward"
+      "placementPrecision": "exact_address"
     },
     {
       "code": "1634300",
@@ -71682,10 +71686,10 @@
       "areaNameJa": "富山県西部",
       "municipalityCode": "1620500",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
+      "publishedAddressJa": "富山県氷見市加納387番地1",
       "facilityNameJa": "氷見市消防本部",
       "facilityNameEn": null,
-      "metadataStatus": "Official prefectural seismic-network facility",
+      "metadataStatus": "Official prefectural placement and municipal address",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -71694,11 +71698,12 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
-        "https://www.pref.toyama.jp/documents/25269/02.pdf"
+        "https://www.pref.toyama.jp/documents/25269/02.pdf",
+        "https://www.city.himi.toyama.jp/gyosei/soshiki/hishokoho/1/1_1/1144.html"
       ],
-      "note": "Toyama Prefecture lists this station, its host facility, and its locality in the official earthquake-observation table; no street number is published there.",
+      "note": "富山県 Prefecture's official seismic-network table identifies 氷見市消防本部 as the host site; the municipality publishes the facility address.",
       "placementLocalityJa": "氷見市",
-      "placementPrecision": "municipality_or_ward"
+      "placementPrecision": "exact_address"
     },
     {
       "code": "1620830",
@@ -71724,10 +71729,10 @@
       "areaNameJa": "富山県西部",
       "municipalityCode": "1620800",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
+      "publishedAddressJa": "富山県砺波市栄町7番3号",
       "facilityNameJa": "砺波市役所",
       "facilityNameEn": null,
-      "metadataStatus": "Official prefectural seismic-network facility",
+      "metadataStatus": "Official prefectural placement and municipal address",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -71736,11 +71741,12 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
-        "https://www.pref.toyama.jp/documents/25269/02.pdf"
+        "https://www.pref.toyama.jp/documents/25269/02.pdf",
+        "https://www.city.tonami.lg.jp/info/5643p/"
       ],
-      "note": "Toyama Prefecture lists this station, its host facility, and its locality in the official earthquake-observation table; no street number is published there.",
+      "note": "富山県 Prefecture's official seismic-network table identifies 砺波市役所 as the host site; the municipality publishes the facility address.",
       "placementLocalityJa": "砺波市",
-      "placementPrecision": "municipality_or_ward"
+      "placementPrecision": "exact_address"
     },
     {
       "code": "1620832",
@@ -119647,10 +119653,10 @@
       "areaNameJa": "和歌山県北部",
       "municipalityCode": "3020200",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
+      "publishedAddressJa": "和歌山県海南市南赤坂11",
+      "facilityNameJa": "海南市役所",
       "facilityNameEn": null,
-      "metadataStatus": "Catalogue only",
+      "metadataStatus": "Official prefectural seismic-network address",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -119658,11 +119664,12 @@
       "providerLatitude": null,
       "providerLongitude": null,
       "sourceUrls": [
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.pref.wakayama.lg.jp/prefg/011400/d00153903_d/fil/03-4_siryou_3.pdf"
       ],
-      "note": "No exact address or precise provider-station metadata is recorded yet.",
+      "note": "Wakayama Prefecture's official earthquake-observation table directly lists this station, the host site, and the address.",
       "placementLocalityJa": "海南市",
-      "placementPrecision": "municipality_or_ward"
+      "placementPrecision": "exact_address"
     },
     {
       "code": "3020234",
@@ -119688,10 +119695,10 @@
       "areaNameJa": "和歌山県北部",
       "municipalityCode": "3020200",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
+      "publishedAddressJa": "和歌山県海南市下津514-2",
+      "facilityNameJa": "海南市消防本部下津消防署",
       "facilityNameEn": null,
-      "metadataStatus": "Catalogue only",
+      "metadataStatus": "Official prefectural seismic-network address",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -119699,11 +119706,12 @@
       "providerLatitude": null,
       "providerLongitude": null,
       "sourceUrls": [
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.pref.wakayama.lg.jp/prefg/011400/d00153903_d/fil/03-4_siryou_3.pdf"
       ],
-      "note": "No exact address or precise provider-station metadata is recorded yet.",
+      "note": "Wakayama Prefecture's official earthquake-observation table directly lists this station, the host site, and the address.",
       "placementLocalityJa": "海南市",
-      "placementPrecision": "municipality_or_ward"
+      "placementPrecision": "exact_address"
     },
     {
       "code": "3020330",
@@ -119729,10 +119737,10 @@
       "areaNameJa": "和歌山県北部",
       "municipalityCode": "3020300",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
+      "publishedAddressJa": "和歌山県橋本市東家1-1-1",
+      "facilityNameJa": "橋本市役所",
       "facilityNameEn": null,
-      "metadataStatus": "Catalogue only",
+      "metadataStatus": "Official prefectural seismic-network address",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -119740,11 +119748,12 @@
       "providerLatitude": null,
       "providerLongitude": null,
       "sourceUrls": [
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.pref.wakayama.lg.jp/prefg/011400/d00153903_d/fil/03-4_siryou_3.pdf"
       ],
-      "note": "No exact address or precise provider-station metadata is recorded yet.",
+      "note": "Wakayama Prefecture's official earthquake-observation table directly lists this station, the host site, and the address.",
       "placementLocalityJa": "橋本市",
-      "placementPrecision": "municipality_or_ward"
+      "placementPrecision": "exact_address"
     },
     {
       "code": "3020332",
@@ -119770,10 +119779,10 @@
       "areaNameJa": "和歌山県北部",
       "municipalityCode": "3020300",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
+      "publishedAddressJa": "和歌山県橋本市高野口町名倉813-2",
+      "facilityNameJa": "橋本市高野口公民館",
       "facilityNameEn": null,
-      "metadataStatus": "Catalogue only",
+      "metadataStatus": "Official prefectural seismic-network address",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -119781,11 +119790,12 @@
       "providerLatitude": null,
       "providerLongitude": null,
       "sourceUrls": [
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.pref.wakayama.lg.jp/prefg/011400/d00153903_d/fil/03-4_siryou_3.pdf"
       ],
-      "note": "No exact address or precise provider-station metadata is recorded yet.",
+      "note": "Wakayama Prefecture's official earthquake-observation table directly lists this station, the host site, and the address.",
       "placementLocalityJa": "橋本市",
-      "placementPrecision": "municipality_or_ward"
+      "placementPrecision": "exact_address"
     },
     {
       "code": "3020401",
@@ -120056,10 +120066,10 @@
       "areaNameJa": "和歌山県北部",
       "municipalityCode": "3020800",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
+      "publishedAddressJa": "和歌山県紀の川市貴志川町神戸327-1",
+      "facilityNameJa": "紀の川市役所貴志川支所",
       "facilityNameEn": null,
-      "metadataStatus": "Catalogue only",
+      "metadataStatus": "Official prefectural seismic-network address",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -120067,11 +120077,12 @@
       "providerLatitude": null,
       "providerLongitude": null,
       "sourceUrls": [
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.pref.wakayama.lg.jp/prefg/011400/d00153903_d/fil/03-4_siryou_3.pdf"
       ],
-      "note": "No exact address or precise provider-station metadata is recorded yet.",
+      "note": "Wakayama Prefecture's official earthquake-observation table directly lists this station, the host site, and the address.",
       "placementLocalityJa": "紀の川市",
-      "placementPrecision": "municipality_or_ward"
+      "placementPrecision": "exact_address"
     },
     {
       "code": "3020835",
@@ -120097,10 +120108,10 @@
       "areaNameJa": "和歌山県北部",
       "municipalityCode": "3020800",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
+      "publishedAddressJa": "和歌山県紀の川市西大井338",
+      "facilityNameJa": "紀の川市役所",
       "facilityNameEn": null,
-      "metadataStatus": "Catalogue only",
+      "metadataStatus": "Official prefectural seismic-network address",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -120108,11 +120119,12 @@
       "providerLatitude": null,
       "providerLongitude": null,
       "sourceUrls": [
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.pref.wakayama.lg.jp/prefg/011400/d00153903_d/fil/03-4_siryou_3.pdf"
       ],
-      "note": "No exact address or precise provider-station metadata is recorded yet.",
+      "note": "Wakayama Prefecture's official earthquake-observation table directly lists this station, the host site, and the address.",
       "placementLocalityJa": "紀の川市",
-      "placementPrecision": "municipality_or_ward"
+      "placementPrecision": "exact_address"
     },
     {
       "code": "3020836",
@@ -120138,10 +120150,10 @@
       "areaNameJa": "和歌山県北部",
       "municipalityCode": "3020800",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
+      "publishedAddressJa": "和歌山県紀の川市桃山町元376",
+      "facilityNameJa": "紀の川市役所桃山支所",
       "facilityNameEn": null,
-      "metadataStatus": "Catalogue only",
+      "metadataStatus": "Official prefectural seismic-network address",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -120149,11 +120161,12 @@
       "providerLatitude": null,
       "providerLongitude": null,
       "sourceUrls": [
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.pref.wakayama.lg.jp/prefg/011400/d00153903_d/fil/03-4_siryou_3.pdf"
       ],
-      "note": "No exact address or precise provider-station metadata is recorded yet.",
+      "note": "Wakayama Prefecture's official earthquake-observation table directly lists this station, the host site, and the address.",
       "placementLocalityJa": "紀の川市",
-      "placementPrecision": "municipality_or_ward"
+      "placementPrecision": "exact_address"
     },
     {
       "code": "3020930",
@@ -120179,10 +120192,10 @@
       "areaNameJa": "和歌山県北部",
       "municipalityCode": "3020900",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
+      "publishedAddressJa": "和歌山県岩出市西野209",
+      "facilityNameJa": "岩出市役所",
       "facilityNameEn": null,
-      "metadataStatus": "Catalogue only",
+      "metadataStatus": "Official prefectural seismic-network address",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -120190,11 +120203,12 @@
       "providerLatitude": null,
       "providerLongitude": null,
       "sourceUrls": [
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.pref.wakayama.lg.jp/prefg/011400/d00153903_d/fil/03-4_siryou_3.pdf"
       ],
-      "note": "No exact address or precise provider-station metadata is recorded yet.",
+      "note": "Wakayama Prefecture's official earthquake-observation table directly lists this station, the host site, and the address.",
       "placementLocalityJa": "岩出市",
-      "placementPrecision": "municipality_or_ward"
+      "placementPrecision": "exact_address"
     },
     {
       "code": "3030432",
@@ -120220,10 +120234,10 @@
       "areaNameJa": "和歌山県北部",
       "municipalityCode": "3030400",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
+      "publishedAddressJa": "和歌山県海草郡紀美野町神野市場226-1",
+      "facilityNameJa": "紀美野町役場美里支所",
       "facilityNameEn": null,
-      "metadataStatus": "Catalogue only",
+      "metadataStatus": "Official prefectural seismic-network address",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -120231,11 +120245,12 @@
       "providerLatitude": null,
       "providerLongitude": null,
       "sourceUrls": [
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.pref.wakayama.lg.jp/prefg/011400/d00153903_d/fil/03-4_siryou_3.pdf"
       ],
-      "note": "No exact address or precise provider-station metadata is recorded yet.",
+      "note": "Wakayama Prefecture's official earthquake-observation table directly lists this station, the host site, and the address.",
       "placementLocalityJa": "紀美野町神野市",
-      "placementPrecision": "municipality_or_ward"
+      "placementPrecision": "exact_address"
     },
     {
       "code": "3030433",
@@ -120261,10 +120276,10 @@
       "areaNameJa": "和歌山県北部",
       "municipalityCode": "3030400",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
+      "publishedAddressJa": "和歌山県海草郡紀美野町下佐々1609-2",
+      "facilityNameJa": "紀美野町消防本部",
       "facilityNameEn": null,
-      "metadataStatus": "Catalogue only",
+      "metadataStatus": "Official prefectural seismic-network address",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -120272,11 +120287,12 @@
       "providerLatitude": null,
       "providerLongitude": null,
       "sourceUrls": [
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.pref.wakayama.lg.jp/prefg/011400/d00153903_d/fil/03-4_siryou_3.pdf"
       ],
-      "note": "No exact address or precise provider-station metadata is recorded yet.",
+      "note": "Wakayama Prefecture's official earthquake-observation table directly lists this station, the host site, and the address.",
       "placementLocalityJa": "紀美野町",
-      "placementPrecision": "municipality_or_ward"
+      "placementPrecision": "exact_address"
     },
     {
       "code": "3034130",
@@ -120302,10 +120318,10 @@
       "areaNameJa": "和歌山県北部",
       "municipalityCode": "3034100",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
+      "publishedAddressJa": "和歌山県伊都郡かつらぎ町丁ノ町2338-2",
+      "facilityNameJa": "地域福祉センター",
       "facilityNameEn": null,
-      "metadataStatus": "Catalogue only",
+      "metadataStatus": "Official prefectural seismic-network address",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -120313,11 +120329,12 @@
       "providerLatitude": null,
       "providerLongitude": null,
       "sourceUrls": [
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.pref.wakayama.lg.jp/prefg/011400/d00153903_d/fil/03-4_siryou_3.pdf"
       ],
-      "note": "No exact address or precise provider-station metadata is recorded yet.",
+      "note": "Wakayama Prefecture's official earthquake-observation table directly lists this station, the host site, and the address.",
       "placementLocalityJa": "かつらぎ町",
-      "placementPrecision": "municipality_or_ward"
+      "placementPrecision": "exact_address"
     },
     {
       "code": "3034132",
@@ -120343,10 +120360,10 @@
       "areaNameJa": "和歌山県北部",
       "municipalityCode": "3034100",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
+      "publishedAddressJa": "和歌山県伊都郡かつらぎ町梁瀬645",
+      "facilityNameJa": "かつらぎ町役場花園支所",
       "facilityNameEn": null,
-      "metadataStatus": "Catalogue only",
+      "metadataStatus": "Official prefectural seismic-network address",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -120354,11 +120371,12 @@
       "providerLatitude": null,
       "providerLongitude": null,
       "sourceUrls": [
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.pref.wakayama.lg.jp/prefg/011400/d00153903_d/fil/03-4_siryou_3.pdf"
       ],
-      "note": "No exact address or precise provider-station metadata is recorded yet.",
+      "note": "Wakayama Prefecture's official earthquake-observation table directly lists this station, the host site, and the address.",
       "placementLocalityJa": "かつらぎ町",
-      "placementPrecision": "municipality_or_ward"
+      "placementPrecision": "exact_address"
     },
     {
       "code": "3034330",
@@ -120384,10 +120402,10 @@
       "areaNameJa": "和歌山県北部",
       "municipalityCode": "3034300",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
+      "publishedAddressJa": "和歌山県伊都郡九度山町九度山1190",
+      "facilityNameJa": "九度山町役場",
       "facilityNameEn": null,
-      "metadataStatus": "Catalogue only",
+      "metadataStatus": "Official prefectural seismic-network address",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -120395,11 +120413,12 @@
       "providerLatitude": null,
       "providerLongitude": null,
       "sourceUrls": [
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.pref.wakayama.lg.jp/prefg/011400/d00153903_d/fil/03-4_siryou_3.pdf"
       ],
-      "note": "No exact address or precise provider-station metadata is recorded yet.",
+      "note": "Wakayama Prefecture's official earthquake-observation table directly lists this station, the host site, and the address.",
       "placementLocalityJa": "九度山町",
-      "placementPrecision": "municipality_or_ward"
+      "placementPrecision": "exact_address"
     },
     {
       "code": "3034401",
@@ -120508,10 +120527,10 @@
       "areaNameJa": "和歌山県北部",
       "municipalityCode": "3036100",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
+      "publishedAddressJa": "和歌山県有田郡湯浅町青木668-1",
+      "facilityNameJa": "湯浅町役場",
       "facilityNameEn": null,
-      "metadataStatus": "Catalogue only",
+      "metadataStatus": "Official prefectural seismic-network address",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -120519,11 +120538,12 @@
       "providerLatitude": null,
       "providerLongitude": null,
       "sourceUrls": [
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.pref.wakayama.lg.jp/prefg/011400/d00153903_d/fil/03-4_siryou_3.pdf"
       ],
-      "note": "No exact address or precise provider-station metadata is recorded yet.",
+      "note": "Wakayama Prefecture's official earthquake-observation table directly lists this station, the host site, and the address.",
       "placementLocalityJa": "湯浅町",
-      "placementPrecision": "municipality_or_ward"
+      "placementPrecision": "exact_address"
     },
     {
       "code": "3036231",
@@ -120549,10 +120569,10 @@
       "areaNameJa": "和歌山県北部",
       "municipalityCode": "3036200",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
+      "publishedAddressJa": "和歌山県有田郡広川町広1500",
+      "facilityNameJa": "広川町役場",
       "facilityNameEn": null,
-      "metadataStatus": "Catalogue only",
+      "metadataStatus": "Official prefectural seismic-network address",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -120560,11 +120580,12 @@
       "providerLatitude": null,
       "providerLongitude": null,
       "sourceUrls": [
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.pref.wakayama.lg.jp/prefg/011400/d00153903_d/fil/03-4_siryou_3.pdf"
       ],
-      "note": "No exact address or precise provider-station metadata is recorded yet.",
+      "note": "Wakayama Prefecture's official earthquake-observation table directly lists this station, the host site, and the address.",
       "placementLocalityJa": "和歌山広川町",
-      "placementPrecision": "municipality_or_ward"
+      "placementPrecision": "exact_address"
     },
     {
       "code": "3036620",
@@ -120632,10 +120653,10 @@
       "areaNameJa": "和歌山県北部",
       "municipalityCode": "3036600",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
+      "publishedAddressJa": "和歌山県有田郡有田川町下津野2018-4",
+      "facilityNameJa": "有田川町役場吉備庁舎",
       "facilityNameEn": null,
-      "metadataStatus": "Catalogue only",
+      "metadataStatus": "Official prefectural seismic-network address",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -120643,11 +120664,12 @@
       "providerLatitude": null,
       "providerLongitude": null,
       "sourceUrls": [
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.pref.wakayama.lg.jp/prefg/011400/d00153903_d/fil/03-4_siryou_3.pdf"
       ],
-      "note": "No exact address or precise provider-station metadata is recorded yet.",
+      "note": "Wakayama Prefecture's official earthquake-observation table directly lists this station, the host site, and the address.",
       "placementLocalityJa": "有田川町",
-      "placementPrecision": "municipality_or_ward"
+      "placementPrecision": "exact_address"
     },
     {
       "code": "3036633",
@@ -120673,10 +120695,10 @@
       "areaNameJa": "和歌山県北部",
       "municipalityCode": "3036600",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
+      "publishedAddressJa": "和歌山県有田郡有田川町大字中井原136-2",
+      "facilityNameJa": "有田川町役場金屋庁舎",
       "facilityNameEn": null,
-      "metadataStatus": "Catalogue only",
+      "metadataStatus": "Official prefectural seismic-network address",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -120684,11 +120706,12 @@
       "providerLatitude": null,
       "providerLongitude": null,
       "sourceUrls": [
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.pref.wakayama.lg.jp/prefg/011400/d00153903_d/fil/03-4_siryou_3.pdf"
       ],
-      "note": "No exact address or precise provider-station metadata is recorded yet.",
+      "note": "Wakayama Prefecture's official earthquake-observation table directly lists this station, the host site, and the address.",
       "placementLocalityJa": "有田川町",
-      "placementPrecision": "municipality_or_ward"
+      "placementPrecision": "exact_address"
     },
     {
       "code": "3038130",
@@ -120714,10 +120737,10 @@
       "areaNameJa": "和歌山県北部",
       "municipalityCode": "3038100",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
+      "publishedAddressJa": "和歌山県日高郡美浜町和田1138-278",
+      "facilityNameJa": "美浜町役場",
       "facilityNameEn": null,
-      "metadataStatus": "Catalogue only",
+      "metadataStatus": "Official prefectural seismic-network address",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -120725,11 +120748,12 @@
       "providerLatitude": null,
       "providerLongitude": null,
       "sourceUrls": [
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.pref.wakayama.lg.jp/prefg/011400/d00153903_d/fil/03-4_siryou_3.pdf"
       ],
-      "note": "No exact address or precise provider-station metadata is recorded yet.",
+      "note": "Wakayama Prefecture's official earthquake-observation table directly lists this station, the host site, and the address.",
       "placementLocalityJa": "和歌山美浜町",
-      "placementPrecision": "municipality_or_ward"
+      "placementPrecision": "exact_address"
     },
     {
       "code": "3038230",
@@ -120755,10 +120779,10 @@
       "areaNameJa": "和歌山県北部",
       "municipalityCode": "3038200",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
+      "publishedAddressJa": "和歌山県日高郡日高町高家626",
+      "facilityNameJa": "日高町役場",
       "facilityNameEn": null,
-      "metadataStatus": "Catalogue only",
+      "metadataStatus": "Official prefectural seismic-network address",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -120766,11 +120790,12 @@
       "providerLatitude": null,
       "providerLongitude": null,
       "sourceUrls": [
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.pref.wakayama.lg.jp/prefg/011400/d00153903_d/fil/03-4_siryou_3.pdf"
       ],
-      "note": "No exact address or precise provider-station metadata is recorded yet.",
+      "note": "Wakayama Prefecture's official earthquake-observation table directly lists this station, the host site, and the address.",
       "placementLocalityJa": "和歌山日高町",
-      "placementPrecision": "municipality_or_ward"
+      "placementPrecision": "exact_address"
     },
     {
       "code": "3038330",
@@ -120796,10 +120821,10 @@
       "areaNameJa": "和歌山県北部",
       "municipalityCode": "3038300",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
+      "publishedAddressJa": "和歌山県日高郡由良町里1220-1",
+      "facilityNameJa": "由良町役場",
       "facilityNameEn": null,
-      "metadataStatus": "Catalogue only",
+      "metadataStatus": "Official prefectural seismic-network address",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -120807,11 +120832,12 @@
       "providerLatitude": null,
       "providerLongitude": null,
       "sourceUrls": [
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.pref.wakayama.lg.jp/prefg/011400/d00153903_d/fil/03-4_siryou_3.pdf"
       ],
-      "note": "No exact address or precise provider-station metadata is recorded yet.",
+      "note": "Wakayama Prefecture's official earthquake-observation table directly lists this station, the host site, and the address.",
       "placementLocalityJa": "由良町",
-      "placementPrecision": "municipality_or_ward"
+      "placementPrecision": "exact_address"
     },
     {
       "code": "3039032",
@@ -120837,10 +120863,10 @@
       "areaNameJa": "和歌山県北部",
       "municipalityCode": "3039000",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
+      "publishedAddressJa": "和歌山県日高郡印南町印南2570",
+      "facilityNameJa": "印南町役場",
       "facilityNameEn": null,
-      "metadataStatus": "Catalogue only",
+      "metadataStatus": "Official prefectural seismic-network address",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -120848,11 +120874,12 @@
       "providerLatitude": null,
       "providerLongitude": null,
       "sourceUrls": [
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.pref.wakayama.lg.jp/prefg/011400/d00153903_d/fil/03-4_siryou_3.pdf"
       ],
-      "note": "No exact address or precise provider-station metadata is recorded yet.",
+      "note": "Wakayama Prefecture's official earthquake-observation table directly lists this station, the host site, and the address.",
       "placementLocalityJa": "和歌山印南町",
-      "placementPrecision": "municipality_or_ward"
+      "placementPrecision": "exact_address"
     },
     {
       "code": "3039100",
@@ -120918,10 +120945,10 @@
       "areaNameJa": "和歌山県北部",
       "municipalityCode": "3039100",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
+      "publishedAddressJa": "和歌山県日高郡みなべ町芝742",
+      "facilityNameJa": "みなべ町役場第1庁舎",
       "facilityNameEn": null,
-      "metadataStatus": "Catalogue only",
+      "metadataStatus": "Official prefectural seismic-network address",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -120929,11 +120956,12 @@
       "providerLatitude": null,
       "providerLongitude": null,
       "sourceUrls": [
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.pref.wakayama.lg.jp/prefg/011400/d00153903_d/fil/03-4_siryou_3.pdf"
       ],
-      "note": "No exact address or precise provider-station metadata is recorded yet.",
+      "note": "Wakayama Prefecture's official earthquake-observation table directly lists this station, the host site, and the address.",
       "placementLocalityJa": "日高郡みなべ町",
-      "placementPrecision": "municipality_or_ward"
+      "placementPrecision": "exact_address"
     },
     {
       "code": "3039233",
@@ -120959,10 +120987,10 @@
       "areaNameJa": "和歌山県北部",
       "municipalityCode": "3039200",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
+      "publishedAddressJa": "和歌山県日高郡日高川町土生160",
+      "facilityNameJa": "日高川町役場本庁",
       "facilityNameEn": null,
-      "metadataStatus": "Catalogue only",
+      "metadataStatus": "Official prefectural seismic-network address",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -120970,11 +120998,12 @@
       "providerLatitude": null,
       "providerLongitude": null,
       "sourceUrls": [
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.pref.wakayama.lg.jp/prefg/011400/d00153903_d/fil/03-4_siryou_3.pdf"
       ],
-      "note": "No exact address or precise provider-station metadata is recorded yet.",
+      "note": "Wakayama Prefecture's official earthquake-observation table directly lists this station, the host site, and the address.",
       "placementLocalityJa": "日高川町",
-      "placementPrecision": "municipality_or_ward"
+      "placementPrecision": "exact_address"
     },
     {
       "code": "3039234",
@@ -121000,10 +121029,10 @@
       "areaNameJa": "和歌山県北部",
       "municipalityCode": "3039200",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
+      "publishedAddressJa": "和歌山県日高郡日高川町高津尾29",
+      "facilityNameJa": "日高川町役場中津支所",
       "facilityNameEn": null,
-      "metadataStatus": "Catalogue only",
+      "metadataStatus": "Official prefectural seismic-network address",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -121011,11 +121040,12 @@
       "providerLatitude": null,
       "providerLongitude": null,
       "sourceUrls": [
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.pref.wakayama.lg.jp/prefg/011400/d00153903_d/fil/03-4_siryou_3.pdf"
       ],
-      "note": "No exact address or precise provider-station metadata is recorded yet.",
+      "note": "Wakayama Prefecture's official earthquake-observation table directly lists this station, the host site, and the address.",
       "placementLocalityJa": "日高川町",
-      "placementPrecision": "municipality_or_ward"
+      "placementPrecision": "exact_address"
     },
     {
       "code": "3039235",
@@ -121041,10 +121071,10 @@
       "areaNameJa": "和歌山県北部",
       "municipalityCode": "3039200",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
+      "publishedAddressJa": "和歌山県日高郡日高川町大字川原河264",
+      "facilityNameJa": "日高川町保健福祉センター",
       "facilityNameEn": null,
-      "metadataStatus": "Catalogue only",
+      "metadataStatus": "Official prefectural seismic-network address",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -121052,11 +121082,12 @@
       "providerLatitude": null,
       "providerLongitude": null,
       "sourceUrls": [
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.pref.wakayama.lg.jp/prefg/011400/d00153903_d/fil/03-4_siryou_3.pdf"
       ],
-      "note": "No exact address or precise provider-station metadata is recorded yet.",
+      "note": "Wakayama Prefecture's official earthquake-observation table directly lists this station, the host site, and the address.",
       "placementLocalityJa": "日高川町",
-      "placementPrecision": "municipality_or_ward"
+      "placementPrecision": "exact_address"
     },
     {
       "code": "3020600",
@@ -121122,10 +121153,10 @@
       "areaNameJa": "和歌山県南部",
       "municipalityCode": "3020600",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
+      "publishedAddressJa": "和歌山県田辺市中辺路町栗栖川396-1",
+      "facilityNameJa": "田辺市役所中辺路行政局",
       "facilityNameEn": null,
-      "metadataStatus": "Catalogue only",
+      "metadataStatus": "Official prefectural seismic-network address",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -121133,11 +121164,12 @@
       "providerLatitude": null,
       "providerLongitude": null,
       "sourceUrls": [
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.pref.wakayama.lg.jp/prefg/011400/d00153903_d/fil/03-4_siryou_3.pdf"
       ],
-      "note": "No exact address or precise provider-station metadata is recorded yet.",
+      "note": "Wakayama Prefecture's official earthquake-observation table directly lists this station, the host site, and the address.",
       "placementLocalityJa": "田辺市",
-      "placementPrecision": "municipality_or_ward"
+      "placementPrecision": "exact_address"
     },
     {
       "code": "3020632",
@@ -121163,10 +121195,10 @@
       "areaNameJa": "和歌山県南部",
       "municipalityCode": "3020600",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
+      "publishedAddressJa": "和歌山県田辺市本宮町本宮219",
+      "facilityNameJa": "田辺市役所本宮行政局",
       "facilityNameEn": null,
-      "metadataStatus": "Catalogue only",
+      "metadataStatus": "Official prefectural seismic-network address",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -121174,11 +121206,12 @@
       "providerLatitude": null,
       "providerLongitude": null,
       "sourceUrls": [
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.pref.wakayama.lg.jp/prefg/011400/d00153903_d/fil/03-4_siryou_3.pdf"
       ],
-      "note": "No exact address or precise provider-station metadata is recorded yet.",
+      "note": "Wakayama Prefecture's official earthquake-observation table directly lists this station, the host site, and the address.",
       "placementLocalityJa": "田辺市",
-      "placementPrecision": "municipality_or_ward"
+      "placementPrecision": "exact_address"
     },
     {
       "code": "3020633",
@@ -121204,10 +121237,10 @@
       "areaNameJa": "和歌山県南部",
       "municipalityCode": "3020600",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
+      "publishedAddressJa": "和歌山県田辺市鮎川2567-1",
+      "facilityNameJa": "田辺市役所大塔行政局",
       "facilityNameEn": null,
-      "metadataStatus": "Catalogue only",
+      "metadataStatus": "Official prefectural seismic-network address",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -121215,11 +121248,12 @@
       "providerLatitude": null,
       "providerLongitude": null,
       "sourceUrls": [
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.pref.wakayama.lg.jp/prefg/011400/d00153903_d/fil/03-4_siryou_3.pdf"
       ],
-      "note": "No exact address or precise provider-station metadata is recorded yet.",
+      "note": "Wakayama Prefecture's official earthquake-observation table directly lists this station, the host site, and the address.",
       "placementLocalityJa": "田辺市",
-      "placementPrecision": "municipality_or_ward"
+      "placementPrecision": "exact_address"
     },
     {
       "code": "3020635",
@@ -121245,10 +121279,10 @@
       "areaNameJa": "和歌山県南部",
       "municipalityCode": "3020600",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
+      "publishedAddressJa": "和歌山県田辺市龍神村西376",
+      "facilityNameJa": "田辺市役所龍神行政局",
       "facilityNameEn": null,
-      "metadataStatus": "Catalogue only",
+      "metadataStatus": "Official prefectural seismic-network address",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -121256,11 +121290,12 @@
       "providerLatitude": null,
       "providerLongitude": null,
       "sourceUrls": [
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.pref.wakayama.lg.jp/prefg/011400/d00153903_d/fil/03-4_siryou_3.pdf"
       ],
-      "note": "No exact address or precise provider-station metadata is recorded yet.",
+      "note": "Wakayama Prefecture's official earthquake-observation table directly lists this station, the host site, and the address.",
       "placementLocalityJa": "田辺市",
-      "placementPrecision": "municipality_or_ward"
+      "placementPrecision": "exact_address"
     },
     {
       "code": "3020636",
@@ -121286,10 +121321,10 @@
       "areaNameJa": "和歌山県南部",
       "municipalityCode": "3020600",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
+      "publishedAddressJa": "和歌山県田辺市東山一丁目5番1号",
+      "facilityNameJa": "田辺市役所",
       "facilityNameEn": null,
-      "metadataStatus": "Catalogue only",
+      "metadataStatus": "Official prefectural seismic-network address",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -121297,11 +121332,12 @@
       "providerLatitude": null,
       "providerLongitude": null,
       "sourceUrls": [
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.pref.wakayama.lg.jp/prefg/011400/d00153903_d/fil/03-4_siryou_3.pdf"
       ],
-      "note": "No exact address or precise provider-station metadata is recorded yet.",
+      "note": "Wakayama Prefecture's official earthquake-observation table directly lists this station, the host site, and the address.",
       "placementLocalityJa": "田辺市",
-      "placementPrecision": "municipality_or_ward"
+      "placementPrecision": "exact_address"
     },
     {
       "code": "3020702",
@@ -121409,10 +121445,10 @@
       "areaNameJa": "和歌山県南部",
       "municipalityCode": "3020700",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
+      "publishedAddressJa": "和歌山県新宮市熊野川町日足324",
+      "facilityNameJa": "新宮市役所熊野川行政局",
       "facilityNameEn": null,
-      "metadataStatus": "Catalogue only",
+      "metadataStatus": "Official prefectural seismic-network address",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -121420,11 +121456,12 @@
       "providerLatitude": null,
       "providerLongitude": null,
       "sourceUrls": [
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.pref.wakayama.lg.jp/prefg/011400/d00153903_d/fil/03-4_siryou_3.pdf"
       ],
-      "note": "No exact address or precise provider-station metadata is recorded yet.",
+      "note": "Wakayama Prefecture's official earthquake-observation table directly lists this station, the host site, and the address.",
       "placementLocalityJa": "新宮市",
-      "placementPrecision": "municipality_or_ward"
+      "placementPrecision": "exact_address"
     },
     {
       "code": "3040102",
@@ -121491,10 +121528,10 @@
       "areaNameJa": "和歌山県南部",
       "municipalityCode": "3040100",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
+      "publishedAddressJa": "和歌山県西牟婁郡白浜町日置980-1",
+      "facilityNameJa": "白浜町役場日置川事務所",
       "facilityNameEn": null,
-      "metadataStatus": "Catalogue only",
+      "metadataStatus": "Official prefectural seismic-network address",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -121502,11 +121539,12 @@
       "providerLatitude": null,
       "providerLongitude": null,
       "sourceUrls": [
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.pref.wakayama.lg.jp/prefg/011400/d00153903_d/fil/03-4_siryou_3.pdf"
       ],
-      "note": "No exact address or precise provider-station metadata is recorded yet.",
+      "note": "Wakayama Prefecture's official earthquake-observation table directly lists this station, the host site, and the address.",
       "placementLocalityJa": "西牟婁郡白浜町",
-      "placementPrecision": "municipality_or_ward"
+      "placementPrecision": "exact_address"
     },
     {
       "code": "3040430",
@@ -121532,10 +121570,10 @@
       "areaNameJa": "和歌山県南部",
       "municipalityCode": "3040400",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
+      "publishedAddressJa": "和歌山県西牟婁郡上富田町朝来763",
+      "facilityNameJa": "上富田町役場",
       "facilityNameEn": null,
-      "metadataStatus": "Catalogue only",
+      "metadataStatus": "Official prefectural seismic-network address",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -121543,11 +121581,12 @@
       "providerLatitude": null,
       "providerLongitude": null,
       "sourceUrls": [
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.pref.wakayama.lg.jp/prefg/011400/d00153903_d/fil/03-4_siryou_3.pdf"
       ],
-      "note": "No exact address or precise provider-station metadata is recorded yet.",
+      "note": "Wakayama Prefecture's official earthquake-observation table directly lists this station, the host site, and the address.",
       "placementLocalityJa": "上富田町",
-      "placementPrecision": "municipality_or_ward"
+      "placementPrecision": "exact_address"
     },
     {
       "code": "3040620",
@@ -121615,10 +121654,10 @@
       "areaNameJa": "和歌山県南部",
       "municipalityCode": "3042100",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
+      "publishedAddressJa": "和歌山県東牟婁郡那智勝浦町大字天満1244-1",
+      "facilityNameJa": "那智勝浦町消防・防災センター",
       "facilityNameEn": null,
-      "metadataStatus": "Catalogue only",
+      "metadataStatus": "Official prefectural seismic-network address",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -121626,11 +121665,12 @@
       "providerLatitude": null,
       "providerLongitude": null,
       "sourceUrls": [
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.pref.wakayama.lg.jp/prefg/011400/d00153903_d/fil/03-4_siryou_3.pdf"
       ],
-      "note": "No exact address or precise provider-station metadata is recorded yet.",
+      "note": "Wakayama Prefecture's official earthquake-observation table directly lists this station, the host site, and the address.",
       "placementLocalityJa": "那智勝浦町",
-      "placementPrecision": "municipality_or_ward"
+      "placementPrecision": "exact_address"
     },
     {
       "code": "3042220",
@@ -121780,10 +121820,10 @@
       "areaNameJa": "和歌山県南部",
       "municipalityCode": "3042700",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
+      "publishedAddressJa": "和歌山県東牟婁郡北山村大沼42",
+      "facilityNameJa": "北山村役場",
       "facilityNameEn": null,
-      "metadataStatus": "Catalogue only",
+      "metadataStatus": "Official prefectural seismic-network address",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -121791,11 +121831,12 @@
       "providerLatitude": null,
       "providerLongitude": null,
       "sourceUrls": [
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.pref.wakayama.lg.jp/prefg/011400/d00153903_d/fil/03-4_siryou_3.pdf"
       ],
-      "note": "No exact address or precise provider-station metadata is recorded yet.",
+      "note": "Wakayama Prefecture's official earthquake-observation table directly lists this station, the host site, and the address.",
       "placementLocalityJa": "北山村",
-      "placementPrecision": "municipality_or_ward"
+      "placementPrecision": "exact_address"
     },
     {
       "code": "3042801",
@@ -121904,10 +121945,10 @@
       "areaNameJa": "和歌山県南部",
       "municipalityCode": "3042800",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
+      "publishedAddressJa": "和歌山県東牟婁郡串本町上野山289",
+      "facilityNameJa": "串本町消防本部古座消防署",
       "facilityNameEn": null,
-      "metadataStatus": "Catalogue only",
+      "metadataStatus": "Official JMA published address",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -121915,11 +121956,12 @@
       "providerLatitude": null,
       "providerLongitude": null,
       "sourceUrls": [
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.jma.go.jp/bosai/oshirase/dokujioshirase_pdf/JPSP/20260217061734_0_Z__J_JPSP_20260217061600_MET_INF_Jdokujioshirase32_NJ000n00_image.pdf"
       ],
-      "note": "No exact address or precise provider-station metadata is recorded yet.",
+      "note": "JMA's official observation-point change notice directly lists this station code, the fire station, and the address.",
       "placementLocalityJa": "東牟婁郡串本町",
-      "placementPrecision": "municipality_or_ward"
+      "placementPrecision": "exact_address"
     },
     {
       "code": "3120100",
@@ -177684,10 +177726,10 @@
       "areaNameJa": "沖縄県本島中南部",
       "municipalityCode": "4721100",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
+      "publishedAddressJa": "沖縄県沖縄市美里五丁目29番1号",
+      "facilityNameJa": "沖縄市消防本部",
       "facilityNameEn": null,
-      "metadataStatus": "Catalogue only",
+      "metadataStatus": "Official municipal seismic-network address",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -177695,11 +177737,13 @@
       "providerLatitude": null,
       "providerLongitude": null,
       "sourceUrls": [
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.city.okinawa.okinawa.jp/documents/25/honpen.pdf",
+        "https://www.city.okinawa.okinawa.jp/k050/anshin/shouboukyuukyuu/shoubou/1008/1108.html"
       ],
-      "note": "No exact address or precise provider-station metadata is recorded yet.",
+      "note": "Okinawa City's current disaster plan directly places the Misato seismic meter inside the Fire Headquarters; the city publishes the headquarters address.",
       "placementLocalityJa": "沖縄市",
-      "placementPrecision": "municipality_or_ward"
+      "placementPrecision": "exact_address"
     },
     {
       "code": "4721233",
@@ -178997,10 +179041,10 @@
       "areaNameJa": "沖縄県大東島",
       "municipalityCode": "4735800",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
+      "publishedAddressJa": "沖縄県島尻郡北大東村中野218",
+      "facilityNameJa": "北大東村役場",
       "facilityNameEn": null,
-      "metadataStatus": "Catalogue only",
+      "metadataStatus": "Official JMA placement and municipal address",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -179008,11 +179052,13 @@
       "providerLatitude": null,
       "providerLongitude": null,
       "sourceUrls": [
-        "https://xml.kishou.go.jp/20130628_jmaxml_info.pdf"
+        "https://xml.kishou.go.jp/20130628_jmaxml_info.pdf",
+        "https://www.jma-net.go.jp/daitou/shosai/kansoku/kansoku_jishin.html",
+        "https://vill.kitadaito.okinawa.jp/sonsei/gyosei.html"
       ],
-      "note": "No exact address or precise provider-station metadata is recorded yet.",
+      "note": "JMA's Daito Islands office directly identifies the North Daito Nakano intensity meter as being at Kitadaito Village Hall; the village publishes the hall's address.",
       "placementLocalityJa": "島尻郡北大東村",
-      "placementPrecision": "municipality_or_ward"
+      "placementPrecision": "exact_address"
     },
     {
       "code": "4721400",

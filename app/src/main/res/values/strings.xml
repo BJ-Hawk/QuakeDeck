@@ -392,6 +392,10 @@
     <string name="notification_tsunami_alerts">Tsunami alerts</string>
     <string name="notification_tsunami_alerts_description">Advisories, warnings, major warnings and cancellations.</string>
     <string name="notification_minimum_tsunami_level">Minimum tsunami level</string>
+    <string name="notification_tsunami_attention">Wake / full-screen</string>
+    <string name="notification_tsunami_attention_description">Uses %1$s. The first tsunami alert reaching the selected attention level can wake or open QuakeDeck.</string>
+    <string name="notification_tsunami_attention_threshold">Wake/full-screen from</string>
+    <string name="notification_tsunami_attention_threshold_description">Attention is available for Tsunami Warning and Major Tsunami Warning.</string>
     <string name="notification_updates">Report updates and cancellations</string>
 <string name="notification_quiet_hours">Quiet hours</string>
 <string name="notification_send_test">Send test notification</string>
@@ -405,10 +409,10 @@
     <string name="notification_intensity_shindo_6_lower_plus">Shindo 6-lower+</string>
     <string name="notification_intensity_shindo_6_upper_plus">Shindo 6-upper+</string>
     <string name="notification_intensity_shindo_7">Shindo 7</string>
-    <string name="notification_local_eew_attention">Warning wake/full-screen</string>
-    <string name="notification_local_eew_attention_description">A new warning predicting Shindo 5− or stronger at %1$s can use this.</string>
-    <string name="notification_local_eew_forecast_attention">Forecast wake/full-screen</string>
-    <string name="notification_local_eew_forecast_attention_description">A Forecast reaching the selected level at %1$s can use this. Crossing into Warning sends a separate alert.</string>
+    <string name="notification_local_eew_attention">Wake / full-screen</string>
+    <string name="notification_local_eew_attention_description">Uses %1$s. The first Warning reaching the selected level can wake or open QuakeDeck.</string>
+    <string name="notification_local_eew_forecast_attention">Wake / full-screen</string>
+    <string name="notification_local_eew_forecast_attention_description">Uses %1$s. The first Forecast reaching the full-notification level can wake or open QuakeDeck. Crossing into Warning remains separate.</string>
     <string name="notification_local_eew_attention_off">Off</string>
     <string name="notification_local_eew_attention_wake_screen">Wake screen</string>
     <string name="notification_local_eew_attention_full_screen">Full-screen alert</string>

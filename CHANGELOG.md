@@ -1,37 +1,159 @@
 # Changelog
 
 QuakeDeck release history
-## v0.9.84al (in progress)
 
-- **DM-D.S.S OAuth and EEW forecasts — pending testing with live events:** Adds the first Android DM-D.S.S integration through the supplied public OAuth client, using authorization-code PKCE with exact callback validation, Android Keystore-encrypted token persistence, automatic access-token refresh, safe in-place re-authorization, and explicit token revocation on disconnect or credential replacement. The grant reads `contract.list` so the source panel can show every active account plan and distinguish what QuakeDeck uses now from later capabilities; Socket Start is attempted only when an active `eew.forecast` entitlement exists. A dedicated converted-JSON `dmdata.v2` WebSocket handles matching ping/pong, text or binary frames, successive VXSE44/VXSE45 forecasts, predicted regional Shindo, out-of-order revisions, cancellations, expiry, and bounded reconnection. Clean shutdowns use the WebSocket close handshake, while abnormal failures use the granted `socket.close` API and retained socket ID before retrying. The explicitly approved read-only `gd.eew` scope adds a bounded post-event safety net after every successful startup/reconnect: QuakeDeck checks only the last five minutes of completed EEWs using the API's documented second-precision datetime refinement, delivers only a still-active candidate issued within three minutes, suppresses anything already accepted, and still permits a recovered Forecast-to-Warning escalation. It never replaces the live socket or turns stale archive entries into alerts. Existing authorizations missing newer scopes remain usable for their existing live access and are clearly prompted to update without being destroyed if authorization is cancelled. Persistent app-private delivery diagnostics keep a bounded redacted history of diagnostically meaningful DM-D.S.S WebSocket packets, including start, data, malformed, error, close, and failure records; routine ping/pong heartbeats are excluded so they cannot evict useful traffic, while connection activity still tracks them. Transport failures are separated from ignored bulletins; WebSocket error code, message, close instruction, close/failure details, true connection time, last activity, and the underlying post-event recovery failure are retained instead of being collapsed into generic labels. The Data source dialog refreshes meaningful packet and error changes while open, previews the newest packets, and exports the complete retained summary and packet history as structured, schema-versioned JSON through an explicit user-selected destination. History is capped by entry count, per-packet size, and total size so diagnostics cannot grow without bound. Warning and paid Forecast notifications remain enabled by default and completely independent. Forecast now offers Shindo 0 through 4 as the full-notification floor; below it, the user can choose off, silent, or a regular notification that never wakes the screen or uses full-screen. The below-floor choice disappears at Shindo 0, while existing installations default to regular delivery to preserve prior behavior. A first revision crossing the selected Forecast floor replaces any lower-level card so its normal alert and selected one-shot attention can occur freshly. Warning remains audible and exposes Shindo 5−, 5+, 6−, 6+, and 7. When an active event crosses from Forecast into Warning, QuakeDeck removes the obsolete Forecast card and posts a new Warning notification identity on the Warning channel, so the escalation alerts again even if the Forecast already notified. The existing single P2PQuake provider is unchanged as the permanent baseline for reports, tsunami, history, Sandbox, monitoring, and fallback warnings—including OAuth failure, missing/expired forecast subscriptions, and DM-D.S.S connection failure. This implementation remains unverified against actual live EEW delivery; live reception, notification, escalation, foreground reconnect, corrected recovery, packet export, and the expanded Forecast policy must remain marked pending until observed on a real authorized device/account.
+## v0.10.0
 
-- **Station names:** Bundles an audited code-keyed active English map for all 4,360 stations. English observed-station rows and idle/report map labels now prefer it while Japanese mode remains unchanged. The previous automatic English names are retained as an exact baseline outside the APK with the station-audit data.
+### DM-D.S.S OAuth and EEW forecasts
 
-- **Notifications and background monitoring:** Adds opt-in foreground monitoring using the existing process-scoped P2PQuake and DM-D.S.S runtime, with Android’s special-use foreground-service type, prompt reconnection for both providers when monitoring starts or the service restarts, and a permanent silent one-line connection-status notification with its own icon, no report details, and no app-icon dot. Live earthquake, EEW, and tsunami notifications receive distinct icons; watch notifications prioritize local or Japan-wide Shindo when the phone badge is unavailable; and Warning and Forecast each expose their own off, wake-screen, and full-screen modes plus their own predicted-Shindo threshold. Each stream can trigger attention once on its first qualifying non-Sandbox revision, requires Android’s shared full-screen approval, and otherwise falls back to heads-up alerts. Background behavior remains unchanged while monitoring is disabled.
+**Validation status:** Pending further testing with live events.
 
-- **Notification navigation:** Makes notification navigation reliable after a cold start by carrying and synchronously retaining a bounded incident snapshot. Earthquake launches keep the exact report selected and suppress persisted free-map camera restoration so the explicit event focus wins; the focus command is replayed once after the report card establishes the final viewport and refines automatically when detailed JMA geometry becomes available, eliminating the former second-tap requirement. EEW Forecast and Warning launches rehydrate the active EEW event, forecast points, timeline offset, P/S-wave rings, and countdown until matching live state recovers. Tsunami launches now carry their complete bulletin, forecast areas, grades, arrival/height details, and timeline offset. Live and restored tsunami warnings focus the affected forecast coasts without inventing an earthquake relationship, first using the bundled prefecture-coast fallback and then refining to exact JMA coast geometry after it loads; the focus also replays after the alert card establishes the final viewport, while the manual Fit Japan action remains whole-country and takes priority. A matching cached but inactive tsunami can no longer suppress the notification's active state, so restored warning coasts flash normally. This works for production and one-shot Sandbox notifications after the app has been swiped away. Explicit notification destinations also take precedence over Sandbox focus cleanup, which now runs only after an actual Sandbox-mode transition.
+#### OAuth, entitlements, and connection lifecycle
 
-- **Sandbox controls and diagnostics:** Moves the Sandbox master switch into the build configuration and enforces it across saved settings, display time, UI, process runtime, and provider boundaries. Disabled builds clear persisted Sandbox mode and cannot use Sandbox time or feeds, start built-in replays, or inject test reports. Adds a one-shot DM-D.S.S-style EEW forecast beside the existing warning injector; it follows the same delayed live-pipeline workflow, exercises the audible Forecast notification and Forecast-specific threshold/attention policy, leaves the selected live or Sandbox connection untouched, and retains the existing safety rule that active Sandbox mode does not wake or take over the device. Adds persisted, event-driven diagnostics—without polling—for monitoring-service time, active UI time, resident time without active UI, and monitoring-only time, with today, since-reset, and non-disruptive reset controls in Settings.
+- Adds the first Android DM-D.S.S integration through the supplied public OAuth client, using authorization-code PKCE with exact callback validation, Android Keystore-encrypted token persistence, automatic access-token refresh, safe in-place re-authorization, and explicit token revocation on disconnect or credential replacement.
+- Reads `contract.list` so the source panel can show every active account plan and distinguish capabilities QuakeDeck uses now from later capabilities. Socket Start is attempted only when an active `eew.forecast` entitlement exists.
+- Keeps existing authorizations that lack newer scopes usable for their existing live access. QuakeDeck clearly prompts the user to update them without destroying the authorization if the new authorization is cancelled.
+- Uses the normal WebSocket close handshake for clean shutdowns. Abnormal failures use the granted `socket.close` API and retained socket ID before retrying.
 
-- **Observed-intensity interface:** Keeps report controls and the active prefecture header pinned while observed stations scroll, with later prefectures naturally pushing into a second floating slot. The selected observation remains highlighted and is mirrored only while its real row is off-screen, docking precisely against the floating prefecture card or report-pane bottom as it crosses either viewport edge. Card gaps are removed, the selected station’s prefecture remains fixed above it across later prefectures, and the Top control moves upward only by the clearance required while the station is bottom-docked.
+#### Live socket, parsing, and recovery
 
-- **Observed-intensity hierarchy and focus:** Extends confirmed observations into independently expandable Prefecture → JMA reporting area → Municipality → Station levels, with stable administrative-code grouping, maximum-Shindo badges, guide rails, and dedicated reticles that fit the corresponding official map boundary without changing the row’s expand/collapse action. Every sibling JMA-area card is now placed in a real vertical parent instead of the same overlay slot, so areas, municipalities, and reporting stations no longer cover one another or appear missing; this also gives the prefecture-equivalent floating, push-off, selected-path, and secondary-slot logic distinct measured positions to follow. All 188 station-backed JMA reporting areas now have build-validated English names, including the island areas omitted by the general place dictionary. Exact regressions conserve all 93 Tokyo stations in the 2026-08-21 Hachijojima report and both JMA areas, all six municipalities, and all 16 stations in the 23:27 Kumamoto report with their actual tier maxima. JMA-area and municipality focus receives a protected, useful minimum zoom so event auto-fit cannot immediately undo the requested boundary fit.
+- Uses a dedicated converted-JSON `dmdata.v2` WebSocket with matching ping/pong, text and binary frame support, successive VXSE44/VXSE45 forecasts, predicted regional Shindo, out-of-order revisions, cancellations, expiry, and bounded reconnection.
+- Handles the production converted-JSON envelope discovered during live testing, where bodies are Base64-encoded GZIP rather than literal JSON strings. The DM-D.S.S-only parser retains plain-JSON compatibility, bounds encoded and decompressed sizes, reports specific decode failures, and suppresses semantically identical paired VXSE44/VXSE45 revisions.
+- Adds a bounded post-event safety net through the explicitly approved read-only `gd.eew` scope after every successful startup or reconnect:
+  - Checks only the last five minutes of completed EEWs using the API's documented second-precision datetime refinement.
+  - Delivers only a still-active candidate issued within three minutes.
+  - Suppresses anything already accepted while still permitting a recovered Forecast-to-Warning escalation.
+  - Never replaces the live socket or turns stale archive entries into alerts.
 
-- **Station information:** Reuses the current earthquake report card at exactly the same dimensions for station details, with an Earthquake/Station information toggle replacing the former two-line maximum-intensity caption immediately left of the existing Shindo badge. Focus station and Observed intensities remain available, while Close report becomes Close station info in station mode and restores the prior camera. Published address, facility, provider identity, and station code come from a compact projection regenerated automatically on every APK pre-build from the authoritative 4,360-record station metadata audit; unknown addresses stay explicitly unknown.
+#### Delivery diagnostics
 
-- **Deep-map legibility:** Presents city and station names as collision-aware translucent labels anchored to the one real map marker at its true coordinate—there is no detached or duplicated label dot, and a collision leaves the same real marker visible by itself. JMA-area and municipality tiers retain context by inheriting a deliberately dimmer parent intensity only when their own direct observation is unavailable; direct values always win. Municipality inheritance now uses the 1,894 stable code-keyed parent relationships generated from the audited build source rather than the mutable runtime station cache, so unreported children cannot lose their faded JMA-area or prefecture colour when cache data differs.
+- Keeps a bounded, redacted, app-private history of diagnostically meaningful DM-D.S.S WebSocket packets: start, data, malformed, error, close, and failure records.
+- Excludes routine ping/pong heartbeats so they cannot evict useful traffic, while still tracking them as connection activity.
+- Separates transport failures from ignored bulletins. WebSocket error code, message, close instruction, close/failure details, true connection time, last activity, and the underlying post-event recovery failure remain available instead of being collapsed into generic labels.
+- Refreshes meaningful packet and error changes in the open Data source dialog, previews the newest packets, and exports the complete retained summary and packet history as structured, schema-versioned JSON through an explicit user-selected destination.
+- Caps diagnostics by entry count, per-packet size, and total size so the history cannot grow without bound.
 
-- **Historical reports:** Compacts and refines the browser with tighter page rhythm, a result count beside the Sort heading, a subtle section divider, and two balanced rows of selectable Shindo-tinted intensity tiles in place of four sparse checkbox rows, while preserving all sorting, date filtering, selection, and navigation behavior. Keeps Previous/Next navigation within a historical event from automatically refitting the camera and gives the event card a stable layout identity so equal-size date, time, and value updates occur in place while genuine size changes remain supported. The shared Live/Historical pending-hypocenter placeholder retains the resolved location’s two-row grid, preventing layout jumps; initial opening, explicit Re-focus, and intentional Observed-intensities resizing remain unchanged.
+#### Forecast and Warning behavior
 
-- **Map accuracy:** Prevents Tokyo reports from also colouring Kyoto by preferring complete Japanese prefecture names before suffix-free forecast-area aliases, while retaining multi-prefecture labels and adding regression coverage for both paths. Known epicentres that fall just outside the bundled land bounds now render whenever their projected marker is actually visible in the map viewport, without relaxing the stricter automatic-focus boundary for genuinely distant events.
+- Keeps Warning and paid Forecast notifications enabled by default and completely independent.
+- Gives Forecast a Shindo 0 through 4 full-notification floor. Below the floor, the user can choose off, silent, or a regular notification that never wakes the screen or uses full-screen.
+- Hides the below-floor choice at Shindo 0. Existing installations default to regular delivery to preserve prior behavior.
+- Replaces a lower-level Forecast card when a revision first crosses the selected floor, allowing its normal alert and selected one-shot attention to occur freshly.
+- Keeps Warning audible and exposes Shindo 5−, 5+, 6−, 6+, and 7.
+- When an active event escalates from Forecast to Warning, removes the obsolete Forecast card and posts a new identity on the Warning channel so the escalation alerts again even if Forecast already notified.
+- Leaves the single existing P2PQuake provider unchanged as the permanent baseline for reports, tsunami, history, Sandbox, monitoring, and fallback warnings, including OAuth failure, missing or expired forecast subscriptions, and DM-D.S.S connection failure.
 
-- **Place-name presentation:** Sentence-cases English epicentre names at the display boundary, correcting JMA's lower-case `the vicinity of Taiwan` label without altering the authoritative source dictionary.
+#### Live-event findings
 
-- **Build tooling:** Updates the Gradle wrapper to 9.7.0.
+- A second real event, `20260825002747`, validated post-hotfix Base64/GZIP parsing, five successive logical revisions with paired VXSE44/VXSE45 deduplication, Shindo 1 then Shindo 2 notification delivery, full-screen launch, final-bulletin receipt, and live timing close to JQuake.
+- That event also exposed lifecycle defects corrected in `0.10.0`:
+  - Unchanged-intensity revisions silently update the existing card; the first revision and a changed relevant Shindo alert normally.
+  - DM-D.S.S activity ends exactly 180 seconds after the event timestamp.
+  - A retained launch payload can no longer resurrect an ended incident.
+- Forecast-to-Warning escalation, cancellation, reconnect recovery, the patched lifecycle, and long-running behavior still require live validation.
+
+### Station names
+
+- Bundles an audited, code-keyed active English map for all 4,360 stations.
+- English observed-station rows and idle/report map labels prefer the audited names, while Japanese mode remains unchanged.
+- Retains the previous automatic English names as an exact baseline outside the APK with the station-audit data.
+
+### Notifications and background monitoring
+
+#### Foreground monitoring
+
+- Adds opt-in foreground monitoring using the existing process-scoped P2PQuake and DM-D.S.S runtime.
+- Uses Android’s special-use foreground-service type, promptly reconnects both providers when monitoring starts or the service restarts, and shows a permanent silent one-line connection-status notification with its own icon, no report details, and no app-icon dot.
+- Leaves background behavior unchanged while monitoring is disabled.
+
+#### Alert behavior and presentation
+
+- Gives live earthquake, EEW, and tsunami notifications distinct icons. Watch notifications prioritize local or Japan-wide Shindo when the phone badge is unavailable.
+- Gives Warning and Forecast independent off, wake-screen, and full-screen modes plus independent predicted-Shindo thresholds.
+- Lets each stream trigger attention once on its first qualifying non-Sandbox revision. Full-screen attention requires Android’s shared approval and otherwise falls back to a heads-up alert.
+- For one active Forecast or Warning identity, the first bulletin alerts, a changed relevant Shindo alerts again, and an unchanged revision silently refreshes the existing card. Forecast-to-Warning remains a distinct fresh alert, and EEW Ended remains a separate status notification.
+- Gives Tsunami Warning and Major Tsunami Warning their own independent wake/full-screen mode and minimum attention grade.
+
+#### Coverage and Settings
+
+- Uses one coverage decision for notification delivery and wake/full-screen attention:
+  - With location filtering disabled, both use the Japan-wide event maximum or all affected tsunami coasts.
+  - With location filtering enabled, both use the same official local EEW forecast or affected tsunami zones.
+- Allows a regionless EEW to use the overall maximum only when its hypocentre is in the selected JMA EEW area or within 75 km, without presenting that fallback as a measured local Shindo.
+- Separates system delivery, reference location, earthquake reports, paid Forecast, Warning, tsunami, and quiet-hour/update controls into compact Settings cards, while showing Android’s shared full-screen permission only once.
+
+### Notification navigation
+
+- Makes cold-start notification navigation reliable by carrying and synchronously retaining a bounded incident snapshot.
+- For earthquake launches:
+  - Keeps the exact report selected and suppresses persisted free-map camera restoration so explicit event focus wins.
+  - Replays the focus command after the report card establishes the final viewport, then refines it automatically when detailed JMA geometry becomes available, eliminating the former second-tap requirement.
+- For EEW Forecast and Warning launches:
+  - Rehydrates the active EEW event, forecast points, timeline offset, P/S-wave rings, and countdown until matching live state recovers.
+  - Gives the retained DM-D.S.S payload the same event-time-plus-180-seconds deadline as the provider and prevents it from overriding an explicit ended or cancelled state.
+- Consumes notification navigation extras once so a configuration change cannot replay an older serial such as Report #1.
+- For tsunami launches:
+  - Carries the complete bulletin, forecast areas, grades, arrival/height details, and timeline offset.
+  - Focuses affected forecast coasts for live and restored warnings without inventing an earthquake relationship, using the bundled prefecture-coast fallback first and refining to exact JMA coast geometry after it loads.
+  - Replays focus after the alert card establishes the final viewport, while manual Fit Japan remains whole-country and takes priority.
+  - Prevents a matching cached but inactive tsunami from suppressing the notification's active state, so restored warning coasts flash normally.
+- Supports production and one-shot Sandbox notifications after the app has been swiped away.
+- Gives explicit notification destinations priority over Sandbox focus cleanup, which now runs only after an actual Sandbox-mode transition.
+
+### Sandbox controls and diagnostics
+
+- Moves the Sandbox master switch into the build configuration and enforces it across saved settings, display time, UI, process runtime, and provider boundaries.
+- Disabled builds clear persisted Sandbox mode and cannot use Sandbox time or feeds, start built-in replays, or inject test reports.
+- Adds a one-shot DM-D.S.S-style EEW forecast beside the existing warning injector. It follows the same delayed live-pipeline workflow, exercises the audible Forecast notification and Forecast-specific threshold/attention policy, leaves the selected live or Sandbox connection untouched, and preserves the rule that active Sandbox mode does not wake or take over the device.
+- Adds persisted, event-driven diagnostics without polling for monitoring-service time, active UI time, resident time without active UI, and monitoring-only time, with today, since-reset, and non-disruptive reset controls in Settings.
+
+### Observed-intensity interface
+
+- Keeps report controls and the active prefecture header pinned while observed stations scroll, with later prefectures naturally pushing into a second floating slot.
+- Keeps the selected observation highlighted and mirrors it only while its real row is off-screen, docking precisely against the floating prefecture card or report-pane bottom as it crosses either viewport edge.
+- Removes card gaps, keeps the selected station’s prefecture fixed above it across later prefectures, and moves the Top control upward only by the clearance required while the station is bottom-docked.
+
+### Observed-intensity hierarchy and focus
+
+- Extends confirmed observations into independently expandable Prefecture → JMA reporting area → Municipality → Station levels, with stable administrative-code grouping, maximum-Shindo badges, guide rails, and dedicated reticles that fit the corresponding official map boundary without changing the row’s expand/collapse action.
+- Places every sibling JMA-area card in a real vertical parent instead of the same overlay slot, preventing areas, municipalities, and reporting stations from covering one another or appearing missing. Prefecture-equivalent floating, push-off, selected-path, and secondary-slot logic now has distinct measured positions to follow.
+- Includes build-validated English names for all 188 station-backed JMA reporting areas, including island areas omitted by the general place dictionary.
+- Adds exact regression coverage that conserves:
+  - All 93 Tokyo stations and both JMA areas in the 2026-08-21 Hachijojima report.
+  - All six municipalities and all 16 stations in the 23:27 Kumamoto report, with their actual tier maxima.
+- Protects a useful minimum zoom for JMA-area and municipality focus so event auto-fit cannot immediately undo the requested boundary fit.
+
+### Station information
+
+- Reuses the current earthquake report card at exactly the same dimensions for station details.
+- Replaces the former two-line maximum-intensity caption immediately left of the existing Shindo badge with an Earthquake/Station information toggle.
+- Keeps Focus station and Observed intensities available. Close report becomes Close station info in station mode and restores the prior camera.
+- Sources published address, facility, provider identity, and station code from a compact projection regenerated automatically on every APK pre-build from the authoritative 4,360-record station metadata audit. Unknown addresses remain explicitly unknown.
+
+### Deep-map legibility
+
+- Presents city and station names as collision-aware translucent labels anchored to the one real map marker at its true coordinate. There is no detached or duplicated label dot; a collision leaves the same real marker visible by itself.
+- Keeps context in JMA-area and municipality tiers by inheriting a deliberately dimmer parent intensity only when their own direct observation is unavailable. Direct values always win.
+- Uses 1,894 stable, code-keyed parent relationships generated from the audited build source for municipality inheritance instead of the mutable runtime station cache. Unreported children therefore retain their faded JMA-area or prefecture colour when cache data differs.
+
+### Historical reports
+
+- Compacts the browser with tighter page rhythm, a result count beside the Sort heading, a subtle section divider, and two balanced rows of selectable Shindo-tinted intensity tiles in place of four sparse checkbox rows, while preserving sorting, date filtering, selection, and navigation behavior.
+- Prevents Previous/Next navigation within a historical event from automatically refitting the camera.
+- Gives the event card a stable layout identity so equal-size date, time, and value updates occur in place while genuine size changes remain supported.
+- Keeps the shared Live/Historical pending-hypocenter placeholder in the resolved location’s two-row grid, preventing layout jumps. Initial opening, explicit Re-focus, and intentional Observed-intensities resizing remain unchanged.
+
+### Map accuracy and place-name presentation
+
+- Prevents Tokyo reports from also colouring Kyoto by preferring complete Japanese prefecture names before suffix-free forecast-area aliases, while retaining multi-prefecture labels and regression coverage for both paths.
+- Renders known epicentres just outside the bundled land bounds whenever their projected marker is visible in the map viewport, without relaxing the stricter automatic-focus boundary for genuinely distant events.
+- Sentence-cases English epicentre names at the display boundary, correcting JMA's lower-case `the vicinity of Taiwan` label without altering the authoritative source dictionary.
+
+### Build tooling
+
+- Updates the Gradle wrapper to 9.7.0.
 
 ---
-
-**Release status:** Advances the cumulative uncommitted hotfix to `0.9.84al` (`versionCode` 217), pending approval.
 
 ## v0.9.84
 

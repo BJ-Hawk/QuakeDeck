@@ -236,6 +236,12 @@ class MainActivity : ComponentActivity() {
     private fun updateNotificationNavigation(intent: Intent?) {
         notificationReportId = intent?.getStringExtra(EXTRA_NOTIFICATION_REPORT_ID)
         notificationEventPayload = intent?.getStringExtra(EXTRA_NOTIFICATION_EVENT)
+        // Notification navigation is a one-shot command. The Activity's launch
+        // Intent survives configuration recreation, so leaving these extras in
+        // place replays an old EEW revision after rotation.
+        intent?.removeExtra(EXTRA_NOTIFICATION_REPORT_ID)
+        intent?.removeExtra(EXTRA_NOTIFICATION_EVENT)
+        intent?.removeExtra(EXTRA_FULL_SCREEN_EEW)
     }
 
     private fun updateDmdssOAuthCallback(intent: Intent?) {
@@ -392,6 +398,10 @@ private fun QuakeDeckApp(
         mutableStateOf(appSettings.minimumLocalEewForecastAttentionIntensity)
     }
     var tsunamiNotificationsEnabled by remember { mutableStateOf(appSettings.tsunamiNotificationsEnabled) }
+    var tsunamiAttentionMode by remember { mutableStateOf(appSettings.tsunamiAttentionMode) }
+    var minimumTsunamiAttentionGrade by remember {
+        mutableStateOf(appSettings.minimumTsunamiAttentionGrade)
+    }
     var notificationUpdatesEnabled by remember { mutableStateOf(appSettings.notificationUpdatesEnabled) }
     var minimumNotificationIntensity by remember { mutableStateOf(appSettings.minimumNotificationIntensity) }
     var minimumTsunamiGrade by remember { mutableStateOf(appSettings.minimumTsunamiGrade) }
@@ -563,6 +573,35 @@ private fun QuakeDeckApp(
 
     val notificationLaunch = notificationLaunchFromIntent ?: retainedNotificationLaunch
     val snapshot = rawSnapshot.withNotificationLaunch(notificationLaunch)
+
+    LaunchedEffect(
+        rawSnapshot.liveUpdateSequence,
+        rawSnapshot.liveUpdateKind,
+        rawSnapshot.event.id,
+        rawSnapshot.activeEew
+    ) {
+        val retained = retainedNotificationLaunch
+            ?.takeIf { it.kind == NotificationLaunchKind.EEW }
+            ?: return@LaunchedEffect
+        val retainedId = retained.event?.id ?: return@LaunchedEffect
+        val providerEndedThisEew =
+            !rawSnapshot.activeEew &&
+                rawSnapshot.event.id == retainedId &&
+                (rawSnapshot.liveUpdateKind == LiveUpdateKind.EEW_ENDED ||
+                    rawSnapshot.liveUpdateKind == LiveUpdateKind.CANCELLED ||
+                    rawSnapshot.event.kind != EarthquakeEventKind.EEW ||
+                    rawSnapshot.event.isCancelled)
+        if (providerEndedThisEew) retainedNotificationLaunch = null
+    }
+
+    LaunchedEffect(retainedNotificationLaunch?.activeUntilMillis) {
+        val retained = retainedNotificationLaunch
+            ?.takeIf { it.kind == NotificationLaunchKind.EEW }
+            ?: return@LaunchedEffect
+        val activeUntil = retained.activeUntilMillis ?: return@LaunchedEffect
+        delay((activeUntil - System.currentTimeMillis()).coerceAtLeast(0L).milliseconds)
+        if (retainedNotificationLaunch == retained) retainedNotificationLaunch = null
+    }
 
     val sandboxState = sandboxUiState(testingMode)
 
@@ -1935,6 +1974,16 @@ private fun QuakeDeckApp(
             onTsunamiNotificationsEnabledChanged = { value ->
                 tsunamiNotificationsEnabled = value
                 appSettings.tsunamiNotificationsEnabled = value
+            },
+            tsunamiAttentionMode = tsunamiAttentionMode,
+            onTsunamiAttentionModeChanged = { value ->
+                tsunamiAttentionMode = value
+                appSettings.tsunamiAttentionMode = value
+            },
+            minimumTsunamiAttentionGrade = minimumTsunamiAttentionGrade,
+            onMinimumTsunamiAttentionGradeChanged = { value ->
+                minimumTsunamiAttentionGrade = value
+                appSettings.minimumTsunamiAttentionGrade = value
             },
             notificationUpdatesEnabled = notificationUpdatesEnabled,
             onNotificationUpdatesEnabledChanged = { value ->

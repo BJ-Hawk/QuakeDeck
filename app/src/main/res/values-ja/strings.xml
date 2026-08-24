@@ -391,6 +391,10 @@
     <string name="notification_tsunami_alerts">津波情報</string>
     <string name="notification_tsunami_alerts_description">津波注意報、津波警報、大津波警報、解除情報。</string>
     <string name="notification_minimum_tsunami_level">通知する最低津波レベル</string>
+    <string name="notification_tsunami_attention">画面起動／全画面</string>
+    <string name="notification_tsunami_attention_description">対象は%1$sです。選択したレベルに初めて達した津波情報で、画面を起動するかQuakeDeckを開くことができます。</string>
+    <string name="notification_tsunami_attention_threshold">画面起動／全画面を使用する最低レベル</string>
+    <string name="notification_tsunami_attention_threshold_description">画面起動と全画面表示は、津波警報と大津波警報で使用できます。</string>
     <string name="notification_updates">情報の更新・取消</string>
 <string name="notification_quiet_hours">サイレント時間帯</string>
 <string name="notification_send_test">テスト通知を送信</string>
@@ -404,10 +408,10 @@
     <string name="notification_intensity_shindo_6_lower_plus">震度6弱以上</string>
     <string name="notification_intensity_shindo_6_upper_plus">震度6強以上</string>
     <string name="notification_intensity_shindo_7">震度7</string>
-    <string name="notification_local_eew_attention">警報の画面起動／全画面</string>
-    <string name="notification_local_eew_attention_description">%1$sで予想震度5弱以上の新しい警報に使用できます。</string>
-    <string name="notification_local_eew_forecast_attention">予報の画面起動／全画面</string>
-    <string name="notification_local_eew_forecast_attention_description">%1$sで選択した震度に達する予報に使用できます。警報へ移行した場合は別の通知を送信します。</string>
+    <string name="notification_local_eew_attention">画面起動／全画面</string>
+    <string name="notification_local_eew_attention_description">対象は%1$sです。選択した震度に初めて達した警報で、画面を起動するかQuakeDeckを開くことができます。</string>
+    <string name="notification_local_eew_forecast_attention">画面起動／全画面</string>
+    <string name="notification_local_eew_forecast_attention_description">対象は%1$sです。通常通知の震度に初めて達した予報で、画面を起動するかQuakeDeckを開くことができます。警報への移行は別に通知します。</string>
     <string name="notification_local_eew_attention_off">オフ</string>
     <string name="notification_local_eew_attention_wake_screen">画面を起動</string>
     <string name="notification_local_eew_attention_full_screen">全画面アラート</string>

@@ -6,6 +6,10 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import java.io.ByteArrayOutputStream
+import java.nio.charset.StandardCharsets
+import java.util.Base64
+import java.util.zip.GZIPOutputStream
 
 class DmDssEewParserTest {
     @Test
@@ -25,6 +29,15 @@ class DmDssEewParserTest {
         assertEquals("3", update.event.reportSerial)
         assertEquals(35.6, update.event.latitude, 0.0001)
         assertEquals(140.1, update.event.longitude, 0.0001)
+    }
+
+    @Test
+    fun forecastAlwaysExpiresExactly180SecondsAfterTheEvent() {
+        val update = DmDssEewParser.parseEnvelope(forecastEnvelope(), previous = null)!!
+        val eventTime = DmDssEewParser.forecastExpiryMillis(update.event) - 180_000L
+
+        assertEquals(eventTime + 180_000L, update.expiresAtMillis)
+        assertEquals(eventTime + 180_000L, DmDssEewParser.forecastExpiryMillis(update.event))
     }
 
     @Test
@@ -223,6 +236,68 @@ class DmDssEewParserTest {
     }
 
     @Test
+    fun parsesProductionBase64GzipEnvelope() {
+        val envelope = compressedForecastEnvelope()
+
+        val parsed = DmDssEewParser.parseEnvelopeResult(envelope, null)
+
+        assertTrue(parsed is DmDssEewParseResult.Accepted)
+        val update = (parsed as DmDssEewParseResult.Accepted).update
+        assertEquals("20260823123456", update.event.id)
+        assertEquals("3", update.event.reportSerial)
+        assertEquals("5-", update.event.maxIntensity)
+    }
+
+    @Test
+    fun compressedBodyFailuresHaveSpecificDiagnosticsAndAreBounded() {
+        val invalidBase64 = compressedForecastEnvelope().put("body", "not-base64")
+        assertEquals(
+            DmDssEewRejection.INVALID_BASE64_BODY,
+            (DmDssEewParser.parseEnvelopeResult(invalidBase64, null) as DmDssEewParseResult.Rejected)
+                .reason
+        )
+
+        val invalidGzip = forecastEnvelope()
+            .put("encoding", "base64")
+            .put("compression", "gzip")
+            .put(
+                "body",
+                Base64.getEncoder().encodeToString("not-gzip".toByteArray(StandardCharsets.UTF_8))
+            )
+        assertEquals(
+            DmDssEewRejection.INVALID_GZIP_BODY,
+            (DmDssEewParser.parseEnvelopeResult(invalidGzip, null) as DmDssEewParseResult.Rejected)
+                .reason
+        )
+
+        val oversized = compressedForecastEnvelope(
+            forecastEnvelope().getString("body") + " ".repeat(1_100_000)
+        )
+        assertEquals(
+            DmDssEewRejection.BODY_TOO_LARGE,
+            (DmDssEewParser.parseEnvelopeResult(oversized, null) as DmDssEewParseResult.Rejected)
+                .reason
+        )
+    }
+
+    @Test
+    fun pairedVxse44AndVxse45WithSameSemanticRevisionAreDuplicates() {
+        val vxse44 = DmDssEewParser.parseEnvelope(
+            forecastEnvelope().apply { getJSONObject("head").put("type", "VXSE44") },
+            null
+        )!!.event
+        val vxse45 = DmDssEewParser.parseEnvelope(forecastEnvelope(), vxse44)!!.event
+
+        assertTrue(isDuplicateDmDssRevision(vxse45, vxse44))
+        assertFalse(
+            isDuplicateDmDssRevision(
+                vxse45.copy(maxIntensity = "4"),
+                vxse44
+            )
+        )
+    }
+
+    @Test
     fun acceptsShindoThreeForecastWithoutRegionalEntries() {
         val envelope = forecastEnvelope()
         val report = JSONObject(envelope.getString("body"))
@@ -345,6 +420,21 @@ class DmDssEewParserTest {
                 )
                 .toString()
         )
+
+    private fun compressedForecastEnvelope(
+        reportBody: String = forecastEnvelope().getString("body")
+    ): JSONObject {
+        val compressed = ByteArrayOutputStream().use { output ->
+            GZIPOutputStream(output).use { gzip ->
+                gzip.write(reportBody.toByteArray(StandardCharsets.UTF_8))
+            }
+            output.toByteArray()
+        }
+        return forecastEnvelope()
+            .put("encoding", "base64")
+            .put("compression", "gzip")
+            .put("body", Base64.getEncoder().encodeToString(compressed))
+    }
 
     private fun cancellationEnvelope(): JSONObject = JSONObject()
         .put("type", "data")

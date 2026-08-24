@@ -125,6 +125,87 @@ class CorePolicyTest {
     }
 
     @Test
+    fun eewScopeUsesJapanWideMaximumForDeliveryAndAttentionWhenFilteringIsOff() {
+        val decision = resolveEewAlertScope(
+            locationFiltering = false,
+            eventMaximum = "5-"
+        )
+
+        assertTrue(decision.inScope)
+        assertEquals("5-", decision.relevantIntensity)
+        assertNull(decision.localPoint)
+        assertEquals(EewAlertScopeBasis.JAPAN_WIDE_MAXIMUM, decision.basis)
+    }
+
+    @Test
+    fun eewScopeUsesTheOfficialLocalForecastWhenFilteringIsOn() {
+        val localPoint = IntensityPoint(name = "東京", intensity = "4", isArea = true)
+        val decision = resolveEewAlertScope(
+            locationFiltering = true,
+            eventMaximum = "6-",
+            officialPoint = localPoint
+        )
+
+        assertTrue(decision.inScope)
+        assertEquals("4", decision.relevantIntensity)
+        assertEquals(localPoint, decision.localPoint)
+        assertEquals(EewAlertScopeBasis.OFFICIAL_REGIONAL_FORECAST, decision.basis)
+    }
+
+    @Test
+    fun eewScopeCanUseOverallMaximumWithoutInventingALocalReadingWhenRegionsAreMissing() {
+        val decision = resolveEewAlertScope(
+            locationFiltering = true,
+            eventMaximum = "5-",
+            emptyRegionFallback = EewAlertScopeBasis.EMPTY_REGIONS_SAME_EEW_AREA
+        )
+
+        assertTrue(decision.inScope)
+        assertEquals("5-", decision.relevantIntensity)
+        assertNull(decision.localPoint)
+        assertEquals(EewAlertScopeBasis.EMPTY_REGIONS_SAME_EEW_AREA, decision.basis)
+    }
+
+    @Test
+    fun eewScopeRejectsAFilteredEventWithoutALocalMatchOrSafeFallback() {
+        val decision = resolveEewAlertScope(
+            locationFiltering = true,
+            eventMaximum = "7"
+        )
+
+        assertFalse(decision.inScope)
+        assertNull(decision.relevantIntensity)
+        assertEquals(EewAlertScopeBasis.OUTSIDE_SELECTED_LOCATION, decision.basis)
+    }
+
+    @Test
+    fun tsunamiDeliveryAndAttentionUseTheSameAffectedAreaScope() {
+        val warning = TsunamiArea("東京湾内湾", TsunamiGrade.WARNING)
+        val warningScope = resolveTsunamiAlertScope(
+            candidateAreas = listOf(warning),
+            minimumDeliveryGrade = TsunamiGrade.ADVISORY,
+            minimumAttentionGrade = TsunamiGrade.WARNING
+        )
+        val advisoryScope = resolveTsunamiAlertScope(
+            candidateAreas = listOf(warning.copy(grade = TsunamiGrade.ADVISORY)),
+            minimumDeliveryGrade = TsunamiGrade.ADVISORY,
+            minimumAttentionGrade = TsunamiGrade.WARNING
+        )
+        val emptyScope = resolveTsunamiAlertScope(
+            candidateAreas = emptyList(),
+            minimumDeliveryGrade = TsunamiGrade.ADVISORY,
+            minimumAttentionGrade = TsunamiGrade.WARNING
+        )
+
+        assertTrue(warningScope.shouldDeliver)
+        assertTrue(warningScope.mayUseAttention)
+        assertTrue(advisoryScope.shouldDeliver)
+        assertFalse(advisoryScope.mayUseAttention)
+        assertFalse(emptyScope.shouldDeliver)
+        assertFalse(emptyScope.mayUseAttention)
+    }
+
+    @Test
     fun englishEpicenterNamesAreSentenceCasedForDisplay() {
         assertEquals("The vicinity of Taiwan", sentenceCaseEpicenterName("the vicinity of Taiwan"))
         assertEquals("Tokyo Bay", sentenceCaseEpicenterName("Tokyo Bay"))
