@@ -198,22 +198,31 @@ class DmDssProvider(
             private var listenerSocketId: String? = socketIdFromStart
 
             override fun onMessage(webSocket: WebSocket, text: String) {
-                handleSocketMessage(webSocket, text)
+                handleSocketMessage(webSocket, text, "text")
             }
 
             override fun onMessage(webSocket: WebSocket, bytes: ByteString) {
-                handleSocketMessage(webSocket, bytes.utf8())
+                handleSocketMessage(webSocket, bytes.utf8(), "binary")
             }
 
-            private fun handleSocketMessage(webSocket: WebSocket, text: String) {
+            private fun handleSocketMessage(
+                webSocket: WebSocket,
+                text: String,
+                transport: String
+            ) {
                 diagnostics.recordSocketActivity()
                 val json = runCatching { JSONObject(text) }.getOrNull()
                 if (json == null) {
-                    diagnostics.recordRejected("WebSocket message was not valid JSON")
+                    diagnostics.recordPacket("IN", transport, text)
+                    diagnostics.recordTransportIssue("WebSocket message was not valid JSON")
                     emitCurrent()
                     return
                 }
-                when (json.optString("type")) {
+                val packetType = json.optString("type")
+                if (shouldRetainDmDssPacketType(packetType)) {
+                    diagnostics.recordPacket("IN", transport, text)
+                }
+                when (packetType) {
                     "start" -> {
                         json.optString("socketId").takeIf(String::isNotBlank)?.let {
                             listenerSocketId = it
@@ -230,7 +239,10 @@ class DmDssProvider(
                         json.optString("pingId").takeIf(String::isNotBlank)?.let {
                             pong.put("pingId", it)
                         }
-                        webSocket.send(pong.toString())
+                        val payload = pong.toString()
+                        if (!webSocket.send(payload)) {
+                            diagnostics.recordTransportIssue("DM-D.S.S pong could not be queued")
+                        }
                     }
                     "data" -> {
                         if (!connected) {
@@ -243,13 +255,35 @@ class DmDssProvider(
                     }
                     "error" -> {
                         val detail = json.optString("error").ifBlank { "WebSocket error" }
-                        diagnostics.recordRejected("DM-D.S.S WebSocket error")
-                        if (json.optBoolean("close", false)) webSocket.close(1000, detail)
+                        val code = json.optInt("code", -1).takeIf { it >= 0 }
+                        val close = json.optBoolean("close", false)
+                        diagnostics.recordTransportIssue(
+                            buildString {
+                                append("DM-D.S.S WebSocket error")
+                                code?.let { append(" ").append(it) }
+                                append(": ").append(detail)
+                                append(" · close=").append(close)
+                            }
+                        )
+                        if (close) webSocket.close(1000, detail)
+                        emitCurrent()
                     }
+                    "pong" -> Unit
+                    else -> emitCurrent()
                 }
             }
 
             override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
+                diagnostics.recordPacket(
+                    "IN",
+                    "control",
+                    JSONObject()
+                        .put("type", "websocket-closing")
+                        .put("code", code)
+                        .put("reason", reason)
+                        .toString()
+                )
+                emitCurrent()
                 webSocket.close(code, reason)
             }
 
@@ -259,6 +293,15 @@ class DmDssProvider(
                 connected = false
                 connecting = false
                 diagnostics.recordSocket("Disconnected")
+                diagnostics.recordPacket(
+                    "IN",
+                    "control",
+                    JSONObject()
+                        .put("type", "websocket-closed")
+                        .put("code", code)
+                        .put("reason", reason)
+                        .toString()
+                )
                 if (!stopped) scheduleReconnect("DM-D.S.S EEW forecast disconnected")
             }
 
@@ -267,6 +310,7 @@ class DmDssProvider(
                 t: Throwable,
                 response: Response?
             ) {
+                val responseCode = response?.code
                 response?.close()
                 val wasCurrent = socket === webSocket && generation == connectionGeneration
                 if (wasCurrent) {
@@ -275,6 +319,28 @@ class DmDssProvider(
                     connecting = false
                 }
                 diagnostics.recordSocket("Connection failed")
+                diagnostics.recordTransportIssue(
+                    buildString {
+                        append("DM-D.S.S WebSocket failure")
+                        responseCode?.let { append(" · HTTP ").append(it) }
+                        append(" · ").append(t.diagnosticSummary())
+                    }
+                )
+                diagnostics.recordPacket(
+                    "IN",
+                    "failure",
+                    JSONObject()
+                        .put("type", "websocket-failure")
+                        .put("httpCode", responseCode)
+                        .put("error", t.diagnosticSummary())
+                        .toString()
+                )
+                if (wasCurrent) {
+                    emit(
+                        state = ConnectionState.DISCONNECTED,
+                        status = "DM-D.S.S EEW forecast connection failed"
+                    )
+                }
                 recoverAbandonedSocket(
                     socketId = listenerSocketId,
                     reconnect = wasCurrent && !stopped,
@@ -316,12 +382,14 @@ class DmDssProvider(
         val reference = activeEvent ?: lastEvent
         if (reference?.id == update.event.id && isOlderSerial(update.event, reference)) {
             diagnostics.recordRejected("Older EEW serial ignored")
+            emitCurrent()
             return
         }
         if (reference?.id == update.event.id && update.event.reportSerial == reference.reportSerial &&
             update.event == reference
         ) {
             diagnostics.recordRejected("Duplicate EEW serial ignored")
+            emitCurrent()
             return
         }
 
@@ -358,8 +426,8 @@ class DmDssProvider(
                 if (stopped || connection != connectionGeneration || run != recoveryGeneration) {
                     return@post
                 }
-                result.onFailure {
-                    diagnostics.recordRecovery("Recovery check failed")
+                result.onFailure { error ->
+                    diagnostics.recordRecovery("Failed: ${error.diagnosticSummary()}")
                     emitCurrent()
                 }.onSuccess { items ->
                     val prior = diagnostics.snapshot()
@@ -446,6 +514,9 @@ class DmDssProvider(
         connecting = false
         connected = false
         diagnostics.recordSocket(label)
+        diagnostics.recordTransportIssue(
+            listOfNotNull(label, error?.diagnosticSummary()).joinToString(" · ")
+        )
         if (stopped) return
         scheduleReconnect(buildString {
             append(label)
@@ -477,6 +548,17 @@ class DmDssProvider(
         private val JSON_MEDIA_TYPE = "application/json; charset=utf-8".toMediaType()
     }
 }
+
+private fun Throwable.diagnosticSummary(): String {
+    val error = this
+    return buildString {
+        append(error.javaClass.simpleName.ifBlank { "Error" })
+        error.message?.takeIf(String::isNotBlank)?.let { append(": ").append(it) }
+    }
+}
+
+internal fun shouldRetainDmDssPacketType(type: String): Boolean =
+    type != "ping" && type != "pong"
 
 internal object DmDssRecoveryPolicy {
     private const val MAX_RECOVERY_AGE_MILLIS = 3 * 60_000L

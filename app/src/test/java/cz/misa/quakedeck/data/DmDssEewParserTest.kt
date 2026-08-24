@@ -62,6 +62,14 @@ class DmDssEewParserTest {
     }
 
     @Test
+    fun recoveryDatetimeRefinementMatchesDocumentedSecondPrecision() {
+        assertEquals(
+            "2021-05-01T00:00:00~",
+            DmDssOAuthClient.gdEewDatetimeRefinement(1_619_827_200_987L)
+        )
+    }
+
+    @Test
     fun requiredScopesIncludeRemoteCleanupAndWarningFlagIsPreserved() {
         assertEquals(
             setOf("contract.list", "socket.start", "socket.close", "eew.get.forecast", "gd.eew"),
@@ -109,6 +117,9 @@ class DmDssEewParserTest {
         )
         assertEquals(
             listOf(
+                MinimumLocalEewAttentionIntensity.SHINDO_0,
+                MinimumLocalEewAttentionIntensity.SHINDO_1,
+                MinimumLocalEewAttentionIntensity.SHINDO_2,
                 MinimumLocalEewAttentionIntensity.SHINDO_3,
                 MinimumLocalEewAttentionIntensity.SHINDO_4
             ),
@@ -140,6 +151,50 @@ class DmDssEewParserTest {
         )
         assertFalse(
             forecastEvent.eewNotificationIdentity() == warningEvent.eewNotificationIdentity()
+        )
+    }
+
+    @Test
+    fun forecastDeliverySupportsShindoZeroAndEveryBelowThresholdMode() {
+        assertEquals(
+            ForecastNotificationDelivery.FULL,
+            forecastNotificationDelivery(
+                predictedIntensity = "0",
+                minimumFullIntensity = MinimumLocalEewAttentionIntensity.SHINDO_0,
+                belowThresholdMode = ForecastBelowThresholdMode.OFF
+            )
+        )
+        assertEquals(
+            ForecastNotificationDelivery.OFF,
+            forecastNotificationDelivery(
+                predictedIntensity = "2",
+                minimumFullIntensity = MinimumLocalEewAttentionIntensity.SHINDO_3,
+                belowThresholdMode = ForecastBelowThresholdMode.OFF
+            )
+        )
+        assertEquals(
+            ForecastNotificationDelivery.SILENT,
+            forecastNotificationDelivery(
+                predictedIntensity = "2",
+                minimumFullIntensity = MinimumLocalEewAttentionIntensity.SHINDO_3,
+                belowThresholdMode = ForecastBelowThresholdMode.SILENT
+            )
+        )
+        assertEquals(
+            ForecastNotificationDelivery.REGULAR,
+            forecastNotificationDelivery(
+                predictedIntensity = "2",
+                minimumFullIntensity = MinimumLocalEewAttentionIntensity.SHINDO_3,
+                belowThresholdMode = ForecastBelowThresholdMode.REGULAR
+            )
+        )
+        assertEquals(
+            ForecastNotificationDelivery.FULL,
+            forecastNotificationDelivery(
+                predictedIntensity = "3",
+                minimumFullIntensity = MinimumLocalEewAttentionIntensity.SHINDO_3,
+                belowThresholdMode = ForecastBelowThresholdMode.OFF
+            )
         )
     }
 

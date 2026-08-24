@@ -8,6 +8,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.PowerManager
 import android.provider.Settings
+import android.widget.Toast
 import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.Matrix
@@ -374,6 +375,9 @@ private fun QuakeDeckApp(
     var eewNotificationsEnabled by remember { mutableStateOf(appSettings.eewNotificationsEnabled) }
     var eewForecastNotificationsEnabled by remember {
         mutableStateOf(appSettings.eewForecastNotificationsEnabled)
+    }
+    var eewForecastBelowThresholdMode by remember {
+        mutableStateOf(appSettings.eewForecastBelowThresholdMode)
     }
     var localEewAttentionMode by remember {
         mutableStateOf(appSettings.localEewAttentionMode)
@@ -1885,6 +1889,11 @@ private fun QuakeDeckApp(
                 eewForecastNotificationsEnabled = value
                 appSettings.eewForecastNotificationsEnabled = value
             },
+            eewForecastBelowThresholdMode = eewForecastBelowThresholdMode,
+            onEewForecastBelowThresholdModeChanged = { value ->
+                eewForecastBelowThresholdMode = value
+                appSettings.eewForecastBelowThresholdMode = value
+            },
             localEewAttentionMode = localEewAttentionMode,
             onLocalEewAttentionModeChanged = { value ->
                 localEewAttentionMode = value
@@ -2261,6 +2270,32 @@ private fun SourceDialog(
     onDmdssDisconnect: () -> Unit,
     onDismiss: () -> Unit
 ) {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val exportCompleteText = uiText(R.string.dmdss_diagnostic_export_complete, language)
+    val exportFailedText = uiText(R.string.dmdss_diagnostic_export_failed, language)
+    var packetHistoryExpanded by rememberSaveable { mutableStateOf(false) }
+    val exportDiagnostics = rememberLauncherForActivityResult(
+        ActivityResultContracts.CreateDocument("application/json")
+    ) { uri ->
+        uri ?: return@rememberLauncherForActivityResult
+        scope.launch {
+            val result = withContext(Dispatchers.IO) {
+                runCatching {
+                    val stream = context.contentResolver.openOutputStream(uri, "wt")
+                        ?: error("Unable to open the selected diagnostics file")
+                    stream.bufferedWriter(Charsets.UTF_8).use { writer ->
+                        writer.write(dmdssDiagnostics.toMachineReadableJson())
+                    }
+                }
+            }
+            Toast.makeText(
+                context,
+                if (result.isSuccess) exportCompleteText else exportFailedText,
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+    }
     val statusLabel = uiText(
         when (snapshot.connectionState) {
             ConnectionState.CONNECTED -> R.string.connected
@@ -2401,11 +2436,21 @@ private fun SourceDialog(
                             uiText(R.string.dmdss_diagnostic_connection, language),
                             listOfNotNull(
                                 dmdssDiagnostics.socketState,
-                                dmdssDiagnostics.lastSocketActivityAtMillis
+                                (if (dmdssDiagnostics.socketState == "Connected") {
+                                    dmdssDiagnostics.connectedAtMillis
+                                } else {
+                                    dmdssDiagnostics.socketStateChangedAtMillis
+                                })
                                     ?.let(::formatDmdssDiagnosticTime)
                             ).joinToString(" · ").ifBlank {
                                 uiText(R.string.dmdss_diagnostic_none, language)
                             }
+                        )
+                        DmdssDiagnosticLine(
+                            uiText(R.string.dmdss_diagnostic_socket_activity, language),
+                            dmdssDiagnostics.lastSocketActivityAtMillis
+                                ?.let(::formatDmdssDiagnosticTime)
+                                ?: uiText(R.string.dmdss_diagnostic_none, language)
                         )
                         DmdssDiagnosticLine(
                             uiText(R.string.dmdss_diagnostic_bulletin, language),
@@ -2426,6 +2471,15 @@ private fun SourceDialog(
                                 listOfNotNull(
                                     formatDmdssDiagnosticTime(rejectedAt),
                                     dmdssDiagnostics.lastRejectedReason
+                                ).joinToString(" · ")
+                            )
+                        }
+                        dmdssDiagnostics.lastTransportIssueAtMillis?.let { issueAt ->
+                            DmdssDiagnosticLine(
+                                uiText(R.string.dmdss_diagnostic_transport_issue, language),
+                                listOfNotNull(
+                                    formatDmdssDiagnosticTime(issueAt),
+                                    dmdssDiagnostics.lastTransportIssue
                                 ).joinToString(" · ")
                             )
                         }
@@ -2452,6 +2506,55 @@ private fun SourceDialog(
                                 ).joinToString(" · ")
                             }
                         )
+                        TextButton(
+                            onClick = { packetHistoryExpanded = !packetHistoryExpanded },
+                            contentPadding = PaddingValues(horizontal = 0.dp, vertical = 2.dp)
+                        ) {
+                            Text(
+                                "${uiText(R.string.dmdss_diagnostic_packet_history, language)} " +
+                                    "(${dmdssDiagnostics.packetHistory.size}) · " +
+                                    uiText(
+                                        if (packetHistoryExpanded) {
+                                            R.string.dmdss_diagnostic_hide_packets
+                                        } else {
+                                            R.string.dmdss_diagnostic_show_packets
+                                        },
+                                        language
+                                    ),
+                                fontSize = 10.sp
+                            )
+                        }
+                        if (packetHistoryExpanded) {
+                            dmdssDiagnostics.packetHistory.asReversed().take(20).forEach { packet ->
+                                Text(
+                                    listOf(
+                                        formatDmdssDiagnosticTime(packet.recordedAtMillis),
+                                        packet.direction,
+                                        packet.transport,
+                                        packet.type
+                                    ).joinToString(" · "),
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 9.sp
+                                )
+                                Text(
+                                    packet.payload.let { payload ->
+                                        if (payload.length <= 4_000) payload
+                                        else payload.take(4_000) + "\n[UI PREVIEW TRUNCATED]"
+                                    },
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    fontSize = 8.sp
+                                )
+                            }
+                        }
+                        TextButton(
+                            onClick = {
+                                val stamp = DMDSS_EXPORT_FILE_TIME_FORMATTER.format(Instant.now())
+                                exportDiagnostics.launch("quakedeck-dmdss-diagnostics-$stamp.json")
+                            },
+                            modifier = Modifier.align(Alignment.End)
+                        ) {
+                            Text(uiText(R.string.dmdss_diagnostic_export_json, language))
+                        }
                     }
                 }
 
@@ -2481,6 +2584,10 @@ private fun formatDmdssDiagnosticTime(millis: Long): String =
 
 private val DMDSS_DIAGNOSTIC_TIME_FORMATTER: DateTimeFormatter =
     DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss 'JST'")
+        .withZone(ZoneId.of("Asia/Tokyo"))
+
+private val DMDSS_EXPORT_FILE_TIME_FORMATTER: DateTimeFormatter =
+    DateTimeFormatter.ofPattern("yyyyMMdd-HHmmss")
         .withZone(ZoneId.of("Asia/Tokyo"))
 
 @Composable

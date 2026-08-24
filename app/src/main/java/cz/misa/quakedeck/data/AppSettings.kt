@@ -10,8 +10,13 @@ enum class EpicenterMarkerStyle { DOT, CROSS }
 enum class AppAppearance { SYSTEM, LIGHT, DARK }
 enum class QuietHoursMode { CRITICAL_ONLY, ALL_SILENT, NOTHING }
 enum class LocalEewAttentionMode { NONE, WAKE_SCREEN, FULL_SCREEN }
+enum class ForecastBelowThresholdMode { OFF, SILENT, REGULAR }
+enum class ForecastNotificationDelivery { OFF, SILENT, REGULAR, FULL }
 
 enum class MinimumLocalEewAttentionIntensity(val rank: Int) {
+    SHINDO_0(0),
+    SHINDO_1(1),
+    SHINDO_2(2),
     SHINDO_3(3),
     SHINDO_4(4),
     SHINDO_5_LOWER(5),
@@ -31,7 +36,7 @@ fun EewAlertLevel.allowedAttentionIntensities(): List<MinimumLocalEewAttentionIn
     MinimumLocalEewAttentionIntensity.entries.filter { intensity ->
         when (this) {
             EewAlertLevel.FORECAST -> intensity.rank in
-                MinimumLocalEewAttentionIntensity.SHINDO_3.rank..
+                MinimumLocalEewAttentionIntensity.SHINDO_0.rank..
                     MinimumLocalEewAttentionIntensity.SHINDO_4.rank
             EewAlertLevel.WARNING ->
                 intensity.rank >= MinimumLocalEewAttentionIntensity.SHINDO_5_LOWER.rank
@@ -40,6 +45,20 @@ fun EewAlertLevel.allowedAttentionIntensities(): List<MinimumLocalEewAttentionIn
 
 fun MinimumLocalEewAttentionIntensity.isReachedBy(predictedIntensity: String): Boolean =
     AlertLocationPolicy.intensityRank(predictedIntensity) >= rank
+
+fun forecastNotificationDelivery(
+    predictedIntensity: String,
+    minimumFullIntensity: MinimumLocalEewAttentionIntensity,
+    belowThresholdMode: ForecastBelowThresholdMode
+): ForecastNotificationDelivery = if (minimumFullIntensity.isReachedBy(predictedIntensity)) {
+    ForecastNotificationDelivery.FULL
+} else {
+    when (belowThresholdMode) {
+        ForecastBelowThresholdMode.OFF -> ForecastNotificationDelivery.OFF
+        ForecastBelowThresholdMode.SILENT -> ForecastNotificationDelivery.SILENT
+        ForecastBelowThresholdMode.REGULAR -> ForecastNotificationDelivery.REGULAR
+    }
+}
 
 data class MainMapCameraState(
     val centerXFraction: Float,
@@ -319,6 +338,19 @@ class AppSettings(context: Context) {
     var eewForecastNotificationsEnabled: Boolean
         get() = prefs.getBoolean("eew_forecast_notifications_enabled", true)
         set(value) { prefs.edit { putBoolean("eew_forecast_notifications_enabled", value) } }
+
+    var eewForecastBelowThresholdMode: ForecastBelowThresholdMode
+        get() = runCatching {
+            ForecastBelowThresholdMode.valueOf(
+                prefs.getString(
+                    "eew_forecast_below_threshold_mode",
+                    ForecastBelowThresholdMode.REGULAR.name
+                )!!
+            )
+        }.getOrDefault(ForecastBelowThresholdMode.REGULAR)
+        set(value) {
+            prefs.edit { putString("eew_forecast_below_threshold_mode", value.name) }
+        }
 
     var localEewAttentionMode: LocalEewAttentionMode
         get() = runCatching {

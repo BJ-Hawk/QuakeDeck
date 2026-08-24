@@ -31,12 +31,14 @@ import cz.misa.quakedeck.data.AppSnapshot
 import cz.misa.quakedeck.data.DmDssDiagnosticsStore
 import cz.misa.quakedeck.data.EarthquakeEvent
 import cz.misa.quakedeck.data.EewAlertLevel
+import cz.misa.quakedeck.data.ForecastNotificationDelivery
 import cz.misa.quakedeck.data.IntensityPoint
 import cz.misa.quakedeck.data.LiveUpdateKind
 import cz.misa.quakedeck.data.LocalEewAttentionMode
 import cz.misa.quakedeck.data.NotificationEventPayload
 import cz.misa.quakedeck.data.notificationEnabled
 import cz.misa.quakedeck.data.notificationPolicy
+import cz.misa.quakedeck.data.forecastNotificationDelivery
 import cz.misa.quakedeck.data.isReachedBy
 import cz.misa.quakedeck.data.eewAttentionIdentity
 import cz.misa.quakedeck.data.eewNotificationIdentity
@@ -69,6 +71,7 @@ class NotificationCoordinator(
     private var lastHandledSequence = 0L
     private val locationRelevantEews = LinkedHashSet<String>()
     private val attentionPresentedEews = LinkedHashSet<String>()
+    private val fullForecastPresentedEews = LinkedHashSet<String>()
     private val notifiedEarthquakes = LinkedHashSet<String>()
     private val audiblyAlertedEarthquakes = LinkedHashSet<String>()
     private val locationRelevantTsunamis = LinkedHashSet<String>()
@@ -217,9 +220,41 @@ class NotificationCoordinator(
                     null
                 }
                 if (!locationFiltering || localPoint != null) {
+                    val forecastDelivery = if (forecastOnly) {
+                        forecastNotificationDelivery(
+                            predictedIntensity = localPoint?.intensity ?: event.maxIntensity,
+                            minimumFullIntensity =
+                                settings.minimumLocalEewForecastAttentionIntensity,
+                            belowThresholdMode = settings.eewForecastBelowThresholdMode
+                        )
+                    } else {
+                        ForecastNotificationDelivery.FULL
+                    }
+                    if (forecastDelivery == ForecastNotificationDelivery.OFF) {
+                        manager.cancel(event.eewNotificationIdentity(), ID_EARTHQUAKE)
+                        recordDmdssEewDecision(
+                            snapshot,
+                            "Below selected Forecast level · notification off"
+                        )
+                        return
+                    }
                     locationRelevantEews += event.id
                     trimIncidentSets()
-                    val attentionMode = if (notificationPolicy.allowsLocalAttention) {
+                    val fullForecast = forecastDelivery == ForecastNotificationDelivery.FULL
+                    if (forecastOnly && fullForecast) {
+                        val firstFullDelivery = fullForecastPresentedEews.add(
+                            event.eewAttentionIdentity()
+                        )
+                        if (firstFullDelivery) {
+                            // A lower revision may already occupy this identity. Reposting the
+                            // first full-level revision ensures its sound/attention is fresh.
+                            manager.cancel(event.eewNotificationIdentity(), ID_EARTHQUAKE)
+                        }
+                    }
+                    val attentionMode = if (
+                        notificationPolicy.allowsLocalAttention &&
+                        (!forecastOnly || fullForecast)
+                    ) {
                         localEewAttentionMode(
                             updateKind = snapshot.liveUpdateKind,
                             event = event,
@@ -228,6 +263,7 @@ class NotificationCoordinator(
                     } else {
                         LocalEewAttentionMode.NONE
                     }
+                    val forceSilent = forecastDelivery == ForecastNotificationDelivery.SILENT
                     val result = postEarthquake(
                         event = event,
                         channel = if (forecastOnly) CHANNEL_EEW_FORECAST else CHANNEL_EEW,
@@ -236,12 +272,22 @@ class NotificationCoordinator(
                         } else {
                             R.string.notification_eew_title
                         },
-                        urgent = notificationPolicy.urgent,
+                        urgent = notificationPolicy.urgent && !forceSilent,
                         localPoint = localPoint,
+                        forceSilent = forceSilent,
                         visualKind = AlertVisualKind.EEW,
                         localEewAttentionMode = attentionMode
                     )
-                    recordDmdssEewDecision(snapshot, result.diagnostic)
+                    recordDmdssEewDecision(
+                        snapshot,
+                        when (forecastDelivery) {
+                            ForecastNotificationDelivery.SILENT ->
+                                "${result.diagnostic} · Below selected Forecast level: silent"
+                            ForecastNotificationDelivery.REGULAR ->
+                                "${result.diagnostic} · Below selected Forecast level: regular"
+                            else -> result.diagnostic
+                        }
+                    )
                 } else {
                     recordDmdssEewDecision(snapshot, "Outside the selected notification location")
                 }
@@ -1108,6 +1154,9 @@ class NotificationCoordinator(
         }
         while (attentionPresentedEews.size > 64) {
             attentionPresentedEews.remove(attentionPresentedEews.first())
+        }
+        while (fullForecastPresentedEews.size > 64) {
+            fullForecastPresentedEews.remove(fullForecastPresentedEews.first())
         }
     }
 

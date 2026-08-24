@@ -21,6 +21,9 @@ import java.security.KeyStore
 import java.security.MessageDigest
 import java.security.SecureRandom
 import java.time.Instant
+import java.time.LocalDateTime
+import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
 import javax.crypto.Cipher
 import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
@@ -266,7 +269,7 @@ class DmDssOAuthClient(
             tokenResult.onFailure { callback(Result.failure(it)) }
             tokenResult.onSuccess { accessToken ->
                 val url = GD_EEW_URL.toHttpUrl().newBuilder()
-                    .addQueryParameter("datetime", "${Instant.ofEpochMilli(sinceMillis)}~")
+                    .addQueryParameter("datetime", gdEewDatetimeRefinement(sinceMillis))
                     .addQueryParameter("limit", "10")
                     .build()
                 val request = Request.Builder()
@@ -419,6 +422,11 @@ class DmDssOAuthClient(
             MessageDigest.getInstance("SHA-256")
                 .digest(verifier.toByteArray(StandardCharsets.US_ASCII))
         )
+
+        internal fun gdEewDatetimeRefinement(sinceMillis: Long): String =
+            LocalDateTime.ofInstant(Instant.ofEpochMilli(sinceMillis), ZoneOffset.UTC)
+                .withNano(0)
+                .format(DateTimeFormatter.ISO_LOCAL_DATE_TIME) + "~"
 
         private fun base64Url(bytes: ByteArray): String =
             java.util.Base64.getUrlEncoder().withoutPadding().encodeToString(bytes)

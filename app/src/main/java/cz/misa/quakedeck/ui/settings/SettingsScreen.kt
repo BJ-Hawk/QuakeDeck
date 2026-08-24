@@ -86,6 +86,7 @@ import cz.misa.quakedeck.data.ActivityTimeStats
 import cz.misa.quakedeck.data.ConnectionState
 import cz.misa.quakedeck.data.DataSourceMode
 import cz.misa.quakedeck.data.EpicenterMarkerStyle
+import cz.misa.quakedeck.data.ForecastBelowThresholdMode
 import cz.misa.quakedeck.data.PlaceNameLanguage
 import cz.misa.quakedeck.data.MinimumNotificationIntensity
 import cz.misa.quakedeck.data.LocalEewAttentionMode
@@ -145,6 +146,8 @@ fun QuakeDeckSettings(
     onEewNotificationsEnabledChanged: (Boolean) -> Unit,
     eewForecastNotificationsEnabled: Boolean,
     onEewForecastNotificationsEnabledChanged: (Boolean) -> Unit,
+    eewForecastBelowThresholdMode: ForecastBelowThresholdMode,
+    onEewForecastBelowThresholdModeChanged: (ForecastBelowThresholdMode) -> Unit,
     localEewAttentionMode: LocalEewAttentionMode,
     onLocalEewAttentionModeChanged: (LocalEewAttentionMode) -> Unit,
     minimumLocalEewAttentionIntensity: MinimumLocalEewAttentionIntensity,
@@ -331,6 +334,9 @@ fun QuakeDeckSettings(
                                 eewForecastNotificationsEnabled = eewForecastNotificationsEnabled,
                                 onEewForecastNotificationsEnabledChanged =
                                     onEewForecastNotificationsEnabledChanged,
+                                eewForecastBelowThresholdMode = eewForecastBelowThresholdMode,
+                                onEewForecastBelowThresholdModeChanged =
+                                    onEewForecastBelowThresholdModeChanged,
                                 localEewAttentionMode = localEewAttentionMode,
                                 onLocalEewAttentionModeChanged = onLocalEewAttentionModeChanged,
                                 minimumLocalEewAttentionIntensity = minimumLocalEewAttentionIntensity,
@@ -585,6 +591,8 @@ private fun MainSettingsPage(
     onEewNotificationsEnabledChanged: (Boolean) -> Unit,
     eewForecastNotificationsEnabled: Boolean,
     onEewForecastNotificationsEnabledChanged: (Boolean) -> Unit,
+    eewForecastBelowThresholdMode: ForecastBelowThresholdMode,
+    onEewForecastBelowThresholdModeChanged: (ForecastBelowThresholdMode) -> Unit,
     localEewAttentionMode: LocalEewAttentionMode,
     onLocalEewAttentionModeChanged: (LocalEewAttentionMode) -> Unit,
     minimumLocalEewAttentionIntensity: MinimumLocalEewAttentionIntensity,
@@ -758,6 +766,9 @@ private fun MainSettingsPage(
                 onEewEnabledChanged = onEewNotificationsEnabledChanged,
                 eewForecastEnabled = eewForecastNotificationsEnabled,
                 onEewForecastEnabledChanged = onEewForecastNotificationsEnabledChanged,
+                eewForecastBelowThresholdMode = eewForecastBelowThresholdMode,
+                onEewForecastBelowThresholdModeChanged =
+                    onEewForecastBelowThresholdModeChanged,
                 localEewAttentionMode = localEewAttentionMode,
                 onLocalEewAttentionModeChanged = onLocalEewAttentionModeChanged,
                 minimumLocalEewAttentionIntensity = minimumLocalEewAttentionIntensity,
@@ -1157,6 +1168,8 @@ private fun EewNotificationControlGroup(
     onMinimumAttentionIntensityChanged: (MinimumLocalEewAttentionIntensity) -> Unit,
     attentionModes: List<LocalEewAttentionMode>,
     intensityOptions: List<MinimumLocalEewAttentionIntensity>,
+    forecastBelowThresholdMode: ForecastBelowThresholdMode? = null,
+    onForecastBelowThresholdModeChanged: ((ForecastBelowThresholdMode) -> Unit)? = null,
     fullScreenIntentAllowed: Boolean,
     onRequestFullScreenIntentPermission: () -> Unit,
     onHelpRequested: (String, String) -> Unit
@@ -1194,11 +1207,18 @@ private fun EewNotificationControlGroup(
             alertLocation.displayName
         )
     )
-    if (attentionMode == LocalEewAttentionMode.NONE) return
+    if (
+        attentionMode == LocalEewAttentionMode.NONE &&
+        forecastBelowThresholdMode == null
+    ) return
 
     NestedNavigationSettingRow(
         title = localizedString(
-            R.string.notification_local_eew_attention_threshold,
+            if (forecastBelowThresholdMode == null) {
+                R.string.notification_local_eew_attention_threshold
+            } else {
+                R.string.notification_eew_forecast_full_from
+            },
             language
         ),
         value = minimumLocalEewAttentionIntensityLabel(
@@ -1212,14 +1232,37 @@ private fun EewNotificationControlGroup(
             onMinimumAttentionIntensityChanged(next)
         },
         supportingText = localizedString(
-            if (attentionMode == LocalEewAttentionMode.WAKE_SCREEN) {
-                R.string.notification_local_eew_attention_wake_description
-            } else {
-                R.string.notification_local_eew_attention_full_screen_description
+            when {
+                forecastBelowThresholdMode != null ->
+                    R.string.notification_eew_forecast_full_from_description
+                attentionMode == LocalEewAttentionMode.WAKE_SCREEN ->
+                    R.string.notification_local_eew_attention_wake_description
+                else -> R.string.notification_local_eew_attention_full_screen_description
             },
             language
         )
     )
+    if (
+        forecastBelowThresholdMode != null &&
+        minimumAttentionIntensity != MinimumLocalEewAttentionIntensity.SHINDO_0
+    ) {
+        NestedNavigationSettingRow(
+            title = localizedString(
+                R.string.notification_eew_forecast_below_level,
+                language
+            ),
+            value = forecastBelowThresholdModeLabel(forecastBelowThresholdMode, language),
+            onClick = {
+                val options = ForecastBelowThresholdMode.entries
+                val next = options[(options.indexOf(forecastBelowThresholdMode) + 1) % options.size]
+                onForecastBelowThresholdModeChanged?.invoke(next)
+            },
+            supportingText = localizedString(
+                R.string.notification_eew_forecast_below_level_description,
+                language
+            )
+        )
+    }
     if (attentionMode == LocalEewAttentionMode.FULL_SCREEN && !fullScreenIntentAllowed) {
         NestedNavigationSettingRow(
             title = localizedString(
@@ -1256,6 +1299,8 @@ private fun NotificationSettingsCard(
     onEewEnabledChanged: (Boolean) -> Unit,
     eewForecastEnabled: Boolean,
     onEewForecastEnabledChanged: (Boolean) -> Unit,
+    eewForecastBelowThresholdMode: ForecastBelowThresholdMode,
+    onEewForecastBelowThresholdModeChanged: (ForecastBelowThresholdMode) -> Unit,
     localEewAttentionMode: LocalEewAttentionMode,
     onLocalEewAttentionModeChanged: (LocalEewAttentionMode) -> Unit,
     minimumLocalEewAttentionIntensity: MinimumLocalEewAttentionIntensity,
@@ -1494,6 +1539,9 @@ private fun NotificationSettingsCard(
                     onMinimumLocalEewForecastAttentionIntensityChanged,
                 attentionModes = localEewAttentionOptions,
                 intensityOptions = forecastEewIntensityOptions,
+                forecastBelowThresholdMode = eewForecastBelowThresholdMode,
+                onForecastBelowThresholdModeChanged =
+                    onEewForecastBelowThresholdModeChanged,
                 fullScreenIntentAllowed = fullScreenIntentAllowed,
                 onRequestFullScreenIntentPermission = onRequestFullScreenIntentPermission,
                 onHelpRequested = { title, body -> helpDialog = title to body }
@@ -3551,6 +3599,9 @@ private fun minimumLocalEewAttentionIntensityLabel(
     language: PlaceNameLanguage
 ): String = localizedString(
     when (intensity) {
+        MinimumLocalEewAttentionIntensity.SHINDO_0 -> R.string.notification_intensity_shindo_0_plus
+        MinimumLocalEewAttentionIntensity.SHINDO_1 -> R.string.notification_intensity_shindo_1_plus
+        MinimumLocalEewAttentionIntensity.SHINDO_2 -> R.string.notification_intensity_shindo_2_plus
         MinimumLocalEewAttentionIntensity.SHINDO_3 -> R.string.notification_intensity_shindo_3_plus
         MinimumLocalEewAttentionIntensity.SHINDO_4 -> R.string.notification_intensity_shindo_4_plus
         MinimumLocalEewAttentionIntensity.SHINDO_5_LOWER -> R.string.notification_intensity_shindo_5_lower_plus
@@ -3562,6 +3613,19 @@ private fun minimumLocalEewAttentionIntensityLabel(
             R.string.notification_intensity_shindo_6_upper_plus
         MinimumLocalEewAttentionIntensity.SHINDO_7 ->
             R.string.notification_intensity_shindo_7
+    },
+    language
+)
+
+@Composable
+private fun forecastBelowThresholdModeLabel(
+    mode: ForecastBelowThresholdMode,
+    language: PlaceNameLanguage
+): String = localizedString(
+    when (mode) {
+        ForecastBelowThresholdMode.OFF -> R.string.notification_eew_forecast_below_off
+        ForecastBelowThresholdMode.SILENT -> R.string.notification_eew_forecast_below_silent
+        ForecastBelowThresholdMode.REGULAR -> R.string.notification_eew_forecast_below_regular
     },
     language
 )
