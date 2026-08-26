@@ -18,6 +18,14 @@ class DmDssDiagnosticsTest {
     }
 
     @Test
+    fun p2pPacketHistoryAlsoExcludesTextHeartbeats() {
+        assertFalse(shouldRetainP2pDiagnosticPacket(JSONObject("""{"type":"ping"}""")))
+        assertFalse(shouldRetainP2pDiagnosticPacket(JSONObject("""{"type":"pong"}""")))
+        assertTrue(shouldRetainP2pDiagnosticPacket(JSONObject("""{"code":551}""")))
+        assertTrue(shouldRetainP2pDiagnosticPacket(null))
+    }
+
+    @Test
     fun packetSanitizerRetainsBulletinButRemovesCredentials() {
         val sanitized = sanitizeDmDssPacket(
             """{"type":"data","ticket":"socket-secret","authorization":"Bearer access-secret","body":"forecast-body"}"""
@@ -65,7 +73,7 @@ class DmDssDiagnosticsTest {
         val export = JSONObject(snapshot.toMachineReadableJson(exportedAtMillis = 300L))
 
         assertEquals("cz.misa.quakedeck.dmdss-diagnostics", export.getString("schema"))
-        assertEquals(1, export.getInt("schemaVersion"))
+        assertEquals(2, export.getInt("schemaVersion"))
         assertEquals("Connected", export.getJSONObject("summary").getString("socketState"))
         assertEquals(1, export.getInt("packetCount"))
         val excludedTypes = export.getJSONObject("storage")
@@ -73,8 +81,123 @@ class DmDssDiagnosticsTest {
         assertEquals("ping", excludedTypes.getString(0))
         assertEquals("pong", excludedTypes.getString(1))
         val packet = export.getJSONArray("packets").getJSONObject(0)
+        assertEquals(DIAGNOSTIC_SOURCE_DMDSS, packet.getString("source"))
         assertEquals("start", packet.getString("type"))
         assertFalse(packet.getString("payload").contains("must-not-export"))
         assertTrue(packet.getString("payload").contains("[REDACTED]"))
+    }
+
+    @Test
+    fun readablePacketHistorySummarizesBothProvidersWithoutReplacingRawPayload() {
+        val p2pPayload = """
+            {
+              "code":556,
+              "issue":{"serial":"2"},
+              "areas":[{"name":"熊本県熊本"}]
+            }
+        """.trimIndent()
+        val packets = listOf(
+            DmDssPacketDiagnostic(
+                recordedAtMillis = 100L,
+                direction = "IN",
+                transport = "text",
+                type = "start",
+                payload = """{"type":"start"}"""
+            ),
+            DmDssPacketDiagnostic(
+                recordedAtMillis = 200L,
+                direction = "IN",
+                transport = "text",
+                type = "json",
+                payload = p2pPayload,
+                source = DIAGNOSTIC_SOURCE_P2PQUAKE
+            )
+        )
+
+        val readable = humanReadablePacketDiagnostics(packets)
+
+        assertEquals("WebSocket Start", readable[0].summary)
+        assertEquals("EEW Report #2", readable[1].summary)
+        assertEquals("熊本県熊本", readable[1].detail)
+        assertEquals(p2pPayload, readable[1].packet.payload)
+
+        val rawExport = JSONObject(
+            DmDssDiagnosticsSnapshot(packetHistory = packets).toMachineReadableJson()
+        ).getJSONArray("packets").getJSONObject(1)
+        assertEquals(DIAGNOSTIC_SOURCE_P2PQUAKE, rawExport.getString("source"))
+        assertEquals(p2pPayload, rawExport.getString("payload"))
+    }
+
+    @Test
+    fun readablePacketHistoryDecodesDmDssForecastBody() {
+        val packet = DmDssPacketDiagnostic(
+            recordedAtMillis = 100L,
+            direction = "IN",
+            transport = "text",
+            type = "data",
+            payload = forecastEnvelope().toString()
+        )
+
+        val readable = humanReadablePacketDiagnostics(listOf(packet)).single()
+
+        assertEquals("EEW Report #2", readable.summary)
+        assertEquals("熊本県熊本", readable.detail)
+        assertEquals(DiagnosticPacketDetailKind.REPORTING_AREA, readable.detailKind)
+    }
+
+    private fun forecastEnvelope(): JSONObject {
+        val report = JSONObject()
+            .put("_schema", JSONObject().put("type", "eew-information"))
+            .put("status", "通常")
+            .put("infoType", "発表")
+            .put("eventId", "20260826113348")
+            .put("serialNo", "2")
+            .put("reportDateTime", "2099-08-26T11:33:58+09:00")
+            .put(
+                "body",
+                JSONObject()
+                    .put("isCanceled", false)
+                    .put(
+                        "earthquake",
+                        JSONObject()
+                            .put("originTime", "2099-08-26T11:33:48+09:00")
+                            .put(
+                                "hypocenter",
+                                JSONObject()
+                                    .put("name", "熊本県熊本地方")
+                                    .put(
+                                        "coordinate",
+                                        JSONObject()
+                                            .put("latitude", JSONObject().put("value", "32.8"))
+                                            .put("longitude", JSONObject().put("value", "130.7"))
+                                    )
+                                    .put("depth", JSONObject().put("value", "10"))
+                            )
+                            .put("magnitude", JSONObject().put("value", "3.4"))
+                    )
+                    .put(
+                        "intensity",
+                        JSONObject()
+                            .put("forecastMaxInt", JSONObject().put("from", "3").put("to", "3"))
+                            .put(
+                                "regions",
+                                org.json.JSONArray().put(
+                                    JSONObject()
+                                        .put("name", "熊本県熊本")
+                                        .put(
+                                            "forecastMaxInt",
+                                            JSONObject().put("from", "3").put("to", "3")
+                                        )
+                                )
+                            )
+                    )
+            )
+        return JSONObject()
+            .put("type", "data")
+            .put("classification", "eew.forecast")
+            .put("id", "telegram-hash")
+            .put("format", "json")
+            .put("head", JSONObject().put("type", "VXSE45").put("test", false))
+            .put("body", report.toString())
     }
 }

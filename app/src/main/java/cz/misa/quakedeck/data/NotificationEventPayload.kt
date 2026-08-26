@@ -12,17 +12,18 @@ import org.json.JSONObject
 object NotificationEventPayload {
     private const val MAX_PAYLOAD_CHARS = 450_000
 
-    fun encode(event: EarthquakeEvent, activeUntilMillis: Long? = null): String? = runCatching {
+    fun encode(
+        event: EarthquakeEvent,
+        activeUntilMillis: Long? = null,
+        launchKind: NotificationLaunchKind = if (event.kind == EarthquakeEventKind.EEW) {
+            NotificationLaunchKind.EEW
+        } else {
+            NotificationLaunchKind.EARTHQUAKE
+        }
+    ): String? = runCatching {
         encodeEvent(event)
             .putNullable("activeUntilMillis", activeUntilMillis)
-            .put(
-                "launchKind",
-                if (event.kind == EarthquakeEventKind.EEW) {
-                    NotificationLaunchKind.EEW.name
-                } else {
-                    NotificationLaunchKind.EARTHQUAKE.name
-                }
-            )
+            .put("launchKind", launchKind.name)
             .toString()
     }.getOrNull()?.takeIf { it.length <= MAX_PAYLOAD_CHARS }
 

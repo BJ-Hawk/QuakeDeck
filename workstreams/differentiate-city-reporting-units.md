@@ -146,22 +146,39 @@ The complete audited 4,360-station English map and the first station-information
 card are active in the app. Placement research is underway in
 `outputs/station-name-audit/station_metadata_sources.json` only:
 
-- 2,944 stations have source-supported facility and/or address data.
-- 2,734 have an exact published Japanese address.
-- 210 have a confirmed facility but no exact address yet.
-- 1,416 remain locality-only and require further research.
+- 2,992 stations have source-supported facility and/or address data.
+- 2,977 have an exact published Japanese address.
+- 15 have a confirmed facility but no exact address yet.
+- 1,368 remain locality-only and require further research.
 - Address/precision validation currently reports zero mismatches.
 
-The latest completed official-source batches added 45 placements: 13 in
-Kagoshima, 26 in Toyama, one in Hokkaido, one in Yamaguchi, and four in Fukui.
-They include exact municipal and prefectural installation addresses where
-published, and facility-only records where the official source directly names
-the host but does not give a street address. Fukui additions are `1820932`
-(`今立総合支所東側`), `1821030` (`丸岡総合支所`), `1821032` (`坂井市役所`), and
-`1821033` (`春江総合支所`). `3321538` (`美作市美来`) remains deliberately
-unmapped: available evidence does not directly map the reporting station to a
-candidate facility. Evidence URLs and the full research provenance remain
-outside the compact runtime projection.
+The latest completed official-source batches converted confirmed facility-only
+records to exact published addresses: one in Okinawa (`4735831`, Kita Daito
+Village Hall), 21 in Toyama, 74 in Nagano, 69 in Osaka, one in Saga, and 22 in
+Kyoto. An official Noshiro City construction record also directly placed
+`0520232` at Noshiro City Hall and supplied its address. Nagano's records
+cover municipal halls, branch offices, fire stations, public facilities, and
+parks whose host identities come from Nagano Prefecture's official seismic-network
+table and whose exact addresses come from the relevant municipal, fire-authority,
+or other official facility publication. Osaka's completed records cover Osaka
+City and Sakai fire services plus municipal and town offices, using Osaka
+Prefecture's official seismic-network table and each host authority's address
+publication. Two Nagano facility-only records remain deliberately without a
+substituted address: `2021532` (former Narakawa Branch Office) and `2040733`
+(former Seinaiji Promotion Office), because the available official evidence
+identifies a former or moved facility but does not publish its historic station
+address. `3321538` (`美作市美来`) remains deliberately unmapped: available evidence
+does not directly map the reporting station to a candidate facility.
+Evidence URLs and the full research provenance remain outside the compact runtime
+projection.
+
+The current Akita pass added direct, published placement/address evidence for
+`0521130` (Katagami City Hall Showa Branch), `0521131` (Katagami City Hall
+Iitagawa Branch), four Yuzawa City offices, `0520340` (Yokote Jūmonji Office),
+`0536332` (Hachirogata Town Hall), and `0534835` (Mitane Yamamoto Branch). The
+Oga municipal plan only supports the localities for `0520632` and `0520633`,
+and Mitane's current plan does not directly identify the two remaining host
+facilities; neither case was promoted to a facility or exact address.
 
 ## Do not redo or change
 
@@ -195,19 +212,19 @@ outside the compact runtime projection.
 
 ## Exact next steps
 
-1. For each station, first seek an official installation address or facility
-   identity. Record any verified address/facility and its evidence in
-   `station_metadata_sources.json`, even if the user ultimately chooses a
-   shorter display name.
-2. Do not infer a placement from coordinates, Street View, nearby facilities,
-   or a generic municipality statement. Leave the record at the highest
-   source-supported precision when a direct mapping is unavailable.
-3. After a bounded research batch, run the JSON address/precision consistency
-   check. Do not re-read or update the workbook for this phase. The
-   station-details APK projection will refresh automatically on the next build.
-4. Regenerate the active code-keyed English-name APK map from the JSON after
-   approved English name changes. Keep the baseline snapshot outside APK
-   resources; this remains separate from the automatic details projection.
+1. Continue the JSON-only search with the remaining locality-only stations,
+   currently testing direct municipal evidence in Akita. Do not treat a former
+   or relocated office as a current station placement without direct evidence.
+2. Preserve the two former Nagano facility records without an address unless a
+   source specifically publishes the historic host-site address.
+3. For each subsequent station, first seek an official installation address or
+   facility identity. Record verified evidence in
+   `station_metadata_sources.json`, but never infer a placement from
+   coordinates, Street View, nearby facilities, or a generic municipality
+   statement.
+4. After each bounded batch, run the JSON address/precision consistency check.
+   Do not re-read or update the workbook for this phase. The station-details APK
+   projection will refresh automatically on the next build.
 
 ## Logical changes and Git state
 

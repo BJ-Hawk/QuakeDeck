@@ -2324,6 +2324,9 @@ private fun SourceDialog(
     val exportCompleteText = uiText(R.string.dmdss_diagnostic_export_complete, language)
     val exportFailedText = uiText(R.string.dmdss_diagnostic_export_failed, language)
     var packetHistoryExpanded by rememberSaveable { mutableStateOf(false) }
+    val readablePacketHistory = remember(dmdssDiagnostics.packetHistory) {
+        humanReadablePacketDiagnostics(dmdssDiagnostics.packetHistory.takeLast(20)).asReversed()
+    }
     val exportDiagnostics = rememberLauncherForActivityResult(
         ActivityResultContracts.CreateDocument("application/json")
     ) { uri ->
@@ -2574,31 +2577,33 @@ private fun SourceDialog(
                             )
                         }
                         if (packetHistoryExpanded) {
-                            dmdssDiagnostics.packetHistory.asReversed().take(20).forEach { packet ->
+                            readablePacketHistory.forEach { readable ->
                                 Text(
                                     listOf(
-                                        formatDmdssDiagnosticTime(packet.recordedAtMillis),
-                                        packet.direction,
-                                        packet.transport,
-                                        packet.type
+                                        formatDmdssDiagnosticTime(readable.packet.recordedAtMillis),
+                                        readable.packet.source,
+                                        readable.summary
                                     ).joinToString(" · "),
                                     fontWeight = FontWeight.Bold,
                                     fontSize = 9.sp
                                 )
-                                Text(
-                                    packet.payload.let { payload ->
-                                        if (payload.length <= 4_000) payload
-                                        else payload.take(4_000) + "\n[UI PREVIEW TRUNCATED]"
-                                    },
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    fontSize = 8.sp
-                                )
+                                diagnosticPacketDetailText(
+                                    context = context,
+                                    readable = readable,
+                                    language = language
+                                )?.let { detail ->
+                                    Text(
+                                        detail,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        fontSize = 8.sp
+                                    )
+                                }
                             }
                         }
                         TextButton(
                             onClick = {
                                 val stamp = DMDSS_EXPORT_FILE_TIME_FORMATTER.format(Instant.now())
-                                exportDiagnostics.launch("quakedeck-dmdss-diagnostics-$stamp.json")
+                                exportDiagnostics.launch("quakedeck-delivery-diagnostics-$stamp.json")
                             },
                             modifier = Modifier.align(Alignment.End)
                         ) {
@@ -2630,6 +2635,30 @@ private fun DmdssDiagnosticLine(label: String, value: String) {
 
 private fun formatDmdssDiagnosticTime(millis: Long): String =
     DMDSS_DIAGNOSTIC_TIME_FORMATTER.format(Instant.ofEpochMilli(millis))
+
+private fun diagnosticPacketDetailText(
+    context: android.content.Context,
+    readable: HumanReadablePacketDiagnostic,
+    language: PlaceNameLanguage
+): String? {
+    val raw = readable.detail ?: return null
+    val display = when (readable.detailKind) {
+        DiagnosticPacketDetailKind.REPORTING_AREA ->
+            PlaceNameTranslator.intensityReportingArea(context, raw, language)
+        DiagnosticPacketDetailKind.LOCATION ->
+            PlaceNameTranslator.observation(context, raw, language)
+        DiagnosticPacketDetailKind.FORECAST_AREA ->
+            TsunamiAreaCatalog.displayName(raw, language)
+        null -> raw
+    }
+    val resource = when (readable.detailKind) {
+        DiagnosticPacketDetailKind.REPORTING_AREA -> R.string.dmdss_diagnostic_reporting_area
+        DiagnosticPacketDetailKind.LOCATION -> R.string.dmdss_diagnostic_location
+        DiagnosticPacketDetailKind.FORECAST_AREA -> R.string.dmdss_diagnostic_forecast_area
+        null -> return display
+    }
+    return UiLocalization.format(context, resource, language, display)
+}
 
 private val DMDSS_DIAGNOSTIC_TIME_FORMATTER: DateTimeFormatter =
     DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss 'JST'")

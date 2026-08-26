@@ -37,6 +37,7 @@ import cz.misa.quakedeck.data.IntensityPoint
 import cz.misa.quakedeck.data.LiveUpdateKind
 import cz.misa.quakedeck.data.LocalEewAttentionMode
 import cz.misa.quakedeck.data.NotificationEventPayload
+import cz.misa.quakedeck.data.NotificationLaunchKind
 import cz.misa.quakedeck.data.notificationEnabled
 import cz.misa.quakedeck.data.notificationPolicy
 import cz.misa.quakedeck.data.forecastNotificationDelivery
@@ -678,7 +679,15 @@ class NotificationCoordinator(
                 event = event,
                 // Ended/cancelled cards remain navigable but must never restore
                 // an active wave display after a cold launch.
-                activeUntilMillis = if (cancelled) 0L else activeUntilMillis
+                activeUntilMillis = if (cancelled) 0L else activeUntilMillis,
+                // Notification semantics are chosen by the posting branch, not
+                // inferred from a mutable combined-map event. A regular report
+                // must never acquire an EEW restoration command.
+                launchKind = if (visualKind == AlertVisualKind.EEW) {
+                    NotificationLaunchKind.EEW
+                } else {
+                    NotificationLaunchKind.EARTHQUAKE
+                }
             ),
             forceSilent = forceSilent,
             suppressAlert = suppressAlert,

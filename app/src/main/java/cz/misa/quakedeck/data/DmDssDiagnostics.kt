@@ -21,7 +21,21 @@ data class DmDssPacketDiagnostic(
     val direction: String,
     val transport: String,
     val type: String,
-    val payload: String
+    val payload: String,
+    val source: String = DIAGNOSTIC_SOURCE_DMDSS
+)
+
+internal enum class DiagnosticPacketDetailKind {
+    REPORTING_AREA,
+    LOCATION,
+    FORECAST_AREA
+}
+
+internal data class HumanReadablePacketDiagnostic(
+    val packet: DmDssPacketDiagnostic,
+    val summary: String,
+    val detail: String? = null,
+    val detailKind: DiagnosticPacketDetailKind? = null
 )
 
 data class DmDssDiagnosticsSnapshot(
@@ -146,7 +160,8 @@ class DmDssDiagnosticsStore(context: Context) {
         direction: String,
         transport: String,
         payload: String,
-        nowMillis: Long = System.currentTimeMillis()
+        nowMillis: Long = System.currentTimeMillis(),
+        source: String = DIAGNOSTIC_SOURCE_DMDSS
     ) {
         val sanitizedPayload = sanitizeDmDssPacket(payload)
         val type = runCatching { JSONObject(sanitizedPayload).optString("type") }
@@ -158,7 +173,8 @@ class DmDssDiagnosticsStore(context: Context) {
             direction = direction,
             transport = transport,
             type = type,
-            payload = sanitizedPayload
+            payload = sanitizedPayload,
+            source = source
         )
         synchronized(HISTORY_LOCK) {
             val retained = trimDmDssPacketHistory(
@@ -260,7 +276,7 @@ fun DmDssDiagnosticsSnapshot.toMachineReadableJson(
     exportedAtMillis: Long = System.currentTimeMillis()
 ): String = JSONObject()
     .put("schema", "cz.misa.quakedeck.dmdss-diagnostics")
-    .put("schemaVersion", 1)
+    .put("schemaVersion", 2)
     .put("exportedAt", Instant.ofEpochMilli(exportedAtMillis).toString())
     .put("exportedAtMillis", exportedAtMillis)
     .put(
@@ -311,6 +327,7 @@ private fun packetHistoryBytes(entries: List<DmDssPacketDiagnostic>): Int =
 private fun DmDssPacketDiagnostic.toJson(): JSONObject = JSONObject()
     .put("recordedAtMillis", recordedAtMillis)
     .put("recordedAt", Instant.ofEpochMilli(recordedAtMillis).toString())
+    .put("source", source)
     .put("direction", direction)
     .put("transport", transport)
     .put("type", type)
@@ -327,13 +344,146 @@ private fun JSONObject.toPacketDiagnostic(): DmDssPacketDiagnostic? {
         direction = optString("direction"),
         transport = optString("transport"),
         type = optString("type"),
-        payload = optString("payload")
+        payload = optString("payload"),
+        source = optString("source").ifBlank { DIAGNOSTIC_SOURCE_DMDSS }
     )
+}
+
+/**
+ * Decode only the bounded on-screen slice. The stored/exported packet remains
+ * raw (apart from credential redaction), so this intentionally lossy summary
+ * can never replace the forensic payload.
+ */
+internal fun humanReadablePacketDiagnostics(
+    packets: List<DmDssPacketDiagnostic>
+): List<HumanReadablePacketDiagnostic> {
+    var previousDmDssEvent: EarthquakeEvent? = null
+    return packets.map { packet ->
+        if (packet.source == DIAGNOSTIC_SOURCE_P2PQUAKE) {
+            summarizeP2pPacket(packet)
+        } else {
+            summarizeDmDssPacket(packet, previousDmDssEvent).also { summary ->
+                summary.decodedDmDssEvent?.let { previousDmDssEvent = it }
+            }.display
+        }
+    }
+}
+
+private data class DmDssPacketSummaryResult(
+    val display: HumanReadablePacketDiagnostic,
+    val decodedDmDssEvent: EarthquakeEvent? = null
+)
+
+private fun summarizeDmDssPacket(
+    packet: DmDssPacketDiagnostic,
+    previous: EarthquakeEvent?
+): DmDssPacketSummaryResult {
+    val json = runCatching { JSONObject(packet.payload) }.getOrNull()
+        ?: return DmDssPacketSummaryResult(
+            HumanReadablePacketDiagnostic(packet, "Unreadable WebSocket packet")
+        )
+    val type = json.optString("type").ifBlank { packet.type }
+    if (type != "data") {
+        val label = when (type.lowercase()) {
+            "start" -> "WebSocket Start"
+            "error" -> "WebSocket Error"
+            "close", "closing", "closed" -> "WebSocket Close"
+            "failure" -> "WebSocket Failure"
+            else -> type.ifBlank { "WebSocket packet" }.replaceFirstChar { it.uppercase() }
+        }
+        return DmDssPacketSummaryResult(HumanReadablePacketDiagnostic(packet, label))
+    }
+
+    return when (val parsed = DmDssEewParser.parseEnvelopeResult(json, previous)) {
+        is DmDssEewParseResult.Accepted -> {
+            val event = parsed.update.event
+            val serial = event.reportSerial?.let { " #$it" }.orEmpty()
+            val label = if (parsed.update.kind == LiveUpdateKind.EEW_ENDED) {
+                "EEW Ended$serial"
+            } else {
+                "EEW Report$serial"
+            }
+            DmDssPacketSummaryResult(
+                display = HumanReadablePacketDiagnostic(
+                    packet = packet,
+                    summary = label,
+                    detail = event.points.firstOrNull()?.name ?: event.place,
+                    detailKind = DiagnosticPacketDetailKind.REPORTING_AREA
+                ),
+                decodedDmDssEvent = event
+            )
+        }
+        is DmDssEewParseResult.Rejected -> DmDssPacketSummaryResult(
+            HumanReadablePacketDiagnostic(
+                packet,
+                json.optString("classification").ifBlank { "DM-D.S.S data packet" }
+            )
+        )
+    }
+}
+
+private fun summarizeP2pPacket(packet: DmDssPacketDiagnostic): HumanReadablePacketDiagnostic {
+    val json = runCatching { JSONObject(packet.payload) }.getOrNull()
+        ?: return HumanReadablePacketDiagnostic(packet, "Unreadable WebSocket packet")
+    val code = json.optInt("code", -1)
+    return when (code) {
+        551 -> {
+            val points = json.optJSONArray("points")
+            val strongest = points?.objectSequence()
+                ?.maxByOrNull { it.optInt("scale", -1) }
+            val place = strongest?.let { point ->
+                point.optString("addr").ifBlank { point.optString("pref") }
+            } ?: json.optJSONObject("earthquake")
+                ?.optJSONObject("hypocenter")
+                ?.optString("name")
+            HumanReadablePacketDiagnostic(
+                packet,
+                "Earthquake Report",
+                place?.takeIf(String::isNotBlank),
+                DiagnosticPacketDetailKind.LOCATION
+            )
+        }
+        552 -> {
+            val area = json.optJSONArray("areas")?.optJSONObject(0)?.optString("name")
+            val cancelled = json.optBoolean("cancelled", false)
+            HumanReadablePacketDiagnostic(
+                packet,
+                if (cancelled) "Tsunami Warning Ended" else "Tsunami Report",
+                area?.takeIf(String::isNotBlank),
+                DiagnosticPacketDetailKind.FORECAST_AREA
+            )
+        }
+        554 -> HumanReadablePacketDiagnostic(packet, "EEW Detection")
+        556 -> {
+            val serial = json.optJSONObject("issue")?.optString("serial")
+                ?.takeIf(String::isNotBlank)
+                ?.let { " #$it" }
+                .orEmpty()
+            val area = json.optJSONArray("areas")?.optJSONObject(0)?.optString("name")
+            val cancelled = json.optBoolean("cancelled", false)
+            HumanReadablePacketDiagnostic(
+                packet,
+                if (cancelled) "EEW Ended$serial" else "EEW Report$serial",
+                area?.takeIf(String::isNotBlank),
+                DiagnosticPacketDetailKind.REPORTING_AREA
+            )
+        }
+        else -> HumanReadablePacketDiagnostic(
+            packet,
+            if (code >= 0) "P2PQuake Packet $code" else "P2PQuake WebSocket packet"
+        )
+    }
+}
+
+private fun JSONArray.objectSequence(): Sequence<JSONObject> = sequence {
+    for (index in 0 until length()) optJSONObject(index)?.let { yield(it) }
 }
 
 private const val MAX_HISTORY_ENTRIES = 200
 private const val MAX_HISTORY_BYTES = 2 * 1024 * 1024
 private const val MAX_PACKET_CHARS = 128 * 1024
+internal const val DIAGNOSTIC_SOURCE_DMDSS = "DM-D.S.S"
+internal const val DIAGNOSTIC_SOURCE_P2PQUAKE = "P2PQuake"
 private val SENSITIVE_JSON_VALUE = Regex(
     "(?i)(\\\"(?:access[_-]?token|refresh[_-]?token|ticket|authorization|client[_-]?secret|code[_-]?verifier)\\\"\\s*:\\s*\\\")(.*?)(\\\")"
 )

@@ -8,6 +8,22 @@ import org.junit.Test
 
 class NotificationEventPayloadTest {
     @Test
+    fun explicitEarthquakeLaunchKindCannotRestoreAnEewEvent() {
+        val event = testEvent(kind = EarthquakeEventKind.EEW)
+        val payload = NotificationEventPayload.decodeLaunch(
+            NotificationEventPayload.encode(
+                event = event,
+                launchKind = NotificationLaunchKind.EARTHQUAKE
+            )
+        )
+
+        assertEquals(NotificationLaunchKind.EARTHQUAKE, payload?.kind)
+        val restored = waitingSnapshot().withNotificationLaunch(payload)
+        assertFalse(restored.activeEew)
+        assertEquals("waiting", restored.event.id)
+    }
+
+    @Test
     fun coldLaunchRehydratesActiveEewDetailsAndTimeline() {
         val event = testEvent(kind = EarthquakeEventKind.EEW).copy(
             eewAlertLevel = EewAlertLevel.FORECAST,

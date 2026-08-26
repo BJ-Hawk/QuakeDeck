@@ -2,6 +2,17 @@
 
 QuakeDeck release history
 
+## Unreleased — target v0.10.1
+
+### Added
+
+- Adds a basic human-readable newest-20 live packet timeline to delivery diagnostics, combining DM-D.S.S and P2PQuake traffic while excluding routine ping/pong keep-alives. The export retains the bounded, credential-redacted raw packet payloads and identifies their source.
+
+### Fixed
+
+- Keeps a P2PQuake earthquake report tied to its own confirmed JMA data when it arrives during an active DM-D.S.S EEW, so Forecast intensity cannot leak into the regular notification or reopen an expired EEW when tapped.
+- Makes earthquake versus EEW notification navigation explicit instead of inferring it from the combined map event, providing a second guard against stale EEW restoration.
+
 ## v0.10.0
 
 ### DM-D.S.S OAuth and EEW forecasts

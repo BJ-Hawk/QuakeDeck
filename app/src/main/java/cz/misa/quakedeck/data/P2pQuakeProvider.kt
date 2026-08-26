@@ -32,6 +32,7 @@ class P2pQuakeProvider(
     private val mainHandler = Handler(Looper.getMainLooper())
     private val persistentSettings = AppSettings(appContext)
     private val archiveStore = ReportArchiveStore(appContext)
+    private val deliveryDiagnostics = DmDssDiagnosticsStore(appContext)
     private val archiveExecutor = Executors.newSingleThreadExecutor()
     private val recentReportCache = RecentReportCache(appContext)
     private val recentCacheExecutor = Executors.newSingleThreadExecutor()
@@ -1430,7 +1431,16 @@ class P2pQuakeProvider(
             }
 
             override fun onMessage(webSocket: WebSocket, text: String) {
-                val json = runCatching { JSONObject(text) }.getOrNull() ?: return
+                val json = runCatching { JSONObject(text) }.getOrNull()
+                if (shouldRetainP2pDiagnosticPacket(json)) {
+                    deliveryDiagnostics.recordPacket(
+                        direction = "IN",
+                        transport = "text",
+                        payload = text,
+                        source = DIAGNOSTIC_SOURCE_P2PQUAKE
+                    )
+                }
+                json ?: return
                 mainHandler.post {
                     if (stopped || generation != connectionGeneration) return@post
                     processLiveMessage(json)
@@ -2891,4 +2901,9 @@ class P2pQuakeProvider(
 
     private fun String?.ifNullOrBlank(defaultValue: () -> String): String =
         if (this.isNullOrBlank()) defaultValue() else this
+}
+
+internal fun shouldRetainP2pDiagnosticPacket(json: JSONObject?): Boolean {
+    val type = json?.optString("type").orEmpty()
+    return type != "ping" && type != "pong"
 }

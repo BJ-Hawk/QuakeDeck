@@ -159,17 +159,32 @@ class QuakeDeckRuntime(context: Context) : QuakeDataProvider {
 
     @Synchronized
     private fun publishCombined(origin: DataSourceMode) {
-        publishSnapshot(combinedSnapshot(origin))
+        val combined = combinedSnapshot(origin)
+        publishSnapshot(
+            snapshot = combined,
+            notificationSnapshot = notificationSnapshotForProviderUpdate(
+                combined = combined,
+                origin = origin,
+                p2p = p2pSnapshot,
+                dmdss = dmdssSnapshot
+            )
+        )
     }
 
     @Synchronized
-    private fun publishSnapshot(snapshot: AppSnapshot) {
+    private fun publishSnapshot(
+        snapshot: AppSnapshot,
+        notificationSnapshot: AppSnapshot = snapshot
+    ) {
         latestSnapshot = snapshot
         lastProviderUpdateMillis = System.currentTimeMillis()
 
         // Notifications must not depend on whether the Activity is visible or
-        // whether Compose is currently allowed to recompose.
-        notificationCoordinator.process(snapshot)
+        // whether Compose is currently allowed to recompose. The map-facing
+        // combined snapshot may deliberately keep an active DM-D.S.S EEW on
+        // screen while P2PQuake delivers a regular report. Notification content
+        // must instead use the provider event that actually triggered the update.
+        notificationCoordinator.process(notificationSnapshot)
 
         monitoringSnapshotCallback?.let { callback ->
             if (Looper.myLooper() == Looper.getMainLooper()) {
@@ -558,6 +573,30 @@ class QuakeDeckRuntime(context: Context) : QuakeDataProvider {
             LiveUpdateKind.CANCELLED
         )
     }
+}
+
+/**
+ * Keep notification data tied to the provider callback that produced the live
+ * update. The combined snapshot is presentation state: while a paid Forecast
+ * is active it intentionally keeps that EEW selected for the map even if the
+ * baseline P2PQuake feed publishes a regular report for the same incident.
+ */
+internal fun notificationSnapshotForProviderUpdate(
+    combined: AppSnapshot,
+    origin: DataSourceMode,
+    p2p: AppSnapshot,
+    dmdss: AppSnapshot
+): AppSnapshot {
+    if (combined.liveUpdateKind == LiveUpdateKind.NONE) return combined
+    val provider = when (origin) {
+        DataSourceMode.FREE -> p2p
+        DataSourceMode.DMDSS -> dmdss
+    }
+    return combined.copy(
+        event = provider.event,
+        tsunami = provider.tsunami,
+        dmdssEewUpdate = origin == DataSourceMode.DMDSS && combined.dmdssEewUpdate
+    )
 }
 
 class QuakeDeckApplication : Application() {
