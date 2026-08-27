@@ -3764,7 +3764,7 @@ private fun EventPanel(
     }
     val destinationEewAreaName =
         alertLocation.eewAreaNameJa ?: resolvedDestinationEewAreaName
-    val destinationPrediction = activeEewForSelected?.let { activeEew ->
+    val destinationForecastResult = activeEewForSelected?.let { activeEew ->
         EewWaveModel.destinationPrediction(
             event = activeEew,
             nowEpochMillis = timelineNowMillis,
@@ -3774,6 +3774,9 @@ private fun EventPanel(
             destinationEewAreaNameJa = destinationEewAreaName
         )
     }
+    val destinationPrediction = destinationForecastResult?.valueOrNull()
+    val localForecastUnavailable =
+        destinationForecastResult is LocalEewForecastResult.Unavailable
     val eewReportLabel = uiText(R.string.eew_report, placeNameLanguage)
     val eewReportEvent = activeEewForSelected ?: selectedEvent.takeIf { isEew }
     val eewReportSummary = eewReportEvent?.reportSerial?.let { serial ->
@@ -3998,6 +4001,10 @@ private fun EventPanel(
                         japaneseIntensity = japaneseIntensity,
                         language = placeNameLanguage
                     )
+                }
+                if (localForecastUnavailable) {
+                    Spacer(Modifier.height(8.dp))
+                    LocalForecastUnavailableCard(placeNameLanguage)
                 }
 
                 if (observationsExpanded && selectedEvent.points.isNotEmpty()) {
@@ -6434,6 +6441,24 @@ private fun DestinationCountdownCard(
 }
 
 @Composable
+private fun LocalForecastUnavailableCard(language: PlaceNameLanguage) {
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(12.dp),
+        color = MaterialTheme.colorScheme.surfaceVariant,
+        tonalElevation = 2.dp
+    ) {
+        Text(
+            text = uiText(R.string.local_eew_forecasting_unavailable, language),
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            fontSize = 12.sp,
+            lineHeight = 16.sp
+        )
+    }
+}
+
+@Composable
 private fun uiText(resourceId: Int, language: PlaceNameLanguage): String =
     UiLocalization.format(LocalContext.current, resourceId, language)
 
@@ -7638,7 +7663,9 @@ private fun JapanMap(
             val affected = buildList {
                 add(sourceToBase(data.project(warning.latitude, warning.longitude)))
 
-                EewWaveModel.wavefrontState(warning, timelineNowMillis)?.let { waves ->
+                EewWaveModel.wavefrontState(warning, timelineNowMillis)
+                    .valueOrNull()
+                    ?.let { waves ->
                     EewWaveModel.geodesicCircle(
                         latitude = warning.latitude,
                         longitude = warning.longitude,
@@ -8754,7 +8781,9 @@ private fun JapanMap(
                 activeEewEvent
                     ?.takeIf { animateEew && !it.isCancelled }
                     ?.let { warning ->
-                        EewWaveModel.wavefrontState(warning, timelineNowMillis)?.let { waves ->
+                        EewWaveModel.wavefrontState(warning, timelineNowMillis)
+                            .valueOrNull()
+                            ?.let { waves ->
                             fun drawWavefront(radiusKm: Double, color: Color) {
                                 val ringPoints = EewWaveModel.geodesicCircle(
                                     latitude = warning.latitude,

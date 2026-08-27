@@ -52,3 +52,6 @@ desktop.ini
 
 # Local station-name reference data
 /tools/source/mt_town_all.csv
+
+# Intentionally unpublished local EEW forecasting implementation
+/app/src/main/java/cz/misa/quakedeck/data/LocalEewForecastEngine.kt

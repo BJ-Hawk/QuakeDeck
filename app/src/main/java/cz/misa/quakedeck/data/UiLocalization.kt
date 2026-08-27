@@ -39,6 +39,8 @@ object UiLocalization {
         Regex("EEW detection expired without warning details · (.+)")
     private val eewPassageCompletePattern =
         Regex("EEW estimated wave passage complete · (.+)")
+    private val eewSafetyTimeoutPattern =
+        Regex("EEW warning display safety timeout · (.+)")
     private val eewDetectedTypePattern = Regex("EEW detected · (.+) · (.+)")
     private val eewDetectedPattern = Regex("EEW detected · (.+)")
     private val recoveredTsunamiCancellationPattern =
@@ -175,6 +177,9 @@ object UiLocalization {
         }
         eewPassageCompletePattern.matchEntire(status)?.let {
             return localized.getString(R.string.status_eew_passage_complete_source, it.groupValues[1])
+        }
+        eewSafetyTimeoutPattern.matchEntire(status)?.let {
+            return localized.getString(R.string.status_eew_safety_timeout_source, it.groupValues[1])
         }
         eewDetectedTypePattern.matchEntire(status)?.let {
             return localized.getString(

@@ -41,6 +41,7 @@ class DmDssProvider(
     private var connecting = false
     private var retryAttempt = 0
     private var activeEvent: EarthquakeEvent? = null
+    private var activeEventUntilMillis: Long? = null
     private var lastEvent: EarthquakeEvent? = null
     private var connected = false
     private var liveSequence = 0L
@@ -398,8 +399,13 @@ class DmDssProvider(
     private fun applyUpdate(update: DmDssEewUpdate) {
         lastEvent = update.event
         activeEvent = update.event.takeIf { update.active }
+        activeEventUntilMillis = if (update.active) {
+            update.expiresAtMillis ?: (System.currentTimeMillis() + DEFAULT_ACTIVE_MILLIS)
+        } else {
+            null
+        }
         if (update.active) {
-            scheduleExpiry(update.event.id, update.expiresAtMillis)
+            scheduleExpiry(update.event.id, activeEventUntilMillis)
         } else {
             expiryGeneration++
         }
@@ -467,6 +473,7 @@ class DmDssProvider(
             {
                 if (generation != expiryGeneration || activeEvent?.id != eventId) return@postDelayed
                 activeEvent = null
+                activeEventUntilMillis = null
                 emit(
                     state = ConnectionState.CONNECTED,
                     status = "DM-D.S.S EEW forecast connected",
@@ -501,6 +508,7 @@ class DmDssProvider(
                 connectionState = state,
                 activeEew = activeEvent != null,
                 activeEewEvent = activeEvent,
+                activeEewUntilMillis = activeEventUntilMillis.takeIf { activeEvent != null },
                 event = event,
                 statusText = status,
                 liveUpdateKind = updateKind,

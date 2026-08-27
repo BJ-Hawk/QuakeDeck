@@ -26,12 +26,14 @@ class QuakeDeckRuntimeNotificationRoutingTest {
         val dmdss = snapshot(
             event = forecast,
             updateKind = LiveUpdateKind.EEW,
-            activeEew = true
+            activeEew = true,
+            activeUntilMillis = 222L
         )
         val combined = p2p.copy(
             sourceMode = DataSourceMode.DMDSS,
             activeEew = true,
             activeEewEvent = forecast,
+            activeEewUntilMillis = 222L,
             event = forecast,
             liveUpdateKind = LiveUpdateKind.CONFIRMED
         )
@@ -49,6 +51,7 @@ class QuakeDeckRuntimeNotificationRoutingTest {
         assertSame(forecast, routed.activeEewEvent)
         assertTrue(routed.activeEew)
         assertFalse(routed.dmdssEewUpdate)
+        assertEquals(null, routed.activeEewUntilMillis)
     }
 
     @Test
@@ -56,11 +59,17 @@ class QuakeDeckRuntimeNotificationRoutingTest {
         val confirmed = event("quake:2026-08-26", EarthquakeEventKind.CONFIRMED, "2")
         val forecast = event("20260826113348", EarthquakeEventKind.EEW, "3")
         val p2p = snapshot(confirmed, LiveUpdateKind.NONE, activeEew = false)
-        val dmdss = snapshot(forecast, LiveUpdateKind.EEW, activeEew = true)
+        val dmdss = snapshot(
+            forecast,
+            LiveUpdateKind.EEW,
+            activeEew = true,
+            activeUntilMillis = 222L
+        )
         val combined = p2p.copy(
             sourceMode = DataSourceMode.DMDSS,
             activeEew = true,
             activeEewEvent = forecast,
+            activeEewUntilMillis = 222L,
             event = forecast,
             liveUpdateKind = LiveUpdateKind.EEW,
             dmdssEewUpdate = true
@@ -75,17 +84,20 @@ class QuakeDeckRuntimeNotificationRoutingTest {
 
         assertSame(forecast, routed.event)
         assertTrue(routed.dmdssEewUpdate)
+        assertEquals(222L, routed.activeEewUntilMillis)
     }
 
     private fun snapshot(
         event: EarthquakeEvent,
         updateKind: LiveUpdateKind,
-        activeEew: Boolean
+        activeEew: Boolean,
+        activeUntilMillis: Long? = null
     ) = AppSnapshot(
         sourceMode = DataSourceMode.DMDSS,
         connectionState = ConnectionState.CONNECTED,
         activeEew = activeEew,
         activeEewEvent = event.takeIf { activeEew },
+        activeEewUntilMillis = activeUntilMillis,
         event = event,
         liveUpdateKind = updateKind
     )

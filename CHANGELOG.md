@@ -2,10 +2,11 @@
 
 QuakeDeck release history
 
-## Unreleased — target v0.10.1
+## Unreleased — target v0.10.1 (in progress)
 
 ### Added
 
+- Moves every QuakeDeck-generated live ground-motion calculation behind one deliberately Git-ignored `LocalEewForecastEngine.kt` implementation while keeping a single public repository and a buildable public checkout. The tracked contract distinguishes available, no-result, and intentionally unavailable states; public builds retain official JMA, DM-D.S.S, and P2PQuake values while omitting local P/S-wave rings and destination countdowns. The always-visible status strip and expanded status drawer identify the compiled edition with an unmistakable `FULL` or `LITE` badge, with the drawer header reserving enough width to show the complete label. A generated compilation marker and explicit Kotlin task input now make a source removal or edition switch invalidate incremental compilation, ignore any stale engine bytecode, and prevent an old `FULL` result from surviving into a `LITE` build. The build script exposes a plain local Boolean switch for deliberately forcing `LITE`, while retaining the Gradle-property override used by automated checks. The build baseline now uses compileSdk 37, Core 1.19.0, Activity Compose 1.13.0, OkHttp 5.5.0, and JSON-java 20260814 for unit tests, and removes the unused duplicate Android-test Compose BOM declaration; targetSdk remains 36 pending deliberate Android 17 behavior validation. P2PQuake warning cleanup falls back to a non-predictive safety timeout, carries its active deadline through merged runtime state and notification payloads, and cannot be resurrected indefinitely from a retained notification. The README prominently documents the exact omitted path and behavior.
 - Adds a basic human-readable newest-20 live packet timeline to delivery diagnostics, combining DM-D.S.S and P2PQuake traffic while excluding routine ping/pong keep-alives. The export retains the bounded, credential-redacted raw packet payloads and identifies their source.
 
 ### Fixed

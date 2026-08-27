@@ -212,6 +212,7 @@ data class AppSnapshot(
     val connectionState: ConnectionState,
     val activeEew: Boolean,
     val activeEewEvent: EarthquakeEvent? = null,
+    val activeEewUntilMillis: Long? = null,
     val activeTsunami: Boolean = false,
     val tsunami: TsunamiReport? = null,
     val event: EarthquakeEvent,

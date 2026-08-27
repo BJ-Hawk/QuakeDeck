@@ -309,11 +309,7 @@ class NotificationCoordinator(
                             notificationIdentity,
                             relevantIntensity
                         ),
-                        activeUntilMillis = if (snapshot.dmdssEewUpdate) {
-                            DmDssEewParser.forecastExpiryMillis(event)
-                        } else {
-                            null
-                        },
+                        activeUntilMillis = snapshot.activeEewUntilMillis,
                         visualKind = AlertVisualKind.EEW,
                         localEewAttentionMode = attentionMode
                     )

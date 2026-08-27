@@ -27411,10 +27411,10 @@
       "areaNameJa": "秋田県内陸南部",
       "municipalityCode": "0521200",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
+      "publishedAddressJa": "秋田県大仙市大曲花園町1番1号",
+      "facilityNameJa": "大仙市役所大曲庁舎",
       "facilityNameEn": null,
-      "metadataStatus": "Catalogue only",
+      "metadataStatus": "Official municipal seismic-network placement and address",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -27422,11 +27422,12 @@
       "providerLatitude": null,
       "providerLongitude": null,
       "sourceUrls": [
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.city.daisen.lg.jp/uploads/contents/archive_0000000671_00/241.pdf",
+        "https://www.city.daisen.lg.jp/archive/contents-14100"
       ],
-      "note": "No exact address or precise provider-station metadata is recorded yet.",
-      "placementLocalityJa": "大仙市",
-      "placementPrecision": "municipality_or_ward"
+      "note": "Daisen City’s office-renovation record identifies the measuring-intensity-meter relocation as work at the Omagari Office; the city publishes the current office address.",
+      "placementPrecision": "exact_address"
     },
     {
       "code": "0521239",
@@ -31523,10 +31524,10 @@
       "areaNameJa": "福島県中通り",
       "municipalityCode": "0721000",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
+      "publishedAddressJa": "福島県二本松市金色403番地1",
+      "facilityNameJa": "二本松市役所本庁",
       "facilityNameEn": null,
-      "metadataStatus": "Catalogue only",
+      "metadataStatus": "Official municipal seismic-network placement and address",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -31534,11 +31535,11 @@
       "providerLatitude": null,
       "providerLongitude": null,
       "sourceUrls": [
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.city.nihonmatsu.lg.jp/data/doc/1655723818_doc_151_0.pdf"
       ],
-      "note": "No exact address or precise provider-station metadata is recorded yet.",
-      "placementLocalityJa": "二本松市",
-      "placementPrecision": "municipality_or_ward"
+      "note": "Nihonmatsu City’s disaster plan places the measuring-intensity meter at the City Hall main-office premises and publishes its exact address.",
+      "placementPrecision": "exact_address"
     },
     {
       "code": "0721031",
@@ -31564,10 +31565,10 @@
       "areaNameJa": "福島県中通り",
       "municipalityCode": "0721000",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
+      "publishedAddressJa": "福島県二本松市油井字濡石1番地2",
+      "facilityNameJa": "二本松市役所安達支所",
       "facilityNameEn": null,
-      "metadataStatus": "Catalogue only",
+      "metadataStatus": "Official municipal seismic-network placement and address",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -31575,11 +31576,11 @@
       "providerLatitude": null,
       "providerLongitude": null,
       "sourceUrls": [
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.city.nihonmatsu.lg.jp/data/doc/1655723818_doc_151_0.pdf"
       ],
-      "note": "No exact address or precise provider-station metadata is recorded yet.",
-      "placementLocalityJa": "二本松市",
-      "placementPrecision": "municipality_or_ward"
+      "note": "Nihonmatsu City’s disaster plan places the measuring-intensity meter at the Adachi Branch premises and publishes its exact address.",
+      "placementPrecision": "exact_address"
     },
     {
       "code": "0721032",
@@ -31605,10 +31606,10 @@
       "areaNameJa": "福島県中通り",
       "municipalityCode": "0721000",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
+      "publishedAddressJa": "福島県二本松市小浜字北月山27番地",
+      "facilityNameJa": "二本松市役所岩代支所",
       "facilityNameEn": null,
-      "metadataStatus": "Catalogue only",
+      "metadataStatus": "Official municipal seismic-network placement and address",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -31616,11 +31617,11 @@
       "providerLatitude": null,
       "providerLongitude": null,
       "sourceUrls": [
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.city.nihonmatsu.lg.jp/data/doc/1655723818_doc_151_0.pdf"
       ],
-      "note": "No exact address or precise provider-station metadata is recorded yet.",
-      "placementLocalityJa": "二本松市",
-      "placementPrecision": "municipality_or_ward"
+      "note": "Nihonmatsu City’s disaster plan places the measuring-intensity meter at the Iwadate Branch premises and publishes its exact address.",
+      "placementPrecision": "exact_address"
     },
     {
       "code": "0721034",
@@ -31646,10 +31647,10 @@
       "areaNameJa": "福島県中通り",
       "municipalityCode": "0721000",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
+      "publishedAddressJa": "福島県二本松市針道字蔵下22番地",
+      "facilityNameJa": "二本松市役所東和支所",
       "facilityNameEn": null,
-      "metadataStatus": "Catalogue only",
+      "metadataStatus": "Official municipal seismic-network placement and address",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -31657,11 +31658,11 @@
       "providerLatitude": null,
       "providerLongitude": null,
       "sourceUrls": [
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.city.nihonmatsu.lg.jp/data/doc/1655723818_doc_151_0.pdf"
       ],
-      "note": "No exact address or precise provider-station metadata is recorded yet.",
-      "placementLocalityJa": "二本松市",
-      "placementPrecision": "municipality_or_ward"
+      "note": "Nihonmatsu City’s disaster plan places the measuring-intensity meter at the Towa Branch premises and publishes its exact address.",
+      "placementPrecision": "exact_address"
     },
     {
       "code": "0721101",
@@ -155667,10 +155668,10 @@
       "areaNameJa": "佐賀県南部",
       "municipalityCode": "4120100",
       "gsiLocalityJa": "大和町大字尼寺",
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
+      "publishedAddressJa": "佐賀県佐賀市大和町大字尼寺1870番地",
+      "facilityNameJa": "佐賀市大和支所",
       "facilityNameEn": null,
-      "metadataStatus": "Catalogue only",
+      "metadataStatus": "Official MLIT observation-point placement and address",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -155678,11 +155679,11 @@
       "providerLatitude": null,
       "providerLongitude": null,
       "sourceUrls": [
-        "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=130.28&lat=33.31"
+        "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=130.28&lat=33.31",
+        "https://www.qsr.mlit.go.jp/takeo/site_files/file/kasegawa/kaseijikanrikeikaku1.pdf"
       ],
-      "note": "No exact address or precise provider-station metadata is recorded yet.",
-      "placementLocalityJa": "佐賀市",
-      "placementPrecision": "municipality_or_ward"
+      "note": "The MLIT Kase River management plan identifies the Saga City Yamato observation point as installed on the Yamato Branch premises and publishes its exact address.",
+      "placementPrecision": "exact_address"
     },
     {
       "code": "4120138",
@@ -156204,10 +156205,10 @@
       "areaNameJa": "佐賀県南部",
       "municipalityCode": "4120800",
       "gsiLocalityJa": "三日月町樋口",
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
+      "publishedAddressJa": "佐賀県小城市三日月町長神田2312番地2",
+      "facilityNameJa": "小城市役所三日月庁舎",
       "facilityNameEn": null,
-      "metadataStatus": "Catalogue only",
+      "metadataStatus": "Official MLIT observation-point placement and address",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -156215,11 +156216,11 @@
       "providerLatitude": null,
       "providerLongitude": null,
       "sourceUrls": [
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.qsr.mlit.go.jp/takeo/site_files/file/kasegawa/kaseijikanrikeikaku1.pdf"
       ],
-      "note": "No exact address or precise provider-station metadata is recorded yet.",
-      "placementLocalityJa": "小城市",
-      "placementPrecision": "municipality_or_ward"
+      "note": "The MLIT Kase River management plan identifies the Ogi City Mikatsuki observation point as installed on the Mikatsuki Office premises and publishes its exact address.",
+      "placementPrecision": "exact_address"
     },
     {
       "code": "4120839",

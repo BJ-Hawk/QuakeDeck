@@ -277,6 +277,7 @@ fun AppSnapshot.withNotificationLaunch(
                 copy(
                     activeEew = !notificationEvent.isCancelled,
                     activeEewEvent = notificationEvent.takeUnless { it.isCancelled },
+                    activeEewUntilMillis = payload.activeUntilMillis,
                     event = notificationEvent,
                     liveUpdateKind = LiveUpdateKind.NONE
                 )

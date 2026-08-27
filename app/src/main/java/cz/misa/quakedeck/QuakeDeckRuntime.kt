@@ -281,6 +281,11 @@ class QuakeDeckRuntime(context: Context) : QuakeDataProvider {
                 connectionState = ConnectionState.CONNECTED,
                 activeEew = selectedEew != null,
                 activeEewEvent = selectedEew,
+                activeEewUntilMillis = if (dmdssEew != null) {
+                    dmdssSnapshot.activeEewUntilMillis
+                } else {
+                    p2pSnapshot.activeEewUntilMillis
+                },
                 event = selectedEvent,
                 statusText = if (dmdssEew != null) {
                     dmdssSnapshot.statusText
@@ -486,6 +491,8 @@ class QuakeDeckRuntime(context: Context) : QuakeDataProvider {
             val injected = latestSnapshot.copy(
                 activeEew = true,
                 activeEewEvent = event,
+                activeEewUntilMillis = System.currentTimeMillis() +
+                    INJECTED_FORECAST_DISPLAY_MILLIS,
                 event = event,
                 statusText = "INJECTED TEST DM-D.S.S EEW FORECAST · connection unchanged",
                 liveUpdateKind = LiveUpdateKind.EEW,
@@ -595,6 +602,7 @@ internal fun notificationSnapshotForProviderUpdate(
     return combined.copy(
         event = provider.event,
         tsunami = provider.tsunami,
+        activeEewUntilMillis = provider.activeEewUntilMillis,
         dmdssEewUpdate = origin == DataSourceMode.DMDSS && combined.dmdssEewUpdate
     )
 }

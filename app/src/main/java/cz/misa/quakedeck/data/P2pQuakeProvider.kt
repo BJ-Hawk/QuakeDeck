@@ -70,6 +70,7 @@ class P2pQuakeProvider(
     private var lastEvent: EarthquakeEvent? = null
     private var activeEew = false
     private var activeEewEvent: EarthquakeEvent? = null
+    private var activeEewUntilMillis: Long? = null
     private var eewCleanupRunnable: Runnable? = null
     private var lastTsunami: TsunamiReport? = null
     private var activeTsunami = false
@@ -533,6 +534,12 @@ class P2pQuakeProvider(
                     connectionState = currentState,
                     activeEew = injectedActiveEew,
                     activeEewEvent = injectedActiveEewEvent,
+                    activeEewUntilMillis = when {
+                        injectedEvent.kind == EarthquakeEventKind.EEW ->
+                            System.currentTimeMillis() + INJECTED_TEST_DISPLAY_MILLIS
+                        injectedActiveEew -> activeEewUntilMillis
+                        else -> null
+                    },
                     activeTsunami = injectedActiveTsunami,
                     tsunami = injectedTsunami,
                     event = injectedEvent,
@@ -1751,16 +1758,19 @@ class P2pQuakeProvider(
         cancelEewCleanup()
         activeEew = false
         activeEewEvent = null
+        activeEewUntilMillis = null
     }
 
     private fun activateEewDetectionTimeout() {
         cancelEewCleanup()
         activeEew = true
         activeEewEvent = null
+        activeEewUntilMillis = System.currentTimeMillis() + 30_000L
         val runnable = Runnable {
             eewCleanupRunnable = null
             if (!activeEew || activeEewEvent != null) return@Runnable
             activeEew = false
+            activeEewUntilMillis = null
             val visibleEvent = lastEvent ?: waitingSnapshot(
                 mode = sourceMode,
                 state = currentState,
@@ -1784,15 +1794,18 @@ class P2pQuakeProvider(
     private fun activateEew(event: EarthquakeEvent): Boolean {
         cancelEewCleanup()
         val nowMillis = System.currentTimeMillis()
-        val targetMillis = EewWaveModel.estimatedWarningEndEpochMillis(event, nowMillis)
+        val deadline = P2pEewLifecyclePolicy.deadline(event, nowMillis)
+        val targetMillis = deadline.epochMillis
         if (targetMillis <= nowMillis) {
             activeEew = false
             activeEewEvent = null
+            activeEewUntilMillis = null
             return false
         }
 
         activeEew = true
         activeEewEvent = event
+        activeEewUntilMillis = targetMillis
         val expectedId = event.id
         val expectedSerial = event.reportSerial
         val runnable = Runnable {
@@ -1804,13 +1817,18 @@ class P2pQuakeProvider(
 
             activeEew = false
             activeEewEvent = null
+            activeEewUntilMillis = null
             val visibleEvent = lastEvent ?: active
             emit(
                 liveSnapshot(
                     state = currentState,
                     activeEew = false,
                     event = visibleEvent,
-                    status = "EEW estimated wave passage complete · ${sourceLabel()}",
+                    status = if (deadline.forecastDerived) {
+                        "EEW estimated wave passage complete · ${sourceLabel()}"
+                    } else {
+                        "EEW warning display safety timeout · ${sourceLabel()}"
+                    },
                     updateKind = LiveUpdateKind.EEW_ENDED
                 )
             )
@@ -2764,6 +2782,7 @@ class P2pQuakeProvider(
         connectionState = state,
         activeEew = activeEew,
         activeEewEvent = activeEewEvent,
+        activeEewUntilMillis = activeEewUntilMillis.takeIf { activeEew },
         activeTsunami = activeTsunami,
         tsunami = lastTsunami,
         event = event,
@@ -2789,6 +2808,7 @@ class P2pQuakeProvider(
             connectionState = state,
             activeEew = activeEew,
             activeEewEvent = activeEewEvent,
+            activeEewUntilMillis = activeEewUntilMillis.takeIf { activeEew },
             activeTsunami = activeTsunami,
             tsunami = lastTsunami,
             event = event,

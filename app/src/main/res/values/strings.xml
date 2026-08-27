@@ -160,6 +160,9 @@
     <string name="p_wave">P-wave</string>
     <string name="arrived">arrived</string>
     <string name="predicted_intensity">Predicted intensity</string>
+    <string name="local_eew_forecasting_unavailable">Local P/S-wave modelling and destination countdowns are intentionally unavailable in this public-source build. Official provider forecasts remain available.</string>
+    <string name="build_edition_full">FULL</string>
+    <string name="build_edition_lite">LITE</string>
     <string name="tsunami_warnings_cancelled">TSUNAMI WARNINGS CANCELLED</string>
     <string name="major_tsunami_warning">MAJOR TSUNAMI WARNING</string>
     <string name="tsunami_warning_upper">TSUNAMI WARNING</string>
@@ -204,6 +207,7 @@
     <string name="status_eew_detection_expired">EEW detection expired</string>
     <string name="status_eew_detection_expired_source">EEW detection expired without warning details · %1$s</string>
     <string name="status_eew_passage_complete_source">EEW estimated wave passage complete · %1$s</string>
+    <string name="status_eew_safety_timeout_source">EEW warning display safety timeout · %1$s</string>
     <string name="status_eew_active_other_report">EEW active · another earthquake report added</string>
     <string name="status_tsunami_received">Tsunami information received</string>
     <string name="status_tsunami_cleared">Tsunami information cleared</string>

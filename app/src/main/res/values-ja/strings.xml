@@ -157,6 +157,9 @@
     <string name="p_wave">P波</string>
     <string name="arrived">到達</string>
     <string name="predicted_intensity">予測震度</string>
+    <string name="local_eew_forecasting_unavailable">この公開ソース版では、ローカルのP波・S波モデルと到達カウントダウンを意図的に利用できません。提供元による公式予測は引き続き利用できます。</string>
+    <string name="build_edition_full">FULL</string>
+    <string name="build_edition_lite">LITE</string>
     <string name="tsunami_warnings_cancelled">津波警報・注意報 解除</string>
     <string name="major_tsunami_warning">大津波警報</string>
     <string name="tsunami_warning_upper">津波警報</string>
@@ -201,6 +204,7 @@
     <string name="status_eew_detection_expired">EEW検知の有効期限切れ</string>
     <string name="status_eew_detection_expired_source">警報詳細なしでEEW検知の有効期限切れ · %1$s</string>
     <string name="status_eew_passage_complete_source">EEW推定波到達終了 · %1$s</string>
+    <string name="status_eew_safety_timeout_source">EEW警報表示の安全タイムアウト · %1$s</string>
     <string name="status_eew_active_other_report">EEW発表中 · 別の地震情報を追加</string>
     <string name="status_tsunami_received">津波情報を受信</string>
     <string name="status_tsunami_cleared">津波情報を解除</string>

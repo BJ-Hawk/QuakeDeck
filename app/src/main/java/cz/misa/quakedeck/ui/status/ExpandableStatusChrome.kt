@@ -72,7 +72,9 @@ import cz.misa.quakedeck.R
 import cz.misa.quakedeck.data.AppSnapshot
 import cz.misa.quakedeck.data.ConnectionState
 import cz.misa.quakedeck.data.DataSourceMode
+import cz.misa.quakedeck.data.LocalEewForecasts
 import cz.misa.quakedeck.data.PlaceNameLanguage
+import cz.misa.quakedeck.data.QuakeDeckBuildEdition
 import cz.misa.quakedeck.data.UiLocalization
 import cz.misa.quakedeck.sandbox.SandboxUiState
 import cz.misa.quakedeck.time.AppClockController
@@ -118,6 +120,7 @@ fun ExpandableStatusChrome(
     content: @Composable BoxScope.() -> Unit
 ) {
     BoxWithConstraints(Modifier.fillMaxSize()) {
+        val buildEdition = LocalEewForecasts.buildEdition
         val isLandscape = maxWidth > maxHeight
         val density = LocalDensity.current
         // The chrome follows the actual app/system font scale instead of reserving
@@ -225,6 +228,7 @@ fun ExpandableStatusChrome(
                 sandbox = sandbox,
                 historicalMode = historicalMode,
                 liveWarningActive = liveWarningActive,
+                buildEdition = buildEdition,
                 language = language,
                 drawerFraction = drawerFraction,
                 onToggleDrawer = toggleDrawer,
@@ -275,6 +279,7 @@ fun ExpandableStatusChrome(
                         sandbox = sandbox,
                         historicalMode = historicalMode,
                         liveWarningActive = liveWarningActive,
+                        buildEdition = buildEdition,
                         clockMode = clockController.mode,
                         clockController = clockController,
                         wallNowMillis = wallNowMillis,
@@ -317,6 +322,7 @@ private fun StatusBar(
     sandbox: SandboxUiState,
     historicalMode: Boolean,
     liveWarningActive: Boolean,
+    buildEdition: QuakeDeckBuildEdition,
     language: PlaceNameLanguage,
     drawerFraction: Float,
     onToggleDrawer: () -> Unit,
@@ -376,15 +382,25 @@ private fun StatusBar(
                 else -> 11.sp
             }
 
-            Text(
-                text = "v${BuildConfig.VERSION_NAME}",
+            Row(
                 modifier = Modifier.align(Alignment.CenterStart),
-                color = mutedForeground,
-                fontSize = 11.sp,
-                fontWeight = FontWeight.Medium,
-                maxLines = 1,
-                overflow = TextOverflow.Clip
-            )
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "v${BuildConfig.VERSION_NAME}",
+                    color = mutedForeground,
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Medium,
+                    maxLines = 1,
+                    overflow = TextOverflow.Clip
+                )
+                Spacer(Modifier.width(5.dp))
+                BuildEditionBadge(
+                    edition = buildEdition,
+                    language = language,
+                    compact = true
+                )
+            }
 
             Text(
                 text = if (isLandscape) fullClock else compactClock,
@@ -476,6 +492,35 @@ private fun CompactStatusAction(
 }
 
 @Composable
+private fun BuildEditionBadge(
+    edition: QuakeDeckBuildEdition,
+    language: PlaceNameLanguage,
+    compact: Boolean
+) {
+    val isFull = edition == QuakeDeckBuildEdition.FULL
+    Surface(
+        shape = RoundedCornerShape(50),
+        color = if (isFull) Color(0xFF167A3E) else Color(0xFFF59E0B),
+        contentColor = if (isFull) Color.White else Color(0xFF271400)
+    ) {
+        Text(
+            text = localizedText(
+                if (isFull) R.string.build_edition_full else R.string.build_edition_lite,
+                language
+            ),
+            modifier = Modifier.padding(
+                horizontal = if (compact) 5.dp else 6.dp,
+                vertical = if (compact) 1.dp else 2.dp
+            ),
+            fontSize = if (compact) 8.sp else 10.sp,
+            lineHeight = if (compact) 10.sp else 12.sp,
+            fontWeight = FontWeight.Black,
+            maxLines = 1
+        )
+    }
+}
+
+@Composable
 private fun Chevron(
     fraction: Float,
     color: Color,
@@ -520,6 +565,7 @@ private fun StatusDrawer(
     sandbox: SandboxUiState,
     historicalMode: Boolean,
     liveWarningActive: Boolean,
+    buildEdition: QuakeDeckBuildEdition,
     clockMode: AppClockMode,
     clockController: AppClockController,
     wallNowMillis: Long,
@@ -580,21 +626,29 @@ private fun StatusDrawer(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.Top
             ) {
-                Column(modifier = Modifier.weight(0.42f)) {
+                Column(modifier = Modifier.weight(0.44f)) {
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(titleRowHeight),
                         contentAlignment = Alignment.CenterStart
                     ) {
-                        Text(
-                            text = "QuakeDeck",
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 18.sp,
-                            lineHeight = 19.sp,
-                            maxLines = 1,
-                            overflow = TextOverflow.Clip
-                        )
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                text = "QuakeDeck",
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 18.sp,
+                                lineHeight = 19.sp,
+                                maxLines = 1,
+                                overflow = TextOverflow.Clip
+                            )
+                            Spacer(Modifier.width(5.dp))
+                            BuildEditionBadge(
+                                edition = buildEdition,
+                                language = language,
+                                compact = false
+                            )
+                        }
                     }
                     Box(
                         modifier = Modifier
@@ -622,7 +676,7 @@ private fun StatusDrawer(
 
                 Column(
                     modifier = Modifier
-                        .weight(0.58f)
+                        .weight(0.56f)
                         .clickable(
                             role = Role.Button,
                             onClickLabel = localized(R.string.show_time_details, language),

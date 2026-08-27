@@ -7,35 +7,22 @@ import java.util.Locale
 import kotlin.math.PI
 import kotlin.math.asin
 import kotlin.math.atan2
-import kotlin.math.ceil
 import kotlin.math.cos
-import kotlin.math.max
-import kotlin.math.min
 import kotlin.math.sin
 import kotlin.math.sqrt
 
 /**
- * Lightweight EEW travel-time model used only for display.
- *
- * P2PQuake provides the hypocentre and, for many forecast areas, an official
- * expected arrival time. QuakeDeck uses that official time for the destination
- * countdown whenever it exists. The map wavefronts and any missing destination
- * time use constant effective crustal velocities so they remain an estimate,
- * not an official warning calculation.
+ * Tracked contracts and non-predictive plumbing for optional local EEW
+ * forecasting. Every ground-motion calculation lives in the deliberately
+ * omitted LocalEewForecastEngine.kt implementation.
  */
 object EewWaveModel {
-    const val P_WAVE_KM_PER_SECOND = 7.0
-    const val S_WAVE_KM_PER_SECOND = 4.0
-    const val EARTH_RADIUS_KM = 6_371.0088
+    private const val EARTH_RADIUS_KM = 6_371.0088
 
     const val DEFAULT_DESTINATION_NAME = "Tokyo"
     const val DEFAULT_DESTINATION_LATITUDE = 35.6762
     const val DEFAULT_DESTINATION_LONGITUDE = 139.6503
     const val DEFAULT_DESTINATION_EEW_AREA_JA = "東京"
-
-    const val WARNING_END_GRACE_MILLIS = 15_000L
-    const val WARNING_END_FALLBACK_MILLIS = 90_000L
-    const val WARNING_END_MAXIMUM_MILLIS = 180_000L
 
     private val jst = ZoneId.of("Asia/Tokyo")
     private val eventTimeFormatter =
@@ -67,23 +54,8 @@ object EewWaveModel {
     fun wavefrontState(
         event: EarthquakeEvent,
         nowEpochMillis: Long
-    ): WavefrontState? {
-        if (event.kind != EarthquakeEventKind.EEW || event.isCancelled) return null
-        val origin = timelineEpochMillis(event, event.originTime) ?: return null
-        val elapsedSeconds = max(0.0, (nowEpochMillis - origin) / 1_000.0)
-        val depthKm = event.depthKm.coerceAtLeast(0).toDouble()
-        return WavefrontState(
-            elapsedSeconds = elapsedSeconds,
-            pWaveRadiusKm = surfaceRadiusKm(
-                travelledKm = elapsedSeconds * P_WAVE_KM_PER_SECOND,
-                depthKm = depthKm
-            ),
-            sWaveRadiusKm = surfaceRadiusKm(
-                travelledKm = elapsedSeconds * S_WAVE_KM_PER_SECOND,
-                depthKm = depthKm
-            )
-        )
-    }
+    ): LocalEewForecastResult<WavefrontState> =
+        LocalEewForecasts.wavefrontState(event, nowEpochMillis)
 
     fun destinationPrediction(
         event: EarthquakeEvent,
@@ -92,71 +64,21 @@ object EewWaveModel {
         destinationLatitude: Double = DEFAULT_DESTINATION_LATITUDE,
         destinationLongitude: Double = DEFAULT_DESTINATION_LONGITUDE,
         destinationEewAreaNameJa: String? = DEFAULT_DESTINATION_EEW_AREA_JA
-    ): DestinationPrediction? {
-        if (event.kind != EarthquakeEventKind.EEW || event.isCancelled) return null
-        val origin = timelineEpochMillis(event, event.originTime) ?: return null
-
-        val surfaceDistance = greatCircleDistanceKm(
-            event.latitude,
-            event.longitude,
-            destinationLatitude,
-            destinationLongitude
-        )
-        val hypocentralDistance = sqrt(
-            surfaceDistance * surfaceDistance +
-                event.depthKm.coerceAtLeast(0).toDouble().let { it * it }
-        )
-
-        val modelledPArrival =
-            origin + (hypocentralDistance / P_WAVE_KM_PER_SECOND * 1_000.0).toLong()
-        val modelledSArrival =
-            origin + (hypocentralDistance / S_WAVE_KM_PER_SECOND * 1_000.0).toLong()
-
-        val officialPoint = destinationEewAreaNameJa
-            ?.takeIf { it.isNotBlank() }
-            ?.let { targetArea ->
-                event.points.firstOrNull { point -> matchesForecastArea(point, targetArea) }
-            }
-        val officialSArrival = officialPoint?.arrivalTime
-            ?.let { timelineEpochMillis(event, it) }
-
-        val sArrival = officialSArrival ?: modelledSArrival
-        return DestinationPrediction(
+    ): LocalEewForecastResult<DestinationPrediction> =
+        LocalEewForecasts.destinationPrediction(
+            event = event,
+            nowEpochMillis = nowEpochMillis,
             destinationName = destinationName,
-            predictedIntensity = officialPoint?.intensity,
-            predictedIntensityFrom = officialPoint?.intensityFrom,
-            predictedIntensityUpperOpenEnded =
-                officialPoint?.intensityUpperOpenEnded == true,
-            pArrivalEpochMillis = modelledPArrival,
-            sArrivalEpochMillis = sArrival,
-            secondsUntilP = secondsUntil(modelledPArrival, nowEpochMillis),
-            secondsUntilS = secondsUntil(sArrival, nowEpochMillis),
-            officialSArrival = officialSArrival != null
+            destinationLatitude = destinationLatitude,
+            destinationLongitude = destinationLongitude,
+            destinationEewAreaNameJa = destinationEewAreaNameJa
         )
-    }
 
-    /**
-     * Estimate when the public EEW warning has finished being useful. P2PQuake
-     * does not provide a dependable normal "warning ended" packet, so the
-     * latest official area arrival is used when available. A bounded fallback
-     * keeps malformed or sparse packets from remaining active forever.
-     */
     fun estimatedWarningEndEpochMillis(
         event: EarthquakeEvent,
         receivedAtEpochMillis: Long = System.currentTimeMillis()
-    ): Long {
-        val latestOfficialArrival = event.points
-            .asSequence()
-            .mapNotNull { point -> point.arrivalTime?.let { timelineEpochMillis(event, it) } }
-            .maxOrNull()
-        val origin = timelineEpochMillis(event, event.originTime)
-        val issued = event.reportIssuedAt?.let { timelineEpochMillis(event, it) }
-        val anchor = origin ?: issued ?: receivedAtEpochMillis
-        val estimated = latestOfficialArrival
-            ?.plus(WARNING_END_GRACE_MILLIS)
-            ?: anchor.plus(WARNING_END_FALLBACK_MILLIS)
-        return min(estimated, anchor.plus(WARNING_END_MAXIMUM_MILLIS))
-    }
+    ): LocalEewForecastResult<Long> =
+        LocalEewForecasts.estimatedWarningEndEpochMillis(event, receivedAtEpochMillis)
 
     fun timelineEpochMillis(
         event: EarthquakeEvent,
@@ -211,13 +133,14 @@ object EewWaveModel {
         return 2.0 * EARTH_RADIUS_KM * asin(sqrt(a.coerceIn(0.0, 1.0)))
     }
 
-    private fun surfaceRadiusKm(travelledKm: Double, depthKm: Double): Double {
-        if (travelledKm <= depthKm) return 0.0
-        return sqrt(travelledKm * travelledKm - depthKm * depthKm)
-    }
-
-    private fun secondsUntil(targetEpochMillis: Long, nowEpochMillis: Long): Long =
-        ceil((targetEpochMillis - nowEpochMillis) / 1_000.0).toLong()
+    internal fun officialForecastPoint(
+        event: EarthquakeEvent,
+        destinationEewAreaNameJa: String?
+    ): IntensityPoint? = destinationEewAreaNameJa
+        ?.takeIf { it.isNotBlank() }
+        ?.let { targetArea ->
+            event.points.firstOrNull { point -> matchesForecastArea(point, targetArea) }
+        }
 
     private fun parseFormattedJst(value: String): Long? =
         runCatching {

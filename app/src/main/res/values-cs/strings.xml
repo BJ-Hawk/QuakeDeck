@@ -160,6 +160,9 @@
     <string name="p_wave">P-vlna</string>
     <string name="arrived">dorazila</string>
     <string name="predicted_intensity">Předpokládaná intenzita</string>
+    <string name="local_eew_forecasting_unavailable">Místní modelování P/S vln a odpočty do příchodu jsou v tomto sestavení z veřejných zdrojů záměrně nedostupné. Oficiální předpovědi poskytovatelů zůstávají dostupné.</string>
+    <string name="build_edition_full">FULL</string>
+    <string name="build_edition_lite">LITE</string>
     <string name="tsunami_warnings_cancelled">VAROVÁNÍ PŘED TSUNAMI ODVOLÁNA</string>
     <string name="major_tsunami_warning">NEJVYŠŠÍ VAROVÁNÍ PŘED TSUNAMI</string>
     <string name="tsunami_warning_upper">VAROVÁNÍ PŘED TSUNAMI</string>
@@ -204,6 +207,7 @@
     <string name="status_eew_detection_expired">Platnost detekce EEW vypršela</string>
     <string name="status_eew_detection_expired_source">Platnost detekce EEW vypršela bez podrobností varování · %1$s</string>
     <string name="status_eew_passage_complete_source">Odhadovaný průchod vln EEW skončil · %1$s</string>
+    <string name="status_eew_safety_timeout_source">Vypršel bezpečnostní limit zobrazení výstrahy EEW · %1$s</string>
     <string name="status_eew_active_other_report">EEW je aktivní · přidána další zpráva o zemětřesení</string>
     <string name="status_tsunami_received">Přijata informace o tsunami</string>
     <string name="status_tsunami_cleared">Informace o tsunami odstraněna</string>

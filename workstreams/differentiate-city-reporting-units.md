@@ -146,10 +146,10 @@ The complete audited 4,360-station English map and the first station-information
 card are active in the app. Placement research is underway in
 `outputs/station-name-audit/station_metadata_sources.json` only:
 
-- 2,992 stations have source-supported facility and/or address data.
-- 2,977 have an exact published Japanese address.
+- 2,999 stations have source-supported facility and/or address data.
+- 2,984 have an exact published Japanese address.
 - 15 have a confirmed facility but no exact address yet.
-- 1,368 remain locality-only and require further research.
+- 1,361 remain locality-only and require further research.
 - Address/precision validation currently reports zero mismatches.
 
 The latest completed official-source batches converted confirmed facility-only
@@ -172,13 +172,17 @@ does not directly map the reporting station to a candidate facility.
 Evidence URLs and the full research provenance remain outside the compact runtime
 projection.
 
-The current Akita pass added direct, published placement/address evidence for
-`0521130` (Katagami City Hall Showa Branch), `0521131` (Katagami City Hall
-Iitagawa Branch), four Yuzawa City offices, `0520340` (Yokote Jūmonji Office),
-`0536332` (Hachirogata Town Hall), and `0534835` (Mitane Yamamoto Branch). The
-Oga municipal plan only supports the localities for `0520632` and `0520633`,
-and Mitane's current plan does not directly identify the two remaining host
-facilities; neither case was promoted to a facility or exact address.
+The current official-source passes added direct, published placement/address
+evidence in Akita for `0521130` (Katagami City Hall Showa Branch), `0521131`
+(Katagami City Hall Iitagawa Branch), four Yuzawa City offices, `0520340`
+(Yokote Jūmonji Office), `0536332` (Hachirogata Town Hall), `0534835` (Mitane
+Yamamoto Branch), and `0521238` (Daisen City Hall Omagari Office); in Fukushima
+for four Nihonmatsu City offices (`0721030`, `0721031`, `0721032`, and
+`0721034`); and in Saga for `4120137` (Saga City Hall Yamato Branch) and
+`4120838` (Ogi City Hall Mikatsuki Office). The Oga municipal plan only supports
+the localities for `0520632` and `0520633`, and Mitane's current plan does not
+directly identify the two remaining host facilities; neither case was promoted
+to a facility or exact address.
 
 ## Do not redo or change
 
@@ -213,8 +217,9 @@ facilities; neither case was promoted to a facility or exact address.
 ## Exact next steps
 
 1. Continue the JSON-only search with the remaining locality-only stations,
-   currently testing direct municipal evidence in Akita. Do not treat a former
-   or relocated office as a current station placement without direct evidence.
+   currently prioritizing prefectural maintenance specifications and direct
+   municipal evidence in still-unfilled prefectures. Do not treat a former or
+   relocated office as a current station placement without direct evidence.
 2. Preserve the two former Nagano facility records without an address unless a
    source specifically publishes the historic host-site address.
 3. For each subsequent station, first seek an official installation address or

@@ -5,6 +5,8 @@ import groovy.json.JsonSlurper
 import java.util.Properties
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.RegularFileProperty
+import org.gradle.api.provider.Property
+import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.InputFile
 import org.gradle.api.tasks.OutputFile
 import org.gradle.api.tasks.TaskAction
@@ -151,6 +153,35 @@ abstract class GenerateStationDetailsTask : DefaultTask() {
     }
 }
 
+abstract class GenerateLocalEewBuildInfoTask : DefaultTask() {
+    @get:Input
+    abstract val engineIncluded: Property<Boolean>
+
+    @get:OutputFile
+    abstract val outputFile: RegularFileProperty
+
+    @TaskAction
+    fun generate() {
+        val included = engineIncluded.get()
+        val target = outputFile.get().asFile
+        target.parentFile.mkdirs()
+        target.resolveSibling("LocalEewBuildInfo.kt").delete()
+        target.writeText(
+            """
+            package cz.misa.quakedeck.data;
+
+            /** Generated from the actual optional source present for this compilation. */
+            final class LocalEewBuildInfo {
+                static final boolean engineIncluded = $included;
+
+                private LocalEewBuildInfo() {}
+            }
+            """.trimIndent() + "\n",
+            Charsets.UTF_8
+        )
+    }
+}
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.plugin.compose")
@@ -159,6 +190,35 @@ plugins {
 // Single build-time boundary for every Sandbox capability. Sandbox source stays
 // compiled, but all of its activation paths become inert when this is false.
 val sandboxEnabled = true
+// Local developer switch. Set this to true to force a LITE compilation even
+// when LocalEewForecastEngine.kt is present. A Gradle property with the same
+// name still overrides this default for automated checks.
+val omitLocalEewForecastEngine = false
+val omitLocalEewForecastEngineRequested = providers
+    .gradleProperty("omitLocalEewForecastEngine")
+    .map(String::toBoolean)
+    .orElse(omitLocalEewForecastEngine)
+val localEewForecastEngineSource = layout.projectDirectory.file(
+    "src/main/java/cz/misa/quakedeck/data/LocalEewForecastEngine.kt"
+)
+val localEewForecastEngineIncluded = omitLocalEewForecastEngineRequested.map { omitted ->
+    !omitted && localEewForecastEngineSource.asFile.isFile
+}
+val generatedLocalEewBuildInfoDir = layout.buildDirectory.dir(
+    "generated/local-eew-build-info/src"
+)
+val generateLocalEewBuildInfo = tasks.register<GenerateLocalEewBuildInfoTask>(
+    "generateLocalEewBuildInfo"
+) {
+    group = "build setup"
+    description = "Records whether this compilation actually includes the optional local EEW engine."
+    engineIncluded.set(localEewForecastEngineIncluded)
+    outputFile.set(
+        generatedLocalEewBuildInfoDir.map {
+            it.file("cz/misa/quakedeck/data/LocalEewBuildInfo.java")
+        }
+    )
+}
 
 val stationMetadataSource = rootProject.layout.projectDirectory.file(
     "outputs/station-name-audit/station_metadata_sources.json"
@@ -189,7 +249,7 @@ fun signingProperty(name: String): String =
 
 android {
     namespace = "cz.misa.quakedeck"
-    compileSdk = 36
+    compileSdk = 37
 
     val sharedSigningConfig = if (signingPropertiesFile.isFile) {
         signingConfigs.create("shared") {
@@ -207,7 +267,7 @@ android {
         minSdk = 26
         targetSdk = 36
         versionCode = 221
-        versionName = "0.10.1-dev.1"
+        versionName = "0.10.1-dev.2"
         buildConfigField("boolean", "SANDBOX_ENABLED", sandboxEnabled.toString())
         buildConfigField(
             "String",
@@ -243,9 +303,10 @@ android {
         compose = true
         buildConfig = true
     }
-    sourceSets.getByName("main").res.directories.add(
-        generatedStationDetailsResDir.get().asFile.absolutePath
-    )
+    sourceSets.getByName("main").apply {
+        res.directories.add(generatedStationDetailsResDir.get().asFile.absolutePath)
+        java.directories.add(generatedLocalEewBuildInfoDir.get().asFile.absolutePath)
+    }
     bundle {
         language {
             // QuakeDeck has an in-app language picker, so every installed split
@@ -259,6 +320,14 @@ tasks.named("preBuild").configure {
     dependsOn(generateStationDetails)
 }
 
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
+    dependsOn(generateLocalEewBuildInfo)
+    inputs.property("localEewForecastEngineIncluded", localEewForecastEngineIncluded)
+    if (omitLocalEewForecastEngineRequested.get()) {
+        exclude("**/LocalEewForecastEngine.kt")
+    }
+}
+
 kotlin {
     compilerOptions {
         jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
@@ -269,17 +338,16 @@ kotlin {
 dependencies {
     val composeBom = platform("androidx.compose:compose-bom:2026.06.00")
     implementation(composeBom)
-    androidTestImplementation(composeBom)
 
-    implementation("androidx.core:core-ktx:1.17.0")
-    implementation("androidx.activity:activity-compose:1.12.4")
+    implementation("androidx.core:core-ktx:1.19.0")
+    implementation("androidx.activity:activity-compose:1.13.0")
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.foundation:foundation")
     implementation("androidx.compose.material3:material3")
     implementation("com.google.mlkit:translate:17.0.3")
-    implementation("com.squareup.okhttp3:okhttp:5.4.0")
+    implementation("com.squareup.okhttp3:okhttp:5.5.0")
     testImplementation("junit:junit:4.13.2")
-    testImplementation("org.json:json:20250517")
+    testImplementation("org.json:json:20260814")
     debugImplementation("androidx.compose.ui:ui-tooling")
 }
