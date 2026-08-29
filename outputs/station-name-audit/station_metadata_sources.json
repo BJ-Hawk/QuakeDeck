@@ -17,7 +17,7 @@
   },
   "coverage": {
     "stations": 4360,
-    "publishedAddresses": 2473,
+    "publishedAddresses": 2525,
     "niedCatalogueStations": 800,
     "providerCoordinateMatches": 790,
     "niedUnmatched": 10,
@@ -25,8 +25,8 @@
     "approvedEnglishNames": 4360,
     "resolvedEnglishNames": 4360,
     "needsResearch": 0,
-    "exactPlacementAddressUpdates": 1800,
-    "localityPlacementRecords": 1887,
+    "exactPlacementAddressUpdates": 1852,
+    "localityPlacementRecords": 1835,
     "prefectureOnlyPlacementRecords": 0
   },
   "stations": [
@@ -396,7 +396,8 @@
       "sourceUrls": [
         "https://www.city.sapporo.jp/kensetsu/stn/documents/demaekouza.pdf",
         "https://www.city.sapporo.jp/ncms/reiki/d1w_reiki_nonframe/H339901010017/H339901010017_j.html",
-        "https://www.city.sapporo.jp/shobo/chuo/documents/202507mobairu.pdf"
+        "https://www.city.sapporo.jp/shobo/chuo/documents/202507mobairu.pdf",
+        "https://www.city.sapporo.jp/kikikanri/torikumi/keikaku/documents/01r7-jishin-chapter2.pdf"
       ],
       "note": "Sapporo states that each ward's measured intensity comes from its fire-station meter.",
       "placementPrecision": "exact_address"
@@ -478,7 +479,8 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=141.36&lat=43.14",
-        "https://www.pref.hokkaido.lg.jp/fs/1/3/1/3/5/6/7/2/_/%E2%97%8B%E3%80%90R7%E3%80%91%E8%B3%87%E6%96%992-1%28%E8%A4%87%E6%95%B0%E3%82%B7%E3%83%BC%E3%83%88%29.pdf"
+        "https://www.pref.hokkaido.lg.jp/fs/1/3/1/3/5/6/7/2/_/%E2%97%8B%E3%80%90R7%E3%80%91%E8%B3%87%E6%96%992-1%28%E8%A4%87%E6%95%B0%E3%82%B7%E3%83%BC%E3%83%88%29.pdf",
+        "https://www.city.sapporo.jp/kikikanri/torikumi/keikaku/documents/01r7-jishin-chapter2.pdf"
       ],
       "note": "Verified against Hokkaido’s current official seismic-observation station table.",
       "placementPrecision": "exact_address"
@@ -519,7 +521,8 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=141.33&lat=43.11",
-        "https://www.pref.hokkaido.lg.jp/fs/1/3/1/3/5/6/7/2/_/%E2%97%8B%E3%80%90R7%E3%80%91%E8%B3%87%E6%96%992-1%28%E8%A4%87%E6%95%B0%E3%82%B7%E3%83%BC%E3%83%88%29.pdf"
+        "https://www.pref.hokkaido.lg.jp/fs/1/3/1/3/5/6/7/2/_/%E2%97%8B%E3%80%90R7%E3%80%91%E8%B3%87%E6%96%992-1%28%E8%A4%87%E6%95%B0%E3%82%B7%E3%83%BC%E3%83%88%29.pdf",
+        "https://www.city.sapporo.jp/kikikanri/torikumi/keikaku/documents/01r7-jishin-chapter2.pdf"
       ],
       "note": "Verified against Hokkaido’s current official seismic-observation station table.",
       "placementPrecision": "exact_address"
@@ -560,7 +563,8 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://www.jma.go.jp/jma/kishou/books/saigaiji/saigaiji_202101/denbun/202101/17/VP20210117013000_3.html",
-        "https://www.pref.hokkaido.lg.jp/fs/1/3/1/3/5/6/7/2/_/%E2%97%8B%E3%80%90R7%E3%80%91%E8%B3%87%E6%96%992-1%28%E8%A4%87%E6%95%B0%E3%82%B7%E3%83%BC%E3%83%88%29.pdf"
+        "https://www.pref.hokkaido.lg.jp/fs/1/3/1/3/5/6/7/2/_/%E2%97%8B%E3%80%90R7%E3%80%91%E8%B3%87%E6%96%992-1%28%E8%A4%87%E6%95%B0%E3%82%B7%E3%83%BC%E3%83%88%29.pdf",
+        "https://www.city.sapporo.jp/kikikanri/torikumi/keikaku/documents/01r7-jishin-chapter2.pdf"
       ],
       "note": "Verified against Hokkaido’s current official seismic-observation station table.",
       "placementPrecision": "exact_address"
@@ -601,7 +605,8 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
-        "https://www.pref.hokkaido.lg.jp/fs/1/3/1/3/5/6/7/2/_/%E2%97%8B%E3%80%90R7%E3%80%91%E8%B3%87%E6%96%992-1%28%E8%A4%87%E6%95%B0%E3%82%B7%E3%83%BC%E3%83%88%29.pdf"
+        "https://www.pref.hokkaido.lg.jp/fs/1/3/1/3/5/6/7/2/_/%E2%97%8B%E3%80%90R7%E3%80%91%E8%B3%87%E6%96%992-1%28%E8%A4%87%E6%95%B0%E3%82%B7%E3%83%BC%E3%83%88%29.pdf",
+        "https://www.city.sapporo.jp/kikikanri/torikumi/keikaku/documents/01r7-jishin-chapter2.pdf"
       ],
       "note": "Verified against Hokkaido’s current official seismic-observation station table.",
       "placementPrecision": "exact_address"
@@ -642,7 +647,8 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
-        "https://www.pref.hokkaido.lg.jp/fs/1/3/1/3/5/6/7/2/_/%E2%97%8B%E3%80%90R7%E3%80%91%E8%B3%87%E6%96%992-1%28%E8%A4%87%E6%95%B0%E3%82%B7%E3%83%BC%E3%83%88%29.pdf"
+        "https://www.pref.hokkaido.lg.jp/fs/1/3/1/3/5/6/7/2/_/%E2%97%8B%E3%80%90R7%E3%80%91%E8%B3%87%E6%96%992-1%28%E8%A4%87%E6%95%B0%E3%82%B7%E3%83%BC%E3%83%88%29.pdf",
+        "https://www.city.sapporo.jp/kikikanri/torikumi/keikaku/documents/01r7-jishin-chapter2.pdf"
       ],
       "note": "Verified against Hokkaido’s current official seismic-observation station table.",
       "placementPrecision": "exact_address"
@@ -724,7 +730,8 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
-        "https://www.pref.hokkaido.lg.jp/fs/1/3/1/3/5/6/7/2/_/%E2%97%8B%E3%80%90R7%E3%80%91%E8%B3%87%E6%96%992-1%28%E8%A4%87%E6%95%B0%E3%82%B7%E3%83%BC%E3%83%88%29.pdf"
+        "https://www.pref.hokkaido.lg.jp/fs/1/3/1/3/5/6/7/2/_/%E2%97%8B%E3%80%90R7%E3%80%91%E8%B3%87%E6%96%992-1%28%E8%A4%87%E6%95%B0%E3%82%B7%E3%83%BC%E3%83%88%29.pdf",
+        "https://www.city.sapporo.jp/kikikanri/torikumi/keikaku/documents/01r7-jishin-chapter2.pdf"
       ],
       "note": "Verified against Hokkaido’s current official seismic-observation station table.",
       "placementPrecision": "exact_address"
@@ -765,7 +772,8 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
-        "https://www.pref.hokkaido.lg.jp/fs/1/3/1/3/5/6/7/2/_/%E2%97%8B%E3%80%90R7%E3%80%91%E8%B3%87%E6%96%992-1%28%E8%A4%87%E6%95%B0%E3%82%B7%E3%83%BC%E3%83%88%29.pdf"
+        "https://www.pref.hokkaido.lg.jp/fs/1/3/1/3/5/6/7/2/_/%E2%97%8B%E3%80%90R7%E3%80%91%E8%B3%87%E6%96%992-1%28%E8%A4%87%E6%95%B0%E3%82%B7%E3%83%BC%E3%83%88%29.pdf",
+        "https://www.city.sapporo.jp/kikikanri/torikumi/keikaku/documents/01r7-jishin-chapter2.pdf"
       ],
       "note": "Verified against Hokkaido’s current official seismic-observation station table.",
       "placementPrecision": "exact_address"
@@ -806,7 +814,8 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://www.data.jma.go.jp/eqev/data/kyoshin/jma-shindo.html",
-        "https://www.pref.hokkaido.lg.jp/fs/1/3/1/3/5/6/7/2/_/%E2%97%8B%E3%80%90R7%E3%80%91%E8%B3%87%E6%96%992-1%28%E8%A4%87%E6%95%B0%E3%82%B7%E3%83%BC%E3%83%88%29.pdf"
+        "https://www.pref.hokkaido.lg.jp/fs/1/3/1/3/5/6/7/2/_/%E2%97%8B%E3%80%90R7%E3%80%91%E8%B3%87%E6%96%992-1%28%E8%A4%87%E6%95%B0%E3%82%B7%E3%83%BC%E3%83%88%29.pdf",
+        "https://www.city.sapporo.jp/kikikanri/torikumi/keikaku/documents/01r7-jishin-chapter2.pdf"
       ],
       "note": "Verified against Hokkaido’s current official seismic-observation station table.",
       "placementPrecision": "exact_address"
@@ -847,7 +856,8 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=141.49&lat=43.03",
-        "https://www.pref.hokkaido.lg.jp/fs/1/3/1/3/5/6/7/2/_/%E2%97%8B%E3%80%90R7%E3%80%91%E8%B3%87%E6%96%992-1%28%E8%A4%87%E6%95%B0%E3%82%B7%E3%83%BC%E3%83%88%29.pdf"
+        "https://www.pref.hokkaido.lg.jp/fs/1/3/1/3/5/6/7/2/_/%E2%97%8B%E3%80%90R7%E3%80%91%E8%B3%87%E6%96%992-1%28%E8%A4%87%E6%95%B0%E3%82%B7%E3%83%BC%E3%83%88%29.pdf",
+        "https://www.city.sapporo.jp/kikikanri/torikumi/keikaku/documents/01r7-jishin-chapter2.pdf"
       ],
       "note": "Verified against Hokkaido’s current official seismic-observation station table.",
       "placementPrecision": "exact_address"
@@ -888,7 +898,8 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
-        "https://www.pref.hokkaido.lg.jp/fs/1/3/1/3/5/6/7/2/_/%E2%97%8B%E3%80%90R7%E3%80%91%E8%B3%87%E6%96%992-1%28%E8%A4%87%E6%95%B0%E3%82%B7%E3%83%BC%E3%83%88%29.pdf"
+        "https://www.pref.hokkaido.lg.jp/fs/1/3/1/3/5/6/7/2/_/%E2%97%8B%E3%80%90R7%E3%80%91%E8%B3%87%E6%96%992-1%28%E8%A4%87%E6%95%B0%E3%82%B7%E3%83%BC%E3%83%88%29.pdf",
+        "https://www.city.sapporo.jp/kikikanri/torikumi/keikaku/documents/01r7-jishin-chapter2.pdf"
       ],
       "note": "Verified against Hokkaido’s current official seismic-observation station table.",
       "placementPrecision": "exact_address"
@@ -929,7 +940,8 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://www.data.jma.go.jp/eqev/data/kyoshin/jma-shindo.html",
-        "https://www.pref.hokkaido.lg.jp/fs/1/3/1/3/5/6/7/2/_/%E2%97%8B%E3%80%90R7%E3%80%91%E8%B3%87%E6%96%992-1%28%E8%A4%87%E6%95%B0%E3%82%B7%E3%83%BC%E3%83%88%29.pdf"
+        "https://www.pref.hokkaido.lg.jp/fs/1/3/1/3/5/6/7/2/_/%E2%97%8B%E3%80%90R7%E3%80%91%E8%B3%87%E6%96%992-1%28%E8%A4%87%E6%95%B0%E3%82%B7%E3%83%BC%E3%83%88%29.pdf",
+        "https://www.city.sapporo.jp/kikikanri/torikumi/keikaku/documents/01r7-jishin-chapter2.pdf"
       ],
       "note": "Verified against Hokkaido’s current official seismic-observation station table.",
       "placementPrecision": "exact_address"
@@ -5655,7 +5667,7 @@
       "municipalityCode": "0122100",
       "gsiLocalityJa": "風連町西町",
       "publishedAddressJa": "名寄市風連町西町196-1(名寄市役所風連庁舎)",
-      "facilityNameJa": null,
+      "facilityNameJa": "名寄市役所風連庁舎",
       "facilityNameEn": null,
       "metadataStatus": "source_verified",
       "providerStationCode": null,
@@ -5666,7 +5678,8 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
-        "https://www.pref.hokkaido.lg.jp/fs/1/3/1/3/5/6/7/2/_/%E2%97%8B%E3%80%90R7%E3%80%91%E8%B3%87%E6%96%992-1%28%E8%A4%87%E6%95%B0%E3%82%B7%E3%83%BC%E3%83%88%29.pdf"
+        "https://www.pref.hokkaido.lg.jp/fs/1/3/1/3/5/6/7/2/_/%E2%97%8B%E3%80%90R7%E3%80%91%E8%B3%87%E6%96%992-1%28%E8%A4%87%E6%95%B0%E3%82%B7%E3%83%BC%E3%83%88%29.pdf",
+        "https://www.kamikawa.pref.hokkaido.lg.jp/fs/8/2/6/5/3/9/9/_/03_%E4%B8%8A%E5%B7%9D%E7%B7%8F%E5%90%88%E6%8C%AF%E8%88%88%E5%B1%80%E5%9C%B0%E5%9F%9F%E7%81%BD%E5%AE%B3%E5%AF%BE%E7%AD%96%E8%A6%81%E7%B6%B1(%E8%B3%87%E6%96%99%E7%B7%A8)%E3%80%90R5.4%E6%94%B9%E6%AD%A3%E3%80%91.pdf"
       ],
       "note": "Verified against Hokkaido’s current official seismic-observation station table.",
       "placementPrecision": "exact_address"
@@ -5696,7 +5709,7 @@
       "municipalityCode": "0146400",
       "gsiLocalityJa": null,
       "publishedAddressJa": "上川郡和寒町字西町145-1(町立図書館)",
-      "facilityNameJa": null,
+      "facilityNameJa": "和寒町立図書館",
       "facilityNameEn": null,
       "metadataStatus": "source_verified",
       "providerStationCode": "HKD032",
@@ -5708,7 +5721,8 @@
       "sourceUrls": [
         "https://www.kyoshin.bosai.go.jp/ja/stationlist/",
         "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
-        "https://www.pref.hokkaido.lg.jp/fs/1/3/1/3/5/6/7/2/_/%E2%97%8B%E3%80%90R7%E3%80%91%E8%B3%87%E6%96%992-1%28%E8%A4%87%E6%95%B0%E3%82%B7%E3%83%BC%E3%83%88%29.pdf"
+        "https://www.pref.hokkaido.lg.jp/fs/1/3/1/3/5/6/7/2/_/%E2%97%8B%E3%80%90R7%E3%80%91%E8%B3%87%E6%96%992-1%28%E8%A4%87%E6%95%B0%E3%82%B7%E3%83%BC%E3%83%88%29.pdf",
+        "https://www.kamikawa.pref.hokkaido.lg.jp/fs/8/2/6/5/3/9/9/_/03_%E4%B8%8A%E5%B7%9D%E7%B7%8F%E5%90%88%E6%8C%AF%E8%88%88%E5%B1%80%E5%9C%B0%E5%9F%9F%E7%81%BD%E5%AE%B3%E5%AF%BE%E7%AD%96%E8%A6%81%E7%B6%B1(%E8%B3%87%E6%96%99%E7%B7%A8)%E3%80%90R5.4%E6%94%B9%E6%AD%A3%E3%80%91.pdf"
       ],
       "note": "Verified against Hokkaido’s current official seismic-observation station table.",
       "placementPrecision": "exact_address"
@@ -5738,7 +5752,7 @@
       "municipalityCode": "0146500",
       "gsiLocalityJa": null,
       "publishedAddressJa": "上川郡剣淵町仲町37-1(剣淵町役場)",
-      "facilityNameJa": null,
+      "facilityNameJa": "剣淵町役場",
       "facilityNameEn": null,
       "metadataStatus": "source_verified",
       "providerStationCode": null,
@@ -5749,7 +5763,8 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
-        "https://www.pref.hokkaido.lg.jp/fs/1/3/1/3/5/6/7/2/_/%E2%97%8B%E3%80%90R7%E3%80%91%E8%B3%87%E6%96%992-1%28%E8%A4%87%E6%95%B0%E3%82%B7%E3%83%BC%E3%83%88%29.pdf"
+        "https://www.pref.hokkaido.lg.jp/fs/1/3/1/3/5/6/7/2/_/%E2%97%8B%E3%80%90R7%E3%80%91%E8%B3%87%E6%96%992-1%28%E8%A4%87%E6%95%B0%E3%82%B7%E3%83%BC%E3%83%88%29.pdf",
+        "https://www.kamikawa.pref.hokkaido.lg.jp/fs/8/2/6/5/3/9/9/_/03_%E4%B8%8A%E5%B7%9D%E7%B7%8F%E5%90%88%E6%8C%AF%E8%88%88%E5%B1%80%E5%9C%B0%E5%9F%9F%E7%81%BD%E5%AE%B3%E5%AF%BE%E7%AD%96%E8%A6%81%E7%B6%B1(%E8%B3%87%E6%96%99%E7%B7%A8)%E3%80%90R5.4%E6%94%B9%E6%AD%A3%E3%80%91.pdf"
       ],
       "note": "Verified against Hokkaido’s current official seismic-observation station table.",
       "placementPrecision": "exact_address"
@@ -5905,7 +5920,7 @@
       "municipalityCode": "0147000",
       "gsiLocalityJa": null,
       "publishedAddressJa": "中川郡音威子府村字音威子府179-1(山村都市交流センター)",
-      "facilityNameJa": null,
+      "facilityNameJa": "音威子府村山村都市交流センター",
       "facilityNameEn": null,
       "metadataStatus": "source_verified",
       "providerStationCode": "HKD026",
@@ -5917,7 +5932,8 @@
       "sourceUrls": [
         "https://www.kyoshin.bosai.go.jp/ja/stationlist/",
         "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
-        "https://www.pref.hokkaido.lg.jp/fs/1/3/1/3/5/6/7/2/_/%E2%97%8B%E3%80%90R7%E3%80%91%E8%B3%87%E6%96%992-1%28%E8%A4%87%E6%95%B0%E3%82%B7%E3%83%BC%E3%83%88%29.pdf"
+        "https://www.pref.hokkaido.lg.jp/fs/1/3/1/3/5/6/7/2/_/%E2%97%8B%E3%80%90R7%E3%80%91%E8%B3%87%E6%96%992-1%28%E8%A4%87%E6%95%B0%E3%82%B7%E3%83%BC%E3%83%88%29.pdf",
+        "https://www.kamikawa.pref.hokkaido.lg.jp/fs/8/2/6/5/3/9/9/_/03_%E4%B8%8A%E5%B7%9D%E7%B7%8F%E5%90%88%E6%8C%AF%E8%88%88%E5%B1%80%E5%9C%B0%E5%9F%9F%E7%81%BD%E5%AE%B3%E5%AF%BE%E7%AD%96%E8%A6%81%E7%B6%B1(%E8%B3%87%E6%96%99%E7%B7%A8)%E3%80%90R5.4%E6%94%B9%E6%AD%A3%E3%80%91.pdf"
       ],
       "note": "Verified against Hokkaido’s current official seismic-observation station table.",
       "placementPrecision": "exact_address"
@@ -5947,7 +5963,7 @@
       "municipalityCode": "0147100",
       "gsiLocalityJa": null,
       "publishedAddressJa": "中川郡中川町字中川337-1(役場)",
-      "facilityNameJa": null,
+      "facilityNameJa": "中川町役場",
       "facilityNameEn": null,
       "metadataStatus": "source_verified",
       "providerStationCode": "HKD025",
@@ -5959,7 +5975,8 @@
       "sourceUrls": [
         "https://www.kyoshin.bosai.go.jp/ja/stationlist/",
         "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
-        "https://www.pref.hokkaido.lg.jp/fs/1/3/1/3/5/6/7/2/_/%E2%97%8B%E3%80%90R7%E3%80%91%E8%B3%87%E6%96%992-1%28%E8%A4%87%E6%95%B0%E3%82%B7%E3%83%BC%E3%83%88%29.pdf"
+        "https://www.pref.hokkaido.lg.jp/fs/1/3/1/3/5/6/7/2/_/%E2%97%8B%E3%80%90R7%E3%80%91%E8%B3%87%E6%96%992-1%28%E8%A4%87%E6%95%B0%E3%82%B7%E3%83%BC%E3%83%88%29.pdf",
+        "https://www.kamikawa.pref.hokkaido.lg.jp/fs/8/2/6/5/3/9/9/_/03_%E4%B8%8A%E5%B7%9D%E7%B7%8F%E5%90%88%E6%8C%AF%E8%88%88%E5%B1%80%E5%9C%B0%E5%9F%9F%E7%81%BD%E5%AE%B3%E5%AF%BE%E7%AD%96%E8%A6%81%E7%B6%B1(%E8%B3%87%E6%96%99%E7%B7%A8)%E3%80%90R5.4%E6%94%B9%E6%AD%A3%E3%80%91.pdf"
       ],
       "note": "Verified against Hokkaido’s current official seismic-observation station table.",
       "placementPrecision": "exact_address"
@@ -5988,10 +6005,10 @@
       "areaNameJa": "上川地方北部",
       "municipalityCode": "0147200",
       "gsiLocalityJa": null,
-      "publishedAddressJa": "雨竜郡幌加内町字平和4608-9(士別地方消防組合深川消防署\n幌加内支署)",
-      "facilityNameJa": null,
+      "publishedAddressJa": "北海道雨竜郡幌加内町字平和4608番地74",
+      "facilityNameJa": "士別地方消防事務組合消防署幌加内支署",
       "facilityNameEn": null,
-      "metadataStatus": "source_verified",
+      "metadataStatus": "Current official Hokkaido seismic-observation and fire-authority confirmation",
       "providerStationCode": "HKD115",
       "providerStationNetwork": "K-NET",
       "providerStationNameJa": "幌加内",
@@ -6001,9 +6018,11 @@
       "sourceUrls": [
         "https://www.kyoshin.bosai.go.jp/ja/stationlist/",
         "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
-        "https://www.pref.hokkaido.lg.jp/fs/1/3/1/3/5/6/7/2/_/%E2%97%8B%E3%80%90R7%E3%80%91%E8%B3%87%E6%96%992-1%28%E8%A4%87%E6%95%B0%E3%82%B7%E3%83%BC%E3%83%88%29.pdf"
+        "https://www.pref.hokkaido.lg.jp/fs/1/3/1/3/5/6/7/2/_/%E2%97%8B%E3%80%90R7%E3%80%91%E8%B3%87%E6%96%992-1%28%E8%A4%87%E6%95%B0%E3%82%B7%E3%83%BC%E3%83%88%29.pdf",
+        "https://www.kamikawa.pref.hokkaido.lg.jp/fs/8/2/6/5/3/9/9/_/03_%E4%B8%8A%E5%B7%9D%E7%B7%8F%E5%90%88%E6%8C%AF%E8%88%88%E5%B1%80%E5%9C%B0%E5%9F%9F%E7%81%BD%E5%AE%B3%E5%AF%BE%E7%AD%96%E8%A6%81%E7%B6%B1(%E8%B3%87%E6%96%99%E7%B7%A8)%E3%80%90R5.4%E6%94%B9%E6%AD%A3%E3%80%91.pdf",
+        "https://www.town.wassamu.hokkaido.jp/fire-department/introduction/"
       ],
-      "note": "Verified against Hokkaido’s current official seismic-observation station table.",
+      "note": "Hokkaido’s current regional seismic-observation table places this K-NET station at the Horokanai Fire Branch. The fire authority publishes the branch at the same address; this corrects the older Deep Chikuma Fire Department address in the prior station table.",
       "placementPrecision": "exact_address"
     },
     {
@@ -6154,7 +6173,7 @@
       "municipalityCode": "0145200",
       "gsiLocalityJa": null,
       "publishedAddressJa": "上川郡鷹栖町南1条3-5-1(鷹栖町役場)",
-      "facilityNameJa": null,
+      "facilityNameJa": "鷹栖町役場",
       "facilityNameEn": null,
       "metadataStatus": "source_verified",
       "providerStationCode": null,
@@ -6165,7 +6184,8 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
-        "https://www.pref.hokkaido.lg.jp/fs/1/3/1/3/5/6/7/2/_/%E2%97%8B%E3%80%90R7%E3%80%91%E8%B3%87%E6%96%992-1%28%E8%A4%87%E6%95%B0%E3%82%B7%E3%83%BC%E3%83%88%29.pdf"
+        "https://www.pref.hokkaido.lg.jp/fs/1/3/1/3/5/6/7/2/_/%E2%97%8B%E3%80%90R7%E3%80%91%E8%B3%87%E6%96%992-1%28%E8%A4%87%E6%95%B0%E3%82%B7%E3%83%BC%E3%83%88%29.pdf",
+        "https://www.kamikawa.pref.hokkaido.lg.jp/fs/8/2/6/5/3/9/9/_/03_%E4%B8%8A%E5%B7%9D%E7%B7%8F%E5%90%88%E6%8C%AF%E8%88%88%E5%B1%80%E5%9C%B0%E5%9F%9F%E7%81%BD%E5%AE%B3%E5%AF%BE%E7%AD%96%E8%A6%81%E7%B6%B1(%E8%B3%87%E6%96%99%E7%B7%A8)%E3%80%90R5.4%E6%94%B9%E6%AD%A3%E3%80%91.pdf"
       ],
       "note": "Verified against Hokkaido’s current official seismic-observation station table.",
       "placementPrecision": "exact_address"
@@ -6195,7 +6215,7 @@
       "municipalityCode": "0145300",
       "gsiLocalityJa": "北一条西二丁目",
       "publishedAddressJa": "上川郡東神楽町南1条西1-3-2(東神楽町役場)",
-      "facilityNameJa": null,
+      "facilityNameJa": "東神楽町役場",
       "facilityNameEn": null,
       "metadataStatus": "source_verified",
       "providerStationCode": null,
@@ -6206,7 +6226,8 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://www.data.jma.go.jp/eqev/data/kyoshin/jma-shindo.html",
-        "https://www.pref.hokkaido.lg.jp/fs/1/3/1/3/5/6/7/2/_/%E2%97%8B%E3%80%90R7%E3%80%91%E8%B3%87%E6%96%992-1%28%E8%A4%87%E6%95%B0%E3%82%B7%E3%83%BC%E3%83%88%29.pdf"
+        "https://www.pref.hokkaido.lg.jp/fs/1/3/1/3/5/6/7/2/_/%E2%97%8B%E3%80%90R7%E3%80%91%E8%B3%87%E6%96%992-1%28%E8%A4%87%E6%95%B0%E3%82%B7%E3%83%BC%E3%83%88%29.pdf",
+        "https://www.kamikawa.pref.hokkaido.lg.jp/fs/8/2/6/5/3/9/9/_/03_%E4%B8%8A%E5%B7%9D%E7%B7%8F%E5%90%88%E6%8C%AF%E8%88%88%E5%B1%80%E5%9C%B0%E5%9F%9F%E7%81%BD%E5%AE%B3%E5%AF%BE%E7%AD%96%E8%A6%81%E7%B6%B1(%E8%B3%87%E6%96%99%E7%B7%A8)%E3%80%90R5.4%E6%94%B9%E6%AD%A3%E3%80%91.pdf"
       ],
       "note": "Verified against Hokkaido’s current official seismic-observation station table.",
       "placementPrecision": "exact_address"
@@ -6236,7 +6257,7 @@
       "municipalityCode": "0145400",
       "gsiLocalityJa": "四条東二丁目",
       "publishedAddressJa": "上川郡当麻町3条東2-11-1(当麻町役場)",
-      "facilityNameJa": null,
+      "facilityNameJa": "当麻町役場",
       "facilityNameEn": null,
       "metadataStatus": "source_verified",
       "providerStationCode": null,
@@ -6247,7 +6268,8 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://www.data.jma.go.jp/eqev/data/kyoshin/jma-shindo.html",
-        "https://www.pref.hokkaido.lg.jp/fs/1/3/1/3/5/6/7/2/_/%E2%97%8B%E3%80%90R7%E3%80%91%E8%B3%87%E6%96%992-1%28%E8%A4%87%E6%95%B0%E3%82%B7%E3%83%BC%E3%83%88%29.pdf"
+        "https://www.pref.hokkaido.lg.jp/fs/1/3/1/3/5/6/7/2/_/%E2%97%8B%E3%80%90R7%E3%80%91%E8%B3%87%E6%96%992-1%28%E8%A4%87%E6%95%B0%E3%82%B7%E3%83%BC%E3%83%88%29.pdf",
+        "https://www.kamikawa.pref.hokkaido.lg.jp/fs/8/2/6/5/3/9/9/_/03_%E4%B8%8A%E5%B7%9D%E7%B7%8F%E5%90%88%E6%8C%AF%E8%88%88%E5%B1%80%E5%9C%B0%E5%9F%9F%E7%81%BD%E5%AE%B3%E5%AF%BE%E7%AD%96%E8%A6%81%E7%B6%B1(%E8%B3%87%E6%96%99%E7%B7%A8)%E3%80%90R5.4%E6%94%B9%E6%AD%A3%E3%80%91.pdf"
       ],
       "note": "Verified against Hokkaido’s current official seismic-observation station table.",
       "placementPrecision": "exact_address"
@@ -6277,7 +6299,7 @@
       "municipalityCode": "0145500",
       "gsiLocalityJa": null,
       "publishedAddressJa": "上川郡比布町北町1-2-1(比布町役場)",
-      "facilityNameJa": null,
+      "facilityNameJa": "比布町役場",
       "facilityNameEn": null,
       "metadataStatus": "source_verified",
       "providerStationCode": null,
@@ -6288,7 +6310,8 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
-        "https://www.pref.hokkaido.lg.jp/fs/1/3/1/3/5/6/7/2/_/%E2%97%8B%E3%80%90R7%E3%80%91%E8%B3%87%E6%96%992-1%28%E8%A4%87%E6%95%B0%E3%82%B7%E3%83%BC%E3%83%88%29.pdf"
+        "https://www.pref.hokkaido.lg.jp/fs/1/3/1/3/5/6/7/2/_/%E2%97%8B%E3%80%90R7%E3%80%91%E8%B3%87%E6%96%992-1%28%E8%A4%87%E6%95%B0%E3%82%B7%E3%83%BC%E3%83%88%29.pdf",
+        "https://www.kamikawa.pref.hokkaido.lg.jp/fs/8/2/6/5/3/9/9/_/03_%E4%B8%8A%E5%B7%9D%E7%B7%8F%E5%90%88%E6%8C%AF%E8%88%88%E5%B1%80%E5%9C%B0%E5%9F%9F%E7%81%BD%E5%AE%B3%E5%AF%BE%E7%AD%96%E8%A6%81%E7%B6%B1(%E8%B3%87%E6%96%99%E7%B7%A8)%E3%80%90R5.4%E6%94%B9%E6%AD%A3%E3%80%91.pdf"
       ],
       "note": "Verified against Hokkaido’s current official seismic-observation station table.",
       "placementPrecision": "exact_address"
@@ -6483,7 +6506,7 @@
       "municipalityCode": "0145800",
       "gsiLocalityJa": null,
       "publishedAddressJa": "上川郡東川町東町1-16-1(東川町役場)",
-      "facilityNameJa": null,
+      "facilityNameJa": "東川町役場",
       "facilityNameEn": null,
       "metadataStatus": "source_verified",
       "providerStationCode": null,
@@ -6494,7 +6517,8 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
-        "https://www.pref.hokkaido.lg.jp/fs/1/3/1/3/5/6/7/2/_/%E2%97%8B%E3%80%90R7%E3%80%91%E8%B3%87%E6%96%992-1%28%E8%A4%87%E6%95%B0%E3%82%B7%E3%83%BC%E3%83%88%29.pdf"
+        "https://www.pref.hokkaido.lg.jp/fs/1/3/1/3/5/6/7/2/_/%E2%97%8B%E3%80%90R7%E3%80%91%E8%B3%87%E6%96%992-1%28%E8%A4%87%E6%95%B0%E3%82%B7%E3%83%BC%E3%83%88%29.pdf",
+        "https://www.kamikawa.pref.hokkaido.lg.jp/fs/8/2/6/5/3/9/9/_/03_%E4%B8%8A%E5%B7%9D%E7%B7%8F%E5%90%88%E6%8C%AF%E8%88%88%E5%B1%80%E5%9C%B0%E5%9F%9F%E7%81%BD%E5%AE%B3%E5%AF%BE%E7%AD%96%E8%A6%81%E7%B6%B1(%E8%B3%87%E6%96%99%E7%B7%A8)%E3%80%90R5.4%E6%94%B9%E6%AD%A3%E3%80%91.pdf"
       ],
       "note": "Verified against Hokkaido’s current official seismic-observation station table.",
       "placementPrecision": "exact_address"
@@ -6648,7 +6672,7 @@
       "municipalityCode": "0122900",
       "gsiLocalityJa": null,
       "publishedAddressJa": "富良野市末広町4525-10(平和公園)",
-      "facilityNameJa": null,
+      "facilityNameJa": "平和公園",
       "facilityNameEn": null,
       "metadataStatus": "source_verified",
       "providerStationCode": "HKD039",
@@ -6660,7 +6684,8 @@
       "sourceUrls": [
         "https://www.kyoshin.bosai.go.jp/ja/stationlist/",
         "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
-        "https://www.pref.hokkaido.lg.jp/fs/1/3/1/3/5/6/7/2/_/%E2%97%8B%E3%80%90R7%E3%80%91%E8%B3%87%E6%96%992-1%28%E8%A4%87%E6%95%B0%E3%82%B7%E3%83%BC%E3%83%88%29.pdf"
+        "https://www.pref.hokkaido.lg.jp/fs/1/3/1/3/5/6/7/2/_/%E2%97%8B%E3%80%90R7%E3%80%91%E8%B3%87%E6%96%992-1%28%E8%A4%87%E6%95%B0%E3%82%B7%E3%83%BC%E3%83%88%29.pdf",
+        "https://www.kamikawa.pref.hokkaido.lg.jp/fs/8/2/6/5/3/9/9/_/03_%E4%B8%8A%E5%B7%9D%E7%B7%8F%E5%90%88%E6%8C%AF%E8%88%88%E5%B1%80%E5%9C%B0%E5%9F%9F%E7%81%BD%E5%AE%B3%E5%AF%BE%E7%AD%96%E8%A6%81%E7%B6%B1(%E8%B3%87%E6%96%99%E7%B7%A8)%E3%80%90R5.4%E6%94%B9%E6%AD%A3%E3%80%91.pdf"
       ],
       "note": "Verified against Hokkaido’s current official seismic-observation station table.",
       "placementPrecision": "exact_address"
@@ -6814,7 +6839,7 @@
       "municipalityCode": "0146200",
       "gsiLocalityJa": null,
       "publishedAddressJa": "空知郡南富良野町字幾寅599-9(グリーン団地)",
-      "facilityNameJa": null,
+      "facilityNameJa": "グリーン団地",
       "facilityNameEn": null,
       "metadataStatus": "source_verified",
       "providerStationCode": "HKD038",
@@ -6826,7 +6851,8 @@
       "sourceUrls": [
         "https://www.kyoshin.bosai.go.jp/ja/stationlist/",
         "https://www.data.jma.go.jp/eqev/data/intens-st/",
-        "https://www.pref.hokkaido.lg.jp/fs/1/3/1/3/5/6/7/2/_/%E2%97%8B%E3%80%90R7%E3%80%91%E8%B3%87%E6%96%992-1%28%E8%A4%87%E6%95%B0%E3%82%B7%E3%83%BC%E3%83%88%29.pdf"
+        "https://www.pref.hokkaido.lg.jp/fs/1/3/1/3/5/6/7/2/_/%E2%97%8B%E3%80%90R7%E3%80%91%E8%B3%87%E6%96%992-1%28%E8%A4%87%E6%95%B0%E3%82%B7%E3%83%BC%E3%83%88%29.pdf",
+        "https://www.kamikawa.pref.hokkaido.lg.jp/fs/8/2/6/5/3/9/9/_/03_%E4%B8%8A%E5%B7%9D%E7%B7%8F%E5%90%88%E6%8C%AF%E8%88%88%E5%B1%80%E5%9C%B0%E5%9F%9F%E7%81%BD%E5%AE%B3%E5%AF%BE%E7%AD%96%E8%A6%81%E7%B6%B1(%E8%B3%87%E6%96%99%E7%B7%A8)%E3%80%90R5.4%E6%94%B9%E6%AD%A3%E3%80%91.pdf"
       ],
       "note": "Verified against Hokkaido’s current official seismic-observation station table.",
       "placementPrecision": "exact_address"
@@ -36003,10 +36029,10 @@
       "areaNameJa": "茨城県北部",
       "municipalityCode": "0820100",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
+      "publishedAddressJa": "茨城県水戸市内原町1497-16",
+      "facilityNameJa": "内原郷土史義勇軍資料館",
       "facilityNameEn": null,
-      "metadataStatus": "Catalogue only",
+      "metadataStatus": "Official Mito City seismic-meter placement confirmation",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -36014,11 +36040,12 @@
       "providerLatitude": null,
       "providerLongitude": null,
       "sourceUrls": [
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.city.mito.lg.jp/page/4338.html",
+        "https://www.city.mito.lg.jp/site/education/73425.html"
       ],
-      "note": "No exact address or precise provider-station metadata is recorded yet.",
-      "placementLocalityJa": "水戸市",
-      "placementPrecision": "municipality_or_ward"
+      "note": "Mito City directly identifies the seismic-intensity meter at this facility and publishes the facility address.",
+      "placementPrecision": "exact_address"
     },
     {
       "code": "0820133",
@@ -36044,10 +36071,10 @@
       "areaNameJa": "茨城県北部",
       "municipalityCode": "0820100",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
+      "publishedAddressJa": "茨城県水戸市栗崎町1695-4",
+      "facilityNameJa": "稲荷第二市民センター",
       "facilityNameEn": null,
-      "metadataStatus": "Catalogue only",
+      "metadataStatus": "Official Mito City seismic-meter placement confirmation",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -36055,11 +36082,12 @@
       "providerLatitude": null,
       "providerLongitude": null,
       "sourceUrls": [
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.city.mito.lg.jp/page/4338.html",
+        "https://www.city.mito.lg.jp/soshiki/144/index.html"
       ],
-      "note": "No exact address or precise provider-station metadata is recorded yet.",
-      "placementLocalityJa": "水戸市",
-      "placementPrecision": "municipality_or_ward"
+      "note": "Mito City directly identifies the seismic-intensity meter at this facility and publishes the facility address.",
+      "placementPrecision": "exact_address"
     },
     {
       "code": "0820220",
@@ -36169,10 +36197,10 @@
       "areaNameJa": "茨城県北部",
       "municipalityCode": "0820200",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
+      "publishedAddressJa": "茨城県日立市十王町友部2581",
+      "facilityNameJa": "日立市役所十王支所",
       "facilityNameEn": null,
-      "metadataStatus": "Catalogue only",
+      "metadataStatus": "Official Hitachi City seismic-meter placement confirmation",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -36180,11 +36208,12 @@
       "providerLatitude": null,
       "providerLongitude": null,
       "sourceUrls": [
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.city.hitachi.lg.jp/_res/projects/default_project/_page_/001/004/798/jishin03.pdf",
+        "https://www.city.hitachi.lg.jp/shisei/shinososhiki/1004542/1016000.html"
       ],
-      "note": "No exact address or precise provider-station metadata is recorded yet.",
-      "placementLocalityJa": "日立市",
-      "placementPrecision": "municipality_or_ward"
+      "note": "Hitachi City’s disaster plan directly identifies this seismic-intensity meter at the Juo Branch Office and the city publishes the branch address.",
+      "placementPrecision": "exact_address"
     },
     {
       "code": "0821200",
@@ -36415,7 +36444,7 @@
       "municipalityCode": "0821400",
       "gsiLocalityJa": null,
       "publishedAddressJa": "茨城県高萩市大字安良川1002",
-      "facilityNameJa": "高萩市建設部資材置場(市民体育館隣)",
+      "facilityNameJa": "防災倉庫（市民体育館西側）",
       "facilityNameEn": null,
       "metadataStatus": "source_verified",
       "providerStationCode": "IBR002",
@@ -36427,7 +36456,8 @@
       "sourceUrls": [
         "https://www.kyoshin.bosai.go.jp/ja/stationlist/",
         "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
-        "https://www.bosai.go.jp/information/tender/supply/pdf/shiyousho.pdf"
+        "https://www.bosai.go.jp/information/tender/supply/pdf/shiyousho.pdf",
+        "https://www.city.takahagi.ibaraki.jp/kurashi/shoubou_bousai_bouhan/bousai/page005533.html"
       ],
       "note": "Verified against NIED’s official K-NET station specification.",
       "placementPrecision": "exact_address"
@@ -36456,10 +36486,10 @@
       "areaNameJa": "茨城県北部",
       "municipalityCode": "0821400",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
+      "publishedAddressJa": "茨城県高萩市本町1丁目100番地1",
+      "facilityNameJa": "高萩市役所",
       "facilityNameEn": null,
-      "metadataStatus": "Catalogue only",
+      "metadataStatus": "Official municipal seismic-meter placement and address",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -36467,11 +36497,11 @@
       "providerLatitude": null,
       "providerLongitude": null,
       "sourceUrls": [
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.city.takahagi.ibaraki.jp/kurashi/shoubou_bousai_bouhan/bousai/page005533.html"
       ],
-      "note": "No exact address or precise provider-station metadata is recorded yet.",
-      "placementLocalityJa": "高萩市",
-      "placementPrecision": "municipality_or_ward"
+      "note": "Takahagi City states that Ibaraki Prefecture installed the city’s intensity meter at City Hall (Honcho 1-100-1).",
+      "placementPrecision": "exact_address"
     },
     {
       "code": "0821530",
@@ -36497,10 +36527,10 @@
       "areaNameJa": "茨城県北部",
       "municipalityCode": "0821500",
       "gsiLocalityJa": "磯原町磯原",
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
+      "publishedAddressJa": "茨城県北茨城市磯原町磯原1630",
+      "facilityNameJa": "北茨城市役所",
       "facilityNameEn": null,
-      "metadataStatus": "Catalogue only",
+      "metadataStatus": "Official Kitaibaraki City seismic-meter placement confirmation",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -36508,11 +36538,11 @@
       "providerLatitude": null,
       "providerLongitude": null,
       "sourceUrls": [
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.city.kitaibaraki.lg.jp/faq/docs/2015040200080/"
       ],
-      "note": "No exact address or precise provider-station metadata is recorded yet.",
-      "placementLocalityJa": "北茨城市",
-      "placementPrecision": "municipality_or_ward"
+      "note": "Kitaibaraki City directly states that its seismic-intensity meter is installed on City Hall grounds and publishes the hall address.",
+      "placementPrecision": "exact_address"
     },
     {
       "code": "0821540",
@@ -37113,10 +37143,10 @@
       "areaNameJa": "茨城県北部",
       "municipalityCode": "0822600",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
+      "publishedAddressJa": "茨城県那珂市福田1819番地5",
+      "facilityNameJa": "那珂市役所本庁",
       "facilityNameEn": null,
-      "metadataStatus": "Catalogue only",
+      "metadataStatus": "Official municipal seismic-meter placement and address",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -37124,11 +37154,11 @@
       "providerLatitude": null,
       "providerLongitude": null,
       "sourceUrls": [
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.city.naka.lg.jp/bousai-anzen-saigai/bousai/page008623.html"
       ],
-      "note": "No exact address or precise provider-station metadata is recorded yet.",
-      "placementLocalityJa": "那珂市",
-      "placementPrecision": "municipality_or_ward"
+      "note": "Naka City states that Ibaraki Prefecture installed the city’s intensity meters on the grounds of the main office and Urizura Branch.",
+      "placementPrecision": "exact_address"
     },
     {
       "code": "0822631",
@@ -37154,10 +37184,10 @@
       "areaNameJa": "茨城県北部",
       "municipalityCode": "0822600",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
+      "publishedAddressJa": "茨城県那珂市瓜連321番地",
+      "facilityNameJa": "那珂市役所瓜連支所",
       "facilityNameEn": null,
-      "metadataStatus": "Catalogue only",
+      "metadataStatus": "Official municipal seismic-meter placement and address",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -37165,11 +37195,11 @@
       "providerLatitude": null,
       "providerLongitude": null,
       "sourceUrls": [
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.city.naka.lg.jp/bousai-anzen-saigai/bousai/page008623.html"
       ],
-      "note": "No exact address or precise provider-station metadata is recorded yet.",
-      "placementLocalityJa": "那珂市",
-      "placementPrecision": "municipality_or_ward"
+      "note": "Naka City states that Ibaraki Prefecture installed the city’s intensity meters on the grounds of the main office and Urizura Branch.",
+      "placementPrecision": "exact_address"
     },
     {
       "code": "0823633",
@@ -46441,10 +46471,10 @@
       "areaNameJa": "埼玉県北部",
       "municipalityCode": "1120600",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
+      "publishedAddressJa": "埼玉県行田市本丸2番5号",
+      "facilityNameJa": "行田市役所",
       "facilityNameEn": null,
-      "metadataStatus": "Catalogue only",
+      "metadataStatus": "Official Gyoda City seismic-network placement and addresses",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -46452,11 +46482,13 @@
       "providerLatitude": null,
       "providerLongitude": null,
       "sourceUrls": [
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.city.gyoda.lg.jp/material/files/group/14/2sinnsaitaisakur5kaisei.pdf",
+        "https://www.city.gyoda.lg.jp/soshiki/sougouseisakubu/zaisan_kanri/gyomu/syuyo/3020.html",
+        "https://www.city.gyoda.lg.jp/soshiki/shiminseikatubu/shisyo/gyomu/shinogaiyo/soshiki_annai/2826.html"
       ],
-      "note": "No exact address or precise provider-station metadata is recorded yet.",
-      "placementLocalityJa": "行田市",
-      "placementPrecision": "municipality_or_ward"
+      "note": "Verified against Gyoda City’s seismic-instrument placement statement and official facility addresses.",
+      "placementPrecision": "exact_address"
     },
     {
       "code": "1120631",
@@ -46482,10 +46514,10 @@
       "areaNameJa": "埼玉県北部",
       "municipalityCode": "1120600",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
+      "publishedAddressJa": "埼玉県行田市南河原790",
+      "facilityNameJa": "南河原支所",
       "facilityNameEn": null,
-      "metadataStatus": "Catalogue only",
+      "metadataStatus": "Official Gyoda City seismic-network placement and addresses",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -46493,11 +46525,13 @@
       "providerLatitude": null,
       "providerLongitude": null,
       "sourceUrls": [
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.city.gyoda.lg.jp/material/files/group/14/2sinnsaitaisakur5kaisei.pdf",
+        "https://www.city.gyoda.lg.jp/soshiki/sougouseisakubu/zaisan_kanri/gyomu/syuyo/3020.html",
+        "https://www.city.gyoda.lg.jp/soshiki/shiminseikatubu/shisyo/gyomu/shinogaiyo/soshiki_annai/2826.html"
       ],
-      "note": "No exact address or precise provider-station metadata is recorded yet.",
-      "placementLocalityJa": "行田市",
-      "placementPrecision": "municipality_or_ward"
+      "note": "Verified against Gyoda City’s seismic-instrument placement statement and official facility addresses.",
+      "placementPrecision": "exact_address"
     },
     {
       "code": "1121030",
@@ -46523,10 +46557,10 @@
       "areaNameJa": "埼玉県北部",
       "municipalityCode": "1121000",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
+      "publishedAddressJa": "埼玉県加須市三俣二丁目1番地1",
+      "facilityNameJa": "加須市役所",
       "facilityNameEn": null,
-      "metadataStatus": "Catalogue only",
+      "metadataStatus": "Official Kazo City seismic-network placement and addresses",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -46534,11 +46568,12 @@
       "providerLatitude": null,
       "providerLongitude": null,
       "sourceUrls": [
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.city.kazo.lg.jp/kurashi_bosai/bosai/1/32453.html",
+        "https://www.city.kazo.lg.jp/soshiki/kasai_chiikishinkou/6364.html"
       ],
-      "note": "No exact address or precise provider-station metadata is recorded yet.",
-      "placementLocalityJa": "加須市",
-      "placementPrecision": "municipality_or_ward"
+      "note": "Verified against Kazo City’s seismic-instrument placement statement and official facility addresses.",
+      "placementPrecision": "exact_address"
     },
     {
       "code": "1121031",
@@ -46564,10 +46599,10 @@
       "areaNameJa": "埼玉県北部",
       "municipalityCode": "1121000",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
+      "publishedAddressJa": "埼玉県加須市騎西36番地1",
+      "facilityNameJa": "騎西総合支所",
       "facilityNameEn": null,
-      "metadataStatus": "Catalogue only",
+      "metadataStatus": "Official Kazo City seismic-network placement and addresses",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -46575,11 +46610,12 @@
       "providerLatitude": null,
       "providerLongitude": null,
       "sourceUrls": [
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.city.kazo.lg.jp/kurashi_bosai/bosai/1/32453.html",
+        "https://www.city.kazo.lg.jp/soshiki/kasai_chiikishinkou/6364.html"
       ],
-      "note": "No exact address or precise provider-station metadata is recorded yet.",
-      "placementLocalityJa": "加須市",
-      "placementPrecision": "municipality_or_ward"
+      "note": "Verified against Kazo City’s seismic-instrument placement statement and official facility addresses.",
+      "placementPrecision": "exact_address"
     },
     {
       "code": "1121032",
@@ -46605,10 +46641,10 @@
       "areaNameJa": "埼玉県北部",
       "municipalityCode": "1121000",
       "gsiLocalityJa": "麦倉",
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
+      "publishedAddressJa": "埼玉県加須市麦倉1481番地1",
+      "facilityNameJa": "北川辺総合支所",
       "facilityNameEn": null,
-      "metadataStatus": "Catalogue only",
+      "metadataStatus": "Official Kazo City seismic-network placement and addresses",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -46616,11 +46652,12 @@
       "providerLatitude": null,
       "providerLongitude": null,
       "sourceUrls": [
-        "https://www.data.jma.go.jp/eqev/data/intens-st/"
+        "https://www.data.jma.go.jp/eqev/data/intens-st/",
+        "https://www.city.kazo.lg.jp/kurashi_bosai/bosai/1/32453.html",
+        "https://www.city.kazo.lg.jp/soshiki/kasai_chiikishinkou/6364.html"
       ],
-      "note": "No exact address or precise provider-station metadata is recorded yet.",
-      "placementLocalityJa": "加須市",
-      "placementPrecision": "municipality_or_ward"
+      "note": "Verified against Kazo City’s seismic-instrument placement statement and official facility addresses.",
+      "placementPrecision": "exact_address"
     },
     {
       "code": "1121033",
@@ -46646,10 +46683,10 @@
       "areaNameJa": "埼玉県北部",
       "municipalityCode": "1121000",
       "gsiLocalityJa": "生出",
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
+      "publishedAddressJa": "埼玉県加須市北下新井1679番地1",
+      "facilityNameJa": "大利根総合支所",
       "facilityNameEn": null,
-      "metadataStatus": "Catalogue only",
+      "metadataStatus": "Official Kazo City seismic-network placement and addresses",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -46657,11 +46694,12 @@
       "providerLatitude": null,
       "providerLongitude": null,
       "sourceUrls": [
-        "https://www.data.jma.go.jp/eqev/data/intens-st/"
+        "https://www.data.jma.go.jp/eqev/data/intens-st/",
+        "https://www.city.kazo.lg.jp/kurashi_bosai/bosai/1/32453.html",
+        "https://www.city.kazo.lg.jp/soshiki/kasai_chiikishinkou/6364.html"
       ],
-      "note": "No exact address or precise provider-station metadata is recorded yet.",
-      "placementLocalityJa": "加須市",
-      "placementPrecision": "municipality_or_ward"
+      "note": "Verified against Kazo City’s seismic-instrument placement statement and official facility addresses.",
+      "placementPrecision": "exact_address"
     },
     {
       "code": "1121101",
@@ -124241,10 +124279,10 @@
       "areaNameJa": "島根県東部",
       "municipalityCode": "3220100",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
+      "publishedAddressJa": "島根県松江市鹿島町佐陀本郷640-1",
+      "facilityNameJa": "鹿島支所",
       "facilityNameEn": null,
-      "metadataStatus": "Catalogue only",
+      "metadataStatus": "Official Shimane Prefecture seismic-observation list (2018)",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -124252,11 +124290,11 @@
       "providerLatitude": null,
       "providerLongitude": null,
       "sourceUrls": [
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.pref.shimane.lg.jp/bousai_info/bousai/bousai/bosai_shiryo/sinsai.data/02-2sinnsaihenn_oukyuutaisaku.pdf"
       ],
-      "note": "No exact address or precise provider-station metadata is recorded yet.",
-      "placementLocalityJa": "松江市",
-      "placementPrecision": "municipality_or_ward"
+      "note": "Verified against Shimane Prefecture’s direct seismic-observation facility and address list.",
+      "placementPrecision": "exact_address"
     },
     {
       "code": "3220145",
@@ -124282,10 +124320,10 @@
       "areaNameJa": "島根県東部",
       "municipalityCode": "3220100",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
+      "publishedAddressJa": "島根県松江市玉湯町湯町1793",
+      "facilityNameJa": "玉湯支所",
       "facilityNameEn": null,
-      "metadataStatus": "Catalogue only",
+      "metadataStatus": "Official Shimane Prefecture seismic-observation list (2018)",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -124293,11 +124331,11 @@
       "providerLatitude": null,
       "providerLongitude": null,
       "sourceUrls": [
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.pref.shimane.lg.jp/bousai_info/bousai/bousai/bosai_shiryo/sinsai.data/02-2sinnsaihenn_oukyuutaisaku.pdf"
       ],
-      "note": "No exact address or precise provider-station metadata is recorded yet.",
-      "placementLocalityJa": "松江市",
-      "placementPrecision": "municipality_or_ward"
+      "note": "Verified against Shimane Prefecture’s direct seismic-observation facility and address list.",
+      "placementPrecision": "exact_address"
     },
     {
       "code": "3220146",
@@ -124323,10 +124361,10 @@
       "areaNameJa": "島根県東部",
       "municipalityCode": "3220100",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
+      "publishedAddressJa": "島根県松江市島根町加賀1175-1",
+      "facilityNameJa": "島根支所",
       "facilityNameEn": null,
-      "metadataStatus": "Catalogue only",
+      "metadataStatus": "Official Shimane Prefecture seismic-observation list (2018)",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -124334,11 +124372,11 @@
       "providerLatitude": null,
       "providerLongitude": null,
       "sourceUrls": [
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.pref.shimane.lg.jp/bousai_info/bousai/bousai/bosai_shiryo/sinsai.data/02-2sinnsaihenn_oukyuutaisaku.pdf"
       ],
-      "note": "No exact address or precise provider-station metadata is recorded yet.",
-      "placementLocalityJa": "松江市",
-      "placementPrecision": "municipality_or_ward"
+      "note": "Verified against Shimane Prefecture’s direct seismic-observation facility and address list.",
+      "placementPrecision": "exact_address"
     },
     {
       "code": "3220147",
@@ -124364,10 +124402,10 @@
       "areaNameJa": "島根県東部",
       "municipalityCode": "3220100",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
+      "publishedAddressJa": "島根県松江市八束町波入2060",
+      "facilityNameJa": "八束支所",
       "facilityNameEn": null,
-      "metadataStatus": "Catalogue only",
+      "metadataStatus": "Official Shimane Prefecture seismic-observation list (2018)",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -124375,11 +124413,11 @@
       "providerLatitude": null,
       "providerLongitude": null,
       "sourceUrls": [
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.pref.shimane.lg.jp/bousai_info/bousai/bousai/bosai_shiryo/sinsai.data/02-2sinnsaihenn_oukyuutaisaku.pdf"
       ],
-      "note": "No exact address or precise provider-station metadata is recorded yet.",
-      "placementLocalityJa": "松江市",
-      "placementPrecision": "municipality_or_ward"
+      "note": "Verified against Shimane Prefecture’s direct seismic-observation facility and address list.",
+      "placementPrecision": "exact_address"
     },
     {
       "code": "3220148",
@@ -124405,10 +124443,10 @@
       "areaNameJa": "島根県東部",
       "municipalityCode": "3220100",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
+      "publishedAddressJa": "島根県松江市東出雲町揖屋1142",
+      "facilityNameJa": "東出雲支所",
       "facilityNameEn": null,
-      "metadataStatus": "Catalogue only",
+      "metadataStatus": "Official Shimane Prefecture seismic-observation list (2018)",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -124416,11 +124454,11 @@
       "providerLatitude": null,
       "providerLongitude": null,
       "sourceUrls": [
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.pref.shimane.lg.jp/bousai_info/bousai/bousai/bosai_shiryo/sinsai.data/02-2sinnsaihenn_oukyuutaisaku.pdf"
       ],
-      "note": "No exact address or precise provider-station metadata is recorded yet.",
-      "placementLocalityJa": "松江市",
-      "placementPrecision": "municipality_or_ward"
+      "note": "Verified against Shimane Prefecture’s direct seismic-observation facility and address list.",
+      "placementPrecision": "exact_address"
     },
     {
       "code": "3220149",
@@ -124446,10 +124484,10 @@
       "areaNameJa": "島根県東部",
       "municipalityCode": "3220100",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
+      "publishedAddressJa": "島根県松江市八雲町西岩坂355-1",
+      "facilityNameJa": "松江市八雲支所",
       "facilityNameEn": null,
-      "metadataStatus": "Catalogue only",
+      "metadataStatus": "Official Shimane Prefecture seismic-observation list (2018)",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -124457,11 +124495,11 @@
       "providerLatitude": null,
       "providerLongitude": null,
       "sourceUrls": [
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.pref.shimane.lg.jp/bousai_info/bousai/bousai/bosai_shiryo/sinsai.data/02-2sinnsaihenn_oukyuutaisaku.pdf"
       ],
-      "note": "No exact address or precise provider-station metadata is recorded yet.",
-      "placementLocalityJa": "松江市",
-      "placementPrecision": "municipality_or_ward"
+      "note": "Verified against Shimane Prefecture’s direct seismic-observation facility and address list.",
+      "placementPrecision": "exact_address"
     },
     {
       "code": "3220150",
@@ -124487,10 +124525,10 @@
       "areaNameJa": "島根県東部",
       "municipalityCode": "3220100",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
+      "publishedAddressJa": "島根県松江市宍道町宍道885-3",
+      "facilityNameJa": "宍道支所",
       "facilityNameEn": null,
-      "metadataStatus": "Catalogue only",
+      "metadataStatus": "Official Shimane Prefecture seismic-observation list (2018)",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -124498,11 +124536,11 @@
       "providerLatitude": null,
       "providerLongitude": null,
       "sourceUrls": [
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.pref.shimane.lg.jp/bousai_info/bousai/bousai/bosai_shiryo/sinsai.data/02-2sinnsaihenn_oukyuutaisaku.pdf"
       ],
-      "note": "No exact address or precise provider-station metadata is recorded yet.",
-      "placementLocalityJa": "松江市",
-      "placementPrecision": "municipality_or_ward"
+      "note": "Verified against Shimane Prefecture’s direct seismic-observation facility and address list.",
+      "placementPrecision": "exact_address"
     },
     {
       "code": "3220301",
@@ -124650,10 +124688,10 @@
       "areaNameJa": "島根県東部",
       "municipalityCode": "3220300",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
+      "publishedAddressJa": "島根県出雲市多伎町小田74-1",
+      "facilityNameJa": "多伎支所",
       "facilityNameEn": null,
-      "metadataStatus": "Catalogue only",
+      "metadataStatus": "Official Shimane Prefecture seismic-observation list (2018)",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -124661,11 +124699,11 @@
       "providerLatitude": null,
       "providerLongitude": null,
       "sourceUrls": [
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.pref.shimane.lg.jp/bousai_info/bousai/bousai/bosai_shiryo/sinsai.data/02-2sinnsaihenn_oukyuutaisaku.pdf"
       ],
-      "note": "No exact address or precise provider-station metadata is recorded yet.",
-      "placementLocalityJa": "出雲市",
-      "placementPrecision": "municipality_or_ward"
+      "note": "Verified against Shimane Prefecture’s direct seismic-observation facility and address list.",
+      "placementPrecision": "exact_address"
     },
     {
       "code": "3220341",
@@ -124691,10 +124729,10 @@
       "areaNameJa": "島根県東部",
       "municipalityCode": "3220300",
       "gsiLocalityJa": "佐田町反辺",
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
+      "publishedAddressJa": "島根県出雲市佐田町反辺1747-6",
+      "facilityNameJa": "佐田支所",
       "facilityNameEn": null,
-      "metadataStatus": "Catalogue only",
+      "metadataStatus": "Official Shimane Prefecture seismic-observation list (2018)",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -124702,11 +124740,11 @@
       "providerLatitude": null,
       "providerLongitude": null,
       "sourceUrls": [
-        "https://www.city.izumo.shimane.jp/www/window/index.html"
+        "https://www.city.izumo.shimane.jp/www/window/index.html",
+        "https://www.pref.shimane.lg.jp/bousai_info/bousai/bousai/bosai_shiryo/sinsai.data/02-2sinnsaihenn_oukyuutaisaku.pdf"
       ],
-      "note": "No exact address or precise provider-station metadata is recorded yet.",
-      "placementLocalityJa": "出雲市",
-      "placementPrecision": "municipality_or_ward"
+      "note": "Verified against Shimane Prefecture’s direct seismic-observation facility and address list.",
+      "placementPrecision": "exact_address"
     },
     {
       "code": "3220342",
@@ -124732,10 +124770,10 @@
       "areaNameJa": "島根県東部",
       "municipalityCode": "3220300",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
+      "publishedAddressJa": "島根県出雲市湖陵町二部1320",
+      "facilityNameJa": "湖陵支所",
       "facilityNameEn": null,
-      "metadataStatus": "Catalogue only",
+      "metadataStatus": "Official Shimane Prefecture seismic-observation list (2018)",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -124743,11 +124781,11 @@
       "providerLatitude": null,
       "providerLongitude": null,
       "sourceUrls": [
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.pref.shimane.lg.jp/bousai_info/bousai/bousai/bosai_shiryo/sinsai.data/02-2sinnsaihenn_oukyuutaisaku.pdf"
       ],
-      "note": "No exact address or precise provider-station metadata is recorded yet.",
-      "placementLocalityJa": "出雲市",
-      "placementPrecision": "municipality_or_ward"
+      "note": "Verified against Shimane Prefecture’s direct seismic-observation facility and address list.",
+      "placementPrecision": "exact_address"
     },
     {
       "code": "3220343",
@@ -124814,10 +124852,10 @@
       "areaNameJa": "島根県東部",
       "municipalityCode": "3220300",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
+      "publishedAddressJa": "島根県出雲市平田町951-1",
+      "facilityNameJa": "平田支所",
       "facilityNameEn": null,
-      "metadataStatus": "Catalogue only",
+      "metadataStatus": "Official Shimane Prefecture seismic-observation list (2018)",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -124825,11 +124863,11 @@
       "providerLatitude": null,
       "providerLongitude": null,
       "sourceUrls": [
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.pref.shimane.lg.jp/bousai_info/bousai/bousai/bosai_shiryo/sinsai.data/02-2sinnsaihenn_oukyuutaisaku.pdf"
       ],
-      "note": "No exact address or precise provider-station metadata is recorded yet.",
-      "placementLocalityJa": "出雲市",
-      "placementPrecision": "municipality_or_ward"
+      "note": "Verified against Shimane Prefecture’s direct seismic-observation facility and address list.",
+      "placementPrecision": "exact_address"
     },
     {
       "code": "3220345",
@@ -124855,10 +124893,10 @@
       "areaNameJa": "島根県東部",
       "municipalityCode": "3220300",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
+      "publishedAddressJa": "島根県出雲市大社町杵築南1395",
+      "facilityNameJa": "大社支所",
       "facilityNameEn": null,
-      "metadataStatus": "Catalogue only",
+      "metadataStatus": "Official Shimane Prefecture seismic-observation list (2018)",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -124866,11 +124904,11 @@
       "providerLatitude": null,
       "providerLongitude": null,
       "sourceUrls": [
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.pref.shimane.lg.jp/bousai_info/bousai/bousai/bosai_shiryo/sinsai.data/02-2sinnsaihenn_oukyuutaisaku.pdf"
       ],
-      "note": "No exact address or precise provider-station metadata is recorded yet.",
-      "placementLocalityJa": "出雲市",
-      "placementPrecision": "municipality_or_ward"
+      "note": "Verified against Shimane Prefecture’s direct seismic-observation facility and address list.",
+      "placementPrecision": "exact_address"
     },
     {
       "code": "3220620",
@@ -124938,10 +124976,10 @@
       "areaNameJa": "島根県東部",
       "municipalityCode": "3220600",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
+      "publishedAddressJa": "島根県安来市伯太町東母里580",
+      "facilityNameJa": "伯太支所",
       "facilityNameEn": null,
-      "metadataStatus": "Catalogue only",
+      "metadataStatus": "Official Shimane Prefecture seismic-observation list (2018)",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -124949,11 +124987,11 @@
       "providerLatitude": null,
       "providerLongitude": null,
       "sourceUrls": [
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.pref.shimane.lg.jp/bousai_info/bousai/bousai/bosai_shiryo/sinsai.data/02-2sinnsaihenn_oukyuutaisaku.pdf"
       ],
-      "note": "No exact address or precise provider-station metadata is recorded yet.",
-      "placementLocalityJa": "安来市",
-      "placementPrecision": "municipality_or_ward"
+      "note": "Verified against Shimane Prefecture’s direct seismic-observation facility and address list.",
+      "placementPrecision": "exact_address"
     },
     {
       "code": "3220636",
@@ -124979,10 +125017,10 @@
       "areaNameJa": "島根県東部",
       "municipalityCode": "3220600",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
+      "publishedAddressJa": "島根県安来市安来町878-2",
+      "facilityNameJa": "安来市役所",
       "facilityNameEn": null,
-      "metadataStatus": "Catalogue only",
+      "metadataStatus": "Official Shimane Prefecture seismic-observation list (2018)",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -124990,11 +125028,11 @@
       "providerLatitude": null,
       "providerLongitude": null,
       "sourceUrls": [
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.pref.shimane.lg.jp/bousai_info/bousai/bousai/bosai_shiryo/sinsai.data/02-2sinnsaihenn_oukyuutaisaku.pdf"
       ],
-      "note": "No exact address or precise provider-station metadata is recorded yet.",
-      "placementLocalityJa": "安来市",
-      "placementPrecision": "municipality_or_ward"
+      "note": "Verified against Shimane Prefecture’s direct seismic-observation facility and address list.",
+      "placementPrecision": "exact_address"
     },
     {
       "code": "3220900",
@@ -125060,10 +125098,10 @@
       "areaNameJa": "島根県東部",
       "municipalityCode": "3220900",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
+      "publishedAddressJa": "島根県雲南市掛合町掛合1262-1",
+      "facilityNameJa": "掛合総合センター",
       "facilityNameEn": null,
-      "metadataStatus": "Catalogue only",
+      "metadataStatus": "Official Shimane Prefecture seismic-observation list (2018)",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -125071,11 +125109,11 @@
       "providerLatitude": null,
       "providerLongitude": null,
       "sourceUrls": [
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.pref.shimane.lg.jp/bousai_info/bousai/bousai/bosai_shiryo/sinsai.data/02-2sinnsaihenn_oukyuutaisaku.pdf"
       ],
-      "note": "No exact address or precise provider-station metadata is recorded yet.",
-      "placementLocalityJa": "雲南市",
-      "placementPrecision": "municipality_or_ward"
+      "note": "Verified against Shimane Prefecture’s direct seismic-observation facility and address list.",
+      "placementPrecision": "exact_address"
     },
     {
       "code": "3220940",
@@ -125101,10 +125139,10 @@
       "areaNameJa": "島根県東部",
       "municipalityCode": "3220900",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
+      "publishedAddressJa": "島根県雲南市三刀屋町三刀屋144-1",
+      "facilityNameJa": "三刀屋総合センター",
       "facilityNameEn": null,
-      "metadataStatus": "Catalogue only",
+      "metadataStatus": "Official Shimane Prefecture seismic-observation list (2018)",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -125112,11 +125150,11 @@
       "providerLatitude": null,
       "providerLongitude": null,
       "sourceUrls": [
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.pref.shimane.lg.jp/bousai_info/bousai/bousai/bosai_shiryo/sinsai.data/02-2sinnsaihenn_oukyuutaisaku.pdf"
       ],
-      "note": "No exact address or precise provider-station metadata is recorded yet.",
-      "placementLocalityJa": "雲南市",
-      "placementPrecision": "municipality_or_ward"
+      "note": "Verified against Shimane Prefecture’s direct seismic-observation facility and address list.",
+      "placementPrecision": "exact_address"
     },
     {
       "code": "3220941",
@@ -125142,10 +125180,10 @@
       "areaNameJa": "島根県東部",
       "municipalityCode": "3220900",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
+      "publishedAddressJa": "島根県雲南市加茂町加茂中972-5",
+      "facilityNameJa": "加茂総合センター",
       "facilityNameEn": null,
-      "metadataStatus": "Catalogue only",
+      "metadataStatus": "Official Shimane Prefecture seismic-observation list (2018)",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -125153,11 +125191,11 @@
       "providerLatitude": null,
       "providerLongitude": null,
       "sourceUrls": [
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.pref.shimane.lg.jp/bousai_info/bousai/bousai/bosai_shiryo/sinsai.data/02-2sinnsaihenn_oukyuutaisaku.pdf"
       ],
-      "note": "No exact address or precise provider-station metadata is recorded yet.",
-      "placementLocalityJa": "雲南市",
-      "placementPrecision": "municipality_or_ward"
+      "note": "Verified against Shimane Prefecture’s direct seismic-observation facility and address list.",
+      "placementPrecision": "exact_address"
     },
     {
       "code": "3220942",
@@ -125183,10 +125221,10 @@
       "areaNameJa": "島根県東部",
       "municipalityCode": "3220900",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
+      "publishedAddressJa": "島根県雲南市吉田町吉田1066",
+      "facilityNameJa": "吉田総合センター",
       "facilityNameEn": null,
-      "metadataStatus": "Catalogue only",
+      "metadataStatus": "Official Shimane Prefecture seismic-observation list (2018)",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -125194,11 +125232,11 @@
       "providerLatitude": null,
       "providerLongitude": null,
       "sourceUrls": [
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.pref.shimane.lg.jp/bousai_info/bousai/bousai/bosai_shiryo/sinsai.data/02-2sinnsaihenn_oukyuutaisaku.pdf"
       ],
-      "note": "No exact address or precise provider-station metadata is recorded yet.",
-      "placementLocalityJa": "雲南市",
-      "placementPrecision": "municipality_or_ward"
+      "note": "Verified against Shimane Prefecture’s direct seismic-observation facility and address list.",
+      "placementPrecision": "exact_address"
     },
     {
       "code": "3220943",
@@ -125224,10 +125262,10 @@
       "areaNameJa": "島根県東部",
       "municipalityCode": "3220900",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
+      "publishedAddressJa": "島根県雲南市木次町里方521-1",
+      "facilityNameJa": "雲南市役所",
       "facilityNameEn": null,
-      "metadataStatus": "Catalogue only",
+      "metadataStatus": "Official Shimane Prefecture seismic-observation list (2018)",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -125235,11 +125273,11 @@
       "providerLatitude": null,
       "providerLongitude": null,
       "sourceUrls": [
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.pref.shimane.lg.jp/bousai_info/bousai/bousai/bosai_shiryo/sinsai.data/02-2sinnsaihenn_oukyuutaisaku.pdf"
       ],
-      "note": "No exact address or precise provider-station metadata is recorded yet.",
-      "placementLocalityJa": "雲南市",
-      "placementPrecision": "municipality_or_ward"
+      "note": "Verified against Shimane Prefecture’s direct seismic-observation facility and address list.",
+      "placementPrecision": "exact_address"
     },
     {
       "code": "3234320",
@@ -125307,10 +125345,10 @@
       "areaNameJa": "島根県東部",
       "municipalityCode": "3234300",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
+      "publishedAddressJa": "島根県仁多郡奥出雲町三成358-1",
+      "facilityNameJa": "奥出雲町役場仁多庁舎",
       "facilityNameEn": null,
-      "metadataStatus": "Catalogue only",
+      "metadataStatus": "Official Shimane Prefecture seismic-observation list (2018)",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -125318,11 +125356,11 @@
       "providerLatitude": null,
       "providerLongitude": null,
       "sourceUrls": [
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.pref.shimane.lg.jp/bousai_info/bousai/bousai/bosai_shiryo/sinsai.data/02-2sinnsaihenn_oukyuutaisaku.pdf"
       ],
-      "note": "No exact address or precise provider-station metadata is recorded yet.",
-      "placementLocalityJa": "奥出雲町",
-      "placementPrecision": "municipality_or_ward"
+      "note": "Verified against Shimane Prefecture’s direct seismic-observation facility and address list.",
+      "placementPrecision": "exact_address"
     },
     {
       "code": "3238635",
@@ -125348,10 +125386,10 @@
       "areaNameJa": "島根県東部",
       "municipalityCode": "3238600",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
+      "publishedAddressJa": "島根県飯石郡飯南町頓原2064",
+      "facilityNameJa": "飯南町保健福祉センター",
       "facilityNameEn": null,
-      "metadataStatus": "Catalogue only",
+      "metadataStatus": "Official Shimane Prefecture seismic-observation list (2018)",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -125359,11 +125397,11 @@
       "providerLatitude": null,
       "providerLongitude": null,
       "sourceUrls": [
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.pref.shimane.lg.jp/bousai_info/bousai/bousai/bosai_shiryo/sinsai.data/02-2sinnsaihenn_oukyuutaisaku.pdf"
       ],
-      "note": "No exact address or precise provider-station metadata is recorded yet.",
-      "placementLocalityJa": "飯南町",
-      "placementPrecision": "municipality_or_ward"
+      "note": "Verified against Shimane Prefecture’s direct seismic-observation facility and address list.",
+      "placementPrecision": "exact_address"
     },
     {
       "code": "3238636",
@@ -125389,10 +125427,10 @@
       "areaNameJa": "島根県東部",
       "municipalityCode": "3238600",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
+      "publishedAddressJa": "島根県飯石郡飯南町下赤名880",
+      "facilityNameJa": "雲南夢ネット飯南局",
       "facilityNameEn": null,
-      "metadataStatus": "Catalogue only",
+      "metadataStatus": "Official Shimane Prefecture seismic-observation list (2018)",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -125400,11 +125438,11 @@
       "providerLatitude": null,
       "providerLongitude": null,
       "sourceUrls": [
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.pref.shimane.lg.jp/bousai_info/bousai/bousai/bosai_shiryo/sinsai.data/02-2sinnsaihenn_oukyuutaisaku.pdf"
       ],
-      "note": "No exact address or precise provider-station metadata is recorded yet.",
-      "placementLocalityJa": "飯南町",
-      "placementPrecision": "municipality_or_ward"
+      "note": "Verified against Shimane Prefecture’s direct seismic-observation facility and address list.",
+      "placementPrecision": "exact_address"
     },
     {
       "code": "3220201",
@@ -125512,10 +125550,10 @@
       "areaNameJa": "島根県西部",
       "municipalityCode": "3220200",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
+      "publishedAddressJa": "島根県浜田市金城町下来原171",
+      "facilityNameJa": "浜田市金城支所",
       "facilityNameEn": null,
-      "metadataStatus": "Catalogue only",
+      "metadataStatus": "Official Shimane Prefecture seismic-observation list (2018)",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -125523,11 +125561,11 @@
       "providerLatitude": null,
       "providerLongitude": null,
       "sourceUrls": [
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.pref.shimane.lg.jp/bousai_info/bousai/bousai/bosai_shiryo/sinsai.data/02-2sinnsaihenn_oukyuutaisaku.pdf"
       ],
-      "note": "No exact address or precise provider-station metadata is recorded yet.",
-      "placementLocalityJa": "浜田市",
-      "placementPrecision": "municipality_or_ward"
+      "note": "Verified against Shimane Prefecture’s direct seismic-observation facility and address list.",
+      "placementPrecision": "exact_address"
     },
     {
       "code": "3220238",
@@ -125553,10 +125591,10 @@
       "areaNameJa": "島根県西部",
       "municipalityCode": "3220200",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
+      "publishedAddressJa": "島根県浜田市三隅町三隅1434",
+      "facilityNameJa": "浜田市三隅支所",
       "facilityNameEn": null,
-      "metadataStatus": "Catalogue only",
+      "metadataStatus": "Official Shimane Prefecture seismic-observation list (2018)",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -125564,11 +125602,11 @@
       "providerLatitude": null,
       "providerLongitude": null,
       "sourceUrls": [
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.pref.shimane.lg.jp/bousai_info/bousai/bousai/bosai_shiryo/sinsai.data/02-2sinnsaihenn_oukyuutaisaku.pdf"
       ],
-      "note": "No exact address or precise provider-station metadata is recorded yet.",
-      "placementLocalityJa": "浜田市",
-      "placementPrecision": "municipality_or_ward"
+      "note": "Verified against Shimane Prefecture’s direct seismic-observation facility and address list.",
+      "placementPrecision": "exact_address"
     },
     {
       "code": "3220239",
@@ -125594,10 +125632,10 @@
       "areaNameJa": "島根県西部",
       "municipalityCode": "3220200",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
+      "publishedAddressJa": "島根県浜田市旭町今市637",
+      "facilityNameJa": "浜田市旭支所",
       "facilityNameEn": null,
-      "metadataStatus": "Catalogue only",
+      "metadataStatus": "Official Shimane Prefecture seismic-observation list (2018)",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -125605,11 +125643,11 @@
       "providerLatitude": null,
       "providerLongitude": null,
       "sourceUrls": [
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.pref.shimane.lg.jp/bousai_info/bousai/bousai/bosai_shiryo/sinsai.data/02-2sinnsaihenn_oukyuutaisaku.pdf"
       ],
-      "note": "No exact address or precise provider-station metadata is recorded yet.",
-      "placementLocalityJa": "浜田市",
-      "placementPrecision": "municipality_or_ward"
+      "note": "Verified against Shimane Prefecture’s direct seismic-observation facility and address list.",
+      "placementPrecision": "exact_address"
     },
     {
       "code": "3220240",
@@ -125635,10 +125673,10 @@
       "areaNameJa": "島根県西部",
       "municipalityCode": "3220200",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
+      "publishedAddressJa": "島根県浜田市弥栄町長安本郷542",
+      "facilityNameJa": "浜田市弥栄支所",
       "facilityNameEn": null,
-      "metadataStatus": "Catalogue only",
+      "metadataStatus": "Official Shimane Prefecture seismic-observation list (2018)",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -125646,11 +125684,11 @@
       "providerLatitude": null,
       "providerLongitude": null,
       "sourceUrls": [
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.pref.shimane.lg.jp/bousai_info/bousai/bousai/bosai_shiryo/sinsai.data/02-2sinnsaihenn_oukyuutaisaku.pdf"
       ],
-      "note": "No exact address or precise provider-station metadata is recorded yet.",
-      "placementLocalityJa": "浜田市",
-      "placementPrecision": "municipality_or_ward"
+      "note": "Verified against Shimane Prefecture’s direct seismic-observation facility and address list.",
+      "placementPrecision": "exact_address"
     },
     {
       "code": "3220241",
@@ -125676,10 +125714,10 @@
       "areaNameJa": "島根県西部",
       "municipalityCode": "3220200",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
+      "publishedAddressJa": "島根県浜田市殿町1",
+      "facilityNameJa": "浜田市役所",
       "facilityNameEn": null,
-      "metadataStatus": "Catalogue only",
+      "metadataStatus": "Official Shimane Prefecture seismic-observation list (2018)",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -125687,11 +125725,11 @@
       "providerLatitude": null,
       "providerLongitude": null,
       "sourceUrls": [
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.pref.shimane.lg.jp/bousai_info/bousai/bousai/bosai_shiryo/sinsai.data/02-2sinnsaihenn_oukyuutaisaku.pdf"
       ],
-      "note": "No exact address or precise provider-station metadata is recorded yet.",
-      "placementLocalityJa": "浜田市",
-      "placementPrecision": "municipality_or_ward"
+      "note": "Verified against Shimane Prefecture’s direct seismic-observation facility and address list.",
+      "placementPrecision": "exact_address"
     },
     {
       "code": "3220400",
@@ -125799,10 +125837,10 @@
       "areaNameJa": "島根県西部",
       "municipalityCode": "3220400",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
+      "publishedAddressJa": "島根県益田市常盤町1-1",
+      "facilityNameJa": "益田市役所",
       "facilityNameEn": null,
-      "metadataStatus": "Catalogue only",
+      "metadataStatus": "Official Shimane Prefecture seismic-observation list (2018)",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -125810,11 +125848,11 @@
       "providerLatitude": null,
       "providerLongitude": null,
       "sourceUrls": [
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.pref.shimane.lg.jp/bousai_info/bousai/bousai/bosai_shiryo/sinsai.data/02-2sinnsaihenn_oukyuutaisaku.pdf"
       ],
-      "note": "No exact address or precise provider-station metadata is recorded yet.",
-      "placementLocalityJa": "益田市",
-      "placementPrecision": "municipality_or_ward"
+      "note": "Verified against Shimane Prefecture’s direct seismic-observation facility and address list.",
+      "placementPrecision": "exact_address"
     },
     {
       "code": "3220435",
@@ -125840,10 +125878,10 @@
       "areaNameJa": "島根県西部",
       "municipalityCode": "3220400",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
+      "publishedAddressJa": "島根県益田市匹見町匹見イ1260",
+      "facilityNameJa": "匹見総合支所",
       "facilityNameEn": null,
-      "metadataStatus": "Catalogue only",
+      "metadataStatus": "Official Shimane Prefecture seismic-observation list (2018)",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -125851,11 +125889,11 @@
       "providerLatitude": null,
       "providerLongitude": null,
       "sourceUrls": [
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.pref.shimane.lg.jp/bousai_info/bousai/bousai/bosai_shiryo/sinsai.data/02-2sinnsaihenn_oukyuutaisaku.pdf"
       ],
-      "note": "No exact address or precise provider-station metadata is recorded yet.",
-      "placementLocalityJa": "益田市",
-      "placementPrecision": "municipality_or_ward"
+      "note": "Verified against Shimane Prefecture’s direct seismic-observation facility and address list.",
+      "placementPrecision": "exact_address"
     },
     {
       "code": "3220436",
@@ -125881,10 +125919,10 @@
       "areaNameJa": "島根県西部",
       "municipalityCode": "3220400",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
+      "publishedAddressJa": "島根県益田市美都町都茂1803-1",
+      "facilityNameJa": "美都総合支所",
       "facilityNameEn": null,
-      "metadataStatus": "Catalogue only",
+      "metadataStatus": "Official Shimane Prefecture seismic-observation list (2018)",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -125892,11 +125930,11 @@
       "providerLatitude": null,
       "providerLongitude": null,
       "sourceUrls": [
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.pref.shimane.lg.jp/bousai_info/bousai/bousai/bosai_shiryo/sinsai.data/02-2sinnsaihenn_oukyuutaisaku.pdf"
       ],
-      "note": "No exact address or precise provider-station metadata is recorded yet.",
-      "placementLocalityJa": "益田市",
-      "placementPrecision": "municipality_or_ward"
+      "note": "Verified against Shimane Prefecture’s direct seismic-observation facility and address list.",
+      "placementPrecision": "exact_address"
     },
     {
       "code": "3220534",
@@ -125922,10 +125960,10 @@
       "areaNameJa": "島根県西部",
       "municipalityCode": "3220500",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
+      "publishedAddressJa": "島根県大田市仁摩町仁万562-3",
+      "facilityNameJa": "大田市仁摩支所",
       "facilityNameEn": null,
-      "metadataStatus": "Catalogue only",
+      "metadataStatus": "Official Shimane Prefecture seismic-observation list (2018)",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -125933,11 +125971,11 @@
       "providerLatitude": null,
       "providerLongitude": null,
       "sourceUrls": [
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.pref.shimane.lg.jp/bousai_info/bousai/bousai/bosai_shiryo/sinsai.data/02-2sinnsaihenn_oukyuutaisaku.pdf"
       ],
-      "note": "No exact address or precise provider-station metadata is recorded yet.",
-      "placementLocalityJa": "大田市",
-      "placementPrecision": "municipality_or_ward"
+      "note": "Verified against Shimane Prefecture’s direct seismic-observation facility and address list.",
+      "placementPrecision": "exact_address"
     },
     {
       "code": "3220535",
@@ -125963,10 +126001,10 @@
       "areaNameJa": "島根県西部",
       "municipalityCode": "3220500",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
+      "publishedAddressJa": "島根県大田市温泉津町小浜イ486",
+      "facilityNameJa": "大田市温泉津支所",
       "facilityNameEn": null,
-      "metadataStatus": "Catalogue only",
+      "metadataStatus": "Official Shimane Prefecture seismic-observation list (2018)",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -125974,11 +126012,11 @@
       "providerLatitude": null,
       "providerLongitude": null,
       "sourceUrls": [
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.pref.shimane.lg.jp/bousai_info/bousai/bousai/bosai_shiryo/sinsai.data/02-2sinnsaihenn_oukyuutaisaku.pdf"
       ],
-      "note": "No exact address or precise provider-station metadata is recorded yet.",
-      "placementLocalityJa": "大田市",
-      "placementPrecision": "municipality_or_ward"
+      "note": "Verified against Shimane Prefecture’s direct seismic-observation facility and address list.",
+      "placementPrecision": "exact_address"
     },
     {
       "code": "3220536",
@@ -126004,10 +126042,10 @@
       "areaNameJa": "島根県西部",
       "municipalityCode": "3220500",
       "gsiLocalityJa": "大田町大田",
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
+      "publishedAddressJa": "島根県大田市大田町大田ロ1111",
+      "facilityNameJa": "大田市役所",
       "facilityNameEn": null,
-      "metadataStatus": "Catalogue only",
+      "metadataStatus": "Official Shimane Prefecture seismic-observation list (2018)",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -126015,11 +126053,11 @@
       "providerLatitude": null,
       "providerLongitude": null,
       "sourceUrls": [
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.pref.shimane.lg.jp/bousai_info/bousai/bousai/bosai_shiryo/sinsai.data/02-2sinnsaihenn_oukyuutaisaku.pdf"
       ],
-      "note": "No exact address or precise provider-station metadata is recorded yet.",
-      "placementLocalityJa": "大田市",
-      "placementPrecision": "municipality_or_ward"
+      "note": "Verified against Shimane Prefecture’s direct seismic-observation facility and address list.",
+      "placementPrecision": "exact_address"
     },
     {
       "code": "3220733",
@@ -126045,10 +126083,10 @@
       "areaNameJa": "島根県西部",
       "municipalityCode": "3220700",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
+      "publishedAddressJa": "島根県江津市江津町1525",
+      "facilityNameJa": "江津市役所",
       "facilityNameEn": null,
-      "metadataStatus": "Catalogue only",
+      "metadataStatus": "Official Shimane Prefecture seismic-observation list (2018)",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -126056,11 +126094,11 @@
       "providerLatitude": null,
       "providerLongitude": null,
       "sourceUrls": [
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.pref.shimane.lg.jp/bousai_info/bousai/bousai/bosai_shiryo/sinsai.data/02-2sinnsaihenn_oukyuutaisaku.pdf"
       ],
-      "note": "No exact address or precise provider-station metadata is recorded yet.",
-      "placementLocalityJa": "江津市",
-      "placementPrecision": "municipality_or_ward"
+      "note": "Verified against Shimane Prefecture’s direct seismic-observation facility and address list.",
+      "placementPrecision": "exact_address"
     },
     {
       "code": "3220734",
@@ -126086,10 +126124,10 @@
       "areaNameJa": "島根県西部",
       "municipalityCode": "3220700",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
+      "publishedAddressJa": "島根県江津市桜江町川戸15-4",
+      "facilityNameJa": "川戸地域コミュニティセンター",
       "facilityNameEn": null,
-      "metadataStatus": "Catalogue only",
+      "metadataStatus": "Official Shimane Prefecture seismic-observation list (2018)",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -126097,11 +126135,11 @@
       "providerLatitude": null,
       "providerLongitude": null,
       "sourceUrls": [
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.pref.shimane.lg.jp/bousai_info/bousai/bousai/bosai_shiryo/sinsai.data/02-2sinnsaihenn_oukyuutaisaku.pdf"
       ],
-      "note": "No exact address or precise provider-station metadata is recorded yet.",
-      "placementLocalityJa": "江津市",
-      "placementPrecision": "municipality_or_ward"
+      "note": "Verified against Shimane Prefecture’s direct seismic-observation facility and address list.",
+      "placementPrecision": "exact_address"
     },
     {
       "code": "3244132",
@@ -126127,10 +126165,10 @@
       "areaNameJa": "島根県西部",
       "municipalityCode": "3244100",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
+      "publishedAddressJa": "島根県邑智郡川本町大字川本271-3",
+      "facilityNameJa": "川本町役場",
       "facilityNameEn": null,
-      "metadataStatus": "Catalogue only",
+      "metadataStatus": "Official Shimane Prefecture seismic-observation list (2018)",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -126138,11 +126176,11 @@
       "providerLatitude": null,
       "providerLongitude": null,
       "sourceUrls": [
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.pref.shimane.lg.jp/bousai_info/bousai/bousai/bosai_shiryo/sinsai.data/02-2sinnsaihenn_oukyuutaisaku.pdf"
       ],
-      "note": "No exact address or precise provider-station metadata is recorded yet.",
-      "placementLocalityJa": "川本町",
-      "placementPrecision": "municipality_or_ward"
+      "note": "Verified against Shimane Prefecture’s direct seismic-observation facility and address list.",
+      "placementPrecision": "exact_address"
     },
     {
       "code": "3244800",
@@ -126208,10 +126246,10 @@
       "areaNameJa": "島根県西部",
       "municipalityCode": "3244800",
       "gsiLocalityJa": "粕渕",
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
+      "publishedAddressJa": "島根県邑智郡美郷町粕淵168",
+      "facilityNameJa": "美郷町役場",
       "facilityNameEn": null,
-      "metadataStatus": "Catalogue only",
+      "metadataStatus": "Official Shimane Prefecture seismic-observation list (2018)",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -126219,11 +126257,11 @@
       "providerLatitude": null,
       "providerLongitude": null,
       "sourceUrls": [
-        "https://www.data.jma.go.jp/eqev/data/intens-st/"
+        "https://www.data.jma.go.jp/eqev/data/intens-st/",
+        "https://www.pref.shimane.lg.jp/bousai_info/bousai/bousai/bosai_shiryo/sinsai.data/02-2sinnsaihenn_oukyuutaisaku.pdf"
       ],
-      "note": "No exact address or precise provider-station metadata is recorded yet.",
-      "placementLocalityJa": "邑智郡美郷町",
-      "placementPrecision": "municipality_or_ward"
+      "note": "Verified against Shimane Prefecture’s direct seismic-observation facility and address list.",
+      "placementPrecision": "exact_address"
     },
     {
       "code": "3244834",
@@ -126249,10 +126287,10 @@
       "areaNameJa": "島根県西部",
       "municipalityCode": "3244800",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
+      "publishedAddressJa": "島根県邑智郡美郷町都賀本郷163",
+      "facilityNameJa": "都賀公民館",
       "facilityNameEn": null,
-      "metadataStatus": "Catalogue only",
+      "metadataStatus": "Official Shimane Prefecture seismic-observation list (2018)",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -126260,11 +126298,11 @@
       "providerLatitude": null,
       "providerLongitude": null,
       "sourceUrls": [
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.pref.shimane.lg.jp/bousai_info/bousai/bousai/bosai_shiryo/sinsai.data/02-2sinnsaihenn_oukyuutaisaku.pdf"
       ],
-      "note": "No exact address or precise provider-station metadata is recorded yet.",
-      "placementLocalityJa": "邑智郡美郷町",
-      "placementPrecision": "municipality_or_ward"
+      "note": "Verified against Shimane Prefecture’s direct seismic-observation facility and address list.",
+      "placementPrecision": "exact_address"
     },
     {
       "code": "3244920",
@@ -126332,10 +126370,10 @@
       "areaNameJa": "島根県西部",
       "municipalityCode": "3244900",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
+      "publishedAddressJa": "島根県邑智郡邑南町下口羽484-1",
+      "facilityNameJa": "邑南町役場羽須美支所",
       "facilityNameEn": null,
-      "metadataStatus": "Catalogue only",
+      "metadataStatus": "Official Shimane Prefecture seismic-observation list (2018)",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -126343,11 +126381,11 @@
       "providerLatitude": null,
       "providerLongitude": null,
       "sourceUrls": [
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.pref.shimane.lg.jp/bousai_info/bousai/bousai/bosai_shiryo/sinsai.data/02-2sinnsaihenn_oukyuutaisaku.pdf"
       ],
-      "note": "No exact address or precise provider-station metadata is recorded yet.",
-      "placementLocalityJa": "邑南町",
-      "placementPrecision": "municipality_or_ward"
+      "note": "Verified against Shimane Prefecture’s direct seismic-observation facility and address list.",
+      "placementPrecision": "exact_address"
     },
     {
       "code": "3244935",
@@ -126373,10 +126411,10 @@
       "areaNameJa": "島根県西部",
       "municipalityCode": "3244900",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
+      "publishedAddressJa": "島根県邑智郡邑南町矢上6000",
+      "facilityNameJa": "邑南町役場",
       "facilityNameEn": null,
-      "metadataStatus": "Catalogue only",
+      "metadataStatus": "Official Shimane Prefecture seismic-observation list (2018)",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -126384,11 +126422,11 @@
       "providerLatitude": null,
       "providerLongitude": null,
       "sourceUrls": [
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.pref.shimane.lg.jp/bousai_info/bousai/bousai/bosai_shiryo/sinsai.data/02-2sinnsaihenn_oukyuutaisaku.pdf"
       ],
-      "note": "No exact address or precise provider-station metadata is recorded yet.",
-      "placementLocalityJa": "邑南町",
-      "placementPrecision": "municipality_or_ward"
+      "note": "Verified against Shimane Prefecture’s direct seismic-observation facility and address list.",
+      "placementPrecision": "exact_address"
     },
     {
       "code": "3244936",
@@ -126456,10 +126494,10 @@
       "areaNameJa": "島根県西部",
       "municipalityCode": "3250100",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
+      "publishedAddressJa": "島根県鹿足郡津和野町後田ロ64-6",
+      "facilityNameJa": "津和野町津和野庁舎",
       "facilityNameEn": null,
-      "metadataStatus": "Catalogue only",
+      "metadataStatus": "Official Shimane Prefecture seismic-observation list (2018)",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -126467,11 +126505,11 @@
       "providerLatitude": null,
       "providerLongitude": null,
       "sourceUrls": [
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.pref.shimane.lg.jp/bousai_info/bousai/bousai/bosai_shiryo/sinsai.data/02-2sinnsaihenn_oukyuutaisaku.pdf"
       ],
-      "note": "No exact address or precise provider-station metadata is recorded yet.",
-      "placementLocalityJa": "津和野町",
-      "placementPrecision": "municipality_or_ward"
+      "note": "Verified against Shimane Prefecture’s direct seismic-observation facility and address list.",
+      "placementPrecision": "exact_address"
     },
     {
       "code": "3250134",
@@ -126580,10 +126618,10 @@
       "areaNameJa": "島根県西部",
       "municipalityCode": "3250500",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
+      "publishedAddressJa": "島根県鹿足郡吉賀町柿木村柿木500-1",
+      "facilityNameJa": "吉賀町柿木庁舎",
       "facilityNameEn": null,
-      "metadataStatus": "Catalogue only",
+      "metadataStatus": "Official Shimane Prefecture seismic-observation list (2018)",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -126591,11 +126629,11 @@
       "providerLatitude": null,
       "providerLongitude": null,
       "sourceUrls": [
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.pref.shimane.lg.jp/bousai_info/bousai/bousai/bosai_shiryo/sinsai.data/02-2sinnsaihenn_oukyuutaisaku.pdf"
       ],
-      "note": "No exact address or precise provider-station metadata is recorded yet.",
-      "placementLocalityJa": "吉賀町",
-      "placementPrecision": "municipality_or_ward"
+      "note": "Verified against Shimane Prefecture’s direct seismic-observation facility and address list.",
+      "placementPrecision": "exact_address"
     },
     {
       "code": "3252531",
@@ -126621,10 +126659,10 @@
       "areaNameJa": "島根県隠岐",
       "municipalityCode": "3252500",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
+      "publishedAddressJa": "島根県隠岐郡海士町大字海士1490",
+      "facilityNameJa": "海士町役場",
       "facilityNameEn": null,
-      "metadataStatus": "Catalogue only",
+      "metadataStatus": "Official Shimane Prefecture seismic-observation list (2018)",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -126632,11 +126670,11 @@
       "providerLatitude": null,
       "providerLongitude": null,
       "sourceUrls": [
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.pref.shimane.lg.jp/bousai_info/bousai/bousai/bosai_shiryo/sinsai.data/02-2sinnsaihenn_oukyuutaisaku.pdf"
       ],
-      "note": "No exact address or precise provider-station metadata is recorded yet.",
-      "placementLocalityJa": "海士町",
-      "placementPrecision": "municipality_or_ward"
+      "note": "Verified against Shimane Prefecture’s direct seismic-observation facility and address list.",
+      "placementPrecision": "exact_address"
     },
     {
       "code": "3252620",
@@ -126869,10 +126907,10 @@
       "areaNameJa": "島根県隠岐",
       "municipalityCode": "3252800",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
+      "publishedAddressJa": "島根県隠岐郡隠岐の島町布施218-24",
+      "facilityNameJa": "隠岐の島町役場布施支所",
       "facilityNameEn": null,
-      "metadataStatus": "Catalogue only",
+      "metadataStatus": "Official Shimane Prefecture seismic-observation list (2018)",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -126880,11 +126918,11 @@
       "providerLatitude": null,
       "providerLongitude": null,
       "sourceUrls": [
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.pref.shimane.lg.jp/bousai_info/bousai/bousai/bosai_shiryo/sinsai.data/02-2sinnsaihenn_oukyuutaisaku.pdf"
       ],
-      "note": "No exact address or precise provider-station metadata is recorded yet.",
-      "placementLocalityJa": "隠岐郡隠岐の島町",
-      "placementPrecision": "municipality_or_ward"
+      "note": "Verified against Shimane Prefecture’s direct seismic-observation facility and address list.",
+      "placementPrecision": "exact_address"
     },
     {
       "code": "3252837",
@@ -126910,10 +126948,10 @@
       "areaNameJa": "島根県隠岐",
       "municipalityCode": "3252800",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
+      "publishedAddressJa": "島根県隠岐郡隠岐の島町都万2016",
+      "facilityNameJa": "隠岐の島町役場都万支所",
       "facilityNameEn": null,
-      "metadataStatus": "Catalogue only",
+      "metadataStatus": "Official Shimane Prefecture seismic-observation list (2018)",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -126921,11 +126959,11 @@
       "providerLatitude": null,
       "providerLongitude": null,
       "sourceUrls": [
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.pref.shimane.lg.jp/bousai_info/bousai/bousai/bosai_shiryo/sinsai.data/02-2sinnsaihenn_oukyuutaisaku.pdf"
       ],
-      "note": "No exact address or precise provider-station metadata is recorded yet.",
-      "placementLocalityJa": "隠岐郡隠岐の島町",
-      "placementPrecision": "municipality_or_ward"
+      "note": "Verified against Shimane Prefecture’s direct seismic-observation facility and address list.",
+      "placementPrecision": "exact_address"
     },
     {
       "code": "3252838",
@@ -126951,10 +126989,10 @@
       "areaNameJa": "島根県隠岐",
       "municipalityCode": "3252800",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
+      "publishedAddressJa": "島根県隠岐郡隠岐の島町北方901-1",
+      "facilityNameJa": "隠岐の島町役場五箇支所",
       "facilityNameEn": null,
-      "metadataStatus": "Catalogue only",
+      "metadataStatus": "Official Shimane Prefecture seismic-observation list (2018)",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -126962,11 +127000,11 @@
       "providerLatitude": null,
       "providerLongitude": null,
       "sourceUrls": [
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.pref.shimane.lg.jp/bousai_info/bousai/bousai/bosai_shiryo/sinsai.data/02-2sinnsaihenn_oukyuutaisaku.pdf"
       ],
-      "note": "No exact address or precise provider-station metadata is recorded yet.",
-      "placementLocalityJa": "隠岐郡隠岐の島町",
-      "placementPrecision": "municipality_or_ward"
+      "note": "Verified against Shimane Prefecture’s direct seismic-observation facility and address list.",
+      "placementPrecision": "exact_address"
     },
     {
       "code": "3320301",
@@ -149426,10 +149464,10 @@
       "areaNameJa": "福岡県福岡",
       "municipalityCode": "4013100",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
+      "publishedAddressJa": "福岡市東区千早4丁目15番1号",
+      "facilityNameJa": "東消防署",
       "facilityNameEn": null,
-      "metadataStatus": "Catalogue only",
+      "metadataStatus": "Fukuoka City disaster plan and Fire Bureau facility address",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -149438,11 +149476,12 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
-        "https://www.joho.tagawa.fukuoka.jp/kiji0031997/3_1997_7322_up_324qazyd.pdf"
+        "https://www.joho.tagawa.fukuoka.jp/kiji0031997/3_1997_7322_up_324qazyd.pdf",
+        "https://www.city.fukuoka.lg.jp/shimin/bousai/bousai/documents/chiboukei_honpen2024.pdf",
+        "https://www.city.fukuoka.lg.jp/syobo/somu/about/syozaiti.html"
       ],
-      "note": "The published Fukuoka prefectural network list confirms this observation-point locality, but not a parcel or host facility.",
-      "placementLocalityJa": "福岡東区千早",
-      "placementPrecision": "municipality_or_ward"
+      "note": "Fukuoka City’s disaster plan directly places its network meters at the Fire Bureau and each fire station except Chuo Fire Station; the official Fire Bureau page publishes this station’s facility and address.",
+      "placementPrecision": "exact_address"
     },
     {
       "code": "4013201",
@@ -149509,10 +149548,10 @@
       "areaNameJa": "福岡県福岡",
       "municipalityCode": "4013200",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
+      "publishedAddressJa": "福岡市博多区博多駅前4丁目19番7号",
+      "facilityNameJa": "博多消防署",
       "facilityNameEn": null,
-      "metadataStatus": "Catalogue only",
+      "metadataStatus": "Fukuoka City disaster plan and Fire Bureau facility address",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -149521,11 +149560,12 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
-        "https://www.joho.tagawa.fukuoka.jp/kiji0031997/3_1997_7322_up_324qazyd.pdf"
+        "https://www.joho.tagawa.fukuoka.jp/kiji0031997/3_1997_7322_up_324qazyd.pdf",
+        "https://www.city.fukuoka.lg.jp/shimin/bousai/bousai/documents/chiboukei_honpen2024.pdf",
+        "https://www.city.fukuoka.lg.jp/syobo/somu/about/syozaiti.html"
       ],
-      "note": "The published Fukuoka prefectural network list confirms this observation-point locality, but not a parcel or host facility.",
-      "placementLocalityJa": "福岡博多区博多駅前",
-      "placementPrecision": "municipality_or_ward"
+      "note": "Fukuoka City’s disaster plan directly places its network meters at the Fire Bureau and each fire station except Chuo Fire Station; the official Fire Bureau page publishes this station’s facility and address.",
+      "placementPrecision": "exact_address"
     },
     {
       "code": "4013300",
@@ -149635,10 +149675,10 @@
       "areaNameJa": "福岡県福岡",
       "municipalityCode": "4013400",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
+      "publishedAddressJa": "福岡市南区塩原2丁目6番11号",
+      "facilityNameJa": "南消防署",
       "facilityNameEn": null,
-      "metadataStatus": "Catalogue only",
+      "metadataStatus": "Fukuoka City disaster plan and Fire Bureau facility address",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -149647,11 +149687,12 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
-        "https://www.joho.tagawa.fukuoka.jp/kiji0031997/3_1997_7322_up_324qazyd.pdf"
+        "https://www.joho.tagawa.fukuoka.jp/kiji0031997/3_1997_7322_up_324qazyd.pdf",
+        "https://www.city.fukuoka.lg.jp/shimin/bousai/bousai/documents/chiboukei_honpen2024.pdf",
+        "https://www.city.fukuoka.lg.jp/syobo/somu/about/syozaiti.html"
       ],
-      "note": "The published Fukuoka prefectural network list confirms this observation-point locality, but not a parcel or host facility.",
-      "placementLocalityJa": "福岡南区塩原",
-      "placementPrecision": "municipality_or_ward"
+      "note": "Fukuoka City’s disaster plan directly places its network meters at the Fire Bureau and each fire station except Chuo Fire Station; the official Fire Bureau page publishes this station’s facility and address.",
+      "placementPrecision": "exact_address"
     },
     {
       "code": "4013530",
@@ -149677,10 +149718,10 @@
       "areaNameJa": "福岡県福岡",
       "municipalityCode": "4013500",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
+      "publishedAddressJa": "福岡市西区今宿東1丁目7番12号",
+      "facilityNameJa": "西消防署",
       "facilityNameEn": null,
-      "metadataStatus": "Catalogue only",
+      "metadataStatus": "Fukuoka City disaster plan and Fire Bureau facility address",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -149689,11 +149730,12 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
-        "https://www.joho.tagawa.fukuoka.jp/kiji0031997/3_1997_7322_up_324qazyd.pdf"
+        "https://www.joho.tagawa.fukuoka.jp/kiji0031997/3_1997_7322_up_324qazyd.pdf",
+        "https://www.city.fukuoka.lg.jp/shimin/bousai/bousai/documents/chiboukei_honpen2024.pdf",
+        "https://www.city.fukuoka.lg.jp/syobo/somu/about/syozaiti.html"
       ],
-      "note": "The published Fukuoka prefectural network list confirms this observation-point locality, but not a parcel or host facility.",
-      "placementLocalityJa": "福岡西区今宿",
-      "placementPrecision": "municipality_or_ward"
+      "note": "Fukuoka City’s disaster plan directly places its network meters at the Fire Bureau and each fire station except Chuo Fire Station; the official Fire Bureau page publishes this station’s facility and address.",
+      "placementPrecision": "exact_address"
     },
     {
       "code": "4013630",
@@ -149719,10 +149761,10 @@
       "areaNameJa": "福岡県福岡",
       "municipalityCode": "4013600",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
+      "publishedAddressJa": "福岡市城南区神松寺2丁目19番12号",
+      "facilityNameJa": "城南消防署",
       "facilityNameEn": null,
-      "metadataStatus": "Catalogue only",
+      "metadataStatus": "Fukuoka City disaster plan and Fire Bureau facility address",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -149731,11 +149773,12 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
-        "https://www.joho.tagawa.fukuoka.jp/kiji0031997/3_1997_7322_up_324qazyd.pdf"
+        "https://www.joho.tagawa.fukuoka.jp/kiji0031997/3_1997_7322_up_324qazyd.pdf",
+        "https://www.city.fukuoka.lg.jp/shimin/bousai/bousai/documents/chiboukei_honpen2024.pdf",
+        "https://www.city.fukuoka.lg.jp/syobo/somu/about/syozaiti.html"
       ],
-      "note": "The published Fukuoka prefectural network list confirms this observation-point locality, but not a parcel or host facility.",
-      "placementLocalityJa": "福岡城南区神松寺",
-      "placementPrecision": "municipality_or_ward"
+      "note": "Fukuoka City’s disaster plan directly places its network meters at the Fire Bureau and each fire station except Chuo Fire Station; the official Fire Bureau page publishes this station’s facility and address.",
+      "placementPrecision": "exact_address"
     },
     {
       "code": "4013700",
@@ -149802,10 +149845,10 @@
       "areaNameJa": "福岡県福岡",
       "municipalityCode": "4013700",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
+      "publishedAddressJa": "福岡市早良区百道浜1丁目3番1号",
+      "facilityNameJa": "早良消防署",
       "facilityNameEn": null,
-      "metadataStatus": "Catalogue only",
+      "metadataStatus": "Fukuoka City disaster plan and Fire Bureau facility address",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -149814,11 +149857,12 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
-        "https://www.joho.tagawa.fukuoka.jp/kiji0031997/3_1997_7322_up_324qazyd.pdf"
+        "https://www.joho.tagawa.fukuoka.jp/kiji0031997/3_1997_7322_up_324qazyd.pdf",
+        "https://www.city.fukuoka.lg.jp/shimin/bousai/bousai/documents/chiboukei_honpen2024.pdf",
+        "https://www.city.fukuoka.lg.jp/syobo/somu/about/syozaiti.html"
       ],
-      "note": "The published Fukuoka prefectural network list confirms this observation-point locality, but not a parcel or host facility.",
-      "placementLocalityJa": "福岡早良区百道浜",
-      "placementPrecision": "municipality_or_ward"
+      "note": "Fukuoka City’s disaster plan directly places its network meters at the Fire Bureau and each fire station except Chuo Fire Station; the official Fire Bureau page publishes this station’s facility and address.",
+      "placementPrecision": "exact_address"
     },
     {
       "code": "4021731",
@@ -150573,10 +150617,10 @@
       "areaNameJa": "福岡県福岡",
       "municipalityCode": "4034100",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
+      "publishedAddressJa": "福岡県糟屋郡宇美町宇美5丁目1番1号",
+      "facilityNameJa": "宇美町役場",
       "facilityNameEn": null,
-      "metadataStatus": "Catalogue only",
+      "metadataStatus": "Official Umi Town disaster plan and town-hall address",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -150585,11 +150629,12 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
-        "https://www.joho.tagawa.fukuoka.jp/kiji0031997/3_1997_7322_up_324qazyd.pdf"
+        "https://www.joho.tagawa.fukuoka.jp/kiji0031997/3_1997_7322_up_324qazyd.pdf",
+        "https://www.town.umi.lg.jp/uploaded/attachment/20731.pdf",
+        "https://www.town.umi.lg.jp/life/sub/23/31/144/"
       ],
-      "note": "The published Fukuoka prefectural network list confirms this observation-point locality, but not a parcel or host facility.",
-      "placementLocalityJa": "宇美町宇美",
-      "placementPrecision": "municipality_or_ward"
+      "note": "Umi Town’s current disaster-plan appendix directly lists the prefecture-installed meter inside Umi Town Hall; the town publishes the hall’s address.",
+      "placementPrecision": "exact_address"
     },
     {
       "code": "4034230",
@@ -150741,10 +150786,10 @@
       "areaNameJa": "福岡県福岡",
       "municipalityCode": "4034500",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
+      "publishedAddressJa": "福岡県糟屋郡新宮町緑ケ浜一丁目1-1",
+      "facilityNameJa": "新宮町役場",
       "facilityNameEn": null,
-      "metadataStatus": "Catalogue only",
+      "metadataStatus": "Official Shingu Town Council meter-placement confirmation",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -150753,11 +150798,12 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://www.jma.go.jp/jma/kishou/books/saigaiji/saigaiji_202101/denbun/202101/17/VP20210117013000_3.html",
-        "https://www.joho.tagawa.fukuoka.jp/kiji0031997/3_1997_7322_up_324qazyd.pdf"
+        "https://www.joho.tagawa.fukuoka.jp/kiji0031997/3_1997_7322_up_324qazyd.pdf",
+        "https://www.town.shingu.fukuoka.jp/material/files/group/14/gikaikouhou107gou.pdf",
+        "https://www.town.shingu.fukuoka.jp/soshiki/chiiki_kyodo/6/1/1141.html"
       ],
-      "note": "The published Fukuoka prefectural network list confirms this observation-point locality, but not a parcel or host facility.",
-      "placementLocalityJa": "新宮町緑ヶ浜",
-      "placementPrecision": "municipality_or_ward"
+      "note": "Shingu Town’s official council bulletin directly identifies the town’s seismic-intensity meter as installed at Town Hall; the town publishes the hall’s address.",
+      "placementPrecision": "exact_address"
     },
     {
       "code": "4034830",
@@ -150825,10 +150871,10 @@
       "areaNameJa": "福岡県福岡",
       "municipalityCode": "4034900",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
+      "publishedAddressJa": "福岡県糟屋郡粕屋町駕与丁1丁目1-1",
+      "facilityNameJa": "粕屋町役場",
       "facilityNameEn": null,
-      "metadataStatus": "Catalogue only",
+      "metadataStatus": "Official Kasuya Town disaster plan and town-hall address",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -150837,11 +150883,12 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
-        "https://www.joho.tagawa.fukuoka.jp/kiji0031997/3_1997_7322_up_324qazyd.pdf"
+        "https://www.joho.tagawa.fukuoka.jp/kiji0031997/3_1997_7322_up_324qazyd.pdf",
+        "https://www.town.kasuya.fukuoka.jp/s013/020/010/020/file/shinnsaiR4.7.pdf",
+        "https://www.town.kasuya.fukuoka.jp/li/110/010/index.html"
       ],
-      "note": "The published Fukuoka prefectural network list confirms this observation-point locality, but not a parcel or host facility.",
-      "placementLocalityJa": "粕屋町仲原",
-      "placementPrecision": "municipality_or_ward"
+      "note": "Kasuya Town’s disaster plan identifies the in-office intensity meter used for the JMA-published Kasuya observation point; the town publishes Town Hall’s address.",
+      "placementPrecision": "exact_address"
     },
     {
       "code": "4010132",
@@ -151839,7 +151886,7 @@
       "publishedAddressJa": "福岡県築上郡吉富町大字広津226番地1",
       "facilityNameJa": "吉富町役場",
       "facilityNameEn": null,
-      "metadataStatus": "Official municipal facility address",
+      "metadataStatus": "Official Yoshitomi Town disaster plan",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -151852,7 +151899,7 @@
         "https://www.town.yoshitomi.lg.jp/user/filer_public/50/8d/508d910c-03bf-47f5-943e-92eaec558b96/04_ji-fu-ting-di-yu-fang-zai-ji-hua-di-4zhang-di-zhen-jin-bo-ying-ji-dui-ce-ji-hua.pdf",
         "https://www.town.yoshitomi.lg.jp/gyosei/z378/"
       ],
-      "note": "The town disaster plan states that its intensity meter is installed at Yoshitomi Town Hall; the town publishes the hall address.",
+      "note": "Yoshitomi Town’s current disaster plan directly identifies its Fukuoka Prefecture intensity meter as installed at Yoshitomi Town Hall.",
       "placementLocalityJa": "吉富町広津",
       "placementPrecision": "exact_address"
     },
@@ -152050,10 +152097,10 @@
       "areaNameJa": "福岡県筑豊",
       "municipalityCode": "4020400",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
+      "publishedAddressJa": "直方市新町2丁目5番10号",
+      "facilityNameJa": "直方市消防本部・直方市消防署",
       "facilityNameEn": null,
-      "metadataStatus": "Catalogue only",
+      "metadataStatus": "Official Nogata City Fire Department records",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -152062,11 +152109,12 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
-        "https://www.joho.tagawa.fukuoka.jp/kiji0031997/3_1997_7322_up_324qazyd.pdf"
+        "https://www.joho.tagawa.fukuoka.jp/kiji0031997/3_1997_7322_up_324qazyd.pdf",
+        "https://www.city.nogata.fukuoka.jp/library/data/kurashi/pdf/shoubouhonbu/h20nenpou.pdf",
+        "https://www.city.nogata.fukuoka.jp/var/rev0/0011/8270/1257815933.pdf"
       ],
-      "note": "The published Fukuoka prefectural network list confirms this observation-point locality, but not a parcel or host facility.",
-      "placementLocalityJa": "直方市新町",
-      "placementPrecision": "municipality_or_ward"
+      "note": "Nogata City’s official fire report records installation of the Fukuoka Prefecture seismic-intensity network meter at the Fire Headquarters; the current annual report identifies the Fire Headquarters and Fire Station at this address.",
+      "placementPrecision": "exact_address"
     },
     {
       "code": "4020501",
@@ -154129,7 +154177,7 @@
       "publishedAddressJa": null,
       "facilityNameJa": null,
       "facilityNameEn": null,
-      "metadataStatus": "Catalogue only",
+      "metadataStatus": "Official Chikugo City locality-only confirmation",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -154138,9 +154186,10 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
-        "https://www.joho.tagawa.fukuoka.jp/kiji0031997/3_1997_7322_up_324qazyd.pdf"
+        "https://www.joho.tagawa.fukuoka.jp/kiji0031997/3_1997_7322_up_324qazyd.pdf",
+        "https://www.city.chikugo.lg.jp/shisei/_5644/_7347/_31889.html?media=pc"
       ],
-      "note": "The published Fukuoka prefectural network list confirms this observation-point locality, but not a parcel or host facility.",
+      "note": "Chikugo City confirms that its Fukuoka Prefecture meter is published only as Chikugo City Yamanoui, withholding the exact installation location to prevent tampering.",
       "placementLocalityJa": "筑後市山ノ井",
       "placementPrecision": "municipality_or_ward"
     },
@@ -161029,7 +161078,8 @@
       "providerLongitude": 131.1203,
       "sourceUrls": [
         "https://www.kyoshin.bosai.go.jp/ja/stationlist/",
-        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200"
+        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200",
+        "https://data.bodik.jp/dataset/430005_00245/resource/dad15967-bb1a-487f-ab7b-908ff373156d"
       ],
       "note": "Matched K-NET station KMM004 within 0.202 km of the rounded catalogue coordinate; no street address is recorded yet. Exact placement address and facility sourced from Kumamoto Prefecture seismic-intensity installation list (2022).",
       "placementPrecision": "exact_address"
@@ -161070,7 +161120,8 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
-        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200"
+        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200",
+        "https://data.bodik.jp/dataset/430005_00245/resource/dad15967-bb1a-487f-ab7b-908ff373156d"
       ],
       "note": "No exact address or precise provider-station metadata is recorded yet. Exact placement address and facility sourced from Kumamoto Prefecture seismic-intensity installation list (2022).",
       "placementPrecision": "exact_address"
@@ -161111,7 +161162,8 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=131.23&lat=32.93",
-        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200"
+        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200",
+        "https://data.bodik.jp/dataset/430005_00245/resource/dad15967-bb1a-487f-ab7b-908ff373156d"
       ],
       "note": "No exact address or precise provider-station metadata is recorded yet. Exact placement address and facility sourced from Kumamoto Prefecture seismic-intensity installation list (2022).",
       "placementPrecision": "exact_address"
@@ -161152,7 +161204,8 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
-        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200"
+        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200",
+        "https://data.bodik.jp/dataset/430005_00245/resource/dad15967-bb1a-487f-ab7b-908ff373156d"
       ],
       "note": "No exact address or precise provider-station metadata is recorded yet. Exact placement address and facility sourced from Kumamoto Prefecture seismic-intensity installation list (2022).",
       "placementPrecision": "exact_address"
@@ -161194,7 +161247,8 @@
       "sourceUrls": [
         "https://www.kyoshin.bosai.go.jp/ja/stationlist/",
         "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
-        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200"
+        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200",
+        "https://data.bodik.jp/dataset/430005_00245/resource/dad15967-bb1a-487f-ab7b-908ff373156d"
       ],
       "note": "Matched K-NET station KMM001 within 0.160 km of the rounded catalogue coordinate; no street address is recorded yet. Exact placement address and facility sourced from Kumamoto Prefecture seismic-intensity installation list (2022).",
       "placementPrecision": "exact_address"
@@ -161235,7 +161289,8 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
-        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200"
+        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200",
+        "https://data.bodik.jp/dataset/430005_00245/resource/dad15967-bb1a-487f-ab7b-908ff373156d"
       ],
       "note": "No exact address or precise provider-station metadata is recorded yet. Exact placement address and facility sourced from Kumamoto Prefecture seismic-intensity installation list (2022).",
       "placementPrecision": "exact_address"
@@ -161277,7 +161332,8 @@
       "sourceUrls": [
         "https://www.kyoshin.bosai.go.jp/ja/stationlist/",
         "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
-        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200"
+        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200",
+        "https://data.bodik.jp/dataset/430005_00245/resource/dad15967-bb1a-487f-ab7b-908ff373156d"
       ],
       "note": "Matched K-NET station KMM007 within 0.421 km of the rounded catalogue coordinate; no street address is recorded yet. Exact placement address and facility sourced from Kumamoto Prefecture seismic-intensity installation list (2022).",
       "placementPrecision": "exact_address"
@@ -161358,7 +161414,8 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
-        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200"
+        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200",
+        "https://data.bodik.jp/dataset/430005_00245/resource/dad15967-bb1a-487f-ab7b-908ff373156d"
       ],
       "note": "No exact address or precise provider-station metadata is recorded yet. Exact placement address and facility sourced from Kumamoto Prefecture seismic-intensity installation list (2022).",
       "placementPrecision": "exact_address"
@@ -161399,7 +161456,8 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
-        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200"
+        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200",
+        "https://data.bodik.jp/dataset/430005_00245/resource/dad15967-bb1a-487f-ab7b-908ff373156d"
       ],
       "note": "No exact address or precise provider-station metadata is recorded yet. Exact placement address and facility sourced from Kumamoto Prefecture seismic-intensity installation list (2022).",
       "placementPrecision": "exact_address"
@@ -161440,7 +161498,8 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
-        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200"
+        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200",
+        "https://data.bodik.jp/dataset/430005_00245/resource/dad15967-bb1a-487f-ab7b-908ff373156d"
       ],
       "note": "No exact address or precise provider-station metadata is recorded yet. Exact placement address and facility sourced from Kumamoto Prefecture seismic-intensity installation list (2022).",
       "placementPrecision": "exact_address"
@@ -161481,7 +161540,8 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
-        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200"
+        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200",
+        "https://data.bodik.jp/dataset/430005_00245/resource/dad15967-bb1a-487f-ab7b-908ff373156d"
       ],
       "note": "No exact address or precise provider-station metadata is recorded yet. Exact placement address and facility sourced from Kumamoto Prefecture seismic-intensity installation list (2022).",
       "placementPrecision": "exact_address"
@@ -161604,7 +161664,8 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
-        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200"
+        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200",
+        "https://data.bodik.jp/dataset/430005_00245/resource/dad15967-bb1a-487f-ab7b-908ff373156d"
       ],
       "note": "No exact address or precise provider-station metadata is recorded yet. Exact placement address and facility sourced from Kumamoto Prefecture seismic-intensity installation list (2022).",
       "placementPrecision": "exact_address"
@@ -161645,7 +161706,8 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
-        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200"
+        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200",
+        "https://data.bodik.jp/dataset/430005_00245/resource/dad15967-bb1a-487f-ab7b-908ff373156d"
       ],
       "note": "No exact address or precise provider-station metadata is recorded yet. Exact placement address and facility sourced from Kumamoto Prefecture seismic-intensity installation list (2022).",
       "placementPrecision": "exact_address"
@@ -161686,7 +161748,8 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
-        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200"
+        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200",
+        "https://data.bodik.jp/dataset/430005_00245/resource/dad15967-bb1a-487f-ab7b-908ff373156d"
       ],
       "note": "No exact address or precise provider-station metadata is recorded yet. Exact placement address and facility sourced from Kumamoto Prefecture seismic-intensity installation list (2022).",
       "placementPrecision": "exact_address"
@@ -161809,7 +161872,8 @@
       "sourceUrls": [
         "https://www.kyoshin.bosai.go.jp/ja/stationlist/",
         "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
-        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200"
+        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200",
+        "https://data.bodik.jp/dataset/430005_00245/resource/dad15967-bb1a-487f-ab7b-908ff373156d"
       ],
       "note": "Matched K-NET station KMM012 within 0.076 km of the rounded catalogue coordinate; no street address is recorded yet. Exact placement address and facility sourced from Kumamoto Prefecture seismic-intensity installation list (2022).",
       "placementPrecision": "exact_address"
@@ -161850,7 +161914,8 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
-        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200"
+        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200",
+        "https://data.bodik.jp/dataset/430005_00245/resource/dad15967-bb1a-487f-ab7b-908ff373156d"
       ],
       "note": "No exact address or precise provider-station metadata is recorded yet. Exact placement address and facility sourced from Kumamoto Prefecture seismic-intensity installation list (2022).",
       "placementPrecision": "exact_address"
@@ -161931,7 +161996,8 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
-        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200"
+        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200",
+        "https://data.bodik.jp/dataset/430005_00245/resource/dad15967-bb1a-487f-ab7b-908ff373156d"
       ],
       "note": "No exact address or precise provider-station metadata is recorded yet. Exact placement address and facility sourced from Kumamoto Prefecture seismic-intensity installation list (2022).",
       "placementPrecision": "exact_address"
@@ -161972,7 +162038,8 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://www.city.yatsushiro.lg.jp/kiji00389/index.html",
-        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200"
+        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200",
+        "https://data.bodik.jp/dataset/430005_00245/resource/dad15967-bb1a-487f-ab7b-908ff373156d"
       ],
       "note": "No exact address or precise provider-station metadata is recorded yet. Exact placement address and facility sourced from Kumamoto Prefecture seismic-intensity installation list (2022).",
       "placementPrecision": "exact_address"
@@ -162013,7 +162080,8 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
-        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200"
+        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200",
+        "https://data.bodik.jp/dataset/430005_00245/resource/dad15967-bb1a-487f-ab7b-908ff373156d"
       ],
       "note": "No exact address or precise provider-station metadata is recorded yet. Exact placement address and facility sourced from Kumamoto Prefecture seismic-intensity installation list (2022).",
       "placementPrecision": "exact_address"
@@ -162054,7 +162122,8 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
-        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200"
+        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200",
+        "https://data.bodik.jp/dataset/430005_00245/resource/dad15967-bb1a-487f-ab7b-908ff373156d"
       ],
       "note": "No exact address or precise provider-station metadata is recorded yet. Exact placement address and facility sourced from Kumamoto Prefecture seismic-intensity installation list (2022).",
       "placementPrecision": "exact_address"
@@ -162137,7 +162206,8 @@
       "sourceUrls": [
         "https://www.kyoshin.bosai.go.jp/ja/stationlist/",
         "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
-        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200"
+        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200",
+        "https://data.bodik.jp/dataset/430005_00245/resource/dad15967-bb1a-487f-ab7b-908ff373156d"
       ],
       "note": "Matched K-NET station KMM003 within 0.444 km of the rounded catalogue coordinate; no street address is recorded yet. Exact placement address and facility sourced from Kumamoto Prefecture seismic-intensity installation list (2022).",
       "placementPrecision": "exact_address"
@@ -162178,7 +162248,8 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
-        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200"
+        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200",
+        "https://data.bodik.jp/dataset/430005_00245/resource/dad15967-bb1a-487f-ab7b-908ff373156d"
       ],
       "note": "No exact address or precise provider-station metadata is recorded yet. Exact placement address and facility sourced from Kumamoto Prefecture seismic-intensity installation list (2022).",
       "placementPrecision": "exact_address"
@@ -162219,7 +162290,8 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
-        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200"
+        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200",
+        "https://data.bodik.jp/dataset/430005_00245/resource/dad15967-bb1a-487f-ab7b-908ff373156d"
       ],
       "note": "No exact address or precise provider-station metadata is recorded yet. Exact placement address and facility sourced from Kumamoto Prefecture seismic-intensity installation list (2022).",
       "placementPrecision": "exact_address"
@@ -162260,7 +162332,8 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
-        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200"
+        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200",
+        "https://data.bodik.jp/dataset/430005_00245/resource/dad15967-bb1a-487f-ab7b-908ff373156d"
       ],
       "note": "No exact address or precise provider-station metadata is recorded yet. Exact placement address and facility sourced from Kumamoto Prefecture seismic-intensity installation list (2022).",
       "placementPrecision": "exact_address"
@@ -162302,7 +162375,8 @@
       "sourceUrls": [
         "https://www.kyoshin.bosai.go.jp/ja/stationlist/",
         "https://www.data.jma.go.jp/eqev/data/intens-st/",
-        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200"
+        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200",
+        "https://data.bodik.jp/dataset/430005_00245/resource/dad15967-bb1a-487f-ab7b-908ff373156d"
       ],
       "note": "Matched K-NET station KMM002 within 0.446 km of the rounded catalogue coordinate; no street address is recorded yet. Exact placement address and facility sourced from Kumamoto Prefecture seismic-intensity installation list (2022).",
       "placementPrecision": "exact_address"
@@ -162343,7 +162417,8 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
-        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200"
+        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200",
+        "https://data.bodik.jp/dataset/430005_00245/resource/dad15967-bb1a-487f-ab7b-908ff373156d"
       ],
       "note": "No exact address or precise provider-station metadata is recorded yet. Exact placement address and facility sourced from Kumamoto Prefecture seismic-intensity installation list (2022).",
       "placementPrecision": "exact_address"
@@ -162384,7 +162459,8 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
-        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200"
+        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200",
+        "https://data.bodik.jp/dataset/430005_00245/resource/dad15967-bb1a-487f-ab7b-908ff373156d"
       ],
       "note": "No exact address or precise provider-station metadata is recorded yet. Exact placement address and facility sourced from Kumamoto Prefecture seismic-intensity installation list (2022).",
       "placementPrecision": "exact_address"
@@ -162425,7 +162501,8 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
-        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200"
+        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200",
+        "https://data.bodik.jp/dataset/430005_00245/resource/dad15967-bb1a-487f-ab7b-908ff373156d"
       ],
       "note": "No exact address or precise provider-station metadata is recorded yet. Exact placement address and facility sourced from Kumamoto Prefecture seismic-intensity installation list (2022).",
       "placementPrecision": "exact_address"
@@ -162466,7 +162543,8 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
-        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200"
+        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200",
+        "https://data.bodik.jp/dataset/430005_00245/resource/dad15967-bb1a-487f-ab7b-908ff373156d"
       ],
       "note": "No exact address or precise provider-station metadata is recorded yet. Exact placement address and facility sourced from Kumamoto Prefecture seismic-intensity installation list (2022).",
       "placementPrecision": "exact_address"
@@ -162507,7 +162585,8 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
-        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200"
+        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200",
+        "https://data.bodik.jp/dataset/430005_00245/resource/dad15967-bb1a-487f-ab7b-908ff373156d"
       ],
       "note": "No exact address or precise provider-station metadata is recorded yet. Exact placement address and facility sourced from Kumamoto Prefecture seismic-intensity installation list (2022).",
       "placementPrecision": "exact_address"
@@ -162548,7 +162627,8 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
-        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200"
+        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200",
+        "https://data.bodik.jp/dataset/430005_00245/resource/dad15967-bb1a-487f-ab7b-908ff373156d"
       ],
       "note": "No exact address or precise provider-station metadata is recorded yet. Exact placement address and facility sourced from Kumamoto Prefecture seismic-intensity installation list (2022).",
       "placementPrecision": "exact_address"
@@ -162589,7 +162669,8 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
-        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200"
+        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200",
+        "https://data.bodik.jp/dataset/430005_00245/resource/dad15967-bb1a-487f-ab7b-908ff373156d"
       ],
       "note": "No exact address or precise provider-station metadata is recorded yet. Exact placement address and facility sourced from Kumamoto Prefecture seismic-intensity installation list (2022).",
       "placementPrecision": "exact_address"
@@ -162630,7 +162711,8 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
-        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200"
+        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200",
+        "https://data.bodik.jp/dataset/430005_00245/resource/dad15967-bb1a-487f-ab7b-908ff373156d"
       ],
       "note": "No exact address or precise provider-station metadata is recorded yet. Exact placement address and facility sourced from Kumamoto Prefecture seismic-intensity installation list (2022).",
       "placementPrecision": "exact_address"
@@ -162671,7 +162753,8 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
-        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200"
+        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200",
+        "https://data.bodik.jp/dataset/430005_00245/resource/dad15967-bb1a-487f-ab7b-908ff373156d"
       ],
       "note": "No exact address or precise provider-station metadata is recorded yet. Exact placement address and facility sourced from Kumamoto Prefecture seismic-intensity installation list (2022).",
       "placementPrecision": "exact_address"
@@ -162713,7 +162796,8 @@
       "sourceUrls": [
         "https://www.kyoshin.bosai.go.jp/ja/stationlist/",
         "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
-        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200"
+        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200",
+        "https://data.bodik.jp/dataset/430005_00245/resource/dad15967-bb1a-487f-ab7b-908ff373156d"
       ],
       "note": "Matched K-NET station KMM008 within 0.279 km of the rounded catalogue coordinate; no street address is recorded yet. Exact placement address and facility sourced from Kumamoto Prefecture seismic-intensity installation list (2022).",
       "placementPrecision": "exact_address"
@@ -162794,7 +162878,8 @@
       "providerLongitude": 130.4873,
       "sourceUrls": [
         "https://www.kyoshin.bosai.go.jp/ja/stationlist/",
-        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200"
+        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200",
+        "https://data.bodik.jp/dataset/430005_00245/resource/dad15967-bb1a-487f-ab7b-908ff373156d"
       ],
       "note": "Matched K-NET station KMM010 within 0.455 km of the rounded catalogue coordinate; no street address is recorded yet. Exact placement address and facility sourced from Kumamoto Prefecture seismic-intensity installation list (2022).",
       "placementPrecision": "exact_address"
@@ -162835,7 +162920,8 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
-        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200"
+        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200",
+        "https://data.bodik.jp/dataset/430005_00245/resource/dad15967-bb1a-487f-ab7b-908ff373156d"
       ],
       "note": "No exact address or precise provider-station metadata is recorded yet. Exact placement address and facility sourced from Kumamoto Prefecture seismic-intensity installation list (2022).",
       "placementPrecision": "exact_address"
@@ -162876,7 +162962,8 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
-        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200"
+        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200",
+        "https://data.bodik.jp/dataset/430005_00245/resource/dad15967-bb1a-487f-ab7b-908ff373156d"
       ],
       "note": "No exact address or precise provider-station metadata is recorded yet. Exact placement address and facility sourced from Kumamoto Prefecture seismic-intensity installation list (2022).",
       "placementPrecision": "exact_address"
@@ -162917,7 +163004,8 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
-        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200"
+        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200",
+        "https://data.bodik.jp/dataset/430005_00245/resource/dad15967-bb1a-487f-ab7b-908ff373156d"
       ],
       "note": "No exact address or precise provider-station metadata is recorded yet. Exact placement address and facility sourced from Kumamoto Prefecture seismic-intensity installation list (2022).",
       "placementPrecision": "exact_address"
@@ -162958,7 +163046,8 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
-        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200"
+        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200",
+        "https://data.bodik.jp/dataset/430005_00245/resource/dad15967-bb1a-487f-ab7b-908ff373156d"
       ],
       "note": "No exact address or precise provider-station metadata is recorded yet. Exact placement address and facility sourced from Kumamoto Prefecture seismic-intensity installation list (2022).",
       "placementPrecision": "exact_address"
@@ -162999,7 +163088,8 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
-        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200"
+        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200",
+        "https://data.bodik.jp/dataset/430005_00245/resource/dad15967-bb1a-487f-ab7b-908ff373156d"
       ],
       "note": "No exact address or precise provider-station metadata is recorded yet. Exact placement address and facility sourced from Kumamoto Prefecture seismic-intensity installation list (2022).",
       "placementPrecision": "exact_address"
@@ -163041,7 +163131,8 @@
       "sourceUrls": [
         "https://www.kyoshin.bosai.go.jp/ja/stationlist/",
         "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
-        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200"
+        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200",
+        "https://data.bodik.jp/dataset/430005_00245/resource/dad15967-bb1a-487f-ab7b-908ff373156d"
       ],
       "note": "Matched K-NET station KMM011 within 0.500 km of the rounded catalogue coordinate; no street address is recorded yet. Exact placement address and facility sourced from Kumamoto Prefecture seismic-intensity installation list (2022).",
       "placementPrecision": "exact_address"
@@ -163082,7 +163173,8 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
-        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200"
+        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200",
+        "https://data.bodik.jp/dataset/430005_00245/resource/dad15967-bb1a-487f-ab7b-908ff373156d"
       ],
       "note": "No exact address or precise provider-station metadata is recorded yet. Exact placement address and facility sourced from Kumamoto Prefecture seismic-intensity installation list (2022).",
       "placementPrecision": "exact_address"
@@ -163123,7 +163215,8 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
-        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200"
+        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200",
+        "https://data.bodik.jp/dataset/430005_00245/resource/dad15967-bb1a-487f-ab7b-908ff373156d"
       ],
       "note": "No exact address or precise provider-station metadata is recorded yet. Exact placement address and facility sourced from Kumamoto Prefecture seismic-intensity installation list (2022).",
       "placementPrecision": "exact_address"
@@ -163164,7 +163257,8 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
-        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200"
+        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200",
+        "https://data.bodik.jp/dataset/430005_00245/resource/dad15967-bb1a-487f-ab7b-908ff373156d"
       ],
       "note": "No exact address or precise provider-station metadata is recorded yet. Exact placement address and facility sourced from Kumamoto Prefecture seismic-intensity installation list (2022).",
       "placementPrecision": "exact_address"
@@ -163205,7 +163299,8 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
-        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200"
+        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200",
+        "https://data.bodik.jp/dataset/430005_00245/resource/dad15967-bb1a-487f-ab7b-908ff373156d"
       ],
       "note": "No exact address or precise provider-station metadata is recorded yet. Exact placement address and facility sourced from Kumamoto Prefecture seismic-intensity installation list (2022).",
       "placementPrecision": "exact_address"
@@ -163246,7 +163341,8 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
-        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200"
+        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200",
+        "https://data.bodik.jp/dataset/430005_00245/resource/dad15967-bb1a-487f-ab7b-908ff373156d"
       ],
       "note": "No exact address or precise provider-station metadata is recorded yet. Exact placement address and facility sourced from Kumamoto Prefecture seismic-intensity installation list (2022).",
       "placementPrecision": "exact_address"
@@ -163287,7 +163383,8 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
-        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200"
+        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200",
+        "https://data.bodik.jp/dataset/430005_00245/resource/dad15967-bb1a-487f-ab7b-908ff373156d"
       ],
       "note": "No exact address or precise provider-station metadata is recorded yet. Exact placement address and facility sourced from Kumamoto Prefecture seismic-intensity installation list (2022).",
       "placementPrecision": "exact_address"
@@ -163329,7 +163426,8 @@
       "sourceUrls": [
         "https://www.kyoshin.bosai.go.jp/ja/stationlist/",
         "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
-        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200"
+        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200",
+        "https://data.bodik.jp/dataset/430005_00245/resource/dad15967-bb1a-487f-ab7b-908ff373156d"
       ],
       "note": "Matched K-NET station KMM005 within 0.511 km of the rounded catalogue coordinate; no street address is recorded yet. Exact placement address and facility sourced from Kumamoto Prefecture seismic-intensity installation list (2022).",
       "placementPrecision": "exact_address"
@@ -163370,7 +163468,8 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
-        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200"
+        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200",
+        "https://data.bodik.jp/dataset/430005_00245/resource/dad15967-bb1a-487f-ab7b-908ff373156d"
       ],
       "note": "No exact address or precise provider-station metadata is recorded yet. Exact placement address and facility sourced from Kumamoto Prefecture seismic-intensity installation list (2022).",
       "placementPrecision": "exact_address"
@@ -163411,7 +163510,8 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
-        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200"
+        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200",
+        "https://data.bodik.jp/dataset/430005_00245/resource/dad15967-bb1a-487f-ab7b-908ff373156d"
       ],
       "note": "No exact address or precise provider-station metadata is recorded yet. Exact placement address and facility sourced from Kumamoto Prefecture seismic-intensity installation list (2022).",
       "placementPrecision": "exact_address"
@@ -163452,7 +163552,8 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
-        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200"
+        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200",
+        "https://data.bodik.jp/dataset/430005_00245/resource/dad15967-bb1a-487f-ab7b-908ff373156d"
       ],
       "note": "No exact address or precise provider-station metadata is recorded yet. Exact placement address and facility sourced from Kumamoto Prefecture seismic-intensity installation list (2022).",
       "placementPrecision": "exact_address"
@@ -163493,7 +163594,8 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
-        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200"
+        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200",
+        "https://data.bodik.jp/dataset/430005_00245/resource/dad15967-bb1a-487f-ab7b-908ff373156d"
       ],
       "note": "No exact address or precise provider-station metadata is recorded yet. Exact placement address and facility sourced from Kumamoto Prefecture seismic-intensity installation list (2022).",
       "placementPrecision": "exact_address"
@@ -163534,7 +163636,8 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
-        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200"
+        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200",
+        "https://data.bodik.jp/dataset/430005_00245/resource/dad15967-bb1a-487f-ab7b-908ff373156d"
       ],
       "note": "No exact address or precise provider-station metadata is recorded yet. Exact placement address and facility sourced from Kumamoto Prefecture seismic-intensity installation list (2022).",
       "placementPrecision": "exact_address"
@@ -163575,7 +163678,8 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
-        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200"
+        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200",
+        "https://data.bodik.jp/dataset/430005_00245/resource/dad15967-bb1a-487f-ab7b-908ff373156d"
       ],
       "note": "No exact address or precise provider-station metadata is recorded yet. Exact placement address and facility sourced from Kumamoto Prefecture seismic-intensity installation list (2022).",
       "placementPrecision": "exact_address"
@@ -163616,7 +163720,8 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
-        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200"
+        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200",
+        "https://data.bodik.jp/dataset/430005_00245/resource/dad15967-bb1a-487f-ab7b-908ff373156d"
       ],
       "note": "No exact address or precise provider-station metadata is recorded yet. Exact placement address and facility sourced from Kumamoto Prefecture seismic-intensity installation list (2022).",
       "placementPrecision": "exact_address"
@@ -163658,7 +163763,8 @@
       "sourceUrls": [
         "https://www.kyoshin.bosai.go.jp/ja/stationlist/",
         "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
-        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200"
+        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200",
+        "https://data.bodik.jp/dataset/430005_00245/resource/dad15967-bb1a-487f-ab7b-908ff373156d"
       ],
       "note": "Matched K-NET station KMM009 within 0.421 km of the rounded catalogue coordinate; no street address is recorded yet. Exact placement address and facility sourced from Kumamoto Prefecture seismic-intensity installation list (2022).",
       "placementPrecision": "exact_address"
@@ -163699,7 +163805,8 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
-        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200"
+        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200",
+        "https://data.bodik.jp/dataset/430005_00245/resource/dad15967-bb1a-487f-ab7b-908ff373156d"
       ],
       "note": "No exact address or precise provider-station metadata is recorded yet. Exact placement address and facility sourced from Kumamoto Prefecture seismic-intensity installation list (2022).",
       "placementPrecision": "exact_address"
@@ -163740,7 +163847,8 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
-        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200"
+        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200",
+        "https://data.bodik.jp/dataset/430005_00245/resource/dad15967-bb1a-487f-ab7b-908ff373156d"
       ],
       "note": "No exact address or precise provider-station metadata is recorded yet. Exact placement address and facility sourced from Kumamoto Prefecture seismic-intensity installation list (2022).",
       "placementPrecision": "exact_address"
@@ -163781,7 +163889,8 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
-        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200"
+        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200",
+        "https://data.bodik.jp/dataset/430005_00245/resource/dad15967-bb1a-487f-ab7b-908ff373156d"
       ],
       "note": "No exact address or precise provider-station metadata is recorded yet. Exact placement address and facility sourced from Kumamoto Prefecture seismic-intensity installation list (2022).",
       "placementPrecision": "exact_address"
@@ -163822,7 +163931,8 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
-        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200"
+        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200",
+        "https://data.bodik.jp/dataset/430005_00245/resource/dad15967-bb1a-487f-ab7b-908ff373156d"
       ],
       "note": "No exact address or precise provider-station metadata is recorded yet. Exact placement address and facility sourced from Kumamoto Prefecture seismic-intensity installation list (2022).",
       "placementPrecision": "exact_address"
@@ -163904,7 +164014,8 @@
       "sourceUrls": [
         "https://www.kyoshin.bosai.go.jp/ja/stationlist/",
         "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
-        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200"
+        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200",
+        "https://data.bodik.jp/dataset/430005_00245/resource/dad15967-bb1a-487f-ab7b-908ff373156d"
       ],
       "note": "Matched K-NET station KMM016 within 0.561 km of the rounded catalogue coordinate; no street address is recorded yet. Exact placement address and facility sourced from Kumamoto Prefecture seismic-intensity installation list (2022).",
       "placementPrecision": "exact_address"
@@ -163945,7 +164056,8 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
-        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200"
+        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200",
+        "https://data.bodik.jp/dataset/430005_00245/resource/dad15967-bb1a-487f-ab7b-908ff373156d"
       ],
       "note": "No exact address or precise provider-station metadata is recorded yet. Exact placement address and facility sourced from Kumamoto Prefecture seismic-intensity installation list (2022).",
       "placementPrecision": "exact_address"
@@ -164027,7 +164139,8 @@
       "sourceUrls": [
         "https://www.kyoshin.bosai.go.jp/ja/stationlist/",
         "https://www.data.jma.go.jp/eqev/data/intens-st/",
-        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200"
+        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200",
+        "https://data.bodik.jp/dataset/430005_00245/resource/dad15967-bb1a-487f-ab7b-908ff373156d"
       ],
       "note": "Matched K-NET station KMM017 within 0.560 km of the rounded catalogue coordinate; no street address is recorded yet. Exact placement address and facility sourced from Kumamoto Prefecture seismic-intensity installation list (2022).",
       "placementPrecision": "exact_address"
@@ -164068,7 +164181,8 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://www.data.jma.go.jp/eqev/data/intens-st/",
-        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200"
+        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200",
+        "https://data.bodik.jp/dataset/430005_00245/resource/dad15967-bb1a-487f-ab7b-908ff373156d"
       ],
       "note": "No exact address or precise provider-station metadata is recorded yet. Exact placement address and facility sourced from Kumamoto Prefecture seismic-intensity installation list (2022).",
       "placementPrecision": "exact_address"
@@ -164109,7 +164223,8 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
-        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200"
+        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200",
+        "https://data.bodik.jp/dataset/430005_00245/resource/dad15967-bb1a-487f-ab7b-908ff373156d"
       ],
       "note": "No exact address or precise provider-station metadata is recorded yet. Exact placement address and facility sourced from Kumamoto Prefecture seismic-intensity installation list (2022).",
       "placementPrecision": "exact_address"
@@ -164150,7 +164265,8 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
-        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200"
+        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200",
+        "https://data.bodik.jp/dataset/430005_00245/resource/dad15967-bb1a-487f-ab7b-908ff373156d"
       ],
       "note": "No exact address or precise provider-station metadata is recorded yet. Exact placement address and facility sourced from Kumamoto Prefecture seismic-intensity installation list (2022).",
       "placementPrecision": "exact_address"
@@ -164192,7 +164308,8 @@
       "sourceUrls": [
         "https://www.kyoshin.bosai.go.jp/ja/stationlist/",
         "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
-        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200"
+        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200",
+        "https://data.bodik.jp/dataset/430005_00245/resource/dad15967-bb1a-487f-ab7b-908ff373156d"
       ],
       "note": "Matched K-NET station KMM014 within 0.502 km of the rounded catalogue coordinate; no street address is recorded yet. Exact placement address and facility sourced from Kumamoto Prefecture seismic-intensity installation list (2022).",
       "placementPrecision": "exact_address"
@@ -164233,7 +164350,8 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
-        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200"
+        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200",
+        "https://data.bodik.jp/dataset/430005_00245/resource/dad15967-bb1a-487f-ab7b-908ff373156d"
       ],
       "note": "No exact address or precise provider-station metadata is recorded yet. Exact placement address and facility sourced from Kumamoto Prefecture seismic-intensity installation list (2022).",
       "placementPrecision": "exact_address"
@@ -164274,7 +164392,8 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://www.data.jma.go.jp/eqev/data/kyoshin/jma-shindo.html",
-        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200"
+        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200",
+        "https://data.bodik.jp/dataset/430005_00245/resource/dad15967-bb1a-487f-ab7b-908ff373156d"
       ],
       "note": "No exact address or precise provider-station metadata is recorded yet. Exact placement address and facility sourced from Kumamoto Prefecture seismic-intensity installation list (2022).",
       "placementPrecision": "exact_address"
@@ -164315,7 +164434,8 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
-        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200"
+        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200",
+        "https://data.bodik.jp/dataset/430005_00245/resource/dad15967-bb1a-487f-ab7b-908ff373156d"
       ],
       "note": "No exact address or precise provider-station metadata is recorded yet. Exact placement address and facility sourced from Kumamoto Prefecture seismic-intensity installation list (2022).",
       "placementPrecision": "exact_address"
@@ -164356,7 +164476,8 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=130.90&lat=32.22",
-        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200"
+        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200",
+        "https://data.bodik.jp/dataset/430005_00245/resource/dad15967-bb1a-487f-ab7b-908ff373156d"
       ],
       "note": "No exact address or precise provider-station metadata is recorded yet. Exact placement address and facility sourced from Kumamoto Prefecture seismic-intensity installation list (2022).",
       "placementPrecision": "exact_address"
@@ -164397,7 +164518,8 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=130.93&lat=32.24",
-        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200"
+        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200",
+        "https://data.bodik.jp/dataset/430005_00245/resource/dad15967-bb1a-487f-ab7b-908ff373156d"
       ],
       "note": "No exact address or precise provider-station metadata is recorded yet. Exact placement address and facility sourced from Kumamoto Prefecture seismic-intensity installation list (2022).",
       "placementPrecision": "exact_address"
@@ -164426,10 +164548,10 @@
       "areaNameJa": "熊本県球磨",
       "municipalityCode": "4351400",
       "gsiLocalityJa": "須恵",
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
+      "publishedAddressJa": "あさぎり町須恵1227",
+      "facilityNameJa": "あさぎり町須恵支所",
       "facilityNameEn": null,
-      "metadataStatus": "Catalogue only",
+      "metadataStatus": "Kumamoto Prefecture seismic-intensity installation list (2022)",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -164437,11 +164559,11 @@
       "providerLatitude": null,
       "providerLongitude": null,
       "sourceUrls": [
-        "https://www.data.jma.go.jp/eqev/data/intens-st/"
+        "https://www.data.jma.go.jp/eqev/data/intens-st/",
+        "https://data.bodik.jp/dataset/430005_00245/resource/dad15967-bb1a-487f-ab7b-908ff373156d"
       ],
-      "note": "No exact address or precise provider-station metadata is recorded yet.",
-      "placementLocalityJa": "あさぎり町",
-      "placementPrecision": "municipality_or_ward"
+      "note": "Kumamoto Prefecture’s official installation list directly identifies the station as installed at Asagiri Town Sue Branch Office and publishes its address.",
+      "placementPrecision": "exact_address"
     },
     {
       "code": "4351434",
@@ -164479,7 +164601,8 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=130.87&lat=32.24",
-        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200"
+        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200",
+        "https://data.bodik.jp/dataset/430005_00245/resource/dad15967-bb1a-487f-ab7b-908ff373156d"
       ],
       "note": "No exact address or precise provider-station metadata is recorded yet. Exact placement address and facility sourced from Kumamoto Prefecture seismic-intensity installation list (2022).",
       "placementPrecision": "exact_address"
@@ -164521,7 +164644,8 @@
       "sourceUrls": [
         "https://www.kyoshin.bosai.go.jp/ja/stationlist/",
         "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
-        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200"
+        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200",
+        "https://data.bodik.jp/dataset/430005_00245/resource/dad15967-bb1a-487f-ab7b-908ff373156d"
       ],
       "note": "Matched K-NET station KMM015 within 0.580 km of the rounded catalogue coordinate; no street address is recorded yet. Exact placement address and facility sourced from Kumamoto Prefecture seismic-intensity installation list (2022).",
       "placementPrecision": "exact_address"
@@ -164562,7 +164686,8 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
-        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200"
+        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200",
+        "https://data.bodik.jp/dataset/430005_00245/resource/dad15967-bb1a-487f-ab7b-908ff373156d"
       ],
       "note": "No exact address or precise provider-station metadata is recorded yet. Exact placement address and facility sourced from Kumamoto Prefecture seismic-intensity installation list (2022).",
       "placementPrecision": "exact_address"
@@ -164643,7 +164768,8 @@
       "providerLongitude": 130.3898,
       "sourceUrls": [
         "https://www.kyoshin.bosai.go.jp/ja/stationlist/",
-        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200"
+        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200",
+        "https://data.bodik.jp/dataset/430005_00245/resource/dad15967-bb1a-487f-ab7b-908ff373156d"
       ],
       "note": "Matched K-NET station KMM018 within 0.456 km of the rounded catalogue coordinate; no street address is recorded yet. Exact placement address and facility sourced from Kumamoto Prefecture seismic-intensity installation list (2022).",
       "placementPrecision": "exact_address"
@@ -164684,7 +164810,8 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
-        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200"
+        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200",
+        "https://data.bodik.jp/dataset/430005_00245/resource/dad15967-bb1a-487f-ab7b-908ff373156d"
       ],
       "note": "No exact address or precise provider-station metadata is recorded yet. Exact placement address and facility sourced from Kumamoto Prefecture seismic-intensity installation list (2022).",
       "placementPrecision": "exact_address"
@@ -164725,7 +164852,8 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
-        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200"
+        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200",
+        "https://data.bodik.jp/dataset/430005_00245/resource/dad15967-bb1a-487f-ab7b-908ff373156d"
       ],
       "note": "No exact address or precise provider-station metadata is recorded yet. Exact placement address and facility sourced from Kumamoto Prefecture seismic-intensity installation list (2022).",
       "placementPrecision": "exact_address"
@@ -164846,7 +164974,8 @@
       "providerLongitude": 130.1807,
       "sourceUrls": [
         "https://www.kyoshin.bosai.go.jp/ja/stationlist/",
-        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200"
+        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200",
+        "https://data.bodik.jp/dataset/430005_00245/resource/dad15967-bb1a-487f-ab7b-908ff373156d"
       ],
       "note": "Matched K-NET station KMM020 within 0.406 km of the rounded catalogue coordinate; no street address is recorded yet. Exact placement address and facility sourced from Kumamoto Prefecture seismic-intensity installation list (2022).",
       "placementPrecision": "exact_address"
@@ -164887,7 +165016,8 @@
       "providerLongitude": 129.9996,
       "sourceUrls": [
         "https://www.kyoshin.bosai.go.jp/ja/stationlist/",
-        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200"
+        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200",
+        "https://data.bodik.jp/dataset/430005_00245/resource/dad15967-bb1a-487f-ab7b-908ff373156d"
       ],
       "note": "Matched K-NET station KMM021 within 0.086 km of the rounded catalogue coordinate; no street address is recorded yet. Exact placement address and facility sourced from Kumamoto Prefecture seismic-intensity installation list (2022).",
       "placementPrecision": "exact_address"
@@ -164929,7 +165059,8 @@
       "sourceUrls": [
         "https://www.kyoshin.bosai.go.jp/ja/stationlist/",
         "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
-        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200"
+        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200",
+        "https://data.bodik.jp/dataset/430005_00245/resource/dad15967-bb1a-487f-ab7b-908ff373156d"
       ],
       "note": "Matched K-NET station KMM019 within 0.538 km of the rounded catalogue coordinate; no street address is recorded yet. Exact placement address and facility sourced from Kumamoto Prefecture seismic-intensity installation list (2022).",
       "placementPrecision": "exact_address"
@@ -164970,7 +165101,8 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
-        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200"
+        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200",
+        "https://data.bodik.jp/dataset/430005_00245/resource/dad15967-bb1a-487f-ab7b-908ff373156d"
       ],
       "note": "No exact address or precise provider-station metadata is recorded yet. Exact placement address and facility sourced from Kumamoto Prefecture seismic-intensity installation list (2022).",
       "placementPrecision": "exact_address"
@@ -165011,7 +165143,8 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
-        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200"
+        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200",
+        "https://data.bodik.jp/dataset/430005_00245/resource/dad15967-bb1a-487f-ab7b-908ff373156d"
       ],
       "note": "No exact address or precise provider-station metadata is recorded yet. Exact placement address and facility sourced from Kumamoto Prefecture seismic-intensity installation list (2022).",
       "placementPrecision": "exact_address"
@@ -165052,7 +165185,8 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
-        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200"
+        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200",
+        "https://data.bodik.jp/dataset/430005_00245/resource/dad15967-bb1a-487f-ab7b-908ff373156d"
       ],
       "note": "No exact address or precise provider-station metadata is recorded yet. Exact placement address and facility sourced from Kumamoto Prefecture seismic-intensity installation list (2022).",
       "placementPrecision": "exact_address"
@@ -165093,7 +165227,8 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
-        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200"
+        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200",
+        "https://data.bodik.jp/dataset/430005_00245/resource/dad15967-bb1a-487f-ab7b-908ff373156d"
       ],
       "note": "No exact address or precise provider-station metadata is recorded yet. Exact placement address and facility sourced from Kumamoto Prefecture seismic-intensity installation list (2022).",
       "placementPrecision": "exact_address"
@@ -165134,7 +165269,8 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
-        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200"
+        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200",
+        "https://data.bodik.jp/dataset/430005_00245/resource/dad15967-bb1a-487f-ab7b-908ff373156d"
       ],
       "note": "No exact address or precise provider-station metadata is recorded yet. Exact placement address and facility sourced from Kumamoto Prefecture seismic-intensity installation list (2022).",
       "placementPrecision": "exact_address"
@@ -165175,7 +165311,8 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
-        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200"
+        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200",
+        "https://data.bodik.jp/dataset/430005_00245/resource/dad15967-bb1a-487f-ab7b-908ff373156d"
       ],
       "note": "No exact address or precise provider-station metadata is recorded yet. Exact placement address and facility sourced from Kumamoto Prefecture seismic-intensity installation list (2022).",
       "placementPrecision": "exact_address"
@@ -165257,7 +165394,8 @@
       "sourceUrls": [
         "https://www.kyoshin.bosai.go.jp/ja/stationlist/",
         "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
-        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200"
+        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200",
+        "https://data.bodik.jp/dataset/430005_00245/resource/dad15967-bb1a-487f-ab7b-908ff373156d"
       ],
       "note": "Matched K-NET station KMM013 within 0.500 km of the rounded catalogue coordinate; no street address is recorded yet. Exact placement address and facility sourced from Kumamoto Prefecture seismic-intensity installation list (2022).",
       "placementPrecision": "exact_address"
@@ -165298,7 +165436,8 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
-        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200"
+        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200",
+        "https://data.bodik.jp/dataset/430005_00245/resource/dad15967-bb1a-487f-ab7b-908ff373156d"
       ],
       "note": "No exact address or precise provider-station metadata is recorded yet. Exact placement address and facility sourced from Kumamoto Prefecture seismic-intensity installation list (2022).",
       "placementPrecision": "exact_address"
@@ -165339,7 +165478,8 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
-        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200"
+        "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200",
+        "https://data.bodik.jp/dataset/430005_00245/resource/dad15967-bb1a-487f-ab7b-908ff373156d"
       ],
       "note": "No exact address or precise provider-station metadata is recorded yet. Exact placement address and facility sourced from Kumamoto Prefecture seismic-intensity installation list (2022).",
       "placementPrecision": "exact_address"

@@ -152,6 +152,11 @@
     <string name="destination_prediction">到達予測</string>
     <string name="official_eew_area_arrival">緊急地震速報の地域到達予測</string>
     <string name="modelled_arrival">モデルによる到達予測</string>
+    <string name="local_jma_method_estimate">気象庁方式によるローカル推定</string>
+    <string name="local_estimate_ground_proxy">地盤代替地点: %1$s</string>
+    <string name="local_estimate_extrapolated">気象庁方式の公表検証範囲外</string>
+    <string name="dmdss_diagnostic_local_forecast">ローカル震度推定</string>
+    <string name="dmdss_diagnostic_local_forecast_ready">%1$d地域・最大震度%2$s・検証範囲外%3$d地域</string>
     <string name="arrived_upper">到達</string>
     <string name="s_wave">S波</string>
     <string name="p_wave">P波</string>

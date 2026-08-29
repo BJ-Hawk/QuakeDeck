@@ -12,10 +12,13 @@ class AlertLocationPolicy(context: Context) {
         location: AlertLocation,
         locationFiltering: Boolean
     ): EewAlertScopeDecision {
-        if (!locationFiltering) return resolveEewAlertScope(
-            locationFiltering = false,
-            eventMaximum = event.maxIntensity
-        )
+        if (!locationFiltering) {
+            val maximum = event.localIntensityForecast?.nationwideMaximum
+                ?.upperDisplayIntensity
+                ?.takeIf { event.points.isEmpty() && event.maxIntensity == "—" }
+                ?: event.maxIntensity
+            return resolveEewAlertScope(locationFiltering = false, eventMaximum = maximum)
+        }
 
         val officialPoint = eewForecastPoint(event, location)
         if (officialPoint != null || event.points.isNotEmpty()) {
@@ -23,6 +26,28 @@ class AlertLocationPolicy(context: Context) {
                 locationFiltering = true,
                 eventMaximum = event.maxIntensity,
                 officialPoint = officialPoint
+            )
+        }
+
+        val localPrediction = EewWaveModel.destinationPrediction(
+            event = event,
+            nowEpochMillis = System.currentTimeMillis(),
+            destinationName = location.displayName,
+            destinationLatitude = location.latitude,
+            destinationLongitude = location.longitude,
+            destinationEewAreaNameJa = location.eewAreaNameJa
+        ).valueOrNull()?.takeIf { it.locallyCalculatedIntensity && it.predictedIntensity != null }
+        if (localPrediction != null) {
+            return resolveEewAlertScope(
+                locationFiltering = true,
+                eventMaximum = event.maxIntensity,
+                localEstimate = IntensityPoint(
+                    name = location.displayName,
+                    intensity = localPrediction.predictedIntensity!!,
+                    intensityFrom = localPrediction.predictedIntensityFrom,
+                    latitude = location.latitude,
+                    longitude = location.longitude
+                )
             )
         }
 
@@ -227,6 +252,7 @@ internal fun resolveEewAlertScope(
     locationFiltering: Boolean,
     eventMaximum: String,
     officialPoint: IntensityPoint? = null,
+    localEstimate: IntensityPoint? = null,
     emptyRegionFallback: EewAlertScopeBasis? = null
 ): EewAlertScopeDecision {
     if (!locationFiltering) {
@@ -243,6 +269,14 @@ internal fun resolveEewAlertScope(
             relevantIntensity = officialPoint.intensity,
             localPoint = officialPoint,
             basis = EewAlertScopeBasis.OFFICIAL_REGIONAL_FORECAST
+        )
+    }
+    if (localEstimate != null) {
+        return EewAlertScopeDecision(
+            inScope = true,
+            relevantIntensity = localEstimate.intensity,
+            localPoint = localEstimate,
+            basis = EewAlertScopeBasis.LOCAL_JMA_METHOD_ESTIMATE
         )
     }
     if (emptyRegionFallback != null) {
@@ -275,6 +309,7 @@ internal fun resolveTsunamiAlertScope(
 enum class EewAlertScopeBasis(val diagnostic: String) {
     JAPAN_WIDE_MAXIMUM("Japan-wide maximum"),
     OFFICIAL_REGIONAL_FORECAST("Official forecast for the selected location"),
+    LOCAL_JMA_METHOD_ESTIMATE("Local JMA-method estimate for the selected location"),
     EMPTY_REGIONS_SAME_EEW_AREA("Empty regional forecast · same JMA EEW area"),
     EMPTY_REGIONS_NEAR_EPICENTRE("Empty regional forecast · within 75 km of hypocentre"),
     OUTSIDE_SELECTED_LOCATION("Outside the selected notification location")

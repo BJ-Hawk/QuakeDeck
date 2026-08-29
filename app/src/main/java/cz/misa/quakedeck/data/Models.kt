@@ -62,7 +62,18 @@ data class IntensityPoint(
     val longitude: Double? = null,
     val prefecture: String = "",
     val stationName: String? = null,
-    val isArea: Boolean = false
+    val isArea: Boolean = false,
+    val regionCode: String? = null,
+    val isPlum: Boolean = false,
+    val isWarning: Boolean = false
+)
+
+@Immutable
+data class EewSourceAccuracy(
+    val epicenterRanks: List<Int> = emptyList(),
+    val depthRank: Int? = null,
+    val magnitudeCalculationRank: Int? = null,
+    val magnitudeStationCountRank: Int? = null
 )
 
 
@@ -123,6 +134,10 @@ data class EarthquakeEvent(
     val hasHypocenter: Boolean = true,
     val reportCorrection: String? = null,
     val isCancelled: Boolean = false,
+    val eewHypocenterCondition: String? = null,
+    val eewMagnitudeUnit: String? = null,
+    val eewSourceAccuracy: EewSourceAccuracy? = null,
+    val localIntensityForecast: LocalEewIntensityForecast? = null,
     /**
      * Offset applied only to the historical P2PQuake sandbox timeline.
      * Production data stays at zero; replay packets are shifted so their issue

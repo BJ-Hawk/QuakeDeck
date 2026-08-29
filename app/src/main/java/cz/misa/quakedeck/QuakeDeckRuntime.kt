@@ -25,6 +25,8 @@ import cz.misa.quakedeck.data.HolidayCountryDetector
 import cz.misa.quakedeck.data.JapanMapGeometry
 import cz.misa.quakedeck.data.IntensityPoint
 import cz.misa.quakedeck.data.LiveUpdateKind
+import cz.misa.quakedeck.data.LocalEewForecasts
+import cz.misa.quakedeck.data.valueOrNull
 import cz.misa.quakedeck.data.P2pQuakeProvider
 import cz.misa.quakedeck.data.PublicHolidayCalendar
 import cz.misa.quakedeck.data.QuakeDataProvider
@@ -76,6 +78,8 @@ class QuakeDeckRuntime(context: Context) : QuakeDataProvider {
 
     private var combinedLiveSequence = 0L
     private var sandboxForecastGeneration = 0L
+    private var sandboxLocalForecastKey: String? = null
+    private var sandboxLocalForecastEvent: EarthquakeEvent? = null
 
     @Volatile
     var dmdssContractSummary: DmDssContractSummary? = null
@@ -148,8 +152,27 @@ class QuakeDeckRuntime(context: Context) : QuakeDataProvider {
     }
 
     private fun handleP2pSnapshot(snapshot: AppSnapshot) {
-        p2pSnapshot = snapshot
+        p2pSnapshot = if (snapshot.testingMode) snapshot.withSandboxLocalForecast() else snapshot
         publishCombined(origin = DataSourceMode.FREE)
+    }
+
+    private fun AppSnapshot.withSandboxLocalForecast(): AppSnapshot {
+        val active = activeEewEvent ?: return this
+        val key = listOf(active.id, active.reportSerial, active.reportIssuedAt).joinToString(":")
+        val enriched = if (sandboxLocalForecastKey == key) {
+            sandboxLocalForecastEvent ?: active
+        } else {
+            active.copy(
+                localIntensityForecast = LocalEewForecasts.intensityForecast(active).valueOrNull()
+            ).also {
+                sandboxLocalForecastKey = key
+                sandboxLocalForecastEvent = it
+            }
+        }
+        return copy(
+            activeEewEvent = enriched,
+            event = if (event.id == active.id) enriched else event
+        )
     }
 
     private fun handleDmdssSnapshot(snapshot: AppSnapshot) {
@@ -619,6 +642,7 @@ class QuakeDeckApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         activityTimeTracker.beginProcess()
+        LocalEewForecasts.initialize(applicationContext)
 
         // Preload only the base map. Detailed JMA layers load when a report or
         // zoom level needs them, so they do not compete with the first frame.

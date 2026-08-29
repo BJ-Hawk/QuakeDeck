@@ -155,6 +155,11 @@
     <string name="destination_prediction">předpověď pro cílové místo</string>
     <string name="official_eew_area_arrival">Oficiální čas příchodu podle EEW</string>
     <string name="modelled_arrival">Modelovaný čas příchodu</string>
+    <string name="local_jma_method_estimate">Místní odhad podle metody JMA</string>
+    <string name="local_estimate_ground_proxy">Náhradní údaj o podloží: %1$s</string>
+    <string name="local_estimate_extrapolated">Pod zveřejněným rozsahem ověření metody JMA</string>
+    <string name="dmdss_diagnostic_local_forecast">Místní odhad intenzity</string>
+    <string name="dmdss_diagnostic_local_forecast_ready">%1$d oblastí · maximum Shindo %2$s · %3$d extrapolací mimo rozsah</string>
     <string name="arrived_upper">DORAZILA</string>
     <string name="s_wave">S-vlna</string>
     <string name="p_wave">P-vlna</string>

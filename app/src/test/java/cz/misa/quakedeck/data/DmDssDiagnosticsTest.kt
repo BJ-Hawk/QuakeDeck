@@ -18,9 +18,10 @@ class DmDssDiagnosticsTest {
     }
 
     @Test
-    fun p2pPacketHistoryAlsoExcludesTextHeartbeats() {
+    fun p2pPacketHistoryExcludesHeartbeatsAndRoutinePeerCounts() {
         assertFalse(shouldRetainP2pDiagnosticPacket(JSONObject("""{"type":"ping"}""")))
         assertFalse(shouldRetainP2pDiagnosticPacket(JSONObject("""{"type":"pong"}""")))
+        assertFalse(shouldRetainP2pDiagnosticPacket(JSONObject("""{"code":555}""")))
         assertTrue(shouldRetainP2pDiagnosticPacket(JSONObject("""{"code":551}""")))
         assertTrue(shouldRetainP2pDiagnosticPacket(null))
     }
@@ -41,17 +42,19 @@ class DmDssDiagnosticsTest {
     }
 
     @Test
-    fun packetHistoryKeepsNewestEntriesWithinBothBounds() {
+    fun packetHistoryTrimsAtWhicheverBoundaryComesLater() {
         val entries = (1L..4L).map { index ->
             DmDssPacketDiagnostic(index, "IN", "text", "ping", "x".repeat(80))
         }
 
-        val countBounded = trimDmDssPacketHistory(entries, maxEntries = 2, maxBytes = 10_000)
-        assertEquals(listOf(3L, 4L), countBounded.map { it.recordedAtMillis })
+        val bytesNotReached = trimDmDssPacketHistory(entries, maxEntries = 2, maxBytes = 10_000)
+        assertEquals(entries, bytesNotReached)
 
-        val sizeBounded = trimDmDssPacketHistory(entries, maxEntries = 10, maxBytes = 250)
-        assertTrue(sizeBounded.size < entries.size)
-        assertEquals(4L, sizeBounded.last().recordedAtMillis)
+        val entriesNotReached = trimDmDssPacketHistory(entries, maxEntries = 10, maxBytes = 250)
+        assertEquals(entries, entriesNotReached)
+
+        val bothReached = trimDmDssPacketHistory(entries, maxEntries = 2, maxBytes = 250)
+        assertEquals(listOf(3L, 4L), bothReached.map { it.recordedAtMillis })
     }
 
     @Test
@@ -76,10 +79,17 @@ class DmDssDiagnosticsTest {
         assertEquals(2, export.getInt("schemaVersion"))
         assertEquals("Connected", export.getJSONObject("summary").getString("socketState"))
         assertEquals(1, export.getInt("packetCount"))
+        assertEquals(
+            "whicheverComesLater",
+            export.getJSONObject("storage").getString("retentionBoundary")
+        )
         val excludedTypes = export.getJSONObject("storage")
             .getJSONArray("excludedRoutinePacketTypes")
         assertEquals("ping", excludedTypes.getString(0))
         assertEquals("pong", excludedTypes.getString(1))
+        val excludedCodes = export.getJSONObject("storage")
+            .getJSONArray("excludedRoutinePacketCodes")
+        assertEquals(P2P_ROUTINE_PEER_COUNT_CODE, excludedCodes.getInt(0))
         val packet = export.getJSONArray("packets").getJSONObject(0)
         assertEquals(DIAGNOSTIC_SOURCE_DMDSS, packet.getString("source"))
         assertEquals("start", packet.getString("type"))

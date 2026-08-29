@@ -78,6 +78,15 @@ object NotificationEventPayload {
             .put("hasHypocenter", event.hasHypocenter)
             .putNullable("reportCorrection", event.reportCorrection)
             .put("isCancelled", event.isCancelled)
+            .putNullable("eewHypocenterCondition", event.eewHypocenterCondition)
+            .putNullable("eewMagnitudeUnit", event.eewMagnitudeUnit)
+            .putNullable("eewSourceAccuracy", event.eewSourceAccuracy?.let { accuracy ->
+                JSONObject()
+                    .put("epicenterRanks", JSONArray(accuracy.epicenterRanks))
+                    .putNullable("depthRank", accuracy.depthRank)
+                    .putNullable("magnitudeCalculationRank", accuracy.magnitudeCalculationRank)
+                    .putNullable("magnitudeStationCountRank", accuracy.magnitudeStationCountRank)
+            })
             .put("timelineOffsetMillis", event.timelineOffsetMillis)
             .put("points", JSONArray().apply {
                 event.points.forEach { point ->
@@ -93,6 +102,9 @@ object NotificationEventPayload {
                             .put("prefecture", point.prefecture)
                             .putNullable("stationName", point.stationName)
                             .put("isArea", point.isArea)
+                            .putNullable("regionCode", point.regionCode)
+                            .put("isPlum", point.isPlum)
+                            .put("isWarning", point.isWarning)
                     )
                 }
             })
@@ -119,12 +131,23 @@ object NotificationEventPayload {
                         longitude = point.nullableDouble("longitude"),
                         prefecture = point.optString("prefecture"),
                         stationName = point.nullableString("stationName"),
-                        isArea = point.optBoolean("isArea", false)
+                        isArea = point.optBoolean("isArea", false),
+                        regionCode = point.nullableString("regionCode"),
+                        isPlum = point.optBoolean("isPlum", false),
+                        isWarning = point.optBoolean("isWarning", false)
                     )
                 )
             }
         }
-        return EarthquakeEvent(
+        val accuracy = json.optJSONObject("eewSourceAccuracy")?.let { source ->
+            EewSourceAccuracy(
+                epicenterRanks = source.optJSONArray("epicenterRanks").toIntList(),
+                depthRank = source.nullableInt("depthRank"),
+                magnitudeCalculationRank = source.nullableInt("magnitudeCalculationRank"),
+                magnitudeStationCountRank = source.nullableInt("magnitudeStationCountRank")
+            )
+        }
+        val event = EarthquakeEvent(
             id = id,
             place = json.optString("place"),
             originTime = originTime,
@@ -151,8 +174,15 @@ object NotificationEventPayload {
             hasHypocenter = json.optBoolean("hasHypocenter", true),
             reportCorrection = json.nullableString("reportCorrection"),
             isCancelled = json.optBoolean("isCancelled", false),
+            eewHypocenterCondition = json.nullableString("eewHypocenterCondition"),
+            eewMagnitudeUnit = json.nullableString("eewMagnitudeUnit"),
+            eewSourceAccuracy = accuracy,
             timelineOffsetMillis = json.optLong("timelineOffsetMillis", 0L)
         )
+        val local = if (event.kind == EarthquakeEventKind.EEW && !event.isCancelled) {
+            LocalEewForecasts.intensityForecast(event).valueOrNull()
+        } else null
+        return event.copy(localIntensityForecast = local)
     }
 
     private fun encodeTsunamiReport(report: TsunamiReport): JSONObject = JSONObject()
@@ -226,11 +256,19 @@ object NotificationEventPayload {
     private fun JSONObject.nullableLong(name: String): Long? =
         takeUnless { isNull(name) }?.optLong(name)
 
+    private fun JSONObject.nullableInt(name: String): Int? =
+        takeUnless { isNull(name) }?.optInt(name)
+
     private fun JSONArray?.toStringList(): List<String> = buildList {
         val source = this@toStringList ?: return@buildList
         for (index in 0 until source.length()) {
             source.optString(index).takeIf { it.isNotBlank() }?.let(::add)
         }
+    }
+
+    private fun JSONArray?.toIntList(): List<Int> = buildList {
+        val source = this@toIntList ?: return@buildList
+        for (index in 0 until source.length()) add(source.optInt(index))
     }
 
     private inline fun <reified T : Enum<T>> enumValueOrDefault(value: String, fallback: T): T =

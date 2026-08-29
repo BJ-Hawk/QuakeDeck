@@ -2558,6 +2558,22 @@ private fun SourceDialog(
                                 ).joinToString(" · ")
                             }
                         )
+                        val localForecast = snapshot.activeEewEvent?.localIntensityForecast
+                        DmdssDiagnosticLine(
+                            uiText(R.string.dmdss_diagnostic_local_forecast, language),
+                            if (localForecast == null) {
+                                uiText(R.string.dmdss_diagnostic_none, language)
+                            } else {
+                                context.getString(
+                                    R.string.dmdss_diagnostic_local_forecast_ready,
+                                    localForecast.regions.size,
+                                    localForecast.nationwideMaximum.upperDisplayIntensity,
+                                    localForecast.regions.count {
+                                        it.extrapolatedBelowJmaValidationRange
+                                    }
+                                )
+                            }
+                        )
                         TextButton(
                             onClick = { packetHistoryExpanded = !packetHistoryExpanded },
                             contentPadding = PaddingValues(horizontal = 0.dp, vertical = 2.dp)
@@ -3736,6 +3752,11 @@ private fun EventPanel(
     val japaneseIntensity = !PlaceNameTranslator.shouldUseEnglish(placeNameLanguage)
     val browsingHistory = selectedEvent.id != snapshot.event.id
     val isEew = selectedEvent.kind == EarthquakeEventKind.EEW
+    val selectedIntensityPoints = if (isEew) {
+        selectedEvent.presentationIntensityPoints()
+    } else {
+        selectedEvent.points
+    }
     val activeEewForSelected = snapshot.activeEewEvent?.takeIf {
         snapshot.activeEew &&
             selectedEvent.id == snapshot.event.id &&
@@ -4007,7 +4028,7 @@ private fun EventPanel(
                     LocalForecastUnavailableCard(placeNameLanguage)
                 }
 
-                if (observationsExpanded && selectedEvent.points.isNotEmpty()) {
+                if (observationsExpanded && selectedIntensityPoints.isNotEmpty()) {
                     Spacer(Modifier.height(4.dp))
                     if (selectedEvent.kind == EarthquakeEventKind.CONFIRMED) {
                         ObservedIntensityGroups(
@@ -4031,7 +4052,16 @@ private fun EventPanel(
                             }
                         )
                     } else {
-                        selectedEvent.points.forEach { point ->
+                        if (selectedEvent.points.isEmpty() && selectedEvent.localIntensityForecast != null) {
+                            Text(
+                                uiText(R.string.local_jma_method_estimate, placeNameLanguage),
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp),
+                                color = MaterialTheme.colorScheme.tertiary,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 12.sp
+                            )
+                        }
+                        selectedIntensityPoints.forEach { point ->
                             ObservedStationRow(
                                 point = point,
                                 language = placeNameLanguage,
@@ -6331,6 +6361,7 @@ private fun DestinationCountdownCard(
     japaneseIntensity: Boolean,
     language: PlaceNameLanguage
 ) {
+    val context = LocalContext.current
     val intensityLabel = prediction.predictedIntensity?.let { upper ->
         when {
             prediction.predictedIntensityUpperOpenEnded -> {
@@ -6381,6 +6412,27 @@ private fun DestinationCountdownCard(
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         fontSize = 10.sp
                     )
+                    if (prediction.locallyCalculatedIntensity) {
+                        Text(
+                            buildString {
+                                append(uiText(R.string.local_jma_method_estimate, language))
+                                prediction.groundProxyName?.let { proxy ->
+                                    append(" · ").append(
+                                        context.getString(R.string.local_estimate_ground_proxy, proxy)
+                                    )
+                                }
+                            },
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            fontSize = 10.sp
+                        )
+                        if (prediction.extrapolatedBelowJmaValidationRange) {
+                            Text(
+                                uiText(R.string.local_estimate_extrapolated, language),
+                                color = MaterialTheme.colorScheme.tertiary,
+                                fontSize = 10.sp
+                            )
+                        }
+                    }
                 }
 
                 Column(horizontalAlignment = Alignment.End) {
@@ -6729,17 +6781,19 @@ private fun JapanMap(
         event.kind == EarthquakeEventKind.CONFIRMED &&
         event.points.isEmpty()
     ) {
-        activeEewEvent.points
+        activeEewEvent.presentationIntensityPoints()
     } else {
-        event.points
+        event.presentationIntensityPoints()
     }
     val stationCatalogSize = StationCatalog.allStations().size
     val intensityGeometry = remember(
         event.id,
         event.points,
+        event.localIntensityForecast,
         activeEewEvent?.id,
         activeEewEvent?.reportSerial,
         activeEewEvent?.points,
+        activeEewEvent?.localIntensityForecast,
         mapPrefectureNames,
         officialAreas,
         stationCatalogSize

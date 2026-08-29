@@ -146,10 +146,10 @@ The complete audited 4,360-station English map and the first station-information
 card are active in the app. Placement research is underway in
 `outputs/station-name-audit/station_metadata_sources.json` only:
 
-- 2,999 stations have source-supported facility and/or address data.
-- 2,984 have an exact published Japanese address.
+- 3,069 stations have source-supported facility and/or address data.
+- 3,054 have an exact published Japanese address.
 - 15 have a confirmed facility but no exact address yet.
-- 1,361 remain locality-only and require further research.
+- 1,291 remain locality-only and require further research.
 - Address/precision validation currently reports zero mismatches.
 
 The latest completed official-source batches converted confirmed facility-only
@@ -183,6 +183,23 @@ for four Nihonmatsu City offices (`0721030`, `0721031`, `0721032`, and
 the localities for `0520632` and `0520633`, and Mitane's current plan does not
 directly identify the two remaining host facilities; neither case was promoted
 to a facility or exact address.
+
+Subsequent JSON-only official-source batches added one Kumamoto municipal
+placement, six Fukuoka City fire-station placements, and municipality/fire
+authority placements in Nogata, Umi, Shingu, Kasuya, and Yoshitomi. An official
+Hokkaido Kamikawa installation table also confirmed the host facilities for
+stations in Takasu, Higashikagura, Toma, Pippu, Higashikawa, Kenbuchi, Nayoro,
+Wassamu, Otoineppu, Nakagawa, and two public-site placements. Exact addresses
+were recorded only where the matching host authority published them; the
+remaining table evidence is retained as facility-only or source provenance.
+
+The subsequent direct municipal passes added four exact Ibaraki placements
+(two Mito facilities, Hitachi Jūō Branch, and Kitaibaraki City Hall), 46
+Shimane prefectural network placements from its official station/facility
+list, four Kazo City instruments at City Hall and the three general branch
+offices, and two Gyoda City instruments at City Hall and Minamikawara Branch.
+The Shimane, Kazo, and Gyoda records carry both the official placement evidence
+and the facility/address source URLs; non-matching labels remain locality-only.
 
 ## Do not redo or change
 

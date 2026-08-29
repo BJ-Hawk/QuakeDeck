@@ -110,6 +110,10 @@ class JmaRegionalMapData(
      * Detailed ~200-area polygons win; public EEW warning areas are fallback.
      */
     fun resolveIntensityAreas(point: IntensityPoint): List<JmaAreaShape> {
+        point.regionCode
+            ?.takeIf { it.isNotBlank() }
+            ?.let(quakeByCode::get)
+            ?.let { return listOf(it) }
         val station = if (point.isArea) {
             null
         } else {

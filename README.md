@@ -2,11 +2,11 @@
 
 QuakeDeck is an Android earthquake-monitoring prototype focused on Japan. It uses Kotlin and Jetpack Compose to combine live P2PQuake/JMA reports, EEW visualization, observed intensity mapping, tsunami information, historical report browsing, and deterministic Sandbox testing in one map-first interface.
 
-Current version: **0.10.1-dev.2**. QuakeDeck is still pre-1.0 and should not be treated as an official emergency-warning application.
+Current version: **0.10.1-dev.3**. QuakeDeck is still pre-1.0 and should not be treated as an official emergency-warning application.
 
 > **Intentionally omitted EEW forecasting implementation**
 >
-> QuakeDeck's locally calculated earthquake-motion forecasting implementation is intentionally excluded from Git for legal reasons. The omitted file is `app/src/main/java/cz/misa/quakedeck/data/LocalEewForecastEngine.kt`; it currently contains modelled P-wave and S-wave propagation, arrival-time predictions, related destination countdowns, and forecast-derived warning-passage timing.
+> QuakeDeck's locally calculated earthquake-motion forecasting implementation is intentionally excluded from Git for legal reasons. The omitted file is `app/src/main/java/cz/misa/quakedeck/data/LocalEewForecastEngine.kt`; it currently contains modelled P-wave and S-wave propagation, arrival-time predictions, related destination countdowns, forecast-derived warning-passage timing, and locally calculated station/regional intensity estimates.
 >
 > A public checkout still builds successfully, but those locally calculated features are unavailable without the omitted implementation. Forecasts and warnings supplied directly by JMA, DM-D.S.S, or P2PQuake remain supported. The omission is deliberate and is not a missing dependency or repository error.
 
@@ -20,6 +20,7 @@ Current version: **0.10.1-dev.2**. QuakeDeck is still pre-1.0 and should not be 
 - Official JMA regional, deep-zoom municipality/ward, and tsunami forecast-zone geometry with precomputed prefecture coastlines for faster cold starts
 - Persistent JMA, NIED, and local-government station filters for the idle map, with report views restricted to their own observed stations
 - P/S wavefront visualization and destination countdowns when the intentionally local forecast engine is present, plus event focus, observed intensity lists, report history, and persistent main-map camera/panel layout in every build
+- Separately labelled local DM-D.S.S intensity estimates when official regional values are absent, calculated in FULL builds from JMA's published method, JMA2001 travel times, and a derived NIED J-SHIS V4 station AVS30 lookup
 - Persistent local raw-report archive and historical report browser
 - English, Czech, and Japanese UI/place-name handling
 - Light, dark, and system appearance modes

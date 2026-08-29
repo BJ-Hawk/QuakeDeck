@@ -397,15 +397,21 @@ class DmDssProvider(
     }
 
     private fun applyUpdate(update: DmDssEewUpdate) {
-        lastEvent = update.event
-        activeEvent = update.event.takeIf { update.active }
+        val event = if (update.active) {
+            val localForecast = LocalEewForecasts.intensityForecast(update.event).valueOrNull()
+            update.event.copy(localIntensityForecast = localForecast)
+        } else {
+            update.event
+        }
+        lastEvent = event
+        activeEvent = event.takeIf { update.active }
         activeEventUntilMillis = if (update.active) {
             update.expiresAtMillis ?: (System.currentTimeMillis() + DEFAULT_ACTIVE_MILLIS)
         } else {
             null
         }
         if (update.active) {
-            scheduleExpiry(update.event.id, activeEventUntilMillis)
+            scheduleExpiry(event.id, activeEventUntilMillis)
         } else {
             expiryGeneration++
         }

@@ -155,6 +155,11 @@
     <string name="destination_prediction">destination prediction</string>
     <string name="official_eew_area_arrival">Official EEW area arrival</string>
     <string name="modelled_arrival">Modelled arrival</string>
+    <string name="local_jma_method_estimate">Local estimate using the JMA method</string>
+    <string name="local_estimate_ground_proxy">Ground proxy: %1$s</string>
+    <string name="local_estimate_extrapolated">Below the JMA method’s published validation range</string>
+    <string name="dmdss_diagnostic_local_forecast">Local intensity estimate</string>
+    <string name="dmdss_diagnostic_local_forecast_ready">%1$d regions · maximum Shindo %2$s · %3$d below-range extrapolations</string>
     <string name="arrived_upper">ARRIVED</string>
     <string name="s_wave">S-wave</string>
     <string name="p_wave">P-wave</string>

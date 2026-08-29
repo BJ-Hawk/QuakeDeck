@@ -29,6 +29,7 @@ class DmDssEewParserTest {
         assertEquals("3", update.event.reportSerial)
         assertEquals(35.6, update.event.latitude, 0.0001)
         assertEquals(140.1, update.event.longitude, 0.0001)
+        assertEquals("350", update.event.points.single().regionCode)
     }
 
     @Test

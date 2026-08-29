@@ -48,7 +48,11 @@ object EewWaveModel {
         val sArrivalEpochMillis: Long,
         val secondsUntilP: Long,
         val secondsUntilS: Long,
-        val officialSArrival: Boolean
+        val officialSArrival: Boolean,
+        val officialIntensity: Boolean = true,
+        val locallyCalculatedIntensity: Boolean = false,
+        val extrapolatedBelowJmaValidationRange: Boolean = false,
+        val groundProxyName: String? = null
     )
 
     fun wavefrontState(

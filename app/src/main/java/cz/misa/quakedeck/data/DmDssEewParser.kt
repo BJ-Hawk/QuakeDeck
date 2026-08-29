@@ -171,7 +171,8 @@ internal object DmDssEewParser {
         val longitude = coordinate.optJSONObject("longitude")?.optString("value")?.toDoubleOrNull()
             ?: return rejected(DmDssEewRejection.INVALID_LONGITUDE)
         val intensity = payload.optJSONObject("intensity")
-        val points = parseRegions(intensity?.optJSONArray("regions"))
+        val bulletinWarning = payload.optBoolean("isWarning", false)
+        val points = parseRegions(intensity?.optJSONArray("regions"), bulletinWarning)
         val forecastMax = intensity?.optJSONObject("forecastMaxInt")
         val maximum = displayIntensity(
             forecastMax?.optString("from").orEmpty(),
@@ -204,7 +205,12 @@ internal object DmDssEewParser {
             reportSerial = serial,
             reportIssuedAt = issuedAt,
             reportType = type,
-            reportCorrection = report.optString("infoType").takeIf { it !in setOf("", "発表") }
+            reportCorrection = report.optString("infoType").takeIf { it !in setOf("", "発表") },
+            eewHypocenterCondition = earthquake.optString("condition")
+                .takeIf(String::isNotBlank),
+            eewMagnitudeUnit = earthquake.optJSONObject("magnitude")
+                ?.optString("unit")?.takeIf(String::isNotBlank),
+            eewSourceAccuracy = parseSourceAccuracy(hypocenter.optJSONObject("accuracy"))
         )
         return accepted(
             DmDssEewUpdate(
@@ -274,7 +280,10 @@ internal object DmDssEewParser {
         }
     }
 
-    private fun parseRegions(regions: org.json.JSONArray?): List<IntensityPoint> = buildList {
+    private fun parseRegions(
+        regions: org.json.JSONArray?,
+        bulletinWarning: Boolean
+    ): List<IntensityPoint> = buildList {
         if (regions == null) return@buildList
         for (index in 0 until regions.length()) {
             val region = regions.optJSONObject(index) ?: continue
@@ -296,11 +305,37 @@ internal object DmDssEewParser {
                     arrivalTime = formatJst(region.optString("arrivalTime"))
                         .takeUnless { it == "—" },
                     stationName = name,
-                    isArea = true
+                    isArea = true,
+                    regionCode = region.optString("code").takeIf(String::isNotBlank),
+                    isPlum = region.optBoolean("isPlum", false),
+                    isWarning = region.optBoolean("isWarning", bulletinWarning)
                 )
             )
         }
     }.sortedByDescending { intensityRank(it.intensity) }
+
+    private fun parseSourceAccuracy(accuracy: JSONObject?): EewSourceAccuracy? {
+        if (accuracy == null) return null
+        val epicenters = buildList {
+            val values = accuracy.optJSONArray("epicenters")
+            if (values != null) {
+                for (index in 0 until values.length()) {
+                    values.optInt(index, Int.MIN_VALUE)
+                        .takeUnless { it == Int.MIN_VALUE }
+                        ?.let(::add)
+                }
+            }
+        }
+        return EewSourceAccuracy(
+            epicenterRanks = epicenters,
+            depthRank = accuracy.optIntOrNull("depth"),
+            magnitudeCalculationRank = accuracy.optIntOrNull("magnitudeCalculation"),
+            magnitudeStationCountRank = accuracy.optIntOrNull("numberOfMagnitudeCalculation")
+        ).takeIf {
+            it.epicenterRanks.isNotEmpty() || it.depthRank != null ||
+                it.magnitudeCalculationRank != null || it.magnitudeStationCountRank != null
+        }
+    }
 
     private fun displayIntensity(from: String, to: String): Pair<String, Boolean> = when {
         to == "over" -> from.ifBlank { "—" } to true
@@ -351,6 +386,9 @@ internal object DmDssEewParser {
     private const val MAX_DECODED_BODY_BYTES = 1024 * 1024
     private const val GZIP_BUFFER_BYTES = 8 * 1024
 }
+
+private fun JSONObject.optIntOrNull(name: String): Int? =
+    if (has(name) && !isNull(name)) optInt(name) else null
 
 private sealed interface DmDssBodyDecodeResult {
     data class Decoded(val text: String) : DmDssBodyDecodeResult

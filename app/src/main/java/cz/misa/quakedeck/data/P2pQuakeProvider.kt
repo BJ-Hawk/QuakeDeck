@@ -2925,5 +2925,8 @@ class P2pQuakeProvider(
 
 internal fun shouldRetainP2pDiagnosticPacket(json: JSONObject?): Boolean {
     val type = json?.optString("type").orEmpty()
-    return type != "ping" && type != "pong"
+    if (type == "ping" || type == "pong") return false
+    return json?.optInt("code") != P2P_ROUTINE_PEER_COUNT_CODE
 }
+
+internal const val P2P_ROUTINE_PEER_COUNT_CODE = 555

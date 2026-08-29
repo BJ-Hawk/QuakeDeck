@@ -1,7 +1,55 @@
 package cz.misa.quakedeck.data
 
+import android.content.Context
+
+data class LocalEewIntensityRange(
+    val lowerInstrumentalIntensity: Double,
+    val upperInstrumentalIntensity: Double,
+    val lowerDisplayIntensity: String,
+    val upperDisplayIntensity: String
+)
+
+data class LocalEewRegionForecast(
+    val areaCode: String,
+    val areaNameJa: String,
+    val prefectureJa: String,
+    val intensity: LocalEewIntensityRange,
+    val earliestSArrivalEpochMillis: Long,
+    val maximumStationCode: String,
+    val earliestArrivalStationCode: String,
+    val extrapolatedBelowJmaValidationRange: Boolean
+)
+
+data class LocalEewIntensityForecast(
+    val regions: List<LocalEewRegionForecast>,
+    val nationwideMaximum: LocalEewIntensityRange,
+    val calculatedAtEpochMillis: Long,
+    val method: String,
+    val groundData: String,
+    val excludedStationCount: Int
+)
+
+fun EarthquakeEvent.presentationIntensityPoints(): List<IntensityPoint> {
+    if (points.isNotEmpty()) return points
+    return localIntensityForecast?.regions.orEmpty().map { region ->
+        IntensityPoint(
+            name = region.areaNameJa,
+            intensity = region.intensity.upperDisplayIntensity,
+            intensityFrom = region.intensity.lowerDisplayIntensity
+                .takeIf { it != region.intensity.upperDisplayIntensity },
+            arrivalTime = null,
+            prefecture = region.prefectureJa,
+            stationName = region.areaNameJa,
+            isArea = true,
+            regionCode = region.areaCode
+        )
+    }
+}
+
 /** Public contract for the deliberately optional local EEW forecasting engine. */
 interface LocalEewForecastProvider {
+    fun initialize(context: Context) = Unit
+
     fun wavefrontState(
         event: EarthquakeEvent,
         nowEpochMillis: Long
@@ -20,6 +68,11 @@ interface LocalEewForecastProvider {
         event: EarthquakeEvent,
         receivedAtEpochMillis: Long
     ): Long?
+
+    fun intensityForecast(
+        event: EarthquakeEvent,
+        calculatedAtEpochMillis: Long
+    ): LocalEewIntensityForecast? = null
 }
 
 enum class LocalEewForecastUnavailableReason {
@@ -59,6 +112,14 @@ object LocalEewForecasts {
                 LocalEewForecastUnavailableReason.IMPLEMENTATION_OMITTED
             )
         }
+    }
+
+    @Volatile
+    private var applicationContext: Context? = null
+
+    fun initialize(context: Context) {
+        applicationContext = context.applicationContext
+        (loadedEngine as? LoadedEngine.Available)?.provider?.initialize(context.applicationContext)
     }
 
     val unavailableReason: LocalEewForecastUnavailableReason?
@@ -107,6 +168,13 @@ object LocalEewForecasts {
         estimatedWarningEndEpochMillis(event, receivedAtEpochMillis)
     }
 
+    fun intensityForecast(
+        event: EarthquakeEvent,
+        calculatedAtEpochMillis: Long = System.currentTimeMillis()
+    ): LocalEewForecastResult<LocalEewIntensityForecast> = evaluate {
+        intensityForecast(event, calculatedAtEpochMillis)
+    }
+
     internal fun availabilityForClass(
         className: String
     ): LocalEewForecastUnavailableReason? = when (val loaded = loadEngine(className)) {
@@ -144,6 +212,7 @@ object LocalEewForecasts {
             .asSubclass(LocalEewForecastProvider::class.java)
             .getDeclaredConstructor()
             .newInstance()
+        applicationContext?.let(provider::initialize)
         LoadedEngine.Available(provider)
     } catch (_: ClassNotFoundException) {
         LoadedEngine.Unavailable(LocalEewForecastUnavailableReason.IMPLEMENTATION_OMITTED)

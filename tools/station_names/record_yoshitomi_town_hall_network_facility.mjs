@@ -1,0 +1,10 @@
+import { readFileSync, writeFileSync } from 'node:fs';
+const path = 'outputs/station-name-audit/station_metadata_sources.json';
+const data = JSON.parse(readFileSync(path, 'utf8'));
+const station = data.stations.find(({ code }) => code === '4064230');
+if (!station) throw new Error('Station 4064230 was not found.');
+station.facilityNameJa = '吉富町役場';
+station.metadataStatus = 'Official Yoshitomi Town disaster plan';
+station.note = 'Yoshitomi Town’s current disaster plan directly identifies its Fukuoka Prefecture intensity meter as installed at Yoshitomi Town Hall.';
+station.sourceUrls = [...new Set([...(station.sourceUrls ?? []), 'https://www.town.yoshitomi.lg.jp/user/filer_public/50/8d/508d910c-03bf-47f5-943e-92eaec558b96/04_ji-fu-ting-di-yu-fang-zai-ji-hua-di-4zhang-di-zhen-jin-bo-ying-ji-dui-ce-ji-hua.pdf'])];
+writeFileSync(path, `${JSON.stringify(data, null, 2)}\n`, 'utf8');

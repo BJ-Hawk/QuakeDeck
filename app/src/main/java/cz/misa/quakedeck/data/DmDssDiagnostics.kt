@@ -265,8 +265,10 @@ internal fun trimDmDssPacketHistory(
     maxEntries: Int,
     maxBytes: Int
 ): List<DmDssPacketDiagnostic> {
-    val retained = entries.takeLast(maxEntries.coerceAtLeast(0)).toMutableList()
-    while (retained.isNotEmpty() && packetHistoryBytes(retained) > maxBytes.coerceAtLeast(0)) {
+    val retained = entries.toMutableList()
+    val entryLimit = maxEntries.coerceAtLeast(0)
+    val byteLimit = maxBytes.coerceAtLeast(0)
+    while (retained.size > entryLimit && packetHistoryBytes(retained) > byteLimit) {
         retained.removeAt(0)
     }
     return retained
@@ -287,8 +289,13 @@ fun DmDssDiagnosticsSnapshot.toMachineReadableJson(
             .put("bounded", true)
             .put("maximumEntries", MAX_HISTORY_ENTRIES)
             .put("maximumTotalBytes", MAX_HISTORY_BYTES)
+            .put("retentionBoundary", "whicheverComesLater")
             .put("maximumPacketCharacters", MAX_PACKET_CHARS)
             .put("excludedRoutinePacketTypes", JSONArray(listOf("ping", "pong")))
+            .put(
+                "excludedRoutinePacketCodes",
+                JSONArray(listOf(P2P_ROUTINE_PEER_COUNT_CODE))
+            )
     )
     .put(
         "summary",
