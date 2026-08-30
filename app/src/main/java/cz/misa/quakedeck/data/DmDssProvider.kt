@@ -15,6 +15,7 @@ import okhttp3.WebSocketListener
 import okio.ByteString
 import org.json.JSONObject
 import java.io.IOException
+import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import kotlin.math.min
 
@@ -25,8 +26,12 @@ class DmDssProvider(
 ) : QuakeDataProvider {
     override val mode = DataSourceMode.DMDSS
 
+    private val appContext = context.applicationContext
     private val handler = Handler(Looper.getMainLooper())
     private val diagnostics = DmDssDiagnosticsStore(context)
+    private val archiveStore = ReportArchiveStore(appContext)
+    private val archiveExecutor = Executors.newSingleThreadExecutor()
+    @Volatile private var reportArchiveEnabled = AppSettings(appContext).reportArchiveEnabled
     private val httpClient = OkHttpClient.Builder()
         .connectTimeout(15, TimeUnit.SECONDS)
         .readTimeout(20, TimeUnit.SECONDS)
@@ -77,6 +82,10 @@ class DmDssProvider(
         socket?.close(1000, "DM-D.S.S source deselected")
         socket = null
         diagnostics.recordSocket("Stopped")
+    }
+
+    override fun setReportArchiveEnabled(enabled: Boolean) {
+        reportArchiveEnabled = enabled
     }
 
     override fun onAppForeground() {
@@ -392,6 +401,7 @@ class DmDssProvider(
             return
         }
 
+        archiveEewFrame(update.event, source = "dm-dss-live")
         diagnostics.recordAccepted(update.event, SOURCE_LIVE)
         applyUpdate(update)
     }
@@ -463,6 +473,7 @@ class DmDssProvider(
                         return@onSuccess
                     }
                     val update = candidate
+                    archiveEewFrame(update.event, source = "dm-dss-recovery")
                     diagnostics.recordRecovery("Recovered event ${update.event.id}")
                     diagnostics.recordAccepted(update.event, SOURCE_RECOVERY)
                     applyUpdate(update)
@@ -499,6 +510,13 @@ class DmDssProvider(
                 "Connecting DM-D.S.S EEW forecast…"
             }
         )
+    }
+
+    private fun archiveEewFrame(event: EarthquakeEvent, source: String) {
+        if (!reportArchiveEnabled) return
+        archiveExecutor.execute {
+            archiveStore.storeEewFrame(event, source)
+        }
     }
 
     private fun emit(

@@ -212,6 +212,8 @@ fun QuakeDeckSettings(
     onInjectEewWarningRequested: (Long) -> Unit,
     onInjectEewForecastRequested: (Long) -> Unit,
     onInjectTsunamiWarningRequested: (Long) -> Unit,
+    p2pCrowdSignalsEnabled: Boolean,
+    onP2pCrowdSignalsEnabledChanged: (Boolean) -> Unit,
     reportArchiveEnabled: Boolean,
     onReportArchiveEnabledChanged: (Boolean) -> Unit,
     automaticHistoricalDownload: Boolean,
@@ -406,6 +408,9 @@ fun QuakeDeckSettings(
                                 onSandboxRequested = {
                                     pageName = SettingsPage.SANDBOX.name
                                 },
+                                p2pCrowdSignalsEnabled = p2pCrowdSignalsEnabled,
+                                onP2pCrowdSignalsEnabledChanged =
+                                    onP2pCrowdSignalsEnabledChanged,
                                 reportArchiveEnabled = reportArchiveEnabled,
                                 onReportArchiveEnabledChanged = onReportArchiveEnabledChanged,
                                 automaticHistoricalDownload = automaticHistoricalDownload,
@@ -657,6 +662,8 @@ private fun MainSettingsPage(
     requestedMode: DataSourceMode,
     onDataSourceRequested: () -> Unit,
     onSandboxRequested: () -> Unit,
+    p2pCrowdSignalsEnabled: Boolean,
+    onP2pCrowdSignalsEnabledChanged: (Boolean) -> Unit,
     reportArchiveEnabled: Boolean,
     onReportArchiveEnabledChanged: (Boolean) -> Unit,
     automaticHistoricalDownload: Boolean,
@@ -932,6 +939,16 @@ private fun MainSettingsPage(
                     snapshot = snapshot,
                     requestedMode = requestedMode,
                     onClick = onDataSourceRequested
+                )
+                CardDivider()
+                SwitchSettingRow(
+                    title = text(R.string.p2p_crowd_signals, selectedLanguage),
+                    supportingText = text(
+                        R.string.p2p_crowd_signals_explanation,
+                        selectedLanguage
+                    ),
+                    checked = p2pCrowdSignalsEnabled,
+                    onCheckedChange = onP2pCrowdSignalsEnabledChanged
                 )
             }
         }

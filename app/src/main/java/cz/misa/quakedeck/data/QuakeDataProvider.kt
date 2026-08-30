@@ -48,6 +48,9 @@ interface QuakeDataProvider {
     /** Enable or disable persistent storage of raw received reports. */
     fun setReportArchiveEnabled(enabled: Boolean) = Unit
 
+    /** Show or hide unconfirmed P2PQuake user-report aggregates. */
+    fun setP2pCrowdSignalsEnabled(enabled: Boolean) = Unit
+
     /** Backfill the upstream retention window automatically after connections. */
     fun setAutomaticHistoricalDownload(enabled: Boolean) = Unit
 

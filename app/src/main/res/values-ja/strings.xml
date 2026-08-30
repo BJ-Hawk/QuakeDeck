@@ -47,6 +47,10 @@
     <string name="map_display">地図表示</string>
     <string name="live_preview">ライブプレビュー</string>
     <string name="data_connection">データと接続</string>
+    <string name="p2p_crowd_signals">P2PQuake 群集シグナル</string>
+    <string name="p2p_crowd_signals_explanation">未確認の揺れ報告を通常のイベントとして表示します。一致する公式地震情報は同じイベントを更新し、揺れ報告数を保持します。</string>
+    <string name="p2p_felt_reports_event">未確認の揺れ報告</string>
+    <string name="p2p_felt_reports_count">揺れ報告 %1$d 件 · P2PQuake</string>
     <string name="testing_sandbox">テストとサンドボックス</string>
     <string name="active">有効</string>
     <string name="sandbox_summary">過去およびシミュレーションデータです。現在の事象ではありません。</string>
@@ -115,7 +119,9 @@
     <string name="text_size">文字サイズ</string>
     <string name="marker_size_explanation">マーカーサイズは画面上で固定され、地図を拡大しても小さくなりません。</string>
 <string name="tsunami_warning">津波警報</string>
+    <string name="eew_forecast">緊急地震速報（予報）</string>
     <string name="eew_warning">緊急地震速報</string>
+    <string name="eew_forecast_active">緊急地震速報（予報）発表中</string>
     <string name="waiting_earthquake_data">地震情報を待機中</string>
     <string name="max_intensity">最大震度</string>
 <string name="depth">深さ</string>
@@ -155,8 +161,10 @@
     <string name="local_jma_method_estimate">気象庁方式によるローカル推定</string>
     <string name="local_estimate_ground_proxy">地盤代替地点: %1$s</string>
     <string name="local_estimate_extrapolated">気象庁方式の公表検証範囲外</string>
+    <string name="local_estimate_official_ceiling">公式地域予報に基づき震度4未満に制約</string>
+    <string name="local_hybrid_eew_disclosure">公式予報区域を優先し、未掲載の震度1～3区域は気象庁方式によるローカル推定です。</string>
     <string name="dmdss_diagnostic_local_forecast">ローカル震度推定</string>
-    <string name="dmdss_diagnostic_local_forecast_ready">%1$d地域・最大震度%2$s・検証範囲外%3$d地域</string>
+    <string name="dmdss_diagnostic_local_forecast_ready">%1$d地域を計算・公式アンカー%2$d・ローカル補完%3$d・震度4未満への制約%4$d・最大震度%5$s・検証範囲外%6$d地域</string>
     <string name="arrived_upper">到達</string>
     <string name="s_wave">S波</string>
     <string name="p_wave">P波</string>

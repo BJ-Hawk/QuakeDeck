@@ -369,6 +369,9 @@ private fun QuakeDeckApp(
     var testingMode by remember {
         mutableStateOf(SandboxFeature.permitted(appSettings.p2pSandboxMode))
     }
+    var p2pCrowdSignalsEnabled by remember {
+        mutableStateOf(appSettings.p2pCrowdSignalsEnabled)
+    }
     var reportArchiveEnabled by remember { mutableStateOf(appSettings.reportArchiveEnabled) }
     var automaticHistoricalDownload by remember {
         mutableStateOf(appSettings.automaticHistoricalDownload && appSettings.reportArchiveEnabled)
@@ -528,6 +531,7 @@ private fun QuakeDeckApp(
         val permittedTestingMode = SandboxFeature.permitted(testingMode)
         provider.setReportArchiveStatusListener { reportArchiveStatus = it }
         provider.setTestingMode(permittedTestingMode)
+        provider.setP2pCrowdSignalsEnabled(p2pCrowdSignalsEnabled)
         provider.setReportArchiveEnabled(reportArchiveEnabled)
         provider.setAutomaticHistoricalDownload(automaticHistoricalDownload)
         provider.start { nextSnapshot ->
@@ -2157,6 +2161,12 @@ private fun QuakeDeckApp(
                     settingsOpenSandboxPage = false
                 }
             },
+            p2pCrowdSignalsEnabled = p2pCrowdSignalsEnabled,
+            onP2pCrowdSignalsEnabledChanged = { enabled ->
+                p2pCrowdSignalsEnabled = enabled
+                appSettings.p2pCrowdSignalsEnabled = enabled
+                provider.setP2pCrowdSignalsEnabled(enabled)
+            },
             reportArchiveEnabled = reportArchiveEnabled,
             onReportArchiveEnabledChanged = { enabled ->
                 reportArchiveEnabled = enabled
@@ -2276,28 +2286,56 @@ private fun MapAlertIndicators(
         verticalArrangement = Arrangement.spacedBy(5.dp)
     ) {
         if (snapshot.activeTsunami) {
-            MapAlertBadge(uiText(R.string.tsunami_warning, language))
+            MapAlertBadge(
+                label = uiText(R.string.tsunami_warning, language),
+                warning = true
+            )
         }
         if (snapshot.activeEew) {
-            MapAlertBadge(uiText(R.string.eew_warning, language))
+            val forecast = snapshot.activeEewEvent?.eewAlertLevel == EewAlertLevel.FORECAST
+            MapAlertBadge(
+                label = uiText(
+                    if (forecast) R.string.eew_forecast else R.string.eew_warning,
+                    language
+                ),
+                warning = !forecast
+            )
         }
     }
 }
 
 @Composable
-private fun MapAlertBadge(label: String) {
+private fun MapAlertBadge(
+    label: String,
+    warning: Boolean
+) {
+    val container = if (warning) {
+        MaterialTheme.colorScheme.errorContainer
+    } else {
+        FORECAST_ALERT_CONTAINER
+    }
+    val foreground = if (warning) {
+        MaterialTheme.colorScheme.onErrorContainer
+    } else {
+        FORECAST_ALERT_FOREGROUND
+    }
+    val outline = if (warning) {
+        MaterialTheme.colorScheme.error
+    } else {
+        FORECAST_ALERT_OUTLINE
+    }
     Surface(
         shape = RoundedCornerShape(7.dp),
-        color = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.92f),
+        color = container.copy(alpha = 0.92f),
         border = androidx.compose.foundation.BorderStroke(
             1.dp,
-            MaterialTheme.colorScheme.error.copy(alpha = 0.8f)
+            outline.copy(alpha = 0.8f)
         )
     ) {
         Text(
             label,
             modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-            color = MaterialTheme.colorScheme.onErrorContainer,
+            color = foreground,
             fontSize = 10.sp,
             fontWeight = FontWeight.Black
         )
@@ -2558,15 +2596,21 @@ private fun SourceDialog(
                                 ).joinToString(" · ")
                             }
                         )
-                        val localForecast = snapshot.activeEewEvent?.localIntensityForecast
+                        val activeEewEvent = snapshot.activeEewEvent
+                        val localForecast = activeEewEvent?.localIntensityForecast
                         DmdssDiagnosticLine(
                             uiText(R.string.dmdss_diagnostic_local_forecast, language),
                             if (localForecast == null) {
                                 uiText(R.string.dmdss_diagnostic_none, language)
                             } else {
-                                context.getString(
+                                UiLocalization.format(
+                                    context,
                                     R.string.dmdss_diagnostic_local_forecast_ready,
+                                    language,
                                     localForecast.regions.size,
+                                    localForecast.officialRegionAnchorCount,
+                                    activeEewEvent.localSupplementalIntensityRegions().size,
+                                    localForecast.officialOmissionCeilingCount,
                                     localForecast.nationwideMaximum.upperDisplayIntensity,
                                     localForecast.regions.count {
                                         it.extrapolatedBelowJmaValidationRange
@@ -3638,6 +3682,22 @@ private fun ReportCardGrid(
                 )
             }
 
+            event.p2pCrowdSignal?.let { crowd ->
+                HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                ReportGridTextCell(
+                    modifier = Modifier.fillMaxWidth(),
+                    text = UiLocalization.format(
+                        context,
+                        R.string.p2p_felt_reports_count,
+                        language,
+                        crowd.reportCount
+                    ),
+                    color = MaterialTheme.colorScheme.tertiary,
+                    strong = true,
+                    maxLines = 1
+                )
+            }
+
             EarthquakeReportStageStrip(
                 event = event,
                 reportLinkEvent = officialReportEvent,
@@ -3735,19 +3795,23 @@ private fun EventPanel(
 ) {
     val context = LocalContext.current
     val locale = UiLocalization.locale(context, placeNameLanguage)
-    val displayPlace = if (selectedEvent.id == "waiting") {
-        uiText(R.string.waiting_earthquake_data, placeNameLanguage)
-    } else {
-        PlaceNameTranslator.epicenter(
-            context,
-            selectedEvent.place,
-            placeNameLanguage,
-            untranslatedFallback = when {
-                !selectedEvent.hasHypocenter -> "Hypocenter under assessment"
-                selectedEvent.reportStage == EarthquakeReportStage.DISTANT -> "Distant earthquake"
-                else -> null
-            }
-        )
+    val displayPlace = when {
+        selectedEvent.id == "waiting" ->
+            uiText(R.string.waiting_earthquake_data, placeNameLanguage)
+        selectedEvent.isP2pCrowdOnly() ->
+            uiText(R.string.p2p_felt_reports_event, placeNameLanguage)
+        else -> {
+            PlaceNameTranslator.epicenter(
+                context,
+                selectedEvent.place,
+                placeNameLanguage,
+                untranslatedFallback = when {
+                    !selectedEvent.hasHypocenter -> "Hypocenter under assessment"
+                    selectedEvent.reportStage == EarthquakeReportStage.DISTANT -> "Distant earthquake"
+                    else -> null
+                }
+            )
+        }
     }
     val japaneseIntensity = !PlaceNameTranslator.shouldUseEnglish(placeNameLanguage)
     val browsingHistory = selectedEvent.id != snapshot.event.id
@@ -3951,23 +4015,46 @@ private fun EventPanel(
                     Spacer(Modifier.height(8.dp))
                 }
 
-                if (isCurrentActiveEew) {
+                // The expanded-intensity mode pins ReportCardGrid over the
+                // scrolling list. Keeping this inline banner underneath that
+                // pinned copy made it invisible while its height survived as
+                // a large empty gap above the destination prediction.
+                if (isCurrentActiveEew && !observationsExpanded) {
+                    val activeForecast =
+                        eewReportEvent?.eewAlertLevel == EewAlertLevel.FORECAST
+                    val activeContainer = if (activeForecast) {
+                        FORECAST_ALERT_CONTAINER
+                    } else {
+                        MaterialTheme.colorScheme.errorContainer
+                    }
+                    val activeForeground = if (activeForecast) {
+                        FORECAST_ALERT_FOREGROUND
+                    } else {
+                        MaterialTheme.colorScheme.onErrorContainer
+                    }
                     Surface(
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(10.dp),
-                        color = MaterialTheme.colorScheme.errorContainer
+                        color = activeContainer
                     ) {
                         Column(Modifier.padding(horizontal = 12.dp, vertical = 9.dp)) {
                             Text(
-                                uiText(R.string.eew_active, placeNameLanguage),
-                                color = MaterialTheme.colorScheme.onErrorContainer,
+                                uiText(
+                                    if (activeForecast) {
+                                        R.string.eew_forecast_active
+                                    } else {
+                                        R.string.eew_active
+                                    },
+                                    placeNameLanguage
+                                ),
+                                color = activeForeground,
                                 fontWeight = FontWeight.Black,
                                 fontSize = 16.sp
                             )
                             eewReportSummary?.let { summary ->
                                 Text(
                                     summary,
-                                    color = MaterialTheme.colorScheme.onErrorContainer.copy(alpha = 0.78f),
+                                    color = activeForeground.copy(alpha = 0.78f),
                                     fontSize = 11.sp,
                                     fontWeight = FontWeight.SemiBold,
                                     maxLines = 1,
@@ -4052,9 +4139,9 @@ private fun EventPanel(
                             }
                         )
                     } else {
-                        if (selectedEvent.points.isEmpty() && selectedEvent.localIntensityForecast != null) {
+                        if (selectedEvent.localSupplementalIntensityRegions().isNotEmpty()) {
                             Text(
-                                uiText(R.string.local_jma_method_estimate, placeNameLanguage),
+                                uiText(R.string.local_hybrid_eew_disclosure, placeNameLanguage),
                                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp),
                                 color = MaterialTheme.colorScheme.tertiary,
                                 fontWeight = FontWeight.Bold,
@@ -4128,16 +4215,20 @@ private fun EventPanel(
                         ) {
                             Column(Modifier.weight(1f)) {
                                 Text(
-                                    PlaceNameTranslator.epicenter(
-                                        context,
-                                        historyEvent.place,
-                                        placeNameLanguage,
-                                        untranslatedFallback = when {
-                                            !historyEvent.hasHypocenter -> "Hypocenter under assessment"
-                                            historyEvent.reportStage == EarthquakeReportStage.DISTANT -> "Distant earthquake"
-                                            else -> null
-                                        }
-                                    ).replace(" Region", "").let(::compactPrefectureLabel),
+                                    if (historyEvent.isP2pCrowdOnly()) {
+                                        uiText(R.string.p2p_felt_reports_event, placeNameLanguage)
+                                    } else {
+                                        PlaceNameTranslator.epicenter(
+                                            context,
+                                            historyEvent.place,
+                                            placeNameLanguage,
+                                            untranslatedFallback = when {
+                                                !historyEvent.hasHypocenter -> "Hypocenter under assessment"
+                                                historyEvent.reportStage == EarthquakeReportStage.DISTANT -> "Distant earthquake"
+                                                else -> null
+                                            }
+                                        ).replace(" Region", "").let(::compactPrefectureLabel)
+                                    },
                                     fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
                                     fontSize = 13.sp,
                                     lineHeight = 16.sp
@@ -4160,6 +4251,16 @@ private fun EventPanel(
                                     append(displayEventOriginTime(historyEvent.originTime))
                                     append(" · ").append(earthquakeMagnitudeText(historyEvent, locale))
                                     append(" · ").append(historyDepth)
+                                    historyEvent.p2pCrowdSignal?.let { crowd ->
+                                        append(" · ").append(
+                                            UiLocalization.format(
+                                                context,
+                                                R.string.p2p_felt_reports_count,
+                                                placeNameLanguage,
+                                                crowd.reportCount
+                                            )
+                                        )
+                                    }
                                 }
                                 Text(
                                     historyMetadata,
@@ -4418,7 +4519,7 @@ private fun HistoricalEventPanel(
                         event = event,
                         officialReportEvent = officialReportEvent,
                         displayPlace = displayPlace,
-                        isEew = false,
+                        isEew = event.kind == EarthquakeEventKind.EEW,
                         japaneseIntensity = japaneseIntensity,
                         language = placeNameLanguage,
                         cardScale = LocalDensity.current.fontScale.coerceIn(0.80f, 2.00f),
@@ -4573,6 +4674,7 @@ private fun HistoricalAssociatedReportRow(
         HistoricalAssociatedReportKind.EARTHQUAKE -> frameIndex?.plus(1)?.toString().orEmpty()
         HistoricalAssociatedReportKind.EEW_DETECTION -> "●"
         HistoricalAssociatedReportKind.EEW -> "⚠"
+        HistoricalAssociatedReportKind.FELT_REPORTS -> "✦"
         HistoricalAssociatedReportKind.TSUNAMI -> "▲"
     }
 
@@ -4600,6 +4702,7 @@ private fun HistoricalAssociatedReportRow(
                     HistoricalAssociatedReportKind.EARTHQUAKE -> MaterialTheme.colorScheme.primary
                     HistoricalAssociatedReportKind.EEW_DETECTION,
                     HistoricalAssociatedReportKind.EEW -> MaterialTheme.colorScheme.error
+                    HistoricalAssociatedReportKind.FELT_REPORTS -> MaterialTheme.colorScheme.tertiary
                     HistoricalAssociatedReportKind.TSUNAMI -> tsunamiGradeColor(TsunamiGrade.WARNING)
                 }.copy(alpha = if (clickable || selected) 1f else 0.72f),
                 fontWeight = FontWeight.Black,
@@ -4660,6 +4763,10 @@ private fun historicalAssociatedReportLabel(
     HistoricalAssociatedReportKind.EEW -> buildString {
         append(uiText(if (report.cancelled) R.string.eew_cancellation else R.string.eew_report, language))
         report.reportSerial?.let { append(" #").append(it) }
+    }
+    HistoricalAssociatedReportKind.FELT_REPORTS -> buildString {
+        append(uiText(R.string.p2p_felt_reports_event, language))
+        report.reportSerial?.let { count -> append(" · ").append(count) }
     }
     HistoricalAssociatedReportKind.TSUNAMI -> when {
         report.cancelled -> uiText(R.string.tsunami_cancellation, language)
@@ -6383,6 +6490,24 @@ private fun DestinationCountdownCard(
     val pArrived = prediction.secondsUntilP <= 0L
     val pWaveLabel = uiText(R.string.p_wave, language)
     val arrivedLabel = uiText(R.string.arrived, language)
+    val localMethodLine = if (prediction.locallyCalculatedIntensity) {
+        buildString {
+            append(uiText(R.string.local_jma_method_estimate, language))
+            prediction.groundProxyName?.let { proxy ->
+                val displayProxy = PlaceNameTranslator.observation(context, proxy, language)
+                if (displayProxy.isNotBlank()) {
+                    append(" · ").append(
+                        UiLocalization.format(
+                            context,
+                            R.string.local_estimate_ground_proxy,
+                            language,
+                            displayProxy
+                        )
+                    )
+                }
+            }
+        }
+    } else null
 
     Surface(
         modifier = Modifier.fillMaxWidth(),
@@ -6390,11 +6515,11 @@ private fun DestinationCountdownCard(
         color = MaterialTheme.colorScheme.surfaceVariant,
         tonalElevation = 2.dp
     ) {
-        Column(Modifier.padding(horizontal = 12.dp, vertical = 10.dp)) {
+        Column(Modifier.padding(horizontal = 12.dp, vertical = 8.dp)) {
             Row(
                 Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.Top
             ) {
                 Column(Modifier.weight(1f)) {
                     Text(
@@ -6410,29 +6535,9 @@ private fun DestinationCountdownCard(
                             language
                         ),
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        fontSize = 10.sp
+                        fontSize = 10.sp,
+                        lineHeight = 12.sp
                     )
-                    if (prediction.locallyCalculatedIntensity) {
-                        Text(
-                            buildString {
-                                append(uiText(R.string.local_jma_method_estimate, language))
-                                prediction.groundProxyName?.let { proxy ->
-                                    append(" · ").append(
-                                        context.getString(R.string.local_estimate_ground_proxy, proxy)
-                                    )
-                                }
-                            },
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            fontSize = 10.sp
-                        )
-                        if (prediction.extrapolatedBelowJmaValidationRange) {
-                            Text(
-                                uiText(R.string.local_estimate_extrapolated, language),
-                                color = MaterialTheme.colorScheme.tertiary,
-                                fontSize = 10.sp
-                            )
-                        }
-                    }
                 }
 
                 Column(horizontalAlignment = Alignment.End) {
@@ -6448,20 +6553,53 @@ private fun DestinationCountdownCard(
                             MaterialTheme.colorScheme.secondary
                         },
                         fontWeight = FontWeight.Black,
-                        fontSize = 26.sp
+                        fontSize = 24.sp,
+                        lineHeight = 25.sp
                     )
                     Text(
                         uiText(R.string.s_wave, language),
                         color = MaterialTheme.colorScheme.secondary,
                         fontWeight = FontWeight.Bold,
-                        fontSize = 11.sp
+                        fontSize = 10.sp,
+                        lineHeight = 11.sp
                     )
                 }
             }
 
-            Spacer(Modifier.height(7.dp))
+            localMethodLine?.let { line ->
+                Text(
+                    line,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    fontSize = 9.sp,
+                    lineHeight = 11.sp,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+            if (prediction.extrapolatedBelowJmaValidationRange) {
+                Text(
+                    uiText(R.string.local_estimate_extrapolated, language),
+                    color = MaterialTheme.colorScheme.tertiary,
+                    fontSize = 9.sp,
+                    lineHeight = 11.sp,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+            if (prediction.officialOmissionCeilingApplied) {
+                Text(
+                    uiText(R.string.local_estimate_official_ceiling, language),
+                    color = MaterialTheme.colorScheme.tertiary,
+                    fontSize = 9.sp,
+                    lineHeight = 11.sp,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+
+            Spacer(Modifier.height(4.dp))
             HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-            Spacer(Modifier.height(7.dp))
+            Spacer(Modifier.height(4.dp))
 
             Row(
                 Modifier.fillMaxWidth(),
@@ -6677,6 +6815,7 @@ private fun JapanMap(
     val mapNeedsJmaDetail =
         event.points.isNotEmpty() ||
             activeEewEvent?.points?.isNotEmpty() == true ||
+            activeEewEvent?.localSupplementalIntensityRegions()?.isNotEmpty() == true ||
             tsunami != null
     var jmaDetailRequested by remember {
         mutableStateOf(
@@ -7710,6 +7849,7 @@ private fun JapanMap(
 
         fun fitActiveEew(allowZoomIn: Boolean) {
             val warning = activeEewEvent ?: return
+            val focusCoordinate = warning.nearestJapanMapEewFocus() ?: return
 
             gestureScale = 1f
             gesturePan = Offset.Zero
@@ -7765,6 +7905,9 @@ private fun JapanMap(
 
             if (affected.size < 2) return
             val epicenter = sourceToBase(data.project(warning.latitude, warning.longitude))
+            val focusPoint = sourceToBase(
+                data.project(focusCoordinate.latitude, focusCoordinate.longitude)
+            )
             val minimumRadius = with(density) { 14.dp.toPx() }
             val horizontalRadius = max(
                 affected.maxOf { abs(it.x - epicenter.x) },
@@ -7774,10 +7917,19 @@ private fun JapanMap(
                 affected.maxOf { abs(it.y - epicenter.y) },
                 minimumRadius
             )
+            val minimumEewZoom = if (warning.hasJapanMapEpicenter()) {
+                MIN_CAMERA_MAP_ZOOM
+            } else {
+                // Keep an offshore source on the nearest existing map edge at
+                // a useful regional scale. The fallback must never become the
+                // all-Japan view merely because the true epicentre is outside
+                // the bundled extent.
+                cameraZoomForDisplayZoom(2.5f)
+            }
             val desiredZoom = min(
                 viewportWidth * 0.38f / horizontalRadius,
                 viewportHeight * 0.38f / verticalRadius
-            ).coerceIn(MIN_CAMERA_MAP_ZOOM, 48f)
+            ).coerceIn(minimumEewZoom, 48f)
 
             // Ring animation may only pull the camera outward. A new report or
             // the end of a manual override may perform one complete refit.
@@ -7786,8 +7938,8 @@ private fun JapanMap(
             committedZoom = targetZoom
             committedPan = clampMapPan(
                 pan = Offset(
-                    -(epicenter.x - viewportCenter.x) * targetZoom,
-                    -(epicenter.y - viewportCenter.y) * targetZoom
+                    -(focusPoint.x - viewportCenter.x) * targetZoom,
+                    -(focusPoint.y - viewportCenter.y) * targetZoom
                 ),
                 zoom = targetZoom,
                 viewportWidth = viewportWidth,
@@ -9466,6 +9618,9 @@ private fun createMapTextPaint(
     }
 
 private const val OBSERVED_STATION_DOTS_ZOOM = 12f
+private val FORECAST_ALERT_CONTAINER = Color(0xFFFFD600)
+private val FORECAST_ALERT_FOREGROUND = Color(0xFF211B00)
+private val FORECAST_ALERT_OUTLINE = Color(0xFFFFA000)
 private const val MUNICIPALITY_CACHE_RELEASE_ZOOM = 16f
 private val MUNICIPALITY_CACHE_RELEASE_DELAY = 4.seconds
 private const val BASE_STATION_DOTS_ZOOM = 18f

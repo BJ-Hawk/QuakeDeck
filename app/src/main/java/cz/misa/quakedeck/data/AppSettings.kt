@@ -564,6 +564,12 @@ class AppSettings(context: Context) {
             prefs.edit { putBoolean("report_archive_enabled", value) }
         }
 
+    var p2pCrowdSignalsEnabled: Boolean
+        get() = prefs.getBoolean("p2p_crowd_signals_enabled", false)
+        set(value) {
+            prefs.edit { putBoolean("p2p_crowd_signals_enabled", value) }
+        }
+
     var automaticHistoricalDownload: Boolean
         get() = prefs.getBoolean("automatic_historical_download", false)
         set(value) {

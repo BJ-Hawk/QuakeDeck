@@ -94,8 +94,26 @@ internal class RecentReportCache(context: Context) {
         .put("hasHypocenter", event.hasHypocenter)
         .putNullable("reportCorrection", event.reportCorrection)
         .put("isCancelled", event.isCancelled)
+        .putNullable("p2pCrowdSignal", event.p2pCrowdSignal?.let(::crowdSignalToJson))
         .put("points", JSONArray().apply {
             event.points.forEach { put(pointToJson(it)) }
+        })
+
+    private fun crowdSignalToJson(signal: P2pCrowdSignal): JSONObject = JSONObject()
+        .put("startedAt", signal.startedAt)
+        .put("updatedAt", signal.updatedAt)
+        .put("reportCount", signal.reportCount)
+        .put("confidence", signal.confidence)
+        .put("areas", JSONArray().apply {
+            signal.areas.forEach { area ->
+                put(
+                    JSONObject()
+                        .put("areaCode", area.areaCode)
+                        .put("reportCount", area.reportCount)
+                        .put("confidence", area.confidence)
+                        .put("displayGrade", area.displayGrade)
+                )
+            }
         })
 
     private fun pointToJson(point: IntensityPoint): JSONObject = JSONObject()
@@ -149,7 +167,39 @@ internal class RecentReportCache(context: Context) {
             hasHypocenter = json.optBoolean("hasHypocenter", true),
             reportCorrection = json.nullableString("reportCorrection"),
             isCancelled = json.optBoolean("isCancelled", false),
+            p2pCrowdSignal = json.optJSONObject("p2pCrowdSignal")
+                ?.let(::crowdSignalFromJson),
             timelineOffsetMillis = 0L
+        )
+    }
+
+    private fun crowdSignalFromJson(json: JSONObject): P2pCrowdSignal? {
+        val startedAt = json.optString("startedAt").trim()
+        if (startedAt.isBlank()) return null
+        val areasJson = json.optJSONArray("areas")
+        val areas = buildList {
+            if (areasJson != null) {
+                for (index in 0 until areasJson.length()) {
+                    val area = areasJson.optJSONObject(index) ?: continue
+                    val areaCode = area.optString("areaCode").trim()
+                    if (areaCode.isBlank()) continue
+                    add(
+                        P2pCrowdAreaSignal(
+                            areaCode = areaCode,
+                            reportCount = area.optInt("reportCount", 0).coerceAtLeast(0),
+                            confidence = area.optDouble("confidence", -1.0),
+                            displayGrade = area.optString("displayGrade").trim()
+                        )
+                    )
+                }
+            }
+        }
+        return P2pCrowdSignal(
+            startedAt = startedAt,
+            updatedAt = json.optString("updatedAt").trim(),
+            reportCount = json.optInt("reportCount", 0).coerceAtLeast(0),
+            confidence = json.optDouble("confidence", 0.0),
+            areas = areas
         )
     }
 

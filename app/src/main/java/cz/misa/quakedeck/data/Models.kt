@@ -138,6 +138,7 @@ data class EarthquakeEvent(
     val eewMagnitudeUnit: String? = null,
     val eewSourceAccuracy: EewSourceAccuracy? = null,
     val localIntensityForecast: LocalEewIntensityForecast? = null,
+    val p2pCrowdSignal: P2pCrowdSignal? = null,
     /**
      * Offset applied only to the historical P2PQuake sandbox timeline.
      * Production data stays at zero; replay packets are shifted so their issue
@@ -150,6 +151,9 @@ data class EarthquakeEvent(
 fun EarthquakeEvent.eewAttentionIdentity(): String = "$eewAlertLevel:$id"
 
 fun EarthquakeEvent.eewNotificationIdentity(): String = "eew:$eewAlertLevel:$id"
+
+fun EarthquakeEvent.isP2pCrowdOnly(): Boolean =
+    p2pCrowdSignal != null && reportType == null
 
 
 
@@ -169,6 +173,7 @@ data class HistoricalReportFrame(
     val index: Int,
     val total: Int,
     val archiveKey: String,
+    val kind: HistoricalAssociatedReportKind = HistoricalAssociatedReportKind.EARTHQUAKE,
     val reportType: String?,
     val reportIssuedAt: String?,
     val sourceReceivedAt: String?,
@@ -180,6 +185,7 @@ enum class HistoricalAssociatedReportKind {
     EARTHQUAKE,
     EEW_DETECTION,
     EEW,
+    FELT_REPORTS,
     TSUNAMI
 }
 

@@ -139,7 +139,9 @@ class QuakeDeckRuntime(context: Context) : QuakeDataProvider {
             settings.p2pSandboxMode = permittedTestingMode
         }
         p2pProvider.setTestingMode(permittedTestingMode)
+        p2pProvider.setP2pCrowdSignalsEnabled(settings.p2pCrowdSignalsEnabled)
         p2pProvider.setReportArchiveEnabled(settings.reportArchiveEnabled)
+        dmdssProvider.setReportArchiveEnabled(settings.reportArchiveEnabled)
         p2pProvider.setAutomaticHistoricalDownload(
             settings.automaticHistoricalDownload && settings.reportArchiveEnabled
         )
@@ -568,8 +570,13 @@ class QuakeDeckRuntime(context: Context) : QuakeDataProvider {
         }
     }
 
-    override fun setReportArchiveEnabled(enabled: Boolean) =
+    override fun setReportArchiveEnabled(enabled: Boolean) {
         p2pProvider.setReportArchiveEnabled(enabled)
+        dmdssProvider.setReportArchiveEnabled(enabled)
+    }
+
+    override fun setP2pCrowdSignalsEnabled(enabled: Boolean) =
+        p2pProvider.setP2pCrowdSignalsEnabled(enabled)
 
     override fun setAutomaticHistoricalDownload(enabled: Boolean) =
         p2pProvider.setAutomaticHistoricalDownload(enabled)

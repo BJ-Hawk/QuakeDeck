@@ -84,6 +84,69 @@ class LocalEewForecastingTest {
         )
     }
 
+    @Test
+    fun localPresentationDoesNotPaintModelledShindoZeroAcrossJapan() {
+        val event = testEvent().copy(
+            localIntensityForecast = localForecast(
+                region("000", "0"),
+                region("001", "1")
+            )
+        )
+
+        assertEquals(
+            listOf("001" to "1"),
+            event.presentationIntensityPoints().map { it.regionCode to it.intensity }
+        )
+    }
+
+    @Test
+    fun officialRegionalPointsWinWhileMissingAreasUseLocalSupplements() {
+        val official = IntensityPoint(
+            name = "Official area",
+            intensity = "4",
+            isArea = true,
+            regionCode = "340"
+        )
+        val event = testEvent().copy(
+            points = listOf(official),
+            localIntensityForecast = localForecast(
+                region("340", "3"),
+                region("341", "3"),
+                region("342", "0")
+            )
+        )
+
+        assertEquals(
+            listOf("340" to "4", "341" to "3"),
+            event.presentationIntensityPoints().map { it.regionCode to it.intensity }
+        )
+        assertEquals(
+            listOf("341"),
+            event.localSupplementalIntensityRegions().map { it.areaCode }
+        )
+    }
+
+    @Test
+    fun officialRegionNamePreventsDuplicateWhenItsCodeIsUnavailable() {
+        val official = IntensityPoint(
+            name = "Area 340",
+            intensity = "4",
+            isArea = true
+        )
+        val event = testEvent().copy(
+            points = listOf(official),
+            localIntensityForecast = localForecast(
+                region("340", "3"),
+                region("341", "2")
+            )
+        )
+
+        assertEquals(
+            listOf(null to "4", "341" to "2"),
+            event.presentationIntensityPoints().map { it.regionCode to it.intensity }
+        )
+    }
+
     private fun testEvent() = EarthquakeEvent(
         id = "forecast-boundary-test",
         place = "Test",
@@ -97,6 +160,27 @@ class LocalEewForecastingTest {
         kind = EarthquakeEventKind.EEW,
         reportIssuedAt = "2026-08-27 12:00:05 JST"
     )
+
+    private fun region(code: String, intensity: String) = LocalEewRegionForecast(
+        areaCode = code,
+        areaNameJa = "Area $code",
+        prefectureJa = "Prefecture",
+        intensity = LocalEewIntensityRange(0.0, 0.0, intensity, intensity),
+        earliestSArrivalEpochMillis = 0L,
+        maximumStationCode = "station-$code",
+        earliestArrivalStationCode = "station-$code",
+        extrapolatedBelowJmaValidationRange = true
+    )
+
+    private fun localForecast(vararg regions: LocalEewRegionForecast) =
+        LocalEewIntensityForecast(
+            regions = regions.toList(),
+            nationwideMaximum = regions.first().intensity,
+            calculatedAtEpochMillis = 0L,
+            method = "test",
+            groundData = "test",
+            excludedStationCount = 0
+        )
 
     private fun parseJst(value: String): Long = LocalDateTime.parse(value, JST_FORMATTER)
         .atZone(ZoneId.of("Asia/Tokyo"))

@@ -19,7 +19,24 @@ object JapanMapCoverage {
             longitude.isFinite() &&
             latitude in MIN_LATITUDE..MAX_LATITUDE &&
             longitude in MIN_LONGITUDE..MAX_LONGITUDE
+
+    /**
+     * Nearest coordinate representable by the existing Japan map extent.
+     * This deliberately clamps the focus target instead of widening the map.
+     */
+    fun nearestPoint(latitude: Double, longitude: Double): JapanMapCoordinate? {
+        if (!latitude.isFinite() || !longitude.isFinite()) return null
+        return JapanMapCoordinate(
+            latitude = latitude.coerceIn(MIN_LATITUDE, MAX_LATITUDE),
+            longitude = longitude.coerceIn(MIN_LONGITUDE, MAX_LONGITUDE)
+        )
+    }
 }
+
+data class JapanMapCoordinate(
+    val latitude: Double,
+    val longitude: Double
+)
 
 fun EarthquakeEvent.hasJapanMapEpicenter(): Boolean =
     hasHypocenter && JapanMapCoverage.contains(latitude, longitude)
@@ -35,8 +52,28 @@ fun EarthquakeEvent.shouldDrawMapEpicenter(projectedMarkerVisible: Boolean): Boo
 /**
  * A report is mappable when either its epicentre is inside the bundled map or
  * it has a Japanese observed/predicted footprint that can be resolved to JMA
- * stations/areas. This preserves useful Japanese shaking information for a
- * distant source without trying to drag the camera to the other side of Earth.
+ * stations/areas. An active EEW is also renderable from valid source coordinates
+ * so its wavefronts and local calculations are not lost merely because the
+ * source lies just outside the strict bundled extent. Confirmed reports retain
+ * the existing Japan-only behavior.
  */
 fun EarthquakeEvent.hasJapanMapContent(): Boolean =
-    hasJapanMapEpicenter() || points.isNotEmpty()
+    hasJapanMapEpicenter() ||
+        points.isNotEmpty() ||
+        (
+            kind == EarthquakeEventKind.EEW &&
+                hasHypocenter &&
+                latitude.isFinite() &&
+                longitude.isFinite()
+            )
+
+/**
+ * EEW-only camera anchor. Offshore sources use the nearest point of the current
+ * map extent; ordinary earthquake reports never use this clamped fallback.
+ */
+fun EarthquakeEvent.nearestJapanMapEewFocus(): JapanMapCoordinate? =
+    if (kind == EarthquakeEventKind.EEW && hasHypocenter) {
+        JapanMapCoverage.nearestPoint(latitude, longitude)
+    } else {
+        null
+    }

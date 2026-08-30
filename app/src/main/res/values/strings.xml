@@ -50,6 +50,10 @@
     <string name="map_display">Map display</string>
     <string name="live_preview">Live preview</string>
     <string name="data_connection">Data &amp; connection</string>
+    <string name="p2p_crowd_signals">P2PQuake crowd signals</string>
+    <string name="p2p_crowd_signals_explanation">Show unconfirmed felt-report incidents as regular events. A coincident official earthquake report amends the same event while retaining the felt-report count.</string>
+    <string name="p2p_felt_reports_event">Unconfirmed felt reports</string>
+    <string name="p2p_felt_reports_count">%1$d felt reports · P2PQuake</string>
     <string name="testing_sandbox">Testing &amp; Sandbox</string>
     <string name="active">Active</string>
     <string name="sandbox_summary">Historical and simulated data. Never represents current events.</string>
@@ -118,7 +122,9 @@
     <string name="text_size">Text size</string>
     <string name="marker_size_explanation">Marker size is fixed in screen space and does not shrink when the map is zoomed.</string>
 <string name="tsunami_warning">Tsunami warning</string>
+    <string name="eew_forecast">EEW forecast</string>
     <string name="eew_warning">EEW warning</string>
+    <string name="eew_forecast_active">EEW FORECAST ACTIVE</string>
     <string name="waiting_earthquake_data">Waiting for earthquake data</string>
     <string name="max_intensity">Max intensity</string>
 <string name="depth">Depth</string>
@@ -158,8 +164,10 @@
     <string name="local_jma_method_estimate">Local estimate using the JMA method</string>
     <string name="local_estimate_ground_proxy">Ground proxy: %1$s</string>
     <string name="local_estimate_extrapolated">Below the JMA method’s published validation range</string>
+    <string name="local_estimate_official_ceiling">Constrained below Shindo 4 by the official regional forecast</string>
+    <string name="local_hybrid_eew_disclosure">Official forecast areas are retained; missing Shindo 1–3 areas are local estimates using the JMA method.</string>
     <string name="dmdss_diagnostic_local_forecast">Local intensity estimate</string>
-    <string name="dmdss_diagnostic_local_forecast_ready">%1$d regions · maximum Shindo %2$s · %3$d below-range extrapolations</string>
+    <string name="dmdss_diagnostic_local_forecast_ready">%1$d calculated · %2$d official anchors · %3$d local supplements · %4$d constrained below Shindo 4 · maximum Shindo %5$s · %6$d below-range extrapolations</string>
     <string name="arrived_upper">ARRIVED</string>
     <string name="s_wave">S-wave</string>
     <string name="p_wave">P-wave</string>

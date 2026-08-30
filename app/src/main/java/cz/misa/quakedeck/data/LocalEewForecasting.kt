@@ -17,7 +17,9 @@ data class LocalEewRegionForecast(
     val earliestSArrivalEpochMillis: Long,
     val maximumStationCode: String,
     val earliestArrivalStationCode: String,
-    val extrapolatedBelowJmaValidationRange: Boolean
+    val extrapolatedBelowJmaValidationRange: Boolean,
+    /** True when an official regional omission constrained this estimate below Shindo 4. */
+    val officialOmissionCeilingApplied: Boolean = false
 )
 
 data class LocalEewIntensityForecast(
@@ -26,12 +28,18 @@ data class LocalEewIntensityForecast(
     val calculatedAtEpochMillis: Long,
     val method: String,
     val groundData: String,
-    val excludedStationCount: Int
+    val excludedStationCount: Int,
+    /**
+     * Adjustment applied by the local engine so the spatial estimate honours
+     * official regional anchors and the provider's nationwide maximum.
+     */
+    val calibrationAdjustment: Double = 0.0,
+    val officialRegionAnchorCount: Int = 0,
+    val officialOmissionCeilingCount: Int = 0
 )
 
 fun EarthquakeEvent.presentationIntensityPoints(): List<IntensityPoint> {
-    if (points.isNotEmpty()) return points
-    return localIntensityForecast?.regions.orEmpty().map { region ->
+    val supplements = localSupplementalIntensityRegions().map { region ->
         IntensityPoint(
             name = region.areaNameJa,
             intensity = region.intensity.upperDisplayIntensity,
@@ -44,7 +52,31 @@ fun EarthquakeEvent.presentationIntensityPoints(): List<IntensityPoint> {
             regionCode = region.areaCode
         )
     }
+    return points + supplements
 }
+
+/** Local Shindo 1-3 coverage for JMA areas absent from the official regional list. */
+fun EarthquakeEvent.localSupplementalIntensityRegions(): List<LocalEewRegionForecast> {
+    val officialCodes = points.mapNotNull { it.regionCode?.trim()?.takeIf(String::isNotEmpty) }.toSet()
+    val officialNames = points.flatMap { point ->
+        listOf(point.name, point.stationName.orEmpty())
+    }.map(::normalizedEewAreaIdentity).filter(String::isNotEmpty).toSet()
+
+    return localIntensityForecast?.regions.orEmpty()
+        // Shindo 0 remains useful for a selected-location estimate, but it is
+        // not a coloured forecast area. Painting modelled zeros made all of
+        // Japan look like reported Shindo 0 instead of retaining neutral land.
+        .filter { it.intensity.upperDisplayIntensity != "0" }
+        .filterNot { region ->
+            region.areaCode in officialCodes ||
+                normalizedEewAreaIdentity(region.areaNameJa) in officialNames
+        }
+}
+
+private fun normalizedEewAreaIdentity(value: String): String = value
+    .replace("　", "")
+    .replace(" ", "")
+    .trim()
 
 /** Public contract for the deliberately optional local EEW forecasting engine. */
 interface LocalEewForecastProvider {

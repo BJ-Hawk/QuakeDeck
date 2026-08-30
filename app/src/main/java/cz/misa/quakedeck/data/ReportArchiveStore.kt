@@ -34,7 +34,7 @@ internal data class ArchivedReportRecord(
 )
 
 /**
- * Persistent raw P2PQuake report archive.
+ * Persistent source-neutral report archive.
  *
  * Complete JSON payloads are stored without collapsing them into summaries. The live incident model can
  * evolve independently, while a future replay can always rebuild exactly what
@@ -146,6 +146,8 @@ internal class ReportArchiveStore(context: Context) :
                         "quake:${earthquake?.optString("time")}"
                     issue?.optString("eventId").orEmpty().isNotBlank() ->
                         "event:${issue?.optString("eventId")}"
+                    code == P2P_CROWD_SIGNAL_CODE && json.optString("started_at").isNotBlank() ->
+                        "crowd:${json.optString("started_at")}"
                     else -> null
                 }
                 val values = ContentValues().apply {
@@ -172,6 +174,15 @@ internal class ReportArchiveStore(context: Context) :
         }
         return ArchiveWriteResult(added, duplicates)
     }
+
+    /**
+     * Persist the parsed EEW state, rather than a provider-specific wire
+     * envelope. P2PQuake 556 and DM-D.S.S VXSE44/VXSE45 therefore share the
+     * same replay representation and a future DM-D.S.S Warning can replace
+     * 556 without a schema or viewer change.
+     */
+    fun storeEewFrame(event: EarthquakeEvent, source: String): ArchiveWriteResult =
+        storeReports(listOf(eewFrameJson(event)), source)
 
     fun stats(
         enabled: Boolean,
@@ -293,7 +304,7 @@ internal class ReportArchiveStore(context: Context) :
                 "event_key",
                 "raw_json"
             ),
-            "code IN (552, 554, 556)",
+            "code IN (552, 554, 556, 9611)",
             null,
             null,
             null,
@@ -380,6 +391,62 @@ internal class ReportArchiveStore(context: Context) :
     private fun sha256(value: String): String = MessageDigest.getInstance("SHA-256")
         .digest(value.toByteArray(StandardCharsets.UTF_8))
         .joinToString("") { "%02x".format(it) }
+
+    private fun eewFrameJson(event: EarthquakeEvent): JSONObject {
+        val issuedAt = archiveSourceTime(event.reportIssuedAt ?: event.originTime)
+        return JSONObject()
+            .put("id", "eew-frame:${event.id}:${event.reportSerial ?: issuedAt}")
+            .put("code", 556)
+            .put("time", issuedAt)
+            .put("quakedeckAlertLevel", event.eewAlertLevel.name)
+            .put("quakedeckMaxIntensity", event.maxIntensity)
+            .put("issue", JSONObject()
+                .put("eventId", event.id)
+                .put("serial", event.reportSerial ?: "")
+                .put("time", issuedAt)
+                .put("type", event.reportType ?: "EEW")
+            )
+            .put("earthquake", JSONObject()
+                .put("originTime", archiveSourceTime(event.originTime))
+                .put("arrivalTime", archiveSourceTime(event.originTime))
+                .put("hypocenter", JSONObject()
+                    .put("name", event.place)
+                    .put("latitude", event.latitude)
+                    .put("longitude", event.longitude)
+                    .put("depth", event.depthKm)
+                    .put("magnitude", event.magnitude)
+                )
+            )
+            .put("areas", JSONArray().apply {
+                event.points.filter { it.isArea }.forEach { point ->
+                    put(JSONObject()
+                        .put("pref", point.prefecture)
+                        .put("name", point.stationName ?: point.name)
+                        .put("scaleFrom", archiveScale(point.intensityFrom ?: point.intensity))
+                        .put("scaleTo", if (point.intensityUpperOpenEnded) 99 else archiveScale(point.intensity))
+                        .put("arrivalTime", point.arrivalTime?.let(::archiveSourceTime) ?: "")
+                    )
+                }
+            })
+    }
+
+    private fun archiveSourceTime(value: String): String = value
+        .removeSuffix(" JST")
+        .replace('-', '/')
+
+    private fun archiveScale(value: String): Int = when (value) {
+        "0" -> 0
+        "1" -> 10
+        "2" -> 20
+        "3" -> 30
+        "4" -> 40
+        "5-", "5弱" -> 45
+        "5+", "5強" -> 50
+        "6-", "6弱" -> 55
+        "6+", "6強" -> 60
+        "7" -> 70
+        else -> -1
+    }
 
     private companion object {
         const val DATABASE_NAME = "quakedeck_report_archive.db"

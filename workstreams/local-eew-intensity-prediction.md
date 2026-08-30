@@ -2,15 +2,19 @@
 
 ## Status — implemented; automated validation complete; pending device/live approval
 
-Implemented in `0.10.1-dev.3` (`versionCode` 222).
+Implemented in `0.10.1-dev.3`; the first device presentation pass shipped in
+`0.10.1-dev.4`, with its follow-up corrections completed in `0.10.1-dev.5`
+and official-authoritative hybrid regional coverage added in `0.10.1-dev.6`
+(`versionCode` 225).
 
 ## Objective
 
-Fill the regional-intensity gap in DM-D.S.S EEW bulletins without modifying,
-merging into, or relabelling official provider values. QuakeDeck calculates a
-separate local estimate from the EEW source parameters, displays its provenance
-and limitations, and uses it for the selected-location notification decision
-only when an official regional forecast is absent.
+Fill the regional-intensity gap in DM-D.S.S EEW bulletins without modifying or
+relabelling official provider values. QuakeDeck calculates a separate local
+estimate from the EEW source parameters, merges only missing areas into the
+presentation, displays its provenance and limitations, and uses it for the
+selected-location notification decision only when that location lacks an
+official regional forecast.
 
 Every forecasting equation, coefficient, interpolation, aggregation rule,
 quality gate, cache, and proxy-selection rule remains in the deliberately
@@ -49,8 +53,8 @@ References:
 - DM-D.S.S parsing now preserves region codes, PLUM/warning flags, magnitude
   unit, assumed-hypocentre condition, and source-accuracy fields.
 - Official regional forecasts always win. Local results live in a separate
-  `localIntensityForecast` object and become presentation points only when the
-  official list is empty.
+  `localIntensityForecast` object; presentation merges them by stable JMA area
+  code and uses local results only for missing areas.
 - Regional maximum intensity and earliest S-wave arrival are independently
   selected from the station set, matching JMA's published aggregation rule.
 - Each result contains point-source and finite-fault lower/upper intensity
@@ -63,13 +67,37 @@ References:
 - Selected-location estimates use the nearest bundled station's AVS30 only
   within 50 km and disclose that station as a ground proxy. No proxy means no
   locally calculated destination intensity.
-- Notifications use a local selected-location estimate only when official
-  regions are empty. Japan-wide mode uses the local nationwide maximum only
-  when the provider maximum is unknown. Existing Forecast and Warning controls,
+- Notifications use an official selected-location prediction when one exists
+  and otherwise use the local destination estimate even if another area has an
+  official value. Japan-wide mode uses the local nationwide maximum only when
+  the provider maximum is unknown. Existing Forecast and Warning controls,
   thresholds, escalation identity, and P2PQuake fallback remain unchanged.
 - Map shading, regional rows, destination countdowns, cold-start notification
   restoration, DM-D.S.S diagnostics, and the built-in Sandbox path understand
   the separate local result and label it as local.
+- When DM-D.S.S provides an official nationwide maximum but no official
+  regional list, the engine applies the smallest continuous-intensity offset
+  needed to put the strongest local station inside that official category.
+  The provider remains authoritative for amplitude while the local estimate
+  supplies only the spatial distribution.
+- When official regions are present, their intensity categories become
+  calibration anchors alongside the nationwide maximum. Officially omitted
+  areas are constrained below Shindo 4; any irreconcilable local result is
+  capped at Shindo 3 and counted in diagnostics instead of contradicting the
+  provider. The official value, arrival, PLUM flag, Warning flag, and event
+  classification are never overwritten.
+- Modelled Shindo 0 remains available for selected-location decisions and the
+  destination card, but is not drawn as a regional map overlay. Unaffected or
+  unforecasted land therefore keeps the normal neutral map colour.
+- Forecast and Warning now have distinct yellow-versus-red active-map and
+  event-panel treatment.
+  The destination card translates its ground-proxy name through the selected
+  UI language and uses a compact layout while retaining provenance and the
+  below-validation-range disclosure.
+- Expanding predicted intensities during an active EEW keeps the report controls
+  pinned without retaining the hidden inline EEW banner's height, so the
+  destination card sits directly below the fixed report card in both Sandbox
+  and live DM-D.S.S regional forecasts.
 
 ## Validation and approval boundary
 
@@ -77,9 +105,10 @@ References:
   both attributed resources present.
 - LITE validation must continue to exclude the engine while compiling the same
   tracked contracts/resources and retaining official-provider behavior.
-- No APK was built for this workstream. Device rendering, Sandbox behavior, and
-  the next suitable live DM-D.S.S event remain pending approval; automated
-  tests are not production proof.
+- No APK was built for this workstream. Device rendering, Sandbox behavior, the
+  hybrid official/local map, selected-location supplementation, omission
+  ceilings, and the next suitable live DM-D.S.S event remain pending approval;
+  automated tests are not production proof.
 
 ## Mandatory cross-machine transfer reminder
 

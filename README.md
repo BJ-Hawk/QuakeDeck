@@ -2,7 +2,7 @@
 
 QuakeDeck is an Android earthquake-monitoring prototype focused on Japan. It uses Kotlin and Jetpack Compose to combine live P2PQuake/JMA reports, EEW visualization, observed intensity mapping, tsunami information, historical report browsing, and deterministic Sandbox testing in one map-first interface.
 
-Current version: **0.10.1-dev.3**. QuakeDeck is still pre-1.0 and should not be treated as an official emergency-warning application.
+Current version: **0.10.1-dev.10**. QuakeDeck is still pre-1.0 and should not be treated as an official emergency-warning application.
 
 > **Intentionally omitted EEW forecasting implementation**
 >
@@ -21,7 +21,8 @@ Current version: **0.10.1-dev.3**. QuakeDeck is still pre-1.0 and should not be 
 - Persistent JMA, NIED, and local-government station filters for the idle map, with report views restricted to their own observed stations
 - P/S wavefront visualization and destination countdowns when the intentionally local forecast engine is present, plus event focus, observed intensity lists, report history, and persistent main-map camera/panel layout in every build
 - Separately labelled local DM-D.S.S intensity estimates when official regional values are absent, calculated in FULL builds from JMA's published method, JMA2001 travel times, and a derived NIED J-SHIS V4 station AVS30 lookup
-- Persistent local raw-report archive and historical report browser
+- Persistent source-neutral EEW/report archive and historical browser, including deduplicated DM-D.S.S Forecast revisions, P2PQuake Warnings, and attached cumulative felt-report replay frames
+- Optional P2PQuake felt-report counters attached only to one matching EEW or confirmed earthquake; a later ordinary report amends that same incident while retaining the counter
 - English, Czech, and Japanese UI/place-name handling
 - Light, dark, and system appearance modes
 - Custom Android notification cards with Shindo or tsunami-grade graphics, alert-level borders, multiline event details, location-aware coverage, audible/silent thresholds, scheduled quiet-hour delivery policies, manual city/postcode relevance filtering, and expiry-safe cold-start incident restoration; active EEW rings/countdowns are restored only when the intentionally local forecast engine is present

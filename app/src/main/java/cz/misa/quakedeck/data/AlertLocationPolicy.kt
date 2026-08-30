@@ -21,7 +21,7 @@ class AlertLocationPolicy(context: Context) {
         }
 
         val officialPoint = eewForecastPoint(event, location)
-        if (officialPoint != null || event.points.isNotEmpty()) {
+        if (officialPoint != null) {
             return resolveEewAlertScope(
                 locationFiltering = true,
                 eventMaximum = event.maxIntensity,
@@ -51,34 +51,36 @@ class AlertLocationPolicy(context: Context) {
             )
         }
 
-        val targetArea = location.eewAreaNameJa
-            ?.takeIf { it.isNotBlank() }
-            ?: geometry.eewAreaAt(location.latitude, location.longitude)?.nameJa
-        val epicentreArea = geometry.eewAreaAt(event.latitude, event.longitude)?.nameJa
-        if (
-            !targetArea.isNullOrBlank() &&
-            !epicentreArea.isNullOrBlank() &&
-            sameArea(targetArea, epicentreArea)
-        ) {
-            return resolveEewAlertScope(
-                locationFiltering = true,
-                eventMaximum = event.maxIntensity,
-                emptyRegionFallback = EewAlertScopeBasis.EMPTY_REGIONS_SAME_EEW_AREA
-            )
-        }
+        if (event.points.isEmpty()) {
+            val targetArea = location.eewAreaNameJa
+                ?.takeIf { it.isNotBlank() }
+                ?: geometry.eewAreaAt(location.latitude, location.longitude)?.nameJa
+            val epicentreArea = geometry.eewAreaAt(event.latitude, event.longitude)?.nameJa
+            if (
+                !targetArea.isNullOrBlank() &&
+                !epicentreArea.isNullOrBlank() &&
+                sameArea(targetArea, epicentreArea)
+            ) {
+                return resolveEewAlertScope(
+                    locationFiltering = true,
+                    eventMaximum = event.maxIntensity,
+                    emptyRegionFallback = EewAlertScopeBasis.EMPTY_REGIONS_SAME_EEW_AREA
+                )
+            }
 
-        val distance = EewWaveModel.greatCircleDistanceKm(
-            event.latitude,
-            event.longitude,
-            location.latitude,
-            location.longitude
-        )
-        if (distance <= EMPTY_REGION_EPICENTRE_FALLBACK_KM) {
-            return resolveEewAlertScope(
-                locationFiltering = true,
-                eventMaximum = event.maxIntensity,
-                emptyRegionFallback = EewAlertScopeBasis.EMPTY_REGIONS_NEAR_EPICENTRE
+            val distance = EewWaveModel.greatCircleDistanceKm(
+                event.latitude,
+                event.longitude,
+                location.latitude,
+                location.longitude
             )
+            if (distance <= EMPTY_REGION_EPICENTRE_FALLBACK_KM) {
+                return resolveEewAlertScope(
+                    locationFiltering = true,
+                    eventMaximum = event.maxIntensity,
+                    emptyRegionFallback = EewAlertScopeBasis.EMPTY_REGIONS_NEAR_EPICENTRE
+                )
+            }
         }
 
         return resolveEewAlertScope(

@@ -125,6 +125,27 @@ class CorePolicyTest {
     }
 
     @Test
+    fun offshoreEewRendersAtNearestExistingMapPointWithoutChangingConfirmedReports() {
+        val offshoreEew = earthquakeEvent(EarthquakeReportStage.UNKNOWN).copy(
+            latitude = 22.4,
+            longitude = 122.9,
+            points = emptyList(),
+            kind = EarthquakeEventKind.EEW
+        )
+
+        assertFalse(offshoreEew.hasJapanMapEpicenter())
+        assertTrue(offshoreEew.hasJapanMapContent())
+        assertEquals(
+            JapanMapCoordinate(22.4, JapanMapCoverage.MIN_LONGITUDE),
+            offshoreEew.nearestJapanMapEewFocus()
+        )
+
+        val confirmedReport = offshoreEew.copy(kind = EarthquakeEventKind.CONFIRMED)
+        assertFalse(confirmedReport.hasJapanMapContent())
+        assertNull(confirmedReport.nearestJapanMapEewFocus())
+    }
+
+    @Test
     fun eewScopeUsesJapanWideMaximumForDeliveryAndAttentionWhenFilteringIsOff() {
         val decision = resolveEewAlertScope(
             locationFiltering = false,
@@ -150,6 +171,21 @@ class CorePolicyTest {
         assertEquals("4", decision.relevantIntensity)
         assertEquals(localPoint, decision.localPoint)
         assertEquals(EewAlertScopeBasis.OFFICIAL_REGIONAL_FORECAST, decision.basis)
+    }
+
+    @Test
+    fun eewScopeUsesALocalSupplementWhenTheSelectedOfficialAreaIsMissing() {
+        val localPoint = IntensityPoint(name = "Tokyo", intensity = "3", isArea = true)
+        val decision = resolveEewAlertScope(
+            locationFiltering = true,
+            eventMaximum = "4",
+            localEstimate = localPoint
+        )
+
+        assertTrue(decision.inScope)
+        assertEquals("3", decision.relevantIntensity)
+        assertEquals(localPoint, decision.localPoint)
+        assertEquals(EewAlertScopeBasis.LOCAL_JMA_METHOD_ESTIMATE, decision.basis)
     }
 
     @Test

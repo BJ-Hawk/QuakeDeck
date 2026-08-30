@@ -52,6 +52,7 @@ object EewWaveModel {
         val officialIntensity: Boolean = true,
         val locallyCalculatedIntensity: Boolean = false,
         val extrapolatedBelowJmaValidationRange: Boolean = false,
+        val officialOmissionCeilingApplied: Boolean = false,
         val groundProxyName: String? = null
     )
 
