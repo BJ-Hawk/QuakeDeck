@@ -28,6 +28,7 @@
     <string name="dmdss_delivery_diagnostics">Delivery diagnostics</string>
     <string name="dmdss_diagnostic_connection">Connection</string>
     <string name="dmdss_diagnostic_socket_activity">Last socket activity</string>
+    <string name="dmdss_diagnostic_socket_context">Last socket context</string>
     <string name="dmdss_diagnostic_bulletin">Last accepted bulletin</string>
     <string name="dmdss_diagnostic_rejected">Last ignored bulletin</string>
     <string name="dmdss_diagnostic_transport_issue">Last transport issue</string>

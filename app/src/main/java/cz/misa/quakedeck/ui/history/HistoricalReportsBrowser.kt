@@ -586,6 +586,21 @@ private fun HistoricalEventRow(
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
+                event.p2pCrowdSignal?.let { crowd ->
+                    Text(
+                        UiLocalization.format(
+                            context,
+                            R.string.p2p_felt_reports_count,
+                            language,
+                            crowd.reportCount
+                        ),
+                        color = MaterialTheme.colorScheme.tertiary,
+                        fontSize = 10.5.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
             }
             Spacer(Modifier.width(10.dp))
             Surface(

@@ -28,6 +28,7 @@
     <string name="dmdss_delivery_diagnostics">Diagnostika doručování</string>
     <string name="dmdss_diagnostic_connection">Připojení</string>
     <string name="dmdss_diagnostic_socket_activity">Poslední aktivita socketu</string>
+    <string name="dmdss_diagnostic_socket_context">Kontext posledního socketu</string>
     <string name="dmdss_diagnostic_bulletin">Poslední přijatý bulletin</string>
     <string name="dmdss_diagnostic_rejected">Poslední ignorovaný bulletin</string>
     <string name="dmdss_diagnostic_transport_issue">Poslední problém přenosu</string>

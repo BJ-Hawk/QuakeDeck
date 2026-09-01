@@ -3,6 +3,7 @@ package cz.misa.quakedeck.data
 import org.json.JSONObject
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -76,7 +77,7 @@ class DmDssDiagnosticsTest {
         val export = JSONObject(snapshot.toMachineReadableJson(exportedAtMillis = 300L))
 
         assertEquals("cz.misa.quakedeck.dmdss-diagnostics", export.getString("schema"))
-        assertEquals(2, export.getInt("schemaVersion"))
+        assertEquals(3, export.getInt("schemaVersion"))
         assertEquals("Connected", export.getJSONObject("summary").getString("socketState"))
         assertEquals(1, export.getInt("packetCount"))
         assertEquals(
@@ -153,6 +154,44 @@ class DmDssDiagnosticsTest {
         assertEquals("EEW Report #2", readable.summary)
         assertEquals("熊本県熊本", readable.detail)
         assertEquals(DiagnosticPacketDetailKind.REPORTING_AREA, readable.detailKind)
+    }
+
+    @Test
+    fun latestPingTrackerSuppressesQueuedStalePingId() {
+        val tracker = LatestDmDssPingTracker()
+        val stale = tracker.receive("older")
+        val latest = tracker.receive("newest")
+
+        assertNull(tracker.payloadIfLatest(stale))
+        assertEquals(
+            "newest",
+            JSONObject(requireNotNull(tracker.payloadIfLatest(latest))).getString("pingId")
+        )
+    }
+
+    @Test
+    fun readablePacketHistoryNamesSocketFailureAndReconnectControlPackets() {
+        val packets = listOf(
+            DmDssPacketDiagnostic(
+                100L,
+                "IN",
+                "failure",
+                "websocket-failure",
+                """{"type":"websocket-failure"}"""
+            ),
+            DmDssPacketDiagnostic(
+                200L,
+                "OUT",
+                "control",
+                "reconnect-scheduled",
+                """{"type":"reconnect-scheduled","delayMillis":2000}"""
+            )
+        )
+
+        assertEquals(
+            listOf("WebSocket Failure", "Reconnect Scheduled"),
+            humanReadablePacketDiagnostics(packets).map { it.summary }
+        )
     }
 
     private fun forecastEnvelope(): JSONObject {

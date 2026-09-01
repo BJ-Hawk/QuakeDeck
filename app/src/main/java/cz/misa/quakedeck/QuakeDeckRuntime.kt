@@ -155,6 +155,7 @@ class QuakeDeckRuntime(context: Context) : QuakeDataProvider {
 
     private fun handleP2pSnapshot(snapshot: AppSnapshot) {
         p2pSnapshot = if (snapshot.testingMode) snapshot.withSandboxLocalForecast() else snapshot
+        dmdssSnapshot = dmdssSnapshot.withAssociatedP2pCrowdSignal()
         publishCombined(origin = DataSourceMode.FREE)
     }
 
@@ -178,8 +179,28 @@ class QuakeDeckRuntime(context: Context) : QuakeDataProvider {
     }
 
     private fun handleDmdssSnapshot(snapshot: AppSnapshot) {
-        dmdssSnapshot = snapshot
+        val previousSignal = dmdssSnapshot.activeEewEvent?.p2pCrowdSignal
+            ?: dmdssSnapshot.event.p2pCrowdSignal
+        p2pProvider.setExternalEewForCrowdAssociation(snapshot.activeEewEvent)
+        dmdssSnapshot = snapshot.withAssociatedP2pCrowdSignal(previousSignal)
         publishCombined(origin = DataSourceMode.DMDSS)
+    }
+
+    private fun AppSnapshot.withAssociatedP2pCrowdSignal(
+        retainedSignal: cz.misa.quakedeck.data.P2pCrowdSignal? = null
+    ): AppSnapshot {
+        val active = activeEewEvent
+        val target = active ?: event.takeIf { it.kind == EarthquakeEventKind.EEW } ?: return this
+        val signal = p2pProvider.crowdSignalFor(target)
+            ?: retainedSignal?.takeIf { previous ->
+                previous.startedAt.isNotBlank() && target.id == dmdssSnapshot.event.id
+            }
+            ?: return this
+        val enriched = target.copy(p2pCrowdSignal = signal)
+        return copy(
+            activeEewEvent = active?.let { enriched },
+            event = if (event.id == target.id) enriched else event
+        )
     }
 
     @Synchronized
@@ -357,6 +378,7 @@ class QuakeDeckRuntime(context: Context) : QuakeDataProvider {
         ) {
             refreshDmdssContractsAndConnect()
         } else {
+            p2pProvider.setExternalEewForCrowdAssociation(null)
             dmdssProvider.stop()
         }
         publishCombined(origin = mode)

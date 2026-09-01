@@ -64,7 +64,7 @@ class P2pCrowdSignalTest {
     }
 
     @Test
-    fun `coincides with official event using existing ten second event window`() {
+    fun `associates delayed felt aggregate with confirmed event`() {
         val signal = P2pCrowdSignal(
             startedAt = "2026/08/30 00:17:23.111",
             updatedAt = "2026/08/30 00:18:00.702",
@@ -73,8 +73,16 @@ class P2pCrowdSignalTest {
             areas = emptyList()
         )
 
-        assertTrue(signal.coincidesWith(confirmedEvent("2026-08-30 00:17:16 JST")))
-        assertFalse(signal.coincidesWith(confirmedEvent("2026-08-30 00:17:11 JST")))
+        assertTrue(signal.coincidesWith(confirmedEvent("2026-08-30 00:17:00 JST")))
+        assertEquals(
+            23L,
+            signal.confirmedAssociationDelaySeconds(
+                confirmedEvent("2026-08-30 00:17:00 JST")
+            )
+        )
+        assertTrue(signal.coincidesWith(confirmedEvent("2026-08-30 00:16:07 JST")))
+        assertFalse(signal.coincidesWith(confirmedEvent("2026-08-30 00:14:22 JST")))
+        assertFalse(signal.coincidesWith(confirmedEvent("2026-08-30 00:17:34 JST")))
     }
 
     @Test
@@ -118,10 +126,104 @@ class P2pCrowdSignalTest {
     }
 
     @Test
+    fun `cumulative felt count cannot move backwards`() {
+        val final = P2pCrowdSignal(
+            startedAt = "2026/08/31 18:50:16.074",
+            updatedAt = "2026/08/31 18:50:42.000",
+            reportCount = 34,
+            confidence = 0.98,
+            areas = emptyList()
+        )
+        val stale = final.copy(
+            updatedAt = "2026/08/31 18:50:20.000",
+            reportCount = 5,
+            confidence = 0.72
+        )
+        val sameCountNewer = final.copy(
+            updatedAt = "2026/08/31 18:50:45.000",
+            confidence = 0.99
+        )
+
+        assertEquals(final, final.mergeCumulativeUpdate(stale))
+        assertEquals(sameCountNewer, final.mergeCumulativeUpdate(sameCountNewer))
+    }
+
+    @Test
+    fun `historical replay uses source chronology before archive receipt order`() {
+        val official = HistoricalReplayOrderKey(
+            timelineAtMillis = 1_000L,
+            receivedAtMillis = 9_000L,
+            archiveKey = "official"
+        )
+        val felt = HistoricalReplayOrderKey(
+            timelineAtMillis = 2_000L,
+            receivedAtMillis = 5_000L,
+            archiveKey = "felt"
+        )
+
+        assertEquals(listOf(official, felt), listOf(felt, official).sorted())
+    }
+
+    @Test
+    fun `confirmed summary keeps final cumulative felt count`() {
+        val first = P2pCrowdSignal(
+            startedAt = "2026/08/31 18:50:16.074",
+            updatedAt = "2026/08/31 18:50:20.000",
+            reportCount = 5,
+            confidence = 0.72,
+            areas = emptyList()
+        )
+        val final = first.copy(
+            updatedAt = "2026/08/31 18:50:42.000",
+            reportCount = 34,
+            confidence = 0.98
+        )
+
+        assertEquals(
+            final,
+            selectP2pCrowdSignalForConfirmedEvent(
+                event = confirmedEvent("2026-08-31 18:50:00 JST"),
+                signals = listOf(final, first)
+            )
+        )
+    }
+
+    @Test
+    fun `confirmed summary retains felt cluster claimed by matching preliminary eew`() {
+        val signal = P2pCrowdSignal(
+            startedAt = "2026/08/31 18:50:04.000",
+            updatedAt = "2026/08/31 18:50:42.000",
+            reportCount = 34,
+            confidence = 0.98,
+            areas = emptyList()
+        )
+        val confirmed = confirmedEvent("2026-08-31 18:50:15 JST")
+        val preliminaryEew = confirmedEvent("2026-08-31 18:50:00 JST").copy(
+            id = "eew",
+            kind = EarthquakeEventKind.EEW
+        )
+
+        assertNull(
+            selectP2pCrowdSignalForConfirmedEvent(
+                event = confirmed,
+                signals = listOf(signal)
+            )
+        )
+        assertEquals(
+            signal,
+            selectP2pCrowdSignalForConfirmedEvent(
+                event = confirmed,
+                signals = listOf(signal),
+                claimedEewsByStartedAt = mapOf(signal.startedAt to preliminaryEew)
+            )
+        )
+    }
+
+    @Test
     fun `informative felt cluster can belong to active eew after origin`() {
         val signal = P2pCrowdSignal(
-            startedAt = "2026/08/30 00:21:23.111",
-            updatedAt = "2026/08/30 00:21:31.702",
+            startedAt = "2026/08/30 00:19:23.111",
+            updatedAt = "2026/08/30 00:19:31.702",
             reportCount = 7,
             confidence = 0.72,
             areas = emptyList()
@@ -133,6 +235,9 @@ class P2pCrowdSignalTest {
 
         assertTrue(signal.canBelongToEew(eew))
         assertFalse(signal.canBelongToEew(eew.copy(isCancelled = true)))
+        assertFalse(
+            signal.copy(startedAt = "2026/08/30 00:21:23.111").canBelongToEew(eew)
+        )
     }
 
     private fun confirmedEvent(originTime: String) = EarthquakeEvent(

@@ -28,6 +28,7 @@
     <string name="dmdss_delivery_diagnostics">DM-D.S.S 配信診断</string>
     <string name="dmdss_diagnostic_connection">接続</string>
     <string name="dmdss_diagnostic_socket_activity">最後のソケット通信</string>
+    <string name="dmdss_diagnostic_socket_context">最後のソケット状況</string>
     <string name="dmdss_diagnostic_bulletin">最後に受理した電文</string>
     <string name="dmdss_diagnostic_rejected">最後に無視した電文</string>
     <string name="dmdss_diagnostic_transport_issue">最後の通信問題</string>

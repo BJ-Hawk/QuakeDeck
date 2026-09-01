@@ -81,6 +81,8 @@ class P2pQuakeProvider(
     // Kept as evidence only. A cluster is never promoted to a visible event;
     // it is claimed only when one EEW or confirmed incident identifies it.
     private val pendingCrowdSignals = LinkedHashMap<String, P2pCrowdSignal>()
+    private val claimedCrowdEews = LinkedHashMap<String, EarthquakeEvent>()
+    private var externalEewForCrowdAssociation: EarthquakeEvent? = null
     private val sandboxTimelineOffsets = mutableMapOf<String, Long>()
     @Volatile private var stopped = false
     @Volatile private var appInForeground = true
@@ -645,6 +647,20 @@ class P2pQuakeProvider(
         }
     }
 
+    /**
+     * Gives the baseline P2PQuake stream visibility of the active paid-provider
+     * EEW solely for attaching 9611 evidence. It never promotes an unmatched
+     * crowd aggregate into an event and never replaces provider earthquake data.
+     */
+    fun setExternalEewForCrowdAssociation(event: EarthquakeEvent?) {
+        externalEewForCrowdAssociation = event?.takeIf {
+            it.kind == EarthquakeEventKind.EEW && !it.isCancelled
+        }
+    }
+
+    fun crowdSignalFor(event: EarthquakeEvent): P2pCrowdSignal? =
+        event.p2pCrowdSignal ?: pendingCrowdSignalFor(event)
+
     override fun setReportArchiveEnabled(enabled: Boolean) {
         reportArchiveEnabled = enabled
         persistentSettings.reportArchiveEnabled = enabled
@@ -702,14 +718,21 @@ class P2pQuakeProvider(
     ) {
         archiveExecutor.execute {
             val result = runCatching {
+                val associations = parseHistoricalCrowdAssociations(
+                    archiveStore.loadAssociatedReportCandidates()
+                )
                 archiveStore.loadEarthquakeReports()
                     .groupBy { it.eventKey }
                     .mapNotNull { (eventKey, records) ->
                         buildHistoricalIncident(eventKey, records)?.let { incident ->
                             val finalEvent = incident.frames.lastOrNull()?.event ?: return@let null
+                            val finalCrowdSignal = historicalCrowdSignalFor(
+                                confirmed = finalEvent,
+                                associations = associations
+                            )
                             HistoricalEventSummary(
                                 eventKey = eventKey,
-                                event = finalEvent,
+                                event = finalEvent.copy(p2pCrowdSignal = finalCrowdSignal),
                                 reportCount = incident.reportCount,
                                 firstReportAt = incident.frames.firstOrNull()?.sourceReceivedAt,
                                 lastReportAt = incident.frames.lastOrNull()?.sourceReceivedAt,
@@ -722,6 +745,45 @@ class P2pQuakeProvider(
             }
             mainHandler.post { onResult(result) }
         }
+    }
+
+    private data class HistoricalCrowdAssociations(
+        val eews: List<EarthquakeEvent>,
+        val signals: List<P2pCrowdSignal>
+    )
+
+    private fun parseHistoricalCrowdAssociations(
+        candidates: List<ArchivedReportRecord>
+    ): HistoricalCrowdAssociations = HistoricalCrowdAssociations(
+        eews = candidates.asSequence()
+            .filter { it.code == 556 && !it.rawJson.optBoolean("cancelled", false) }
+            .mapNotNull { parseEew(it.rawJson) }
+            .toList(),
+        signals = candidates.asSequence()
+            .filter { it.code == P2P_CROWD_SIGNAL_CODE }
+            .mapNotNull { parseP2pCrowdSignal(it.rawJson) }
+            .filter(P2pCrowdSignal::isInformative)
+            .toList()
+    )
+
+    private fun historicalCrowdSignalFor(
+        confirmed: EarthquakeEvent,
+        associations: HistoricalCrowdAssociations
+    ): P2pCrowdSignal? {
+        val matchingEews = associations.eews.filter { historicalEewMatches(confirmed, it) }
+        val claimedEewsByStartedAt = associations.signals.mapNotNull { signal ->
+            matchingEews.asSequence()
+                .filter(signal::canBelongToEew)
+                .minByOrNull { eew ->
+                    kotlin.math.abs(signal.associationDelaySeconds(eew) ?: Long.MAX_VALUE)
+                }
+                ?.let { signal.startedAt to it }
+        }.toMap()
+        return selectP2pCrowdSignalForConfirmedEvent(
+            event = confirmed,
+            signals = associations.signals,
+            claimedEewsByStartedAt = claimedEewsByStartedAt
+        )
     }
 
     override fun loadHistoricalIncident(
@@ -804,6 +866,7 @@ class P2pQuakeProvider(
         data class ReplaySource(
             val archiveKey: String,
             val kind: HistoricalAssociatedReportKind,
+            val timelineAtMillis: Long,
             val receivedAt: Long,
             val sourceTime: String?,
             val reportType: String?,
@@ -821,6 +884,12 @@ class P2pQuakeProvider(
                         ReplaySource(
                             archiveKey = record.archiveKey,
                             kind = HistoricalAssociatedReportKind.EEW,
+                            timelineAtMillis = historicalReplayTimelineMillis(
+                                sourceTime = record.sourceTime,
+                                rawJson = record.rawJson,
+                                fallbackTime = eew.reportIssuedAt,
+                                receivedAt = record.receivedAt
+                            ),
                             receivedAt = record.receivedAt,
                             sourceTime = record.sourceTime,
                             reportType = "EEW",
@@ -843,8 +912,15 @@ class P2pQuakeProvider(
                         ReplaySource(
                             archiveKey = record.archiveKey,
                             kind = HistoricalAssociatedReportKind.FELT_REPORTS,
+                            timelineAtMillis = historicalReplayTimelineMillis(
+                                sourceTime = record.sourceTime,
+                                rawJson = record.rawJson,
+                                fallbackTime = signal.updatedAt,
+                                receivedAt = record.receivedAt
+                            ),
                             receivedAt = record.receivedAt,
-                            sourceTime = record.sourceTime,
+                            sourceTime = record.sourceTime?.takeIf(String::isNotBlank)
+                                ?: signal.updatedAt,
                             reportType = "P2PQuake felt reports",
                             reportIssuedAt = null,
                             signal = signal
@@ -856,6 +932,12 @@ class P2pQuakeProvider(
             ReplaySource(
                 archiveKey = record.archiveKey,
                 kind = HistoricalAssociatedReportKind.EARTHQUAKE,
+                timelineAtMillis = historicalReplayTimelineMillis(
+                    sourceTime = record.sourceTime,
+                    rawJson = record.rawJson,
+                    fallbackTime = report.reportIssuedAt,
+                    receivedAt = record.receivedAt
+                ),
                 receivedAt = record.receivedAt,
                 sourceTime = record.sourceTime,
                 reportType = report.reportType,
@@ -863,41 +945,59 @@ class P2pQuakeProvider(
                 event = frame.event
             )
         }
-        val sources = (eewSources + feltSources + confirmedSources).sortedWith(
-            compareBy<ReplaySource> { it.receivedAt }
-                .thenBy { it.archiveKey }
-        )
+        val sources = (eewSources + feltSources + confirmedSources).sortedBy { source ->
+            HistoricalReplayOrderKey(
+                timelineAtMillis = source.timelineAtMillis,
+                receivedAtMillis = source.receivedAt,
+                archiveKey = source.archiveKey
+            )
+        }
 
         var activeEew: EarthquakeEvent? = null
         var confirmed: EarthquakeEvent? = null
+        var pendingCrowd: P2pCrowdSignal? = null
         val frames = buildList {
             sources.forEach { source ->
                 val displayed = when (source.kind) {
                     HistoricalAssociatedReportKind.EEW -> source.event?.let { eew ->
+                        val carried = listOfNotNull(
+                            activeEew?.p2pCrowdSignal,
+                            pendingCrowd?.takeIf { it.canBelongToEew(eew) }
+                        ).reduceOrNull(P2pCrowdSignal::mergeCumulativeUpdate)
                         activeEew = eew.copy(
-                            p2pCrowdSignal = activeEew?.p2pCrowdSignal
-                                ?.takeIf { it.canBelongToEew(eew) }
+                            p2pCrowdSignal = carried
                         )
                         activeEew
                     }
                     HistoricalAssociatedReportKind.FELT_REPORTS -> source.signal?.let { signal ->
-                        when {
-                            activeEew?.let { signal.canBelongToEew(it) } == true -> {
-                                activeEew = activeEew?.copy(p2pCrowdSignal = signal)
-                                activeEew
+                        pendingCrowd = pendingCrowd?.mergeCumulativeUpdate(signal) ?: signal
+                        val cumulative = requireNotNull(pendingCrowd)
+                        confirmed = confirmed?.let { event ->
+                            if (cumulative.coincidesWith(event)) {
+                                event.copy(p2pCrowdSignal = cumulative)
+                            } else {
+                                event
                             }
-                            confirmed?.let { signal.coincidesWith(it) } == true -> {
-                                confirmed = confirmed?.copy(p2pCrowdSignal = signal)
-                                confirmed
-                            }
-                            else -> null
                         }
+                        activeEew = activeEew?.let { event ->
+                            if (cumulative.canBelongToEew(event)) {
+                                event.copy(p2pCrowdSignal = cumulative)
+                            } else {
+                                event
+                            }
+                        }
+                        confirmed?.takeIf { cumulative.coincidesWith(it) }
+                            ?: activeEew?.takeIf { cumulative.canBelongToEew(it) }
                     }
                     HistoricalAssociatedReportKind.EARTHQUAKE -> source.event?.let { event ->
+                        val carried = listOfNotNull(
+                            event.p2pCrowdSignal,
+                            activeEew?.p2pCrowdSignal,
+                            pendingCrowd?.takeIf { it.coincidesWith(event) },
+                            confirmed?.p2pCrowdSignal
+                        ).reduceOrNull(P2pCrowdSignal::mergeCumulativeUpdate)
                         confirmed = event.copy(
-                            p2pCrowdSignal = event.p2pCrowdSignal
-                                ?: activeEew?.p2pCrowdSignal
-                                ?: confirmed?.p2pCrowdSignal
+                            p2pCrowdSignal = carried
                         )
                         confirmed
                     }
@@ -922,6 +1022,18 @@ class P2pQuakeProvider(
         val total = frames.size
         return frames.mapIndexed { index, frame -> frame.copy(index = index, total = total) }
     }
+
+    private fun historicalReplayTimelineMillis(
+        sourceTime: String?,
+        rawJson: JSONObject,
+        fallbackTime: String?,
+        receivedAt: Long
+    ): Long = (
+        sourceInstant(sourceTime.orEmpty())
+            ?: reportSourceInstant(rawJson)
+            ?: sourceInstant(fallbackTime.orEmpty().removeSuffix(" JST"))
+            ?: Instant.ofEpochMilli(receivedAt)
+        ).toEpochMilli()
 
     private fun buildHistoricalAssociatedReports(
         parsedRecords: List<Pair<ArchivedEarthquakeReport, EarthquakeEvent>>,
@@ -1185,10 +1297,17 @@ class P2pQuakeProvider(
                 if (
                     stopped ||
                     testingMode ||
-                    generation != recentReportsGeneration ||
-                    freshRecentReportsLoaded ||
-                    lastEvent != null
+                    generation != recentReportsGeneration
                 ) return@post
+
+                val restoredCrowd = restoreRememberedCrowdSignals(remembered)
+                if (freshRecentReportsLoaded || lastEvent != null) {
+                    if (restoredCrowd) {
+                        scheduleRecentReportCacheWrite()
+                        emitCurrentRecentState(sourceLabel())
+                    }
+                    return@post
+                }
 
                 remembered.asReversed().forEach(::addToHistory)
                 lastEvent = eventHistory.firstOrNull()
@@ -1205,6 +1324,29 @@ class P2pQuakeProvider(
                 }
             }
         }
+    }
+
+    private fun restoreRememberedCrowdSignals(remembered: List<EarthquakeEvent>): Boolean {
+        var changed = false
+        remembered.forEach { cachedEvent ->
+            val cachedSignal = cachedEvent.p2pCrowdSignal ?: return@forEach
+            val currentSignal = pendingCrowdSignals[cachedSignal.startedAt]
+            val mergedSignal = currentSignal?.mergeCumulativeUpdate(cachedSignal) ?: cachedSignal
+            pendingCrowdSignals[mergedSignal.startedAt] = mergedSignal
+
+            val owner = sequenceOf(lastEvent, *eventHistory.toTypedArray())
+                .filterNotNull()
+                .firstOrNull { current ->
+                    current.id == cachedEvent.id || sameConfirmedIncident(current, cachedEvent)
+                } ?: return@forEach
+            val previous = owner.p2pCrowdSignal
+            val restored = previous?.mergeCumulativeUpdate(mergedSignal) ?: mergedSignal
+            if (restored != previous) {
+                amendCrowdOwner(owner, restored)
+                changed = true
+            }
+        }
+        return changed
     }
 
     private fun scheduleRecentReportCacheWrite() {
@@ -1273,19 +1415,33 @@ class P2pQuakeProvider(
     private fun loadArchivedHistory() {
         if (!reportArchiveEnabled || testingMode) return
         archiveExecutor.execute {
-            val reports = archiveStore.loadRecentEarthquakeReports()
-            if (reports.isEmpty()) return@execute
+            val records = archiveStore.loadRecentEarthquakeReportRecords()
+            if (records.isEmpty()) return@execute
+            val associations = parseHistoricalCrowdAssociations(
+                archiveStore.loadAssociatedReportCandidates()
+            )
+            val archivedFinalEvents = records.groupBy { it.eventKey }.mapNotNull { (eventKey, reports) ->
+                buildHistoricalIncident(eventKey, reports)?.frames?.lastOrNull()?.event?.let { event ->
+                    event.copy(
+                        p2pCrowdSignal = historicalCrowdSignalFor(event, associations)
+                    )
+                }
+            }
             mainHandler.post {
                 if (stopped || testingMode || !reportArchiveEnabled) return@post
-                reports.sortedWith(reportChronologicalComparator).forEach { json ->
-                    if (!acceptMessage(json)) return@forEach
-                    parseQuake(json)?.let { report ->
-                        val merged = addToHistory(report)
-                        if (lastEvent?.id == merged.id && lastEvent?.kind == EarthquakeEventKind.CONFIRMED) {
-                            lastEvent = merged
+                records.map(ArchivedEarthquakeReport::rawJson)
+                    .sortedWith(reportChronologicalComparator)
+                    .forEach { json ->
+                        if (!acceptMessage(json)) return@forEach
+                        parseQuake(json)?.let { report ->
+                            val merged = addToHistory(report)
+                            if (lastEvent?.id == merged.id && lastEvent?.kind == EarthquakeEventKind.CONFIRMED) {
+                                lastEvent = merged
+                            }
                         }
                     }
-                }
+                val restoredCrowd = restoreRememberedCrowdSignals(archivedFinalEvents)
+                if (restoredCrowd) scheduleRecentReportCacheWrite()
                 if (lastEvent == null) lastEvent = eventHistory.firstOrNull()
                 lastEvent?.let { event ->
                     emit(snapshot(currentState, activeEew, event, "Local report archive loaded"))
@@ -1680,11 +1836,17 @@ class P2pQuakeProvider(
 
     private fun handleCrowdSignal(json: JSONObject) {
         if (!crowdSignalsEnabled || testingMode) return
-        val signal = parseP2pCrowdSignal(json) ?: return
+        val incoming = parseP2pCrowdSignal(json) ?: return
+        val existing = pendingCrowdSignals[incoming.startedAt]
+        val signal = existing?.mergeCumulativeUpdate(incoming) ?: incoming
         pendingCrowdSignals[signal.startedAt] = signal
+        if (signal == existing) return
         if (!signal.isInformative()) return
 
         val owner = crowdSignalOwner(signal) ?: return
+        if (owner.kind == EarthquakeEventKind.EEW) {
+            claimedCrowdEews[signal.startedAt] = owner
+        }
         amendCrowdOwner(owner, signal)
         scheduleRecentReportCacheWrite()
         emit(
@@ -1697,35 +1859,87 @@ class P2pQuakeProvider(
         )
     }
 
-    private fun crowdSignalOwner(signal: P2pCrowdSignal): EarthquakeEvent? = sequenceOf(
-        activeEewEvent,
-        lastEvent,
-        *eventHistory.toTypedArray()
-    ).filterNotNull()
-        .distinctBy { it.id }
-        .filter { event ->
-            event.p2pCrowdSignal?.startedAt == signal.startedAt ||
-                (event.kind == EarthquakeEventKind.EEW && signal.canBelongToEew(event)) ||
-                (event.kind == EarthquakeEventKind.CONFIRMED && signal.coincidesWith(event))
-        }
-        .singleOrNull()
+    private fun crowdSignalOwner(signal: P2pCrowdSignal): EarthquakeEvent? {
+        val candidates = sequenceOf(
+            activeEewEvent,
+            externalEewForCrowdAssociation,
+            lastEvent,
+            *eventHistory.toTypedArray()
+        ).filterNotNull().distinctBy { it.id }.toList()
 
-    private fun amendCrowdOwner(owner: EarthquakeEvent, signal: P2pCrowdSignal) {
-        val amended = owner.copy(p2pCrowdSignal = signal)
-        if (activeEewEvent?.id == owner.id) activeEewEvent = amended
-        if (lastEvent?.id == owner.id) lastEvent = amended
-        val historyIndex = eventHistory.indexOfFirst { it.id == owner.id }
-        if (historyIndex >= 0) eventHistory[historyIndex] = amended
+        candidates.firstOrNull {
+            it.p2pCrowdSignal?.startedAt == signal.startedAt
+        }?.let { return it }
+        candidates.asSequence()
+            .filter { it.kind == EarthquakeEventKind.EEW && signal.canBelongToEew(it) }
+            .mapNotNull { event ->
+                signal.associationDelaySeconds(event)?.let { delay -> event to delay }
+            }
+            .minByOrNull { (_, delay) -> kotlin.math.abs(delay) }
+            ?.first
+            ?.let { return it }
+        return candidates.asSequence()
+            .mapNotNull { event ->
+                signal.confirmedAssociationDelaySeconds(event)?.let { delay -> event to delay }
+            }
+            .minByOrNull { (_, delay) -> kotlin.math.abs(delay) }
+            ?.first
     }
 
-    private fun pendingCrowdSignalFor(event: EarthquakeEvent): P2pCrowdSignal? =
-        pendingCrowdSignals.values
-            .filter { signal ->
-                signal.isInformative() && (
-                    signal.canBelongToEew(event) || signal.coincidesWith(event)
-                )
+    private fun amendCrowdOwner(owner: EarthquakeEvent, signal: P2pCrowdSignal) {
+        val nearestConfirmedId = sequenceOf(lastEvent, *eventHistory.toTypedArray())
+            .filterNotNull()
+            .distinctBy { it.id }
+            .mapNotNull { event ->
+                signal.confirmedAssociationDelaySeconds(event)?.let { delay -> event.id to delay }
             }
-            .singleOrNull()
+            .minByOrNull { (_, delay) -> kotlin.math.abs(delay) }
+            ?.first
+
+        fun EarthquakeEvent.matchesOwner(): Boolean =
+            id == owner.id ||
+                id == nearestConfirmedId ||
+                p2pCrowdSignal?.startedAt == signal.startedAt ||
+                likelySameEarthquake(this, owner)
+
+        fun EarthquakeEvent.withLatestSignal(): EarthquakeEvent = copy(
+            p2pCrowdSignal = p2pCrowdSignal?.mergeCumulativeUpdate(signal) ?: signal
+        )
+
+        activeEewEvent = activeEewEvent?.let { event ->
+            if (event.matchesOwner()) event.withLatestSignal() else event
+        }
+        lastEvent = lastEvent?.let { event ->
+            if (event.matchesOwner()) event.withLatestSignal() else event
+        }
+        eventHistory.indices.forEach { index ->
+            val event = eventHistory[index]
+            if (event.matchesOwner()) eventHistory[index] = event.withLatestSignal()
+        }
+    }
+
+    private fun pendingCrowdSignalFor(event: EarthquakeEvent): P2pCrowdSignal? {
+        if (event.kind != EarthquakeEventKind.CONFIRMED) {
+            return pendingCrowdSignals.values
+                .mapNotNull { signal ->
+                    if (!signal.isInformative()) return@mapNotNull null
+                    val delay = signal.associationDelaySeconds(event)
+                        ?.takeIf { signal.canBelongToEew(event) }
+                        ?: return@mapNotNull null
+                    signal to kotlin.math.abs(delay)
+                }
+                .minByOrNull { (_, delay) -> delay }
+                ?.first
+        }
+        val matchingClaims = claimedCrowdEews.filterValues { eew ->
+            historicalEewMatches(event, eew)
+        }
+        return selectP2pCrowdSignalForConfirmedEvent(
+            event = event,
+            signals = pendingCrowdSignals.values,
+            claimedEewsByStartedAt = matchingClaims
+        )
+    }
 
     private fun recoverRecentFeed(generation: Int) {
         if (testingMode || stopped) return
@@ -3200,6 +3414,21 @@ internal fun shouldRetainP2pDiagnosticPacket(json: JSONObject?): Boolean {
     val type = json?.optString("type").orEmpty()
     if (type == "ping" || type == "pong") return false
     return json?.optInt("code") != P2P_ROUTINE_PEER_COUNT_CODE
+}
+
+internal data class HistoricalReplayOrderKey(
+    val timelineAtMillis: Long,
+    val receivedAtMillis: Long,
+    val archiveKey: String
+) : Comparable<HistoricalReplayOrderKey> {
+    override fun compareTo(other: HistoricalReplayOrderKey): Int =
+        compareValuesBy(
+            this,
+            other,
+            HistoricalReplayOrderKey::timelineAtMillis,
+            HistoricalReplayOrderKey::receivedAtMillis,
+            HistoricalReplayOrderKey::archiveKey
+        )
 }
 
 internal const val P2P_ROUTINE_PEER_COUNT_CODE = 555

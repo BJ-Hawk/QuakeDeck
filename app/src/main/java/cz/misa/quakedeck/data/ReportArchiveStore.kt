@@ -227,15 +227,15 @@ internal class ReportArchiveStore(context: Context) :
             .sumOf { name -> parent.resolve(name).takeIf { it.exists() }?.length() ?: 0L }
     }
 
-    /** Returns recent raw earthquake reports; the provider restores original source-time order. */
-    fun loadRecentEarthquakeReports(limit: Int = 2_000): List<JSONObject> {
-        val result = mutableListOf<JSONObject>()
+    /** Returns recent earthquake records; the provider restores original source-time order. */
+    fun loadRecentEarthquakeReportRecords(limit: Int = 2_000): List<ArchivedEarthquakeReport> {
+        val result = mutableListOf<ArchivedEarthquakeReport>()
         readableDatabase.rawQuery(
             """
-            SELECT raw_json FROM (
-                SELECT raw_json, source_time, received_at
+            SELECT archive_key, event_key, source_time, received_at, raw_json FROM (
+                SELECT archive_key, event_key, source_time, received_at, raw_json
                 FROM reports
-                WHERE code = 551
+                WHERE code = 551 AND event_key IS NOT NULL
                 ORDER BY source_time DESC, received_at DESC
                 LIMIT ?
             )
@@ -244,7 +244,14 @@ internal class ReportArchiveStore(context: Context) :
             arrayOf(limit.toString())
         ).use { cursor ->
             while (cursor.moveToNext()) {
-                runCatching { JSONObject(cursor.getString(0)) }.getOrNull()?.let(result::add)
+                val raw = runCatching { JSONObject(cursor.getString(4)) }.getOrNull() ?: continue
+                result += ArchivedEarthquakeReport(
+                    archiveKey = cursor.getString(0),
+                    eventKey = cursor.getString(1),
+                    sourceTime = cursor.getString(2),
+                    receivedAt = cursor.getLong(3),
+                    rawJson = raw
+                )
             }
         }
         return result

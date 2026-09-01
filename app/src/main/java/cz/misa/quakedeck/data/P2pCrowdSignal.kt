@@ -5,7 +5,6 @@ import org.json.JSONObject
 import java.time.Duration
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
-import kotlin.math.abs
 
 @Immutable
 data class P2pCrowdAreaSignal(
@@ -25,6 +24,26 @@ data class P2pCrowdSignal(
     val confidence: Double,
     val areas: List<P2pCrowdAreaSignal>
 )
+
+/**
+ * Updates for one 9611 cluster are cumulative. Recovery or archive delivery can
+ * arrive out of order, so a lower old count must never replace the final value.
+ */
+internal fun P2pCrowdSignal.mergeCumulativeUpdate(
+    incoming: P2pCrowdSignal
+): P2pCrowdSignal {
+    if (startedAt != incoming.startedAt) return incoming
+    if (reportCount != incoming.reportCount) {
+        return if (incoming.reportCount > reportCount) incoming else this
+    }
+    val currentUpdated = crowdSignalInstant(updatedAt)
+    val incomingUpdated = crowdSignalInstant(incoming.updatedAt)
+    return when {
+        incomingUpdated == null -> this
+        currentUpdated == null || incomingUpdated >= currentUpdated -> incoming
+        else -> this
+    }
+}
 
 internal fun parseP2pCrowdSignal(json: JSONObject): P2pCrowdSignal? {
     if (json.optInt("code", -1) != P2P_CROWD_SIGNAL_CODE) return null
@@ -67,13 +86,35 @@ internal fun parseP2pCrowdSignal(json: JSONObject): P2pCrowdSignal? {
 }
 
 internal fun P2pCrowdSignal.coincidesWith(event: EarthquakeEvent): Boolean {
+    return confirmedAssociationDelaySeconds(event) != null
+}
+
+/**
+ * A 9611 aggregate starts when P2PQuake receives the first felt report, not at
+ * the earthquake origin time. Confirmed JMA reports can also round or revise
+ * their origin timestamp. Keep the association one-way and bounded: tolerate
+ * only a small pre-origin clock skew, then up to three minutes for people and
+ * the upstream aggregate to react.
+ */
+internal fun P2pCrowdSignal.confirmedAssociationDelaySeconds(
+    event: EarthquakeEvent
+): Long? {
+    if (event.kind != EarthquakeEventKind.CONFIRMED) return null
+    val secondsAfterOrigin = associationDelaySeconds(event) ?: return null
+    return secondsAfterOrigin.takeIf {
+        it in -P2P_CONFIRMED_PRE_ORIGIN_TOLERANCE_SECONDS..
+            P2P_CONFIRMED_CROWD_ASSOCIATION_SECONDS
+    }
+}
+
+internal fun P2pCrowdSignal.associationDelaySeconds(event: EarthquakeEvent): Long? {
     val crowdTime = P2P_CROWD_TIME_FORMATTERS.firstNotNullOfOrNull { formatter ->
         runCatching { LocalDateTime.parse(startedAt, formatter) }.getOrNull()
-    } ?: return false
+    } ?: return null
     val eventTime = runCatching {
         LocalDateTime.parse(event.originTime, P2P_EVENT_TIME_FORMATTER)
-    }.getOrNull() ?: return false
-    return abs(Duration.between(crowdTime, eventTime).seconds) <= 10L
+    }.getOrNull() ?: return null
+    return Duration.between(eventTime, crowdTime).seconds
 }
 
 /**
@@ -91,22 +132,50 @@ internal fun P2pCrowdSignal.isInformative(): Boolean =
  */
 internal fun P2pCrowdSignal.canBelongToEew(event: EarthquakeEvent): Boolean {
     if (event.kind != EarthquakeEventKind.EEW || event.isCancelled) return false
-    val crowdTime = P2P_CROWD_TIME_FORMATTERS.firstNotNullOfOrNull { formatter ->
-        runCatching { LocalDateTime.parse(startedAt, formatter) }.getOrNull()
-    } ?: return false
-    val eventTime = runCatching {
-        LocalDateTime.parse(event.originTime, P2P_EVENT_TIME_FORMATTER)
-    }.getOrNull() ?: return false
-    val secondsAfterOrigin = Duration.between(eventTime, crowdTime).seconds
+    val secondsAfterOrigin = associationDelaySeconds(event) ?: return false
     return secondsAfterOrigin in 0L..P2P_EEW_CROWD_ASSOCIATION_SECONDS
 }
 
+/**
+ * Selects one cumulative felt cluster for a confirmed incident. A cluster may
+ * match the confirmed origin directly or retain a prior claim made by a
+ * matching EEW whose preliminary origin differs slightly from the final one.
+ */
+internal fun selectP2pCrowdSignalForConfirmedEvent(
+    event: EarthquakeEvent,
+    signals: Collection<P2pCrowdSignal>,
+    claimedEewsByStartedAt: Map<String, EarthquakeEvent> = emptyMap()
+): P2pCrowdSignal? = signals.asSequence()
+    .filter(P2pCrowdSignal::isInformative)
+    .groupBy(P2pCrowdSignal::startedAt)
+    .values
+    .mapNotNull { updates ->
+        val cumulative = updates.reduce(P2pCrowdSignal::mergeCumulativeUpdate)
+        val directDelay = cumulative.confirmedAssociationDelaySeconds(event)
+        val claimedDelay = claimedEewsByStartedAt[cumulative.startedAt]
+            ?.takeIf(cumulative::canBelongToEew)
+            ?.let(cumulative::associationDelaySeconds)
+        val rank = listOfNotNull(directDelay, claimedDelay)
+            .minOfOrNull { kotlin.math.abs(it) }
+            ?: return@mapNotNull null
+        cumulative to rank
+    }
+    .minByOrNull { (_, rank) -> rank }
+    ?.first
+
 internal const val P2P_CROWD_SIGNAL_CODE = 9611
-internal const val P2P_EEW_CROWD_ASSOCIATION_SECONDS = 10L * 60L
+internal const val P2P_EEW_CROWD_ASSOCIATION_SECONDS = 3L * 60L
+internal const val P2P_CONFIRMED_PRE_ORIGIN_TOLERANCE_SECONDS = 10L
+internal const val P2P_CONFIRMED_CROWD_ASSOCIATION_SECONDS = 3L * 60L
 
 private val P2P_CROWD_TIME_FORMATTERS = listOf(
     DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss.SSS"),
     DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss")
 )
+
+private fun crowdSignalInstant(value: String): LocalDateTime? =
+    P2P_CROWD_TIME_FORMATTERS.firstNotNullOfOrNull { formatter ->
+        runCatching { LocalDateTime.parse(value, formatter) }.getOrNull()
+    }
 private val P2P_EVENT_TIME_FORMATTER =
     DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss 'JST'")

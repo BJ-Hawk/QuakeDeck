@@ -2542,6 +2542,23 @@ private fun SourceDialog(
                                 ?.let(::formatDmdssDiagnosticTime)
                                 ?: uiText(R.string.dmdss_diagnostic_none, language)
                         )
+                        if (dmdssDiagnostics.lastNetworkType != null) {
+                            DmdssDiagnosticLine(
+                                uiText(R.string.dmdss_diagnostic_socket_context, language),
+                                listOfNotNull(
+                                    dmdssDiagnostics.lastNetworkType,
+                                    dmdssDiagnostics.lastSocketLifetimeMillis?.let {
+                                        "lifetime ${formatDmdssDiagnosticDuration(it)}"
+                                    },
+                                    dmdssDiagnostics.lastSocketCallbackCurrent?.let {
+                                        if (it) "current listener" else "stale listener"
+                                    },
+                                    dmdssDiagnostics.lastReconnectDelayMillis?.let {
+                                        "retry ${formatDmdssDiagnosticDuration(it)}"
+                                    }
+                                ).joinToString(" · ")
+                            )
+                        }
                         DmdssDiagnosticLine(
                             uiText(R.string.dmdss_diagnostic_bulletin, language),
                             if (dmdssDiagnostics.lastAcceptedAtMillis == null) {
@@ -2695,6 +2712,12 @@ private fun DmdssDiagnosticLine(label: String, value: String) {
 
 private fun formatDmdssDiagnosticTime(millis: Long): String =
     DMDSS_DIAGNOSTIC_TIME_FORMATTER.format(Instant.ofEpochMilli(millis))
+
+private fun formatDmdssDiagnosticDuration(millis: Long): String = when {
+    millis < 1_000L -> "${millis} ms"
+    millis < 60_000L -> "${millis / 1_000L} s"
+    else -> "${millis / 60_000L} min ${(millis % 60_000L) / 1_000L} s"
+}
 
 private fun diagnosticPacketDetailText(
     context: android.content.Context,
@@ -4251,16 +4274,6 @@ private fun EventPanel(
                                     append(displayEventOriginTime(historyEvent.originTime))
                                     append(" · ").append(earthquakeMagnitudeText(historyEvent, locale))
                                     append(" · ").append(historyDepth)
-                                    historyEvent.p2pCrowdSignal?.let { crowd ->
-                                        append(" · ").append(
-                                            UiLocalization.format(
-                                                context,
-                                                R.string.p2p_felt_reports_count,
-                                                placeNameLanguage,
-                                                crowd.reportCount
-                                            )
-                                        )
-                                    }
                                 }
                                 Text(
                                     historyMetadata,
@@ -4270,6 +4283,21 @@ private fun EventPanel(
                                     maxLines = 1,
                                     overflow = TextOverflow.Ellipsis
                                 )
+                                historyEvent.p2pCrowdSignal?.let { crowd ->
+                                    Text(
+                                        UiLocalization.format(
+                                            context,
+                                            R.string.p2p_felt_reports_count,
+                                            placeNameLanguage,
+                                            crowd.reportCount
+                                        ),
+                                        color = MaterialTheme.colorScheme.tertiary,
+                                        fontWeight = FontWeight.SemiBold,
+                                        fontSize = 10.sp,
+                                        lineHeight = 12.sp,
+                                        maxLines = 1
+                                    )
+                                }
                             }
                             Spacer(Modifier.width(6.dp))
                             Surface(
@@ -4470,6 +4498,31 @@ private fun HistoricalEventPanel(
                             modifier = Modifier.padding(horizontal = 8.dp),
                             verticalArrangement = Arrangement.Top
                         ) {
+                            val historicalFrameLabel = when (frame.kind) {
+                                HistoricalAssociatedReportKind.EARTHQUAKE ->
+                                    earthquakeReportLabel(event, placeNameLanguage)
+                                        ?: uiText(R.string.earthquake_report, placeNameLanguage)
+                                HistoricalAssociatedReportKind.EEW -> buildString {
+                                    append(uiText(R.string.eew_report, placeNameLanguage))
+                                    event.reportSerial?.let { append(" #").append(it) }
+                                }
+                                HistoricalAssociatedReportKind.FELT_REPORTS ->
+                                    event.p2pCrowdSignal?.let { crowd ->
+                                        UiLocalization.format(
+                                            context,
+                                            R.string.p2p_felt_reports_count,
+                                            placeNameLanguage,
+                                            crowd.reportCount
+                                        )
+                                    } ?: uiText(
+                                        R.string.p2p_felt_reports_event,
+                                        placeNameLanguage
+                                    )
+                                HistoricalAssociatedReportKind.EEW_DETECTION ->
+                                    uiText(R.string.eew_detection, placeNameLanguage)
+                                HistoricalAssociatedReportKind.TSUNAMI ->
+                                    uiText(R.string.tsunami_information_title, placeNameLanguage)
+                            }
                             Text(
                                 uiText(R.string.historical_report_upper, placeNameLanguage),
                                 color = MaterialTheme.colorScheme.onPrimaryContainer,
@@ -4479,8 +4532,7 @@ private fun HistoricalEventPanel(
                             )
                             Text(
                                 buildString {
-                                    append(earthquakeReportLabel(event, placeNameLanguage)
-                                        ?: uiText(R.string.earthquake_report, placeNameLanguage))
+                                    append(historicalFrameLabel)
                                     append(" · ")
                                     append(uiText(R.string.report, placeNameLanguage))
                                     append(' ').append(reportIndex + 1).append(" / ").append(incident.reportCount)

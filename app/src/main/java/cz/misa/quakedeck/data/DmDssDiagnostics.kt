@@ -53,6 +53,10 @@ data class DmDssDiagnosticsSnapshot(
     val lastRejectedReason: String? = null,
     val lastTransportIssueAtMillis: Long? = null,
     val lastTransportIssue: String? = null,
+    val lastNetworkType: String? = null,
+    val lastSocketLifetimeMillis: Long? = null,
+    val lastSocketCallbackCurrent: Boolean? = null,
+    val lastReconnectDelayMillis: Long? = null,
     val lastRecoveryAtMillis: Long? = null,
     val lastRecoveryResult: String? = null,
     val lastNotificationAtMillis: Long? = null,
@@ -85,6 +89,10 @@ class DmDssDiagnosticsStore(context: Context) {
         lastRejectedReason = prefs.getString(KEY_REJECTED_REASON, null),
         lastTransportIssueAtMillis = prefs.optionalLong(KEY_TRANSPORT_ISSUE_AT),
         lastTransportIssue = prefs.getString(KEY_TRANSPORT_ISSUE, null),
+        lastNetworkType = prefs.getString(KEY_NETWORK_TYPE, null),
+        lastSocketLifetimeMillis = prefs.optionalLong(KEY_SOCKET_LIFETIME),
+        lastSocketCallbackCurrent = prefs.optionalBoolean(KEY_SOCKET_CALLBACK_CURRENT),
+        lastReconnectDelayMillis = prefs.optionalLong(KEY_RECONNECT_DELAY),
         lastRecoveryAtMillis = prefs.optionalLong(KEY_RECOVERY_AT),
         lastRecoveryResult = prefs.getString(KEY_RECOVERY_RESULT, null),
         lastNotificationAtMillis = prefs.optionalLong(KEY_NOTIFICATION_AT),
@@ -134,6 +142,20 @@ class DmDssDiagnosticsStore(context: Context) {
         prefs.edit {
             putLong(KEY_TRANSPORT_ISSUE_AT, nowMillis)
             putString(KEY_TRANSPORT_ISSUE, sanitizeDmDssDiagnosticText(reason))
+        }
+    }
+
+    fun recordSocketContext(
+        networkType: String,
+        socketLifetimeMillis: Long? = null,
+        callbackCurrent: Boolean? = null,
+        reconnectDelayMillis: Long? = null
+    ) {
+        prefs.edit {
+            putString(KEY_NETWORK_TYPE, sanitizeDmDssDiagnosticText(networkType))
+            socketLifetimeMillis?.let { putLong(KEY_SOCKET_LIFETIME, it.coerceAtLeast(0L)) }
+            callbackCurrent?.let { putBoolean(KEY_SOCKET_CALLBACK_CURRENT, it) }
+            reconnectDelayMillis?.let { putLong(KEY_RECONNECT_DELAY, it.coerceAtLeast(0L)) }
         }
     }
 
@@ -219,6 +241,9 @@ class DmDssDiagnosticsStore(context: Context) {
     private fun android.content.SharedPreferences.optionalLong(key: String): Long? =
         if (contains(key)) getLong(key, 0L) else null
 
+    private fun android.content.SharedPreferences.optionalBoolean(key: String): Boolean? =
+        if (contains(key)) getBoolean(key, false) else null
+
     private companion object {
         const val PREFS_NAME = "dmdss_delivery_diagnostics"
         const val HISTORY_FILE_NAME = "dmdss_packet_history.json"
@@ -236,6 +261,10 @@ class DmDssDiagnosticsStore(context: Context) {
         const val KEY_REJECTED_REASON = "rejected_reason"
         const val KEY_TRANSPORT_ISSUE_AT = "transport_issue_at"
         const val KEY_TRANSPORT_ISSUE = "transport_issue"
+        const val KEY_NETWORK_TYPE = "network_type"
+        const val KEY_SOCKET_LIFETIME = "socket_lifetime"
+        const val KEY_SOCKET_CALLBACK_CURRENT = "socket_callback_current"
+        const val KEY_RECONNECT_DELAY = "reconnect_delay"
         const val KEY_RECOVERY_AT = "recovery_at"
         const val KEY_RECOVERY_RESULT = "recovery_result"
         const val KEY_NOTIFICATION_AT = "notification_at"
@@ -271,6 +300,7 @@ internal fun trimDmDssPacketHistory(
     while (retained.size > entryLimit && packetHistoryBytes(retained) > byteLimit) {
         retained.removeAt(0)
     }
+
     return retained
 }
 
@@ -278,7 +308,7 @@ fun DmDssDiagnosticsSnapshot.toMachineReadableJson(
     exportedAtMillis: Long = System.currentTimeMillis()
 ): String = JSONObject()
     .put("schema", "cz.misa.quakedeck.dmdss-diagnostics")
-    .put("schemaVersion", 2)
+    .put("schemaVersion", 3)
     .put("exportedAt", Instant.ofEpochMilli(exportedAtMillis).toString())
     .put("exportedAtMillis", exportedAtMillis)
     .put(
@@ -314,6 +344,10 @@ fun DmDssDiagnosticsSnapshot.toMachineReadableJson(
             .putNullable("lastRejectedReason", lastRejectedReason?.let(::sanitizeDmDssDiagnosticText))
             .putNullable("lastTransportIssueAtMillis", lastTransportIssueAtMillis)
             .putNullable("lastTransportIssue", lastTransportIssue?.let(::sanitizeDmDssDiagnosticText))
+            .putNullable("lastNetworkType", lastNetworkType?.let(::sanitizeDmDssDiagnosticText))
+            .putNullable("lastSocketLifetimeMillis", lastSocketLifetimeMillis)
+            .putNullable("lastSocketCallbackCurrent", lastSocketCallbackCurrent)
+            .putNullable("lastReconnectDelayMillis", lastReconnectDelayMillis)
             .putNullable("lastRecoveryAtMillis", lastRecoveryAtMillis)
             .putNullable("lastRecoveryResult", lastRecoveryResult?.let(::sanitizeDmDssDiagnosticText))
             .putNullable("lastNotificationAtMillis", lastNotificationAtMillis)
@@ -394,8 +428,10 @@ private fun summarizeDmDssPacket(
         val label = when (type.lowercase()) {
             "start" -> "WebSocket Start"
             "error" -> "WebSocket Error"
-            "close", "closing", "closed" -> "WebSocket Close"
-            "failure" -> "WebSocket Failure"
+            "close", "closing", "closed", "websocket-closing", "websocket-closed" ->
+                "WebSocket Close"
+            "failure", "websocket-failure" -> "WebSocket Failure"
+            "reconnect-scheduled" -> "Reconnect Scheduled"
             else -> type.ifBlank { "WebSocket packet" }.replaceFirstChar { it.uppercase() }
         }
         return DmDssPacketSummaryResult(HumanReadablePacketDiagnostic(packet, label))

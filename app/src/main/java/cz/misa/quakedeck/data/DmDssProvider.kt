@@ -1,8 +1,11 @@
 package cz.misa.quakedeck.data
 
 import android.content.Context
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import android.os.Handler
 import android.os.Looper
+import android.os.SystemClock
 import okhttp3.Call
 import okhttp3.Callback
 import okhttp3.MediaType.Companion.toMediaType
@@ -206,6 +209,8 @@ class DmDssProvider(
             .build()
         socket = socketClient.newWebSocket(request, object : WebSocketListener() {
             private var listenerSocketId: String? = socketIdFromStart
+            private val listenerStartedAtElapsedMillis = SystemClock.elapsedRealtime()
+            private val pingTracker = LatestDmDssPingTracker()
 
             override fun onMessage(webSocket: WebSocket, text: String) {
                 handleSocketMessage(webSocket, text, "text")
@@ -241,18 +246,29 @@ class DmDssProvider(
                         connected = true
                         retryAttempt = 0
                         diagnostics.recordSocket("Connected")
+                        diagnostics.recordSocketContext(currentNetworkType(appContext))
                         emitCurrent()
                         recoverMissedEew(generation)
                     }
                     "ping" -> {
-                        val pong = JSONObject().put("type", "pong")
-                        json.optString("pingId").takeIf(String::isNotBlank)?.let {
-                            pong.put("pingId", it)
-                        }
-                        val payload = pong.toString()
-                        if (!webSocket.send(payload)) {
-                            diagnostics.recordTransportIssue("DM-D.S.S pong could not be queued")
-                        }
+                        val token = pingTracker.receive(
+                            json.optString("pingId").takeIf(String::isNotBlank)
+                        )
+                        handler.postDelayed(
+                            {
+                                if (generation != connectionGeneration || stopped) {
+                                    return@postDelayed
+                                }
+                                pingTracker.payloadIfLatest(token)?.let { payload ->
+                                    if (!webSocket.send(payload)) {
+                                        diagnostics.recordTransportIssue(
+                                            "DM-D.S.S pong could not be queued"
+                                        )
+                                    }
+                                }
+                            },
+                            PONG_COALESCE_MILLIS
+                        )
                     }
                     "data" -> {
                         if (!connected) {
@@ -267,11 +283,26 @@ class DmDssProvider(
                         val detail = json.optString("error").ifBlank { "WebSocket error" }
                         val code = json.optInt("code", -1).takeIf { it >= 0 }
                         val close = json.optBoolean("close", false)
+                        val listenerCurrent = socket === webSocket &&
+                            generation == connectionGeneration
+                        diagnostics.recordSocketContext(
+                            networkType = currentNetworkType(appContext),
+                            socketLifetimeMillis = SystemClock.elapsedRealtime() -
+                                listenerStartedAtElapsedMillis,
+                            callbackCurrent = listenerCurrent
+                        )
                         diagnostics.recordTransportIssue(
                             buildString {
                                 append("DM-D.S.S WebSocket error")
                                 code?.let { append(" ").append(it) }
                                 append(": ").append(detail)
+                                append(
+                                    if (listenerCurrent) {
+                                        " · current listener"
+                                    } else {
+                                        " · stale listener"
+                                    }
+                                )
                                 append(" · close=").append(close)
                             }
                         )
@@ -298,11 +329,14 @@ class DmDssProvider(
             }
 
             override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
-                if (socket !== webSocket || generation != connectionGeneration) return
-                socket = null
-                connected = false
-                connecting = false
-                diagnostics.recordSocket("Disconnected")
+                val wasCurrent = socket === webSocket && generation == connectionGeneration
+                val lifetime = SystemClock.elapsedRealtime() - listenerStartedAtElapsedMillis
+                val networkType = currentNetworkType(appContext)
+                diagnostics.recordSocketContext(
+                    networkType = networkType,
+                    socketLifetimeMillis = lifetime,
+                    callbackCurrent = wasCurrent
+                )
                 diagnostics.recordPacket(
                     "IN",
                     "control",
@@ -310,8 +344,17 @@ class DmDssProvider(
                         .put("type", "websocket-closed")
                         .put("code", code)
                         .put("reason", reason)
+                        .put("socketId", listenerSocketId)
+                        .put("socketLifetimeMillis", lifetime)
+                        .put("currentListener", wasCurrent)
+                        .put("networkType", networkType)
                         .toString()
                 )
+                if (!wasCurrent) return
+                socket = null
+                connected = false
+                connecting = false
+                diagnostics.recordSocket("Disconnected")
                 if (!stopped) scheduleReconnect("DM-D.S.S EEW forecast disconnected")
             }
 
@@ -323,15 +366,23 @@ class DmDssProvider(
                 val responseCode = response?.code
                 response?.close()
                 val wasCurrent = socket === webSocket && generation == connectionGeneration
+                val lifetime = SystemClock.elapsedRealtime() - listenerStartedAtElapsedMillis
+                val networkType = currentNetworkType(appContext)
                 if (wasCurrent) {
                     socket = null
                     connected = false
                     connecting = false
                 }
-                diagnostics.recordSocket("Connection failed")
+                if (wasCurrent) diagnostics.recordSocket("Connection failed")
+                diagnostics.recordSocketContext(
+                    networkType = networkType,
+                    socketLifetimeMillis = lifetime,
+                    callbackCurrent = wasCurrent
+                )
                 diagnostics.recordTransportIssue(
                     buildString {
                         append("DM-D.S.S WebSocket failure")
+                        append(if (wasCurrent) " · current listener" else " · stale listener")
                         responseCode?.let { append(" · HTTP ").append(it) }
                         append(" · ").append(t.diagnosticSummary())
                     }
@@ -343,6 +394,10 @@ class DmDssProvider(
                         .put("type", "websocket-failure")
                         .put("httpCode", responseCode)
                         .put("error", t.diagnosticSummary())
+                        .put("socketId", listenerSocketId)
+                        .put("socketLifetimeMillis", lifetime)
+                        .put("currentListener", wasCurrent)
+                        .put("networkType", networkType)
                         .toString()
                 )
                 if (wasCurrent) {
@@ -561,6 +616,21 @@ class DmDssProvider(
         emit(state = ConnectionState.DISCONNECTED, status = status)
         handler.removeCallbacks(reconnectRunnable)
         val delay = min(60_000L, 2_000L * (1L shl min(retryAttempt, 5)))
+        val networkType = currentNetworkType(appContext)
+        diagnostics.recordSocketContext(
+            networkType = networkType,
+            reconnectDelayMillis = delay
+        )
+        diagnostics.recordPacket(
+            "OUT",
+            "control",
+            JSONObject()
+                .put("type", "reconnect-scheduled")
+                .put("delayMillis", delay)
+                .put("attempt", retryAttempt + 1)
+                .put("networkType", networkType)
+                .toString()
+        )
         retryAttempt++
         handler.postDelayed(reconnectRunnable, delay)
     }
@@ -578,8 +648,44 @@ class DmDssProvider(
         private const val GD_EEW_SCOPE = "gd.eew"
         private const val SOURCE_LIVE = "Live WebSocket"
         private const val SOURCE_RECOVERY = "Post-event recovery"
+        private const val PONG_COALESCE_MILLIS = 50L
         private val JSON_MEDIA_TYPE = "application/json; charset=utf-8".toMediaType()
     }
+}
+
+internal data class DmDssPingToken(
+    val sequence: Long,
+    val pingId: String?
+)
+
+/** Coalesces backlogged JSON pings so only the newest DM-D.S.S pingId is echoed. */
+internal class LatestDmDssPingTracker {
+    private var sequence = 0L
+
+    @Synchronized
+    fun receive(pingId: String?): DmDssPingToken = DmDssPingToken(++sequence, pingId)
+
+    @Synchronized
+    fun payloadIfLatest(token: DmDssPingToken): String? {
+        if (token.sequence != sequence) return null
+        return JSONObject().put("type", "pong").also { pong ->
+            token.pingId?.let { pong.put("pingId", it) }
+        }.toString()
+    }
+}
+
+private fun currentNetworkType(context: Context): String {
+    val manager = context.getSystemService(ConnectivityManager::class.java) ?: return "Unknown"
+    val network = manager.activeNetwork ?: return "Offline"
+    val capabilities = manager.getNetworkCapabilities(network) ?: return "Unknown"
+    val transports = buildList {
+        if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI)) add("Wi-Fi")
+        if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)) add("Cellular")
+        if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET)) add("Ethernet")
+        if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_VPN)) add("VPN")
+        if (capabilities.hasTransport(NetworkCapabilities.TRANSPORT_BLUETOOTH)) add("Bluetooth")
+    }
+    return transports.ifEmpty { listOf("Other") }.joinToString("+")
 }
 
 private fun Throwable.diagnosticSummary(): String {
