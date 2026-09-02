@@ -1,0 +1,123 @@
+{
+  "result": "PASS",
+  "scope": "Complete JMA public station-map inventory, joined to official XML codes",
+  "createdAtUtc": "2026-09-02T15:17:43.405259+00:00",
+  "baseline": {
+    "path": "app\\src\\main\\res\\raw\\jma_intensity_stations.json",
+    "sha256": "e56412f7116b5bae79af901ab3c0a94d36406060ec36b26b6b140ad4704f716f",
+    "source": "Japan Meteorological Agency (JMA)",
+    "sourceBlob": null,
+    "rows": 4360
+  },
+  "officialMapRows": 4360,
+  "officialCodeTableRows": 4361,
+  "candidateRows": 4360,
+  "fieldMatchCounts": {
+    "code": 4360,
+    "nameJa": 4360,
+    "prefectureJa": 4360,
+    "latitude": 4360,
+    "longitude": 4360,
+    "networkJa": 4360,
+    "areaCode": 4360,
+    "areaNameJa": 4360,
+    "municipalityCode": 4360
+  },
+  "addedCodes": [],
+  "removedCodes": [],
+  "fieldDifferences": [],
+  "coordinateTypeChangesOnly": [],
+  "codeTableOnlyEntries": [
+    {
+      "code": "1336172",
+      "name": "伊豆大島町岡田",
+      "areaCode": "355",
+      "areaName": "伊豆大島",
+      "municipalityCode": "1336100",
+      "municipalityName": "伊豆大島町",
+      "worksheetRow": 1467
+    }
+  ],
+  "codeTableOnlyPolicy": "Excluded because JMA publishes no matching map row. No coordinates or operator inferred. This does not establish the operational status of the code.",
+  "prefectures": 47,
+  "reportingAreas": 188,
+  "municipalityParents": 1894,
+  "operatorCounts": {
+    "気象庁": 670,
+    "防災科学技術研究所": 800,
+    "地方公共団体": 2890
+  },
+  "researchMetadata": {
+    "sha256": "05513f55fdf8486f6864505571844576d7fe996b2adc515e44deaf96bcc74324",
+    "rows": 4360,
+    "fieldDifferences": [],
+    "orphanCodes": []
+  },
+  "englishNames": {
+    "sha256": "0fbf2df0387fb3a6c2d74d0fcc0e8382192fda645d3e014b172c4072dff6e8d1",
+    "rows": 4360,
+    "orphanCodes": []
+  },
+  "baselineCanonicalStationSha256": "038c30ca1d5ebc7ce21fc7079e03e66b3f142db52ab8eef461e3f57b5799fa65",
+  "candidateCanonicalStationSha256": "038c30ca1d5ebc7ce21fc7079e03e66b3f142db52ab8eef461e3f57b5799fa65",
+  "sourceFiles": [
+    {
+      "file": "jma-map-stations.json",
+      "url": "https://www.jma.go.jp/jma/kishou/know/jishin/intens-st/stations.json",
+      "sha256": "9233bbcb6206600aa5f8045778881adcfad791e04bf1577c64e1ac6a6c2a2cf9",
+      "bytes": 447256,
+      "savedAtUtc": "2026-09-02T15:05:09.547722+00:00"
+    },
+    {
+      "file": "jma-map.js",
+      "url": "https://www.jma.go.jp/jma/kishou/know/jishin/intens-st/map.js",
+      "sha256": "9c8f40e504bb34dbd2a64728461f7d38efd90bbdcb76b5f120d7c3549e33c447",
+      "bytes": 5508,
+      "savedAtUtc": "2026-09-02T15:05:09.690091+00:00"
+    },
+    {
+      "file": "jma-map-index.html",
+      "url": "https://www.jma.go.jp/jma/kishou/know/jishin/intens-st/index.html",
+      "sha256": "da537654df1d3557d0d543ef49dc114dc305fb474ee628cc8a9decd784530829",
+      "bytes": 6450,
+      "savedAtUtc": "2026-09-02T15:05:09.739821+00:00"
+    },
+    {
+      "file": "jmaxml_20260826_Code.zip",
+      "url": "https://xml.kishou.go.jp/jmaxml_20260826_Code.zip",
+      "sha256": "66d37e3d480c594b650d0a4d9d0b63c539ef4987da57073321c5105ce1c63892",
+      "bytes": 1676300,
+      "savedAtUtc": "2026-09-02T15:06:21.776310+00:00"
+    },
+    {
+      "file": "jma-xml-technical.html",
+      "url": "https://xml.kishou.go.jp/tec_material.html",
+      "sha256": "bfeafc4809a21d561cd78558697167d5d5fccee0c059c2ded41d84197e26d919",
+      "bytes": 14283,
+      "savedAtUtc": "2026-09-02T15:06:23.473029+00:00"
+    },
+    {
+      "file": "jma-terms.html",
+      "url": "https://www.jma.go.jp/jma/kishou/info/coment.html",
+      "sha256": "ff2b45042e6207053d8f6aa617656aa6a144e462db138f0b8138de6eefbeff48",
+      "bytes": 23377,
+      "savedAtUtc": "2026-09-02T15:07:47.362326+00:00"
+    },
+    {
+      "file": "pdl-1.0.html",
+      "url": "https://www.digital.go.jp/resources/open_data/public_data_license_v1.0",
+      "sha256": "19fabfcbd7df3095d20816f7d4a66a75ff650c07dec6d7101ab0fbde0c2c3760",
+      "bytes": 59198,
+      "savedAtUtc": "2026-09-02T15:07:47.496785+00:00"
+    },
+    {
+      "file": "jma-observation-history.html",
+      "url": "https://www.data.jma.go.jp/eqev/data/kyoshin/jma-shindo.html",
+      "sha256": "339b7b67ac24dde5ae003d1e377caba4738798eebbf07cf02eb638761f609761",
+      "bytes": 635010,
+      "savedAtUtc": "2026-09-02T15:07:46.542539+00:00"
+    }
+  ],
+  "productionResourcesWritten": false,
+  "candidateFileSha256": "73955e713708812c575f5ff13cbe10732de3884a1b59050194f5beafdc4c5041"
+}

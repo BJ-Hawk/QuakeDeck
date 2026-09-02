@@ -38,6 +38,13 @@ The eventual naming rule must be shared by report rows and deep-zoom map labels.
 
 ## Completed
 
+- 2026-09-02 catalogue-source migration: all 4,360 station rows and all nine
+  fields exactly match a new derivation from the official JMA map plus XML
+  code-table worksheet 24. Only top-level `catalog` provenance changed in the
+  research JSON; station research, approved English names and the workbook were
+  preserved. The repeatable builder now retains the full official provenance.
+  See [audit and migration record](../outputs/jma-station-migration-audit/2026-09-02/README.md).
+
 - Confirmed the original issue: the source preserves full Japanese identities,
   but the English/Czech place-name path reduces station labels to the translated
   municipality prefix.

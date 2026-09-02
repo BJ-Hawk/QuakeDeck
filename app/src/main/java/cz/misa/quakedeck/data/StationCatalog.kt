@@ -2,25 +2,18 @@ package cz.misa.quakedeck.data
 
 import android.content.Context
 import cz.misa.quakedeck.R
-import okhttp3.Call
-import okhttp3.Callback
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import okhttp3.Response
-import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
-import java.io.IOException
 import java.util.Locale
 
 /**
  * Coordinates for JMA / local-government / NIED seismic-intensity stations.
  *
- * v0.9 deliberately keeps this behind one abstraction. A compact snapshot of
- * the public iku55/jma_int_stations export is bundled so detailed map colouring
- * never depends on a runtime download. A refreshed export can still be cached;
- * replacing it with JMA's current parameter CSV later does not affect map/event
- * code at all.
+ * Bundled directly from JMA's station map and official XML code table (sheet 24).
+ * QuakeDeck joins and reformats those sources without changing published values.
+ * Source URLs, hashes, processing credit and PDL1.0 terms travel with the resource.
+ * Updates are audited offline so a download cannot replace verified station IDs
+ * independently of the bundled names, research metadata and map hierarchy.
  */
 data class SeismicStation(
     val code: String,
@@ -109,9 +102,10 @@ fun shouldShowCatalogStation(
 ): Boolean = !reportActive && visibility.includes(station)
 
 object StationCatalog {
-    private const val CATALOG_URL =
-        "https://raw.githubusercontent.com/iku55/jma_int_stations/main/stations.json"
-    private const val CACHE_FILE = "seismic_intensity_stations.json"
+    const val SOURCE_PAGE = "https://www.jma.go.jp/jma/kishou/know/jishin/intens-st/index.html"
+    const val CODE_TABLE_PAGE = "https://xml.kishou.go.jp/tec_material.html"
+    const val TERMS_PAGE = "https://www.jma.go.jp/jma/kishou/info/coment.html"
+    private const val LEGACY_CACHE_FILE = "seismic_intensity_stations.json"
 
     @Volatile private var stations: List<SeismicStation> = emptyList()
     @Volatile private var byPrefAndName: Map<String, SeismicStation> = emptyMap()
@@ -161,90 +155,41 @@ object StationCatalog {
             ?: byName[normalize(stationNameJa)]
     }
 
-    /** Load cached or bundled data off-thread, then refresh the cache if needed. */
-    fun loadAsync(context: Context, client: OkHttpClient, onReady: () -> Unit) {
+    /** Load the audited official bundle off-thread; discard the obsolete cache. */
+    fun loadAsync(context: Context, onReady: () -> Unit) {
         if (loaded) {
             onReady()
             return
         }
 
         val appContext = context.applicationContext
-        val cache = File(appContext.filesDir, CACHE_FILE)
         Thread({
-            var loadedFromCache = false
-            if (cache.isFile && cache.length() > 32_000L) {
-                loadedFromCache = runCatching {
-                    parseRemote(cache.readText(Charsets.UTF_8))
-                }.isSuccess
-                if (!loadedFromCache) cache.delete()
-            }
-            if (!loadedFromCache) {
-                runCatching { parseBundled(appContext) }
-            }
+            // Never read old third-party data, even if cleanup cannot complete.
+            runCatching { File(appContext.filesDir, LEGACY_CACHE_FILE).delete() }
+            runCatching { parseBundled(appContext) }
             // Parse generated display resources on this same worker so opening
             // Observed Intensities never performs a large JSON read on Compose.
             runCatching { englishStationNames(appContext) }
             runCatching { stationDetails(appContext) }
-            // The live feed must remain usable even if both catalogue sources
-            // are damaged. In a normal build, the bundled snapshot always wins
-            // before this fallback is reached.
+            // The live feed must remain usable even if the resource is damaged.
             if (!loaded) loaded = true
             onReady()
-            if (!loadedFromCache) refreshInBackground(appContext, client)
         }, "QuakeDeck-stations").start()
-    }
-
-    private fun refreshInBackground(context: Context, client: OkHttpClient) {
-        val request = Request.Builder().url(CATALOG_URL)
-            .header("User-Agent", "QuakeDeck/0.9.66 (Android)")
-            .build()
-        client.newCall(request).enqueue(object : Callback {
-            override fun onFailure(call: Call, e: IOException) = Unit
-            override fun onResponse(call: Call, response: Response) {
-                response.use {
-                    if (!response.isSuccessful) return
-                    val text = response.body.string()
-                    if (runCatching { parseRemote(text) }.isSuccess) {
-                        runCatching { File(context.filesDir, CACHE_FILE).writeText(text, Charsets.UTF_8) }
-                    }
-                }
-            }
-        })
-    }
-
-    private fun parseRemote(text: String) {
-        val array = JSONArray(text)
-        val parsed = ArrayList<SeismicStation>(array.length())
-        for (i in 0 until array.length()) {
-            val item = array.optJSONObject(i) ?: continue
-            val name = item.optString("name")
-            val lat = item.optString("lat").toDoubleOrNull() ?: continue
-            val lon = item.optString("lon").toDoubleOrNull() ?: continue
-            if (name.isBlank()) continue
-            val pref = item.optJSONObject("pref")?.optString("name").orEmpty()
-            val area = item.optJSONObject("area")
-            val city = item.optJSONObject("city")
-            parsed += SeismicStation(
-                code = item.optString("code"),
-                nameJa = name,
-                prefectureJa = pref,
-                latitude = lat,
-                longitude = lon,
-                networkJa = item.optString("affi"),
-                areaCode = area?.optString("code").orEmpty(),
-                areaNameJa = area?.optString("name").orEmpty(),
-                municipalityCode = city?.optString("code").orEmpty()
-            )
-        }
-        publish(parsed)
     }
 
     private fun parseBundled(context: Context) {
         val text = context.resources.openRawResource(R.raw.jma_intensity_stations)
             .bufferedReader(Charsets.UTF_8)
             .use { it.readText() }
+        publish(parseBundledStations(text))
+    }
+
+    internal fun parseBundledStations(text: String): List<SeismicStation> {
         val root = JSONObject(text)
         require(root.getInt("version") == 1) { "Unsupported station catalogue version" }
+        require(root.getString("source") == "Japan Meteorological Agency (JMA)") {
+            "Expected the audited official JMA catalogue"
+        }
         val array = root.getJSONArray("stations")
         val parsed = ArrayList<SeismicStation>(array.length())
         for (i in 0 until array.length()) {
@@ -266,7 +211,7 @@ object StationCatalog {
                 municipalityCode = row.optString(8)
             )
         }
-        publish(parsed)
+        return parsed
     }
 
     private fun englishStationNames(context: Context): Map<String, String> {

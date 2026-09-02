@@ -2,6 +2,12 @@
 
 QuakeDeck release history
 
+## v0.10.2-dev.1 (in progress)
+
+- Replaces the third-party station catalogue with a direct JMA map/code-table derivation after an exact 4,360-station, nine-field dry-run audit. Preserves coordinates, Japanese and approved English identities, operator labels, administrative parents, and researched station details; documents the one code-table-only entry without map coordinates.
+- Removes the third-party station download and cache reader, discarding the obsolete cache on startup. Catalogue updates now use the reproducible offline audit.
+- Adds JMA source links, processing attribution and PDL1.0 terms to the catalogue provenance, Data source dialog in English/Czech/Japanese, repository data notes and website credits.
+
 ## v0.10.1
 
 ### Local EEW forecasts and build editions

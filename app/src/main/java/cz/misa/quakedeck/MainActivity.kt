@@ -2695,6 +2695,24 @@ private fun SourceDialog(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontSize = 11.sp
                 )
+                HorizontalDivider()
+                Text(uiText(R.string.station_catalog_credit_title, language), fontWeight = FontWeight.Bold)
+                Text(
+                    uiText(R.string.station_catalog_credit, language),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    fontSize = 11.sp
+                )
+                listOf(
+                    R.string.station_catalog_source_link to StationCatalog.SOURCE_PAGE,
+                    R.string.station_catalog_codes_link to StationCatalog.CODE_TABLE_PAGE,
+                    R.string.station_catalog_terms_link to StationCatalog.TERMS_PAGE
+                ).forEach { (label, url) ->
+                    TextButton(onClick = {
+                        context.startActivity(Intent(Intent.ACTION_VIEW, url.toUri()))
+                    }) {
+                        Text(uiText(label, language), fontSize = 11.sp)
+                    }
+                }
             }
         },
         confirmButton = { TextButton(onClick = onDismiss) { Text(uiText(R.string.done, language)) } }

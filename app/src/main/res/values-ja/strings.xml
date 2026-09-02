@@ -8,6 +8,11 @@
     <string name="no_connection_details">接続の詳細はありません</string>
     <string name="data_source">データソース</string>
     <string name="sources">データソース</string>
+    <string name="station_catalog_credit_title">震度観測点一覧</string>
+    <string name="station_catalog_credit">出典：気象庁ホームページ「震度観測点」及び公式コード表。PDL1.0に基づきQuakeDeckが加工して作成した観測点一覧です。</string>
+    <string name="station_catalog_source_link">気象庁「震度観測点」</string>
+    <string name="station_catalog_codes_link">気象庁の公式コード表</string>
+    <string name="station_catalog_terms_link">気象庁の利用規約 · PDL1.0</string>
     <string name="p2pquake_source_subtitle">P2PQuake v2 REST + ライブWebSocket</string>
     <string name="dmdss_pending_subtitle">アダプター設定準備中 · 現在はFREEへフォールバック</string>
     <string name="dmdss_connect_subtitle">アカウントを接続してEEW予報を受信</string>

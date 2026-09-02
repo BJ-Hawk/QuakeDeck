@@ -8,6 +8,11 @@
     <string name="no_connection_details">Podrobnosti o připojení nejsou k dispozici</string>
     <string name="data_source">Zdroj dat</string>
     <string name="sources">Zdroje</string>
+    <string name="station_catalog_credit_title">Katalog stanic</string>
+    <string name="station_catalog_credit">Zdroj: web Japonské meteorologické agentury (JMA). Data mapy stanic a oficiální číselníky zpracoval QuakeDeck podle PDL1.0. Tento katalog je upraveným výstupem projektu QuakeDeck.</string>
+    <string name="station_catalog_source_link">Seznam stanic JMA</string>
+    <string name="station_catalog_codes_link">Oficiální číselníky JMA</string>
+    <string name="station_catalog_terms_link">Podmínky použití JMA · PDL1.0</string>
     <string name="p2pquake_source_subtitle">P2PQuake v2 REST + živý WebSocket</string>
     <string name="dmdss_pending_subtitle">Nastavení adaptéru se připravuje · zatím se používá FREE</string>
     <string name="dmdss_connect_subtitle">Připojte účet pro živé předpovědi EEW</string>

@@ -136,7 +136,7 @@ class P2pQuakeProvider(
             loadConfirmedHistory(startupGeneration)
         }
 
-        StationCatalog.loadAsync(appContext, httpClient) {
+        StationCatalog.loadAsync(appContext) {
             mainHandler.post {
                 if (stopped) return@post
                 enrichKnownStationCoordinates()

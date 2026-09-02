@@ -1,0 +1,242 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="ja" lang="ja">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>気象庁防災情報XMLフォーマット ｜ 技術資料</title>
+<meta name="author" content="気象庁 Japan Meteorological agency" />
+<meta name="keywords" content="気象庁 Japan Meteorological agency" />
+<meta name="description" content="気象庁が提供するページです" />
+<meta http-equiv="Content-Style-Type" content="text/css" />
+<meta http-equiv="Content-Script-Type" content="text/javascript" />
+<link rel="shortcut icon" href="favicon.ico">
+<link rel="stylesheet" type="text/css" href="https://www.jma.go.jp/jma/com/css/define.css" media="all" />
+<script type="text/javascript" src="https://www.jma.go.jp/jma/com/js/jquery.js"></script>
+<style type="text/css" media="all"><!-- @import url(https://www.jma.go.jp/jma/com/default.css); --></style>
+<style type="text/css">
+#twtr p{
+font-size:1.2em;
+}
+#mapzero{
+font-size:1.1em;
+}
+#header_right{
+width:800px;
+float:right;
+padding:30px 0 0;
+}
+#header_link{
+float:left;
+width:530px;
+}
+#header_link ul li#goriyou a{
+padding:0 0 0 13px;
+background-image:url(https://www.jma.go.jp/jma/com/images/info.png);
+background-position:left center;
+background-repeat:no-repeat;
+}
+#gsearch input[type="text"] {
+	padding: 2px 5px !important;
+	width: 200px !important;
+}
+</style>
+</head>
+<body>
+<noscript><div>すべての機能をご利用いただくにはJavascriptを有効にしてください。</div></noscript>
+<!--header start -->
+<div id="header_area">
+  <div id="nheader">
+    <div id="logo"><a href="https://www.jma.go.jp/jma/index.html"><img src="https://www.jma.go.jp/jma/com/images/logo.gif" alt="気象庁" width="120" height="67" /></a></div>
+    <div id="header_right">
+      <div id="header_link">
+	<ul>
+	  <li id="toMain"><a href="#main">本文へ</a></li>
+	  <li id="goriyou"><a href="https://www.jma.go.jp/jma/kishou/usage_info/guide_top.html">情報ご利用ガイド</a></li>
+	  <li xml:lang="en" lang="en"><a href="https://www.jma.go.jp/jma/indexe.html">ENGLISH</a></li>
+	  <li><a href="https://www.jma.go.jp/jma/kishou/info/goiken.html">ご意見･ご感想</a></li>
+	  <li id="siteMap"><a href="https://www.jma.go.jp/jma/kishou/sitemap.html">サイトマップ</a></li>
+	</ul>
+      </div>
+      <!-- search -->
+	<div id="gsearch">
+		<form id="cse-search-box" action="//cse.google.com/cse">
+			<input type="hidden" name="cx" value="009950868052057056798:0yrbmp7chwi" />
+			<input type="hidden" name="ie" value="UTF-8" />
+			<input type="hidden" name="lr" value="lang_ja"/>
+			<input type="text" name="q" id="cse-search-text">
+			<input type="image" name="sa" src="https://www.jma.go.jp/jma/com/images/btn_search6.png" alt="検索"/>
+		</form>
+		<script type="text/javascript" src="https://www.gstatic.com/prose/brand.js" targetid="cse-search-text" hl="ja"></script>
+	</div>
+   <!-- search end-->
+
+    </div>
+    <ul id="gnavi">
+      <li><a href="https://www.jma.go.jp/">ホーム</a></li>
+      <li><a href="https://www.jma.go.jp/jma/menu/menuflash.html">防災情報</a></li>
+      <li><a href="https://www.jma.go.jp/jma/menu/menureport.html" class="on">各種データ・資料</a></li>
+      <li><a href="https://www.jma.go.jp/jma/menu/areas.html">地域の情報</a></li>
+      <li><a href="https://www.jma.go.jp/jma/menu/menuknowledge.html">知識・解説</a></li>
+      <li><a href="https://www.jma.go.jp/jma/menu/menuappli.html">各種申請・ご案内</a></li>
+    </ul>
+  </div>
+</div>
+<!--header end --><!-- global menu -->
+<div id="contents_area2">
+  <div id="ncontents2">
+    <ul class="breadcrumb2">
+       <li><a href="https://www.jma.go.jp/">ホーム</a>&nbsp;&gt;&nbsp;</li>
+       <li><a href="https://www.jma.go.jp/jma/menu/menureport.html">各種データ・資料</a>&nbsp;&gt;&nbsp;</li>
+       <li><a href="./index.html">気象庁防災情報XMLフォーマット情報提供ページ</a>&nbsp;&gt;&nbsp;</li>
+       <li>技術資料</li>
+    </ul>
+    <br />
+      		<div id="submenu">
+				<ul id="submenulist">
+				<h2 class="accordion_head2">コンテンツ</h2>
+					<li><a href="./index.html">トップページ</a></li>
+					<li><a href="./revise.html">更新情報</a></li>
+					<li><a href="./tec_material.html">技術資料</a></li>
+					<li><a href="./xmlpull.html">情報の取得方法</a></li>
+					<li><a href="./qanda.html">よくある質問</a></li>
+					<li><a href="./link.html">参考資料集</a></li>
+				</ul>
+			</div><!-- //global menu --><!-- contents -->
+<h1>気象庁防災情報XMLフォーマット　技術資料</h1>
+
+<h2>気象庁防災情報XMLフォーマット　Ver.1.3（令和4年12月9日公表（令和8年8月26日一部更新））</h2>
+<div class="contents">
+ <ul>
+  <li><a href="jmaxml_20221209_format_v1_3.pdf">気象庁防災情報XMLフォーマット（本文）[PDF形式：575KB]</a><font color="#000000">(令和4年12月9日公開)</font> </li>
+  <li><a href="jmaxml_20260806_format_v1_3_hyo1_1.pdf">気象庁防災情報XML一覧表（表1.1）[PDF形式：183KB]</a><font color="#000000">(令和8年8月6日一部更新)</font><br>
+　　（参考）XML化対象電文（表1.1）(平成25年6月28日一部更新)は<a href="jmaxml_20130628_format_v1_1_hyo1_1.pdf">こちら</a></li>
+  <li><a href = "jmaxml_20191001_format_v1_2_EijiOfficeName.pdf">（別添）英字官署名[PDF形式：71KB]</a><font color="#000000">(令和元年10月1日公開)</font></li>
+  <li>辞書・コード管理表（表1.5.1.1～表1.5.3.2）<br>
+　　　　「辞書及びスキーマ」の辞書一式を参照<br>
+　　　　「コード管理表及び個別コード表」のコード管理表一式を参照</li>
+  <li><a href="jmaxml_20091228_format_v1_0_hyo4.pdf">用語定義（表4）[PDF形式：161KB]</a> 
+  <li>XMLスキーマ（別紙1～4.3）<br>
+　　　　「辞書及びスキーマ」のXMLスキーマファイルを参照</li>
+ </ul>
+<br>
+# 過去の辞書やスキーマは、<a href="./past_reference.html">過去の参考資料</a>よりダウンロードできます。<br><br>
+</div>
+<br>
+
+<h2>辞書及びスキーマ（平成21年5月15日公表（令和8年1月29日一部更新））</h2>
+<div class="contents">
+<ul>
+<li><a href="jmaxml_20260129_dictionary.xlsx">辞書一式[xlsx形式：272KB]</a><font color="#000000">(令和8年1月29日一部更新)</font></li>
+<li><a href="jmaxml_20241031_Schema(xsd).zip">XMLスキーマファイル（xsd形式）一式[zip形式：20KB]</a><font color="#000000">(令和6年10月31日一部更新)</font></li>
+<li><a href="jmaxml_guide_20260129_dic_schema_list.pdf">辞書・スキーマバージョン管理表[pdf形式：89KB]</a><font color="#000000">(令和8年1月29日一部更新)</font></li>
+</ul>
+</div>
+<br>
+
+<h2>コード管理表及び個別コード表（平成21年5月15日公表（令和8年8月26日一部更新））</h2>
+<div class="contents">
+<ul>
+<li><a href="jmaxml_20260826_code.xlsx">コード管理表一式[xlsx形式：97KB]</a><font color="#000000">(令和8年8月26日一部更新)</font></li>
+<li><a href="jmaxml_20260826_Code.zip">個別コード表[zip形式：1638KB]</a><font color="#000000">(令和8年8月26日一部更新)</font></li>
+</ul>
+<br>
+<font color="#000000">なお、更新内容については<a href="./revise.html">更新情報のページ</a>をご確認ください。</font> <br>
+また、コード表が示す予報区等のGISデータについて、<a href="https://www.data.jma.go.jp/developer/index.html">「高度利用ポータルサイト」</a>で提供しています。<br>
+</div>
+<br>
+
+<h2>電文毎の解説資料（令和8年8月26日一部更新）</h2>
+<div class="contents">
+<ul>
+<li><a href="jmaxml_20260826_manual_list.pdf">解説資料整理表[pdf形式：123KB]</a>(令和8年8月26日一部更新) </li>
+<li><a href="jmaxml_20260826_Manual(pdf).zip">解説資料セット[zip形式：13040KB]</a>(令和8年8月26日一部更新) </li>
+</ul>
+</div>
+<br>
+
+<h2>サンプルデータ（令和8年7月23日一部更新）</h2>
+<div class="contents">
+<ul>
+<li><a href="jmaxml_20260723_sample_list.pdf">サンプルデータ整理表[pdf形式：320KB]</a>(令和8年7月23日一部更新) </li>
+<li><a href="jmaxml_20260723_Samples.zip">サンプルデータ（xml及びtxt）セット[zip形式：4054KB]</a>(令和8年7月23日一部更新) </li>
+</ul>
+<br>
+# サンプルデータにつきましては、今後も必要な充実を図る予定です。<br>
+# 令和8年出水期からの防災気象情報の体系整理に係るサンプル電文について、以下のとおり掲載します。なお、ファイル名に記載された発信官署地点略号は、<a href="https://www.data.jma.go.jp/suishin/jyouhou/pdf/300.pdf">技術情報第300号</a>をご確認ください。<br>
+<ul>
+<li><a href="SampleXml_Weather warning, advisory, etc_20251217.zip">現行細分区による全要素・全細分区のサンプル電文（対象：注警報、時系列情報、新早期注意情報）[zip形式：4071KB]</a>(令和7年12月17日) </li>
+</ul>
+</div>
+<br>
+
+<h2>全内容出力スタイルシート（令和8年1月29日一部更新）</h2>
+<div class="contents">
+<ul>
+<li><a href="jmaxml_20260129_Verification_StyleSheet_list.pdf">全内容出力スタイルシート整理表[pdf形式：71KB]</a>(令和8年1月29日一部更新)</li>
+<li><a href="jmaxml_20260129_Verification_StyleSheet.zip">全内容出力スタイルシートセット[zip形式：116KB]</a>(令和8年1月29日一部更新)</li>
+</ul>
+<br>
+<span class="must">全内容出力スタイルシートご利用上の注意点</span><br>
+ここで提供しております全内容出力スタイルシートについては、システムに直接組み込む等の方法でご利用になることは避けていただき、電文処理の参考資料としてお使い下さい。<br>
+</div>
+<br>
+
+<h2>気象庁防災情報XMLフォーマット運用指針（平成22年5月14日公表（令和8年4月30日一部更新））</h2>
+<div class="contents">
+<ul>
+<li><a href="jmaxml_guide_20130412.pdf">気象庁防災情報XMLフォーマット運用指針[pdf形式：435KB]</a><font color="#000000">(平成25年4月12日一部変更)</font>
+<li>別紙１：辞書・スキーマバージョン管理表<br>
+　　　　「辞書及びスキーマ」の辞書・スキーマバージョン管理表を参照 
+<li><a href="jmaxml_guide_20260430_head_control_list.pdf">別紙２：管理部・ヘッダ部の運用整理表[pdf形式：346KB]</a><font color="#000000">(令和8年4月30日一部更新)</font></li>
+<li><a href="jmaxml_guide_20260129_code_dep_list.pdf">別紙３：UTF-8依存文字列利用状況[pdf形式：68KB]</a><font color="#000000">(令和8年1月29日一部更新)</font></li>
+</ul>
+</div>
+<br><br>
+
+<h2>（参考情報）過去の動作検証の結果</h2>
+「XMLコンソーシアム」のご協力により、各種XML関連ソフトウエアにおける動作状況を検証していただきました。各種ベンダー系及びフリー系ソフトウエアにおける、スキーマの読み込みとサンプルデータの妥当性検証、その他データバインディング等の検証において、良好な動作結果が得られています。 <br>
+なお、この検証結果については、上記ファイル中にお示ししている検証条件における動作結果であり、気象庁並びに各ソフトウエア開発元において、「気象庁防災情報XMLフォーマット」仕様の動作保証及び完全対応を表明するものではないことにご留意ください。<br><br>
+<div class="contents">
+<ul>
+<li><a href="20091228kenshoukekka.pdf">平成22年12月28日一部更新時の動作検証結果[PDF形式：162KB]</a></li>
+<li><a href="20090515kenshoukekka_2.pdf">平成21年5月15日発表時の動作検証結果[PDF形式：103KB]</a></li>
+</ul>
+</div>
+<br>
+
+<h2>技術資料等のメール配信について</h2>
+<div class="contents">
+　「気象庁防災情報XMLフォーマット」に関する<a href="tec_material.html">技術資料</a>等が更新された際にメールでお知らせしています。<br>
+<br>
+　お知らせをご希望の方は、件名を「＜メール配信希望＞気象庁防災情報XMLフォーマット」とし、本文に連絡先電子メールアドレスを明記のうえ、「jmaxml※met.kishou.go.jp」（※は@に変更してください）までメールを送付願います。 
+<br>
+<br>
+　送付いただきましたメールアドレスは、本連絡にのみ利用し、それ以外には利用いたしません。<br>
+</div>
+<br>
+
+<h2>お問い合わせ先</h2>
+<div class="contents">
+気象庁情報基盤部情報政策課<br>
+電話 03-6758-3900（内線3118、3115）<br>
+電子メールアドレス「jmaxml※met.kishou.go.jp」（※は@に変更してください）<br>
+（メールでのお問い合わせの場合には、件名を「＜問合せ＞○○○について」のように記入し送付をお願いします。）
+</div><!-- //contents -->
+<div id="gotop"><a href="#top">このページのトップへ</a></div>
+<table class="plugin" summary="layout" border="0">
+  <tbody>
+  <tr>
+    <td><a href="https://get.adobe.com/jp/reader/"><img height="33" alt="Adobe Reader" src="./common/adobe.gif" width="112"></a></td>
+    <td class="stx">このサイトには、Adobe社<a href="https://get.adobe.com/jp/reader/">Adobe 
+      Reader</a>が必要なページがあります。<br>
+お持ちでない方は左のアイコンよりダウンロードをお願いいたします。</td></tr></tbody></table>
+</div>
+</div>
+<div id="footer_area">
+	<div id="nfooter">
+		<ul>
+			<li><a href="https://www.jma.go.jp/jma/kishou/info/coment.html">気象庁ホームページについて</a></li>
+		</ul>
+	</div>
+</div>
+</body>
+</html>

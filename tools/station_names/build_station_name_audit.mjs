@@ -918,11 +918,7 @@ async function loadInputs() {
     stations,
     admins,
     places,
-    catalog: {
-      version: stationRoot.version,
-      source: stationRoot.source,
-      sourceBlob: stationRoot.sourceBlob,
-    },
+    catalog: Object.fromEntries(Object.entries(stationRoot).filter(([key]) => key !== "stations")),
     officialMunicipalityNames: placeNameRoot.municipality ?? {},
   };
 }

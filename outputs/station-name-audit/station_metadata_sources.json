@@ -2,8 +2,50 @@
   "schemaVersion": 2,
   "catalog": {
     "version": 1,
-    "source": "iku55/jma_int_stations",
-    "sourceBlob": "a697372b878fda4c9aa5c971e13e08a2f5e9b7e6"
+    "source": "Japan Meteorological Agency (JMA)",
+    "sourceUrls": [
+      "https://www.jma.go.jp/jma/kishou/know/jishin/intens-st/stations.json",
+      "https://xml.kishou.go.jp/jmaxml_20260826_Code.zip"
+    ],
+    "sourcePages": [
+      "https://www.jma.go.jp/jma/kishou/know/jishin/intens-st/index.html",
+      "https://xml.kishou.go.jp/tec_material.html"
+    ],
+    "sourceFiles": [
+      {
+        "url": "https://www.jma.go.jp/jma/kishou/know/jishin/intens-st/stations.json",
+        "sha256": "9233bbcb6206600aa5f8045778881adcfad791e04bf1577c64e1ac6a6c2a2cf9"
+      },
+      {
+        "url": "https://www.jma.go.jp/jma/kishou/know/jishin/intens-st/map.js",
+        "sha256": "9c8f40e504bb34dbd2a64728461f7d38efd90bbdcb76b5f120d7c3549e33c447"
+      },
+      {
+        "url": "https://xml.kishou.go.jp/jmaxml_20260826_Code.zip",
+        "sha256": "66d37e3d480c594b650d0a4d9d0b63c539ef4987da57073321c5105ce1c63892"
+      }
+    ],
+    "codeTable": {
+      "workbook": "地震火山関連コード表.xlsx",
+      "sheet": "24",
+      "workbookSha256": "6055deba49825c8f36948b6a5eab1929816b16e730792a008cacc1f7e9e13ca3"
+    },
+    "license": "Public Data License 1.0 (PDL1.0)",
+    "termsUrl": "https://www.jma.go.jp/jma/kishou/info/coment.html",
+    "licenseUrl": "https://www.digital.go.jp/resources/open_data/public_data_license_v1.0",
+    "attribution": "Source: Japan Meteorological Agency website. Station map data and official XML code tables processed into the QuakeDeck catalogue by QuakeDeck.",
+    "processing": "Exact Japanese-name join of all official map stations to sheet 24; prefecture/operator labels decoded using JMA map.js. Published coordinate values retained without rounding. Code-table entries absent from the station map are excluded; this is a QuakeDeck adaptation, not an unmodified JMA product.",
+    "codeTableEntriesWithoutMapCoordinates": [
+      {
+        "code": "1336172",
+        "name": "伊豆大島町岡田",
+        "areaCode": "355",
+        "areaName": "伊豆大島",
+        "municipalityCode": "1336100",
+        "municipalityName": "伊豆大島町",
+        "worksheetRow": 1467
+      }
+    ]
   },
   "sources": {
     "jma": {
