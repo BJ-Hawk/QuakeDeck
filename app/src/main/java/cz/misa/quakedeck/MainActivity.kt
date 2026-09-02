@@ -4609,6 +4609,16 @@ private fun HistoricalEventPanel(
                         }
                     )
 
+                    if (event.localSupplementalIntensityRegions().isNotEmpty()) {
+                        Text(
+                            uiText(R.string.local_hybrid_eew_disclosure, placeNameLanguage),
+                            modifier = Modifier.padding(top = 4.dp),
+                            color = MaterialTheme.colorScheme.tertiary,
+                            fontSize = 10.sp,
+                            lineHeight = 12.sp
+                        )
+                    }
+
                     Spacer(Modifier.height(8.dp))
                     HistoricalReportNavigation(
                         reportIndex = reportIndex,
@@ -6866,6 +6876,7 @@ private fun JapanMap(
     val baseMapReady = mapData != null
     val mapNeedsJmaDetail =
         event.points.isNotEmpty() ||
+            event.localSupplementalIntensityRegions().isNotEmpty() ||
             activeEewEvent?.points?.isNotEmpty() == true ||
             activeEewEvent?.localSupplementalIntensityRegions()?.isNotEmpty() == true ||
             tsunami != null

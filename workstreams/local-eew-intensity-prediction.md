@@ -1,11 +1,11 @@
 # Local EEW intensity and JMA2001 travel-time prediction
 
-## Status — implemented; automated validation complete; pending device/live approval
+## Status — implementation finalized in 0.10.1; device/live validation tracked separately
 
-Implemented in `0.10.1-dev.3`; the first device presentation pass shipped in
-`0.10.1-dev.4`, with its follow-up corrections completed in `0.10.1-dev.5`
-and official-authoritative hybrid regional coverage added in `0.10.1-dev.6`
-(`versionCode` 225).
+The approved implementation is finalized as `0.10.1` (`versionCode` 233),
+including official-authoritative hybrid coverage in live view and historical
+EEW replay. The release is no longer in progress. Remaining device/live checks
+are validation follow-ups, not an unfinished development-version marker.
 
 ## Objective
 
@@ -99,21 +99,48 @@ References:
   destination card sits directly below the fixed report card in both Sandbox
   and live DM-D.S.S regional forecasts.
 
+## Historical replay — completed 2026-09-02
+
+- Each matched archived EEW revision calls the existing intensity engine once
+  on the archive executor. It uses that revision's hypocentre, magnitude,
+  provider maximum, and official regions, never the final confirmed event.
+- The shared `presentationIntensityPoints()` path supplies the same
+  official-first hybrid map colours as live, excludes modelled Shindo 0, and
+  requests detailed JMA geometry even when the official region list is empty.
+  A compact localized note identifies local supplements in the historical panel.
+- New archive frames preserve magnitude unit, hypocentre condition, source
+  accuracy, region codes, PLUM/Warning flags, and cancellation state. The
+  provider-wide maximum remains authoritative even if regional values differ.
+- Existing archives remain readable and can calculate from their retained
+  inputs. Previously omitted metadata cannot be reconstructed. Estimates are
+  recomputed using the installed engine/resources, not claimed to be an exact
+  snapshot of an older engine's output.
+- Felt frames carry forward their preceding EEW estimate; confirmed-report
+  frames retain official observations only. Historical navigation still does
+  not enable P/S rings, destination countdowns, live notifications, or automatic
+  refits between report steps.
+- LITE or an unavailable/no-result engine retains official areas only. No
+  equation, coefficient, resource, forecast contract, or ignored engine file
+  changed for this replay extension.
+
 ## Validation and approval boundary
 
 - FULL debug Kotlin compilation and unit tests pass with the ignored engine and
   both attributed resources present.
 - LITE validation must continue to exclude the engine while compiling the same
   tracked contracts/resources and retaining official-provider behavior.
-- No APK was built for this workstream. Device rendering, Sandbox behavior, the
-  hybrid official/local map, selected-location supplementation, omission
-  ceilings, and the next suitable live DM-D.S.S event remain pending approval;
-  automated tests are not production proof.
+- The replay regression suite covers archived input preservation, per-revision
+  calculations, official/local presentation parity, legacy empty-region frames,
+  parser sorting, LITE/no-result handling, and cancelled/confirmed exclusions.
+- No APK was built for this release task. Historical map rendering still needs
+  a device check; broader hybrid-map, selected-location, omission-ceiling, and
+  live DM-D.S.S coverage remain follow-ups. Automated tests are not production
+  proof and release finalization does not change that boundary.
 
 ## Mandatory cross-machine transfer reminder
 
-`LocalEewForecastEngine.kt` is ignored by Git. Pulling or pushing this workstream
-will transfer the matching tracked contracts and resources but **will not
-transfer the engine**. Manually copy the updated file to the same relative path
-on the other QuakeDeck machine and compile-check it there before describing that
-machine's FULL build as current.
+`LocalEewForecastEngine.kt` is ignored by Git. This replay extension did not
+change it, but pulling or pushing the tracked plumbing **will not transfer the
+engine**. The other QuakeDeck machine still needs a manually copied matching
+engine at the same relative path and a compile check before its FULL build can
+be described as current. Without it, historical replay remains official-only.

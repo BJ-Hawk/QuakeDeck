@@ -894,7 +894,7 @@ class P2pQuakeProvider(
                             sourceTime = record.sourceTime,
                             reportType = "EEW",
                             reportIssuedAt = eew.reportIssuedAt,
-                            event = eew
+                            event = EewArchiveFrame.forReplay(eew, record.rawJson)
                         )
                     }
             }.toList()

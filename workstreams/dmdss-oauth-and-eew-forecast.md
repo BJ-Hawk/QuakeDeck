@@ -1,117 +1,162 @@
 # DM-D.S.S OAuth and EEW forecast
 
-## Status — pending testing with live EEW events
+## Status — 0.10.1 finalized; integration pending further live-event testing
 
-**This integration is partially live-event validated but is not production-verified.** Real authorized-device events now prove socket delivery, production-body decoding, paired-feed deduplication, successive revisions, notification delivery, full-screen launch, and final-bulletin receipt. Validation remains pending for the `0.10.0` unchanged-revision/lifecycle fixes, Forecast-to-Warning escalation, cancellation, socket interruption and foreground-service reconnection, and bounded `gd.eew` recovery after a genuinely missed live bulletin.
+The implementation is finalized as **0.10.1** (`versionCode` 233), as approved
+on 2026-09-02. It is no longer an in-progress development release.
 
-Until that validation is observed on a real authorized device/account, documentation must describe the DM-D.S.S integration as **pending live-event testing**, not complete or proven reliable. P2PQuake remains the permanent baseline and fallback throughout testing.
+**DM-D.S.S is partially live-event validated, not production-verified.**
+Unobserved escalation, cancellation, lifecycle, reconnect, and missed-bulletin
+recovery paths remain explicitly pending live-event testing. Release
+finalization does not imply that every real-world path has passed.
 
-### Latest validation observation — 2026-08-24
+## Scope and fixed boundaries
 
-- Foreground monitoring remained connected during device testing. A Wi-Fi/data/network handover produced the recorded `SocketException: Software caused connection abort`; QuakeDeck reconnected promptly and the following recovery check reported no newly missed recent EEW.
-- The first observed live Forecast, event `20260824203209`, arrived over that recovered socket as serials 1 through 4, each delivered as VXSE44 and VXSE45. This validates real socket transport and successive-revision delivery. Its decoded overall forecast maximum was Shindo 3.
-- The pre-hotfix parser rejected all eight application packets before notification policy because production converted-JSON envelopes declared `encoding: base64` and `compression: gzip`, while QuakeDeck treated `body` as literal JSON. Diagnostics consequently showed no accepted bulletin and no notification decision; the configured Forecast floor was not responsible.
-- `0.9.84am` decodes that DM-D.S.S envelope shape with strict Base64 handling, bounded GZIP expansion, specific rejection diagnostics, retained plain-JSON compatibility, and semantic deduplication of paired VXSE44/VXSE45 revisions. `0.9.84an` then fixes the notification-policy mismatch exposed by the decoded bulletin: delivery and wake/full-screen now consume the same Japan-wide or selected-location scope result, including a conservative same-JMA-area/75 km fallback when an EEW omits its regional forecast list. The fallback never labels the event maximum as a measured local Shindo.
-- A second live Forecast, event `20260825002747`, was successfully decoded as five logical revisions despite paired VXSE44/VXSE45 delivery. Its relevant maximum changed from Shindo 1 to Shindo 2; QuakeDeck correctly issued the first alert, a new alert for that change, a full-screen launch, and an EEW Ended notification. Its arrival was nearly synchronized with JQuake, with QuakeDeck's wave graphics only slightly behind.
-- That event also exposed that unchanged serials still alerted, the retained notification payload could reactivate EEW after the provider's 180-second expiry and Ended update, and Activity recreation could replay the original Report #1 launch command. `0.10.0` keeps the documented DM-D.S.S lifetime at exactly event timestamp + 180 seconds, silently refreshes unchanged-intensity revisions, lets relevant Shindo changes alert, makes explicit ended/cancelled state authoritative, expires the retained payload on the same deadline, and consumes notification navigation extras once.
-- The full debug unit-test suite and Kotlin compilation pass for `0.10.0`. Per the user’s instruction, no new APK was assembled for this iteration. These checks validate the hotfix mechanics but do not replace a live re-test.
-- Forecast-to-Warning escalation, cancellation handling, recovery of a genuinely missed bulletin, and long-running behavior also remain unvalidated with live events.
+- User-facing OAuth authorization-code PKCE, encrypted credentials, automatic
+  refresh, non-destructive re-authorization, and explicit revocation.
+- Scopes: `contract.list`, `socket.start`, `socket.close`,
+  `eew.get.forecast`, and the approved read-only `gd.eew` recovery check.
+  No client secret is embedded in the APK.
+- Active account plans are displayed; only an active `eew.forecast`
+  entitlement enables the implemented forecast socket.
+- One existing P2PQuake runtime remains the permanent baseline for confirmed
+  reports, tsunami, history, Sandbox, monitoring, and fallback Warning delivery.
+  Missing authorization, subscription, or DM-D.S.S connectivity must not remove
+  that baseline.
+- Warning and Forecast retain independent default-on notification switches,
+  channels, thresholds, and wake/full-screen controls. Forecast offers Shindo
+  0–4 floors with separate below-floor handling; Warning offers 5− through 7.
+- No new DM-D.S.S classifications, second P2PQuake socket, standalone felt-only
+  events, or changes to the felt-confidence gate are included in this release.
+- Work remains local to the permanent checkout. No staging, commits, pushes,
+  fetches, or publishing are authorized by this workstream.
 
-### P2PQuake felt-report validation observation — 2026-09-01
+## Completed implementation
 
-- The real delivery export `quakedeck-delivery-diagnostics-20260901-121052.json` proves that the baseline P2PQuake socket received the `9611` aggregates surrounding the two newest confirmed `551` earthquakes. Neither failure was caused by transport, deduplication, or the 180-second association window.
-- The 11:32 JST Kumamoto Region event received one aggregate at +81 seconds with `count: 1`, `confidence: 0`, and no `area_confidences`. It remained diagnostics-only under the deliberate singleton suppression rule.
-- The 12:01 JST Amakusa/Ashikita event received an aggregate at +45 seconds, followed by a cumulative update to `count: 2`; both retained `confidence: 0` and no `area_confidences`. The update was merged correctly, but the current `reportCount >= 2 && (confidence > 0 || areas.isNotEmpty())` quality gate still classified it as non-informative, so it was not attached when the later official report arrived.
-- This is now a documented policy gap rather than an unexplained delivery failure. A follow-up decision is required on whether confirmed `551` incidents may display temporally matching raw felt counts without positive P2PQuake confidence/area data, while retaining the stricter gate for unconfirmed EEWs and continuing to forbid standalone felt-only events. No code was changed during this diagnostic pass.
+### Connection and delivery
 
-## Objective
+- `dmdata.v2` WebSocket transport, text/binary payloads, bounded Base64/GZIP
+  converted-JSON decoding, VXSE44/VXSE45 semantic deduplication, serial ordering,
+  cancellation, expiry, and reconnect.
+- Normal WebSocket close handshakes; granted `socket.close` cleanup after
+  abnormal failure. Only the newest queued JSON `pingId` is answered.
+- Bounded `gd.eew` recovery after startup/reconnect: inspect the last five
+  minutes, deliver only a still-active recent candidate, suppress duplicates,
+  and preserve Forecast-to-Warning escalation.
+- Existing authorizations can remain usable while missing newer scopes;
+  cancelling Update authorization preserves the working account.
 
-Implement the first production-shaped Android DM-D.S.S integration: user OAuth and live `eew.forecast` reception, while retaining the existing P2PQuake provider as the single baseline for earthquake reports, tsunami information, archives, Sandbox tooling, and fallback EEW warnings.
+### Alerts and navigation
 
-## User decisions already made
+- First revision and changed relevant Shindo alert; unchanged revisions
+  silently refresh the existing notification. Forecast-to-Warning creates a
+  fresh Warning identity, and Ended remains a separate status.
+- DM-D.S.S active lifetime stays at event origin + 180 seconds. Retained launch
+  data cannot override explicit ended/cancelled state or reappear after expiry.
+- Cold-start notification payloads restore the appropriate incident and focus;
+  one-shot navigation prevents rotation from replaying an older report serial.
+  Regular reports keep confirmed JMA data rather than inheriting active EEW
+  intensity or notification identity.
+- Live/local and Japan-wide delivery and attention share the same scope policy.
+  Forecast, Warning, and tsunami attention remain independently controlled.
 
-- Start DM-D.S.S app work now.
-- Limit this first slice to OAuth and EEW forecasts.
-- Follow the current QuakeDeck local-development rules: work in the permanent checkout on `main`, use the next lettered in-progress version, preserve all unrelated work, and do not stage, commit, push, branch, fork, clone, or fetch.
-- OAuth must be a user-facing application flow. Users authorize the public QuakeDeck client with their own DM-D.S.S accounts; no client secret belongs in the APK.
-- P2PQuake must remain unchanged and always provide the baseline/fallback, including when OAuth succeeds but the user has no valid EEW forecast subscription.
-- Request only the scopes used by this slice: read-only `contract.list` for the user-visible account capability summary, `socket.start`, `socket.close`, and `eew.get.forecast` for the implemented live forecast feed and abnormal-failure cleanup, plus the explicitly approved read-only `gd.eew` post-event recovery check.
-- Show the user which active DM-D.S.S data plans the account really exposes and distinguish the EEW forecast used now from plans reserved for later integrations.
-- Give Warning and paid Forecast notifications completely separate delivery and attention controls. Both remain enabled by default. Forecast offers Shindo 0 through 4 as the full-notification floor; below that floor the user can choose off, silent, or a regular notification without wake/full-screen. At Shindo 0 the below-floor choice is hidden because no lower JMA intensity exists. Warning continues to offer Shindo 5− through 7.
-- Retain every diagnostically meaningful DM-D.S.S WebSocket application packet, including bulletin bodies, in a bounded app-private history. Exclude routine ping/pong heartbeats so they cannot evict useful traffic, but continue using them for connection activity and protocol replies. Redact credentials, never store OAuth tokens or socket tickets, and make the complete retained history explicitly exportable as machine-readable JSON.
+### Diagnostics, archives, and felt reports
 
-## Work completed
+- Source-labelled newest-20 human-readable packet preview for DM-D.S.S and
+  P2PQuake; bounded raw, credential-redacted JSON export through explicit user
+  action. Routine ping/pong and code-555 peer counts are omitted.
+- Failure records retain network transport, socket age, listener currency,
+  and planned reconnect delay; rejection and transport failures stay distinct.
+- Accepted DM-D.S.S Forecasts and P2PQuake Warnings share the source-neutral EEW
+  archive representation. Replay orders EEW, attached felt snapshots, and
+  confirmed reports by bulletin chronology, not insertion time.
+- Informative `9611` aggregates attach to a matching EEW/confirmed incident,
+  transfer to the confirmed report, remain cumulative across recovery, and
+  appear in replay plus final historical-catalogue/Recent-earthquakes counts.
+  Unmatched or insufficient-confidence aggregates remain diagnostics-only.
 
-- Confirmed the existing website capability checker is separate and requests only `contract.list`; it never opens a socket.
-- Confirmed the Android runtime currently owns exactly one P2PQuake provider and the DM-D.S.S source choice is only a visual fallback placeholder.
-- Confirmed from the current official DM-D.S.S documentation that native clients should use authorization-code PKCE, Socket Start requires `socket.start` plus `eew.get.forecast`, the `eew.forecast` classification can be delivered as converted JSON, and WebSocket ping frames require matching JSON pong replies.
-- Added authorization-code PKCE with callback-state validation, Keystore-encrypted access and refresh tokens, token refresh, revocation, and the supplied public client ID without a client secret.
-- Added `contract.list` capability discovery and localized account-plan presentation. Only an active `eew.forecast` entitlement enables the DM-D.S.S forecast connection; all other active plans are shown as available but reserved for later integrations.
-- Added Socket Start and `dmdata.v2` WebSocket handling for converted VXSE44/VXSE45 forecasts, including ping/pong, update ordering, cancellation, expiry, reconnect, and regional forecast intensity parsing.
-- Corrected production body handling after the first live event demonstrated that converted JSON is transported as Base64-encoded GZIP. Decoding is confined to DM-D.S.S, bounded before and after expansion, preserves uncompressed JSON support, produces specific diagnostics for malformed metadata/content, and prevents an equivalent VXSE44/VXSE45 pair from becoming two logical revisions.
-- Kept the existing P2PQuake instance as the always-running source for baseline data and fallback EEW. DM-D.S.S only overlays its forecast while selected, authorized, entitled, and connected.
-- Added localized connection/capability text and focused regression tests for parsing, cancellation, classification filtering, PKCE, required scopes, and entitlement gating.
-- Advanced the cumulative in-progress metadata to `0.9.84ab` (`versionCode` 207) without staging, committing, pushing, fetching, or publishing.
-- Replaced the diagnostics drawer's obsolete hardcoded Not configured state with independent P2PQuake and DM-D.S.S connection rows plus an accurate composite-provider label.
-- Added the `socket.close` grant and retained socket IDs so abnormal disconnects can release their server slot before retrying; clean shutdowns still use the normal WebSocket close handshake.
-- Added non-destructive authorization updates. A cancelled update preserves current credentials and connectivity, while a successful update atomically replaces credentials and revokes the superseded tokens.
-- Split notification policy completely by EEW level. Warning and Forecast each have their own default-on delivery switch, Android notification channel, wake/full-screen mode, predicted-intensity threshold, notification identity, and attention identity while sharing only the reference location and Android's system-level full-screen permission. Forecast exposes Shindo 0 through 4 as its full-notification threshold and offers off, silent, or regular notification delivery below it; regular below-level notifications never wake or use full-screen, and the below-level control disappears at Shindo 0. Existing installations default to regular below-level delivery to preserve their prior notification behavior. Attention activates on the first revision that actually crosses the respective threshold, with the prior lower-level card replaced so the crossing can alert freshly. Warning still exposes Shindo 5−, 5+, 6−, 6+, and 7. When an active event escalates from Forecast to Warning, the Forecast card is removed and a distinct Warning notification is posted on the Warning channel so it alerts again.
-- Added a one-shot Sandbox EEW forecast beside the existing warning injector. It uses the same configurable delay and normal runtime/notification route, does not replace the active live or official Sandbox connection, and verifies the audible Forecast policy without touching `P2pQuakeProvider`. Active Sandbox mode retains the existing protection against waking or taking over the device.
-- Replaced the partial cold-start event handoff with a bounded incident payload. Forecast and Warning notification launches now restore active EEW state, forecast points, timeline offset, P/S-wave rings, countdown, detail card, and explicit camera focus even after process removal; matching live runtime state takes over when available. Notification focus replays after final card layout and refines when detailed JMA geometry loads, so a second user tap is no longer required. The same handoff restores tsunami forecast areas and whole-Japan coastal focus without inventing an earthquake relationship, and reactivates a matching cached-but-inactive bulletin so its coasts flash.
-- Added a dedicated affected-coast tsunami camera command shared by live and cold-start notification bulletins. It frames bundled prefecture-coast fallbacks immediately, refines to exact JMA coast geometry when ready, and replays after the alert card settles the viewport without changing the manual whole-country Fit Japan action.
-- Added bounded `gd.eew` recovery after every successful live startup/reconnect. It examines only recently completed events, posts only a still-active candidate issued within three minutes, suppresses an event already accepted by the live path, and preserves Forecast-to-Warning escalation without using the archive as a real-time substitute.
-- Corrected the `gd.eew` recovery query to use the documented timezone-free, whole-second datetime refinement after the live API rejected Java `Instant` output containing fractional seconds and `Z`. Corrected the diagnostic exception-class label and made meaningful packet/error changes publish an immediate UI snapshot so an open history view does not require a cold start.
-- Replaced silent parser drops with explicit rejection reasons; accepted messages, socket activity, recovery results, and notification-policy outcomes are persisted and shown in the Data source dialog.
-- Separated transport failures from ignored bulletins and retained exact WebSocket error code/message/close data, close and failure details, true connection time, last activity, and the underlying post-event recovery failure. Added a bounded app-private, credential-redacted history of diagnostically meaningful inbound and outbound DM-D.S.S application packets, excluding routine ping/pong heartbeats so they cannot evict useful traffic, plus a newest-packet preview and explicit schema-versioned JSON export of the complete retained diagnostics through Android's document picker.
-- Confirmed foreground monitoring already owns the shared process runtime rather than only P2PQuake, and made service enable/restart explicitly cancel any pending DM-D.S.S retry delay and reconnect the paid forecast socket immediately.
-- Unified the scope used for EEW delivery and attention. With location filtering disabled, Forecast and Warning delivery, sound, wake, and full-screen all use the Japan-wide maximum. With filtering enabled, they use the same official regional forecast; if that list is absent, QuakeDeck may conservatively use the event maximum only for the same JMA EEW area or within 75 km of the hypocentre, without inventing a local forecast point.
-- Added independent tsunami wake/full-screen controls for Tsunami Warning and Major Tsunami Warning. Tsunami delivery and attention use the same filtered affected-coast list, so a coast excluded from delivery cannot trigger attention and an included qualifying coast cannot be silently denied attention by a second lookup.
-- Reorganized Notifications settings into separate compact cards for system delivery, reference-location coverage, earthquake reports, paid Forecast, Warning, tsunami, and updates/quiet hours. Warning and Forecast remain fully separate; the shared Android full-screen permission appears only once.
-- After the first successfully handled live five-revision event, made EEW revision alerts semantic: the first bulletin and each changed relevant Shindo alert normally, while unchanged serials silently refresh the same card. Retained cold-start state now shares DM-D.S.S's exact event-time-plus-180-seconds deadline, explicit provider end/cancellation wins immediately, and rotation cannot replay an already-consumed older report intent.
-- Added opt-in P2PQuake `9611` felt-report evidence without introducing felt-only events. Informative cumulative aggregates can attach to an active P2PQuake or DM-D.S.S EEW and transfer to the matching confirmed earthquake; live diagnostics retain the raw packets, historical replay preserves their source chronology, and historical-event plus Recent earthquakes summaries expose the final attached count. The cumulative implementation reached `0.10.1-dev.13` (`versionCode` 232), but the zero-confidence/no-area confirmed-event policy described above remains unresolved.
-- Advanced the cumulative in-progress metadata through `0.9.84ai` (`versionCode` 214) for missed-EEW recovery and delivery diagnostics, to `0.9.84aj` (`versionCode` 215) for complete bounded packet diagnostics and machine-readable export, to `0.9.84ak` (`versionCode` 216) so routine ping/pong heartbeats no longer consume the retained history, to `0.9.84al` (`versionCode` 217) for Shindo 0–4 Forecast delivery policy, to `0.9.84am` (`versionCode` 218) for production Base64/GZIP envelope handling, and to `0.9.84an` (`versionCode` 219) for consistent notification scope, tsunami attention, and the reorganized settings UI. The cumulative release is now `0.10.0` (`versionCode` 220) to reflect its substantially expanded functionality, including the live-event revision and lifecycle corrections.
+### Historical intensity shading — completed 2026-09-02
 
-## Why it is being done this way
+- Historical EEW revisions now call the existing FULL intensity engine on the
+  archive executor, using only that revision's inputs. The map uses the same
+  official-first/local hybrid presentation as live; modelled Shindo 0 remains
+  neutral and official areas are never overwritten.
+- New frames retain magnitude unit, hypocentre condition, source accuracy,
+  region codes, PLUM/Warning flags, and cancellation state. Existing archives
+  remain readable but cannot recover metadata older versions discarded.
+- Replay estimates use the installed engine/resources. They are not presented
+  as a frozen copy of an older engine's output.
+- Historical P/S rings, countdowns, live alerts, and automatic refits between
+  report steps remain disabled. Confirmed frames retain observed data only.
+- LITE keeps official-only shading. The ignored engine and its calculation
+  contracts are unchanged; a FULL checkout on another machine still requires
+  the manually copied matching `LocalEewForecastEngine.kt`, which Git cannot
+  transfer.
+- Calculation details and limitations:
+  [Local EEW intensity workstream](local-eew-intensity-prediction.md).
 
-- The P2PQuake provider already owns confirmed-report history, tsunami state, offline replays, diagnostics, and notification behavior. Replacing it wholesale in the first DM-D.S.S slice would needlessly destabilize unrelated features.
-- A second P2PQuake connection is forbidden. The DM-D.S.S adapter is therefore an additional paid EEW forecast source, merged at the process-scoped runtime boundary over the existing single FREE baseline.
-- Tokens are device secrets even though the OAuth client ID is public. Persist them encrypted with an Android Keystore key; keep PKCE state/verifier short-lived and validate the callback state before exchanging the authorization code.
+## Retained live evidence
 
-## Current unfinished state
+### DM-D.S.S events — 2026-08-24/25
 
-- The repository implementation is code-complete, but the DM-D.S.S integration remains **pending testing with live EEW events** and is not production-verified. Existing authorizations must use Update authorization once to add `socket.close` and `gd.eew`; cancelling that flow deliberately leaves the working authorization and live forecast access intact, but post-event recovery remains unavailable.
-- Two real DM-D.S.S WebSocket Forecast sequences have arrived. The second proves the corrected parser, paired-feed deduplication, five successive logical revisions, notification delivery, full-screen launch, final-bulletin receipt, and near-JQuake timing. The `0.10.0` suppression of unchanged-revision alerts, authoritative Ended state, exact 180-second UI expiry, and one-shot rotation-safe navigation still require the next live event for validation. Forecast-to-Warning escalation, cancellation, long-running monitoring, and genuinely missed-event recovery remain pending too.
-- The bounded packet trace and machine-readable export have now been exercised with real mixed DM-D.S.S/P2PQuake traffic and are sufficient to reconstruct the two 2026-09-01 felt-association decisions. Packet bodies remain app-private and export only through explicit user action; credential-redaction review at rollover and the final retention-boundary behavior still require explicit validation.
-- Confirmed-event felt counters currently exclude aggregates that have no positive confidence and no regional confidence entries, even when their count reaches two and their start time clearly matches the official earthquake. Whether to relax only the post-confirmation gate remains pending; unmatched aggregates must continue to stay diagnostics-only and must never become standalone events.
-- The public OAuth client must have the exact Android redirect URI `cz.misa.quakedeck://oauth/dmdss` registered in the DM-D.S.S control panel before a live device authorization can complete. Repository code cannot verify that account-side setting.
+- Event `20260824203209` delivered four serials, each over VXSE44 and VXSE45,
+  with overall Shindo 3. The original parser rejected all eight Base64/GZIP
+  bodies before notification policy; the production-envelope fix addressed it.
+- Event `20260825002747` then validated decoding, paired-feed deduplication,
+  five logical revisions, Shindo 1 then 2 notification delivery, full-screen
+  launch, final-bulletin receipt, and timing close to JQuake.
+- That event exposed repeated unchanged alerts, retained-payload reactivation,
+  failed UI expiry, and rotation replaying Report #1. Those fixes shipped in
+  `0.10.0`; their documented live-validation gaps remain open.
+- A recorded network handover caused a socket abort followed by prompt
+  reconnection and a recovery check reporting no newly missed recent EEW.
+  This does not prove every interruption/recovery path.
 
-## Important things not to redo or change
+### P2PQuake felt-association diagnosis — 2026-09-01
 
-- Do not broaden scopes beyond `contract.list`, `socket.start`, `socket.close`, `eew.get.forecast`, and the explicitly approved `gd.eew`, or add socket listing, earthquake reports, warning-only, realtime intensity, or tsunami classifications in this slice.
-- Do not add a second P2PQuake provider/socket.
-- Do not store or export a client secret, access token, refresh token, socket ticket, authorization header, or account credentials. The explicitly approved bounded DM-D.S.S packet history may retain bulletin bodies in app-private storage and user-requested redacted JSON exports only.
-- Do not disturb current station/hierarchy work or redesign existing report, map, notification, archive, Sandbox, or monitoring behavior.
+The supplied `quakedeck-delivery-diagnostics-20260901-121052.json` showed
+both missing aggregates arrived inside the association window:
 
-## Exact next steps
+- 11:32 JST Kumamoto: aggregate at +81 seconds, `count: 1`,
+  `confidence: 0`, no `area_confidences`.
+- 12:01 JST Amakusa/Ashikita: aggregate at +45 seconds, later updated to
+  `count: 2`, still zero confidence and no regional confidence entries.
 
-1. Confirm the exact callback URI is registered for the supplied public OAuth client.
-2. Install the current `0.10.1-dev.13` build on the authorized device, then wait for and document the next actual live Forecast event. Confirm the first bulletin alerts, unchanged relevant Shindo silently refreshes the existing card, a changed relevant Shindo alerts again, Ended remains separate, the detail state stops exactly 180 seconds after the event timestamp, and rotation never replays an older serial.
-3. Exercise authorization with an account lacking `eew.forecast`, confirm its other active plans remain visible, and confirm P2PQuake remains the effective EEW fallback without a DM-D.S.S socket attempt.
-4. Confirm Warning and Forecast notifications remain independent and default on. Exercise every Forecast floor from Shindo 0 through 4 and each below-floor choice (off, silent, and regular without wake/full-screen); confirm the below-floor row is absent at Shindo 0. Confirm Warning choices remain Shindo 5−/5+/6−/6+/7.
-5. Confirm a later Forecast or Warning revision activates attention exactly once when it first crosses its own selected threshold, and that the same active event crossing from Forecast to Warning produces a new Warning notification.
-6. Exercise both one-shot Sandbox EEW injectors and the tsunami warning injector with the configured delay. Confirm Forecast, Warning, and tsunami each follow their own delivery and attention controls while active Sandbox mode retains the existing no-wake/no-takeover protection.
-7. Swipe QuakeDeck away, then open newly posted Forecast, Warning, earthquake, and tsunami Sandbox notifications. Confirm their detail cards and camera state restore, including EEW rings/countdown and flashing tsunami forecast areas framed around the affected coasts.
-8. Update authorization on the live account, reconnect, and confirm the diagnostics show a successful post-event recovery check without duplicating a live event.
-9. After real DM-D.S.S activity or a transport failure, confirm the packet preview distinguishes bulletin rejection from transport errors, then export the complete JSON and verify its schema, ordering, raw bulletin preservation, credential redaction, and retention bounds.
-10. Validate a real successive-revision sequence, including Forecast-to-Warning escalation if one occurs, and retain the pending status for any path that has not actually occurred live.
-11. Decide the confirmed-report `9611` rule: retain the current confidence/area requirement, accept `count >= 2` after a matching official `551`, or expose even a matching singleton only after confirmation. Do not relax the active-EEW gate or permit felt-only events as part of that decision.
-12. Re-test the chosen rule against a later real event and its raw diagnostic export, including a cumulative update that remains at zero confidence/no areas.
-13. Remove the pending-live-event status only after the user reviews the observed live evidence, then obtain approval before finalizing or committing the cumulative release.
+Both were rejected by the existing
+`reportCount >= 2 && (confidence > 0 || areas.isNotEmpty())` gate, not by
+transport or timing. The post-confirmation policy decision remains separate:
+keep the gate, allow matching count ≥2 after an official `551`, or allow
+a matching singleton only after confirmation. No option has been implemented;
+the active-EEW gate and ban on felt-only events remain unchanged.
 
-## Relevant logical changes and Git state
+## Validation and remaining checks
 
-- Branch: `main` in `C:\Users\bjsit\Documents\GitHub\QuakeDeck`.
-- The checkout already contains extensive unrelated modified and untracked station/hierarchy work. Preserve it exactly.
-- This workstream began on cumulative in-progress version `0.9.84aa` (`versionCode` 206), advanced through `0.9.84ab`, `0.9.84ac`, `0.9.84ad`, `0.9.84ae`, `0.9.84af`, `0.9.84ag`, `0.9.84ah`, `0.9.84ai`, `0.9.84aj`, `0.9.84ak`, `0.9.84al`, `0.9.84am`, and `0.9.84an`, and was finalized as `0.10.0` (`versionCode` 220).
-- Subsequent cumulative DM-D.S.S/P2PQuake integration and diagnostics work is currently represented by `0.10.1-dev.13` (`versionCode` 232). This documentation-only diagnostic update does not change Android release metadata.
-- Nothing is staged, committed, pushed, fetched, or published by this workstream.
+- FULL and forced-LITE debug Kotlin compilation and 107 unit tests pass,
+  including eight new archive/replay forecast regressions. No APK was built
+  for this release task.
+- Device-check historical empty-region and mixed official/local EEW frames,
+  forward/backward revision changes, and the transition to confirmed data in
+  portrait/landscape. Confirm no historical rings/countdowns appear.
+- On the next suitable authorized-device live event, verify unchanged versus
+  changed-intensity alerts, exact 180-second termination, Ended navigation,
+  rotation, and independent Forecast-to-Warning escalation.
+- Exercise cancellation, foreground-service/network reconnection, and
+  `gd.eew` recovery after a genuinely missed live bulletin.
+- Recheck account/subscription fallback, Update authorization, independent
+  attention thresholds, and cold-start notification focus. Successful live
+  authorization already demonstrates a usable registered callback; control
+  panel changes remain account-side.
+- Check raw export redaction/retention boundaries with further real traffic.
+- Obtain a separate decision before changing confirmed-event felt acceptance,
+  then validate that decision against real diagnostic evidence.
+- Keep the pending-live-testing label until the user reviews the missing live
+  evidence. A future commit or publication still needs explicit authorization.
+
+## Release record
+
+- Initial OAuth/Forecast integration finalized in `0.10.0` (code 220).
+- Hybrid calculations, replay, diagnostics, felt counters, and the historical
+  shading extension finalized in `0.10.1` (code 233).
+- The cumulative [changelog](../CHANGELOG.md) is the release summary; this
+  workstream records boundaries, evidence, and remaining validation rather
+  than repeating the full development-version chronology.
