@@ -277,7 +277,7 @@ android {
         minSdk = 26
         targetSdk = 36
         versionCode = 238
-        versionName = "0.10.2-dev.5"
+        versionName = "0.10.2"
         buildConfigField("boolean", "SANDBOX_ENABLED", sandboxEnabled.toString())
         buildConfigField(
             "String",

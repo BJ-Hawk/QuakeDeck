@@ -2,7 +2,7 @@
 
 QuakeDeck release history
 
-## v0.10.2-dev.5 (in progress)
+## v0.10.2
 
 - Replaces the third-party station catalogue with a direct JMA map/code-table derivation after an exact 4,360-station, nine-field dry-run audit. Preserves coordinates, Japanese and approved English identities, operator labels, administrative parents, and researched station details; documents the one code-table-only entry without map coordinates.
 - Removes the third-party station download and cache reader, discarding the obsolete cache on startup. Catalogue updates now use the reproducible offline audit.
@@ -15,7 +15,7 @@ QuakeDeck release history
 - Places Google's official, unmodified "Powered by Google Translate" badge beside every automatic place-name translation. The existing translation help now links to Google Translate, includes the required disclaimer, and labels the enabling action accordingly.
 - Shows the complete DM-D.S.S public EEW cautions before first account authorization, stores the displayed notice revision, and keeps the cautions and official source link accessible from the Data source dialog.
 - Batches the shared P2PQuake/DM-D.S.S diagnostic history on one background writer, retaining packet order, redaction and the later-of-200-entries-or-2-MB rule. Code-561 felt traffic remains diagnostic evidence without entering the main-thread live queue; official reports and cumulative code-9611 association retain their existing routing.
-- Advances the cumulative local hotfix to `0.10.2-dev.5` (`versionCode` 238).
+- Advances the cumulative local hotfix to `0.10.2` (`versionCode` 238).
 
 ## v0.10.1
 
