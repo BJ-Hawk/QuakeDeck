@@ -7,6 +7,7 @@ import org.json.JSONArray
 import org.json.JSONObject
 import java.nio.charset.StandardCharsets
 import java.time.Instant
+import java.util.concurrent.Executors
 
 /**
  * Bounded app-private audit trail for the DM-D.S.S delivery path.
@@ -73,6 +74,18 @@ class DmDssDiagnosticsStore(context: Context) {
         PREFS_NAME,
         Context.MODE_PRIVATE
     )
+    private val packetHistory = HISTORIES.getOrCreate(historyFile.baseFile.absolutePath) {
+        BatchedDiagnosticPacketHistory(
+            executor = HISTORY_WRITER,
+            read = ::readPersistedPacketHistory,
+            write = ::writePacketHistory,
+            onWriteFailure = { error ->
+                recordTransportIssue("Packet history write failed: ${error.javaClass.simpleName}")
+            },
+            maxEntries = MAX_HISTORY_ENTRIES,
+            maxBytes = MAX_HISTORY_BYTES
+        )
+    }
 
     fun snapshot(): DmDssDiagnosticsSnapshot = DmDssDiagnosticsSnapshot(
         socketState = prefs.getString(KEY_SOCKET_STATE, null),
@@ -98,7 +111,7 @@ class DmDssDiagnosticsStore(context: Context) {
         lastNotificationAtMillis = prefs.optionalLong(KEY_NOTIFICATION_AT),
         lastNotificationEventId = prefs.getString(KEY_NOTIFICATION_EVENT, null),
         lastNotificationResult = prefs.getString(KEY_NOTIFICATION_RESULT, null),
-        packetHistory = readPacketHistory()
+        packetHistory = packetHistory.snapshot()
     )
 
     fun recordSocket(state: String, nowMillis: Long = System.currentTimeMillis()) {
@@ -198,37 +211,13 @@ class DmDssDiagnosticsStore(context: Context) {
             payload = sanitizedPayload,
             source = source
         )
-        synchronized(HISTORY_LOCK) {
-            val retained = trimDmDssPacketHistory(
-                entries = readPacketHistoryUnlocked() + entry,
-                maxEntries = MAX_HISTORY_ENTRIES,
-                maxBytes = MAX_HISTORY_BYTES
-            )
-            val writeResult = runCatching {
-                val output = historyFile.startWrite()
-                try {
-                    output.write(
-                        JSONArray(retained.map(DmDssPacketDiagnostic::toJson)).toString()
-                            .toByteArray(StandardCharsets.UTF_8)
-                    )
-                    historyFile.finishWrite(output)
-                } catch (error: Throwable) {
-                    historyFile.failWrite(output)
-                    throw error
-                }
-            }
-            writeResult.exceptionOrNull()?.let { error ->
-                recordTransportIssue("Packet history write failed: ${error.javaClass.simpleName}")
-            }
-        }
+        packetHistory.append(entry)
     }
 
-    private fun readPacketHistory(): List<DmDssPacketDiagnostic> = synchronized(HISTORY_LOCK) {
-        readPacketHistoryUnlocked()
-    }
+    fun flushPacketHistoryAsync() = packetHistory.flushAsync()
 
-    private fun readPacketHistoryUnlocked(): List<DmDssPacketDiagnostic> = runCatching {
-        if (!historyFile.baseFile.isFile) return@runCatching emptyList()
+    private fun readPersistedPacketHistory(): List<DmDssPacketDiagnostic> = runCatching {
+        // openRead also recovers AtomicFile's backup after an interrupted write.
         val text = historyFile.openRead().bufferedReader(StandardCharsets.UTF_8).use { it.readText() }
         val json = JSONArray(text)
         buildList {
@@ -237,6 +226,17 @@ class DmDssDiagnosticsStore(context: Context) {
             }
         }
     }.getOrDefault(emptyList())
+
+    private fun writePacketHistory(json: String) {
+        val output = historyFile.startWrite()
+        try {
+            output.write(json.toByteArray(StandardCharsets.UTF_8))
+            historyFile.finishWrite(output)
+        } catch (error: Throwable) {
+            historyFile.failWrite(output)
+            throw error
+        }
+    }
 
     private fun android.content.SharedPreferences.optionalLong(key: String): Long? =
         if (contains(key)) getLong(key, 0L) else null
@@ -270,7 +270,10 @@ class DmDssDiagnosticsStore(context: Context) {
         const val KEY_NOTIFICATION_AT = "notification_at"
         const val KEY_NOTIFICATION_EVENT = "notification_event"
         const val KEY_NOTIFICATION_RESULT = "notification_result"
-        val HISTORY_LOCK = Any()
+        val HISTORIES = DiagnosticPacketHistoryRegistry()
+        val HISTORY_WRITER = Executors.newSingleThreadScheduledExecutor { runnable ->
+            Thread(runnable, "QuakeDeck-packet-history").apply { isDaemon = true }
+        }
     }
 }
 
@@ -294,14 +297,9 @@ internal fun trimDmDssPacketHistory(
     maxEntries: Int,
     maxBytes: Int
 ): List<DmDssPacketDiagnostic> {
-    val retained = entries.toMutableList()
-    val entryLimit = maxEntries.coerceAtLeast(0)
-    val byteLimit = maxBytes.coerceAtLeast(0)
-    while (retained.size > entryLimit && packetHistoryBytes(retained) > byteLimit) {
-        retained.removeAt(0)
-    }
-
-    return retained
+    val buffer = DiagnosticPacketBuffer(maxEntries, maxBytes)
+    entries.forEach { buffer.append(it.encodeDiagnosticPacket()) }
+    return buffer.snapshot().map { it.packet }
 }
 
 fun DmDssDiagnosticsSnapshot.toMachineReadableJson(
@@ -361,9 +359,8 @@ fun DmDssDiagnosticsSnapshot.toMachineReadableJson(
     )
     .toString(2)
 
-private fun packetHistoryBytes(entries: List<DmDssPacketDiagnostic>): Int =
-    JSONArray(entries.map(DmDssPacketDiagnostic::toJson)).toString()
-        .toByteArray(StandardCharsets.UTF_8).size
+internal fun DmDssPacketDiagnostic.encodeDiagnosticPacket(): EncodedDiagnosticPacket =
+    EncodedDiagnosticPacket(this, toJson().toString())
 
 private fun DmDssPacketDiagnostic.toJson(): JSONObject = JSONObject()
     .put("recordedAtMillis", recordedAtMillis)

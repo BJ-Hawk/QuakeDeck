@@ -153,11 +153,21 @@ The complete audited 4,360-station English map and the first station-information
 card are active in the app. Placement research is underway in
 `outputs/station-name-audit/station_metadata_sources.json` only:
 
-- 3,069 stations have source-supported facility and/or address data.
-- 3,054 have an exact published Japanese address.
-- 15 have a confirmed facility but no exact address yet.
-- 1,291 remain locality-only and require further research.
+- 3,414 stations have source-supported address data, all with an exact published
+  Japanese address.
+- 946 retain municipality-or-ward precision. Three of those also have a
+  source-supported facility identity but no verified published address; the
+  remaining 943 still require facility/address research.
 - Address/precision validation currently reports zero mismatches.
+
+The latest locality-only refinement preserved those coverage counts while making
+the fallback data more useful: 944 catalogue-only records now retain their
+official JMA observation-point label as `placementLocalityJa`, rather than a
+coarser municipality or ward label. This is locality evidence only: none was
+promoted to a facility or an exact address, and the JMA list recheck found no
+additional exact name-to-address match. The three facility-only records remain
+explicitly distinct from the 943 records still needing facility/address
+research.
 
 The latest completed official-source batches converted confirmed facility-only
 records to exact published addresses: one in Okinawa (`4735831`, Kita Daito
@@ -170,12 +180,32 @@ table and whose exact addresses come from the relevant municipal, fire-authority
 or other official facility publication. Osaka's completed records cover Osaka
 City and Sakai fire services plus municipal and town offices, using Osaka
 Prefecture's official seismic-network table and each host authority's address
-publication. Two Nagano facility-only records remain deliberately without a
-substituted address: `2021532` (former Narakawa Branch Office) and `2040733`
-(former Seinaiji Promotion Office), because the available official evidence
-identifies a former or moved facility but does not publish its historic station
-address. `3321538` (`美作市美来`) remains deliberately unmapped: available evidence
+publication. `2021532` (former Narakawa Branch Office) was subsequently
+promoted when Shiojiri City's historical-site page published the former branch
+address, `長野県塩尻市木曽平沢2221番地`. `2040733` (Achi Seinaiji) was subsequently
+promoted when JMA's July 2023 current row directly identified its new host and
+address. Fukui Prefecture's official seismic-meter location dataset subsequently
+directly identified the facilities and published addresses for 21 further
+records. `2520431` (Ōmihachiman Azuchi Shimo Toyoura) was subsequently promoted
+to Azuchi Community Center, `滋賀県近江八幡市安土町下豊浦4660番地`, using the city’s
+current disaster-plan placement table and official facility address. `3321538`
+(`美作市美来`) remains deliberately unmapped: available evidence
 does not directly map the reporting station to a candidate facility.
+
+The newest bounded batch added 39 exact Nara Prefecture seismic-network
+placements. Ikoma City's current official disaster-plan appendix directly pairs
+each affected observation label with its host facility and published Japanese
+address, including Nara City Hall, Uda's four regional offices, and municipal
+or village offices across the prefecture. `2920734` (Gojō Okaguchi) remains
+locality-only: the available material does not identify its host facility or
+street address.
+
+Subsequent focused official records added three Fukushima municipality sites,
+two Kiryu branch offices, two Asahi branch facilities, the Mabashi Fire Station
+in Matsudo, Isumi City Hall's Misaki Office, Iga's Abo District Civic Center,
+and Kitaakita's Moriyoshi and Aikawa branch offices. Each address was retained
+only where the official evidence directly identified the station host and the
+published facility address.
 Evidence URLs and the full research provenance remain outside the compact runtime
 projection.
 
@@ -207,6 +237,155 @@ list, four Kazo City instruments at City Hall and the three general branch
 offices, and two Gyoda City instruments at City Hall and Minamikawara Branch.
 The Shimane, Kazo, and Gyoda records carry both the official placement evidence
 and the facility/address source URLs; non-matching labels remain locality-only.
+
+The latest bounded batch added 34 exact placements from Tottori Prefecture's
+2023 official seismic-observation list. That direct station-label/facility/
+address table covered Tottori City general branches, municipal and town halls,
+branch offices, public facilities, and the remaining local-government sites in
+the published list. Each record retains the prefectural list URL, has
+`exact_address` precision, and was promoted only because the source explicitly
+pairs the station with its host facility and Japanese address.
+
+The next direct municipal-evidence pass added seven exact placements: Zushi
+Fire Headquarters, Yamato City Hall, Minamiashigara City Hall, Nakai Town Hall,
+Matsuda Town Hall, Isehara Fire Station, and Mizunami City Hall. Each promotion
+uses a host authority's explicit seismic-instrument placement statement paired
+with that authority's published facility address; no placement was inferred
+from coordinates or locality names.
+
+The latest Shiga pass added 27 exact placements. A Shiga Prefecture seismic
+station/host-facility table was matched only where its station label exactly
+matches the current JMA Hikone station list; each resulting municipal hall,
+branch office, fire-station, or public-facility identity was then paired with a
+published address from the responsible municipality. The additions cover
+Nagahama, Takashima, Toyosato, Taga, Hikone, Kora, Hino, Ryuo, Aisho, Yasu,
+Kusatsu, and Higashiomi. Former or discontinued host facilities remain
+unpromoted when continuity between the historical table and a current site is
+not directly supported.
+
+The subsequent Hyogo pass added five exact placements using direct municipal
+installation statements, supported where needed by current JMA regional station
+lists and the host authority's own address publication: Kawanishi City Hall,
+Takarazuka City Hall, Kurokko Plaza in Nishiwaki, Seido Elementary School in
+Ashiya, and Nishinomiya North Fire Station. Each record retains the direct
+official evidence URLs. No facility was inferred from a locality, coordinate,
+or nearby site.
+
+The next bounded municipal-evidence pass added five exact placements without
+touching the workbook: Kawamata Town Hall in Fukushima, and Isumi City Hall
+Ohara Office, Mobara City Hall, Funabashi City Hall, and Abiko City Hall in
+Chiba. Each source directly identifies the seismic instrument at the named
+host site and the host authority publishes the recorded Japanese address. The
+former Isumi Misaki office was deliberately left locality-only because the
+current official page does not establish continuity with the historical meter
+location.
+
+The most recent Chiba pass added 39 exact municipal-hall and town-hall
+placements. Chiba's official disaster plan states that the prefectural
+municipal intensity instruments are installed at each municipality's main
+office building or grounds. Records were promoted only when the current
+station's Japanese locality exactly matched that main-office locality and the
+responsible municipality published the facility's full Japanese address. This
+adds, among others, city halls in Nagareyama, Ichihara, Sosa, Togane, Ichikawa,
+Narashino, Kashiwa, Matsudo, Tateyama, Kimitsu, Inzai, and Minamiboso, plus
+municipal and town halls in Chonan, Kozaki, Otaki, Onjuku, and Kyonan. Branch,
+secondary, relocated, and merely nearby sites remain locality-only unless a
+direct source identifies them.
+
+The subsequent official-source pass added two further Chiba main-office
+placements under the same rule: Noda City Hall (`1220832`) and Shisui Town Hall
+(`1232231`). Direct ward publications then established the measurement meters
+at Shinagawa City Office (`1310931`) and Koto City Office (`1310831`), with the
+ward-published addresses recorded. Ota's official system publication supports
+only the more precise Kamata locality for `1311130`; it deliberately remains
+locality-only because it does not identify a host facility or street address.
+
+The latest direct Tokyo municipal pass added seven exact placements: Hino
+Disaster Information Center, Musashimurayama First Elementary School, Hamura
+City Hall, Higashikurume City Hall, Ogikubo Fire Station, Suginami Fire
+Station's Takaido Branch, and Adachi City Office. Each addition pairs an
+official seismic-meter placement statement with the host authority's published
+Japanese address; no site was inferred from coordinates or the station locality.
+
+The subsequent bounded official-source pass added four further Tokyo municipal
+placements (Komae, Kodaira, Musashino, and Mizuho) and two Toshima Village
+branch offices (Hirashima and Takarajima). Further remote-island research added
+exact Mishima Village facilities, Toshima Village Akusekijima Branch Office,
+and Setouchi Ikejichi Assembly Hall. A current JMA March 2026 station-code
+notice then directly established the Suwanosejima and Kodakarajima branch-office
+placements, superseding prior prefectural Community Hall labels.
+
+JMA's November 2025 and March 2026 current station-code notices supplied
+direct placement/address rows for further stations and corrected records where
+the newer source documents a move. The November notice, for example, added
+direct municipal placements in Chikujo, Isumi, Nagahama, Maibara, Moriyama,
+Yasu, Koka, and Higashiomi, and corrected moves in Yomogita, Miura, Gujo,
+Yatsushiro, and Kakeroma. Kakeroma's former Seso Port facility label was
+removed: the current notice supplies its new exact address but does not name a
+replacement host facility, so none was invented.
+
+JMA's March 2025 current station-code notice added four further exact
+facility/address placements: Nakajima Village Hall, Inzai City Inba Branch,
+Shimokitayama Village Hall, and Kurate Town Hall. It also documents moves for
+Akashi Futami and Minamisatsuma Bonotsucho Kushi. The new Akashi row supplies
+an exact address but no host facility, so the former Nakazaki Park label was
+removed; Kushi is directly identified at Kushi Branch Office.
+
+A retrospective pass through JMA's July 2023 current station-code notice added
+31 exact placements. Its current rows directly identify the host and address
+for local-government stations in Ibaraki, Saitama, Tokyo, Kanagawa, Fukui,
+Yamanashi, Nagano, Nara, Shimane, Saga, and Oita. The evidence also supersedes
+the former Seinaiji Promotion Office label for `2040733`: the current row
+places it at Achi Village Seinaiji Promotion Office, `762-1 Seinaiji`, with a
+published address. No old-side address was used.
+
+Ena City's current disaster plan directly maps six local-government station
+labels to their host facilities. The city's own facility pages supply the
+published addresses for Iwamura, Akechi, Yamaoka, and Kushihara Promotion
+Offices, Ena City Hall, and Kamiyahagi Elementary School. All six were promoted
+to exact addresses; no station location was inferred from the address alone.
+
+Hiroshima Prefecture's August 2026 seismic-network upgrade specification
+directly lists 66 work sites with their host facilities and published Japanese
+addresses. The confirmed records span Hiroshima's wards and the cities and
+towns of Miyoshi, Shobara, Akitakata, Akiota, Mihara, Onomichi, Fukuyama,
+Kure, Otake, Etajima, Fuchu, Sera, Jinseki Kogen, Fuchu Town, and
+Osakikamijima. Each was promoted only where the station locality matched the
+listed network work site; no facility or address was inferred from coordinates.
+
+Three direct Fukushima field-survey and municipal-source records placed the
+Soma, Kunimi, and Shinchi stations at their respective city or town halls.
+Kiryu City's own seismic-instrument page then directly identified the
+Kurohone and Niisato stations as being on the grounds of their branch offices;
+the city profile page supplied their published Japanese addresses. These five
+records were promoted to exact addresses without relying on locality or
+coordinate inference.
+
+The current JMA-list recheck found no exact name-to-address match among the
+remaining locality-only records, so it produced no placement promotions.
+Coordinate-adjacent candidates were explicitly rejected as insufficient
+evidence. JMA's February 2024 observation report did refine `2120342`
+(Takayama Takane) to the official locality `高根町上ケ洞`; it identifies neither
+a host facility nor a street address, so the record remains at
+municipality-or-ward precision and the coverage counts are unchanged.
+
+The latest direct municipal records added nine exact placements. Fukaya City's
+official emergency-response plan explicitly accounts for its four meters at
+City Hall and the Hanazono, Okabe, and Kawamoto general branch offices; the
+current station labels map one-to-one to those four hosts. The city publishes
+each office's Japanese address, so `1121834` through `1121837` were promoted
+to exact addresses. Kiyose's relocation report directly places `1322141` at
+the rebuilt Kiyose City Hall, whose facility page publishes its address.
+Kunitachi's and Tachikawa's official disaster plans directly place `1321530`
+and `1320231`, respectively, on their city-hall grounds; each city publishes
+the corresponding Japanese address. Hinode Town's official 2022
+instrument-replacement record directly identifies `1330540` as installed at
+Hinode Town Hall and supplies its Japanese address. The separate `1322152`
+record remains locality-only: no source identifies its host facility or exact
+address. Machida City's official newsletter directly identifies the meter at
+City Hall, allowing `1320932` (Machida Morino) to be placed at Machida City Hall
+with its published Japanese address; `1320952` (Machida Honmachida) remains
+locality-only because that evidence does not identify its host facility.
 
 ## Do not redo or change
 
@@ -244,8 +423,9 @@ and the facility/address source URLs; non-matching labels remain locality-only.
    currently prioritizing prefectural maintenance specifications and direct
    municipal evidence in still-unfilled prefectures. Do not treat a former or
    relocated office as a current station placement without direct evidence.
-2. Preserve the two former Nagano facility records without an address unless a
-   source specifically publishes the historic host-site address.
+2. Preserve any former or relocated facility record without an address unless a
+   source specifically publishes the relevant historic or current host-site
+   address.
 3. For each subsequent station, first seek an official installation address or
    facility identity. Record verified evidence in
    `station_metadata_sources.json`, but never infer a placement from
@@ -267,10 +447,14 @@ and the facility/address source URLs; non-matching labels remain locality-only.
 - The station-code resolver now drives English observed-station rows and idle and
   report map labels. The baseline resource was deliberately moved out of the APK
   to `outputs/station-name-audit/station_english_names_baseline.json`.
-- The current `Station Sources` workbook and metadata JSON were compared record
-  by record: 4,360 records, zero missing rows, and zero mismatches across all 32
-  exported fields. The workbook was also opened successfully in Excel after its
-  package repair.
+- Placement research is maintained in the metadata JSON only; its exact-address
+  entries require both a direct station-to-facility mapping and a published
+  official address.
 - No source metadata row was edited for the station-card or administrative
   projection implementations. The build-derived compact resource is generated
   below `app/build/` and is not a second hand-maintained source.
+- Placement research remains uncommitted in the existing dirty local worktree.
+  Its newest recorded promotions are 39 directly mapped Nara Prefecture
+  seismic-network stations, after the 21 Fukui Prefecture stations and `2520431`
+  at Azuchi Community Center. This continuation update is coordination-only: it
+  does not alter release metadata or the changelog.

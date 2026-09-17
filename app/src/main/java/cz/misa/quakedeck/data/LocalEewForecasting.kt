@@ -105,6 +105,12 @@ interface LocalEewForecastProvider {
         event: EarthquakeEvent,
         calculatedAtEpochMillis: Long
     ): LocalEewIntensityForecast? = null
+
+    /** Optional location inference when no explicit official regional value applies. */
+    fun fallbackAlertScope(
+        event: EarthquakeEvent,
+        location: AlertLocation
+    ): EewAlertScopeDecision? = null
 }
 
 enum class LocalEewForecastUnavailableReason {
@@ -212,6 +218,13 @@ object LocalEewForecasts {
     ): LocalEewForecastUnavailableReason? = when (val loaded = loadEngine(className)) {
         is LoadedEngine.Available -> null
         is LoadedEngine.Unavailable -> loaded.reason
+    }
+
+    fun fallbackAlertScope(
+        event: EarthquakeEvent,
+        location: AlertLocation
+    ): LocalEewForecastResult<EewAlertScopeDecision> = evaluate {
+        fallbackAlertScope(event, location)
     }
 
     private fun <T> evaluate(

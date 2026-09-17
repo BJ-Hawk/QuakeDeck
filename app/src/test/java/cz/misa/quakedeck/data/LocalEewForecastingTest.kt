@@ -74,6 +74,19 @@ class LocalEewForecastingTest {
     }
 
     @Test
+    fun omittedEngineCannotInferLocationCoverageFromTheEarthquakeMaximum() {
+        if (LocalEewForecasts.buildEdition != QuakeDeckBuildEdition.LITE) return
+        val result = LocalEewForecasts.fallbackAlertScope(testEvent(), AlertLocation.DEFAULT_TOKYO)
+        assertTrue(result is LocalEewForecastResult.Unavailable)
+        val decision = resolveEewAlertScope(
+            locationFiltering = true,
+            eventMaximum = "5-"
+        )
+        assertEquals(false, decision.inScope)
+        assertNull(decision.relevantIntensity)
+    }
+
+    @Test
     fun operationalFallbackUsesReceiptForMalformedTimes() {
         val received = 50_000L
         val event = testEvent().copy(originTime = "bad", reportIssuedAt = "also bad")

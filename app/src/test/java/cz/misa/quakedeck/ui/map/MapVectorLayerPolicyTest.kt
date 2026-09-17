@@ -7,8 +7,8 @@ import org.junit.Test
 class MapVectorLayerPolicyTest {
     @Test
     fun zoomBoundariesSelectExactlyOneVectorLayer() {
-        assertEquals(MapVectorLayer.N03_PREFECTURES, mapVectorLayerForZoom(1f))
-        assertEquals(MapVectorLayer.N03_PREFECTURES, mapVectorLayerForZoom(6.499f))
+        assertEquals(MapVectorLayer.JMA_PREFECTURES, mapVectorLayerForZoom(1f))
+        assertEquals(MapVectorLayer.JMA_PREFECTURES, mapVectorLayerForZoom(6.499f))
         assertEquals(MapVectorLayer.JMA_QUAKE_AREAS, mapVectorLayerForZoom(6.5f))
         assertEquals(MapVectorLayer.JMA_QUAKE_AREAS, mapVectorLayerForZoom(20.999f))
         assertEquals(MapVectorLayer.MUNICIPALITIES, mapVectorLayerForZoom(21f))
@@ -17,14 +17,14 @@ class MapVectorLayerPolicyTest {
 
     @Test
     fun sourceIsolationHookUsesItsConfiguredLayerAtEveryZoom() {
-        assertEquals(MapVectorLayer.N03_PREFECTURES, mapVectorLayerForZoom(1f, true))
-        assertEquals(MapVectorLayer.N03_PREFECTURES, mapVectorLayerForZoom(128f, true))
+        assertEquals(MapVectorLayer.JMA_PREFECTURES, mapVectorLayerForZoom(1f, true))
+        assertEquals(MapVectorLayer.JMA_PREFECTURES, mapVectorLayerForZoom(128f, true))
     }
 
     @Test
     fun invalidZoomFallsBackToCoarseLayer() {
-        assertEquals(MapVectorLayer.N03_PREFECTURES, mapVectorLayerForZoom(Float.NaN))
-        assertEquals(MapVectorLayer.N03_PREFECTURES, mapVectorLayerForZoom(-1f))
+        assertEquals(MapVectorLayer.JMA_PREFECTURES, mapVectorLayerForZoom(Float.NaN))
+        assertEquals(MapVectorLayer.JMA_PREFECTURES, mapVectorLayerForZoom(-1f))
     }
 
     @Test

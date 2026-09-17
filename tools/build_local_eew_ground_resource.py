@@ -73,7 +73,7 @@ def main() -> None:
     )
     parser.add_argument(
         "--output",
-        default="app/src/main/res/raw/local_eew_station_avs30.gz",
+        default="app/src/localForecast/res/raw/local_eew_station_avs30.gz",
     )
     parser.add_argument("--workers", type=int, default=6)
     args = parser.parse_args()

@@ -110,6 +110,7 @@ class CorePolicyTest {
         assertFalse(JapanMapCoverage.contains(Double.NaN, 139.6503))
         assertFalse(JapanMapCoverage.contains(35.6762, Double.POSITIVE_INFINITY))
         assertFalse(JapanMapCoverage.contains(0.0, 0.0))
+        assertFalse(JapanMapCoverage.contains(24.288, 153.98))
     }
 
     @Test
@@ -136,7 +137,10 @@ class CorePolicyTest {
         assertFalse(offshoreEew.hasJapanMapEpicenter())
         assertTrue(offshoreEew.hasJapanMapContent())
         assertEquals(
-            JapanMapCoordinate(22.4, JapanMapCoverage.MIN_LONGITUDE),
+            JapanMapCoordinate(
+                JapanMapCoverage.MIN_LATITUDE,
+                JapanMapCoverage.MIN_LONGITUDE
+            ),
             offshoreEew.nearestJapanMapEewFocus()
         )
 

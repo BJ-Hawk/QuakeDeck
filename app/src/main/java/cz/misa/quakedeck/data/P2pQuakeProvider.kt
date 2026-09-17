@@ -610,6 +610,7 @@ class P2pQuakeProvider(
         httpClient.dispatcher.cancelAll()
         httpClient.connectionPool.evictAll()
         currentState = ConnectionState.DISCONNECTED
+        deliveryDiagnostics.flushPacketHistoryAsync()
     }
 
     override fun onAppForeground() {
@@ -1774,20 +1775,19 @@ class P2pQuakeProvider(
             }
 
             override fun onMessage(webSocket: WebSocket, text: String) {
-                val json = runCatching { JSONObject(text) }.getOrNull()
-                if (shouldRetainP2pDiagnosticPacket(json)) {
+                receiveP2pLivePacket(text, recordPacket = { payload ->
                     deliveryDiagnostics.recordPacket(
                         direction = "IN",
                         transport = "text",
-                        payload = text,
+                        payload = payload,
                         source = DIAGNOSTIC_SOURCE_P2PQUAKE
                     )
-                }
-                json ?: return
-                mainHandler.post {
-                    if (stopped || generation != connectionGeneration) return@post
-                    processLiveMessage(json)
-                }
+                }, dispatch = { json ->
+                    mainHandler.post {
+                        if (stopped || generation != connectionGeneration) return@post
+                        processLiveMessage(json)
+                    }
+                })
             }
 
             override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
@@ -3408,6 +3408,18 @@ class P2pQuakeProvider(
 
     private fun String?.ifNullOrBlank(defaultValue: () -> String): String =
         if (this.isNullOrBlank()) defaultValue() else this
+}
+
+/** Keep raw flood evidence, but never enqueue diagnostics-only 561 on the UI thread. */
+internal fun receiveP2pLivePacket(
+    text: String,
+    recordPacket: (String) -> Unit,
+    dispatch: (JSONObject) -> Unit
+) {
+    val json = runCatching { JSONObject(text) }.getOrNull()
+    if (shouldRetainP2pDiagnosticPacket(json)) recordPacket(text)
+    if (json == null || json.optInt("code", -1) == 561) return
+    dispatch(json)
 }
 
 internal fun shouldRetainP2pDiagnosticPacket(json: JSONObject?): Boolean {

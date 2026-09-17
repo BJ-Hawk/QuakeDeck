@@ -85,6 +85,7 @@ class DmDssProvider(
         socket?.close(1000, "DM-D.S.S source deselected")
         socket = null
         diagnostics.recordSocket("Stopped")
+        diagnostics.flushPacketHistoryAsync()
     }
 
     override fun setReportArchiveEnabled(enabled: Boolean) {

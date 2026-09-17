@@ -1,18 +1,18 @@
 package cz.misa.quakedeck.data
 
 /**
- * Geographic extent of the bundled Japan prefecture map.
+ * Geographic extent of the bundled JMA nationwide forecast polygon.
  *
- * These values come from the TopoJSON bbox shipped in
- * japan_prefectures_topojson*.gz. Events outside this extent may still carry
+ * These values come from the source shapefile bbox used to build
+ * jma_prefectures_simplified.gz. Events outside this extent may still carry
  * observations or tsunami information for Japan, but their epicentre cannot be
  * meaningfully focused or drawn on QuakeDeck's Japan-only map.
  */
 object JapanMapCoverage {
-    const val MIN_LONGITUDE = 122.93261009098296
-    const val MIN_LATITUDE = 20.42282277525095
-    const val MAX_LONGITUDE = 153.9860719457638
-    const val MAX_LATITUDE = 45.557239054039144
+    const val MIN_LONGITUDE = 122.93375
+    const val MIN_LATITUDE = 24.04967
+    const val MAX_LONGITUDE = 148.89216
+    const val MAX_LATITUDE = 45.55682
 
     fun contains(latitude: Double, longitude: Double): Boolean =
         latitude.isFinite() &&

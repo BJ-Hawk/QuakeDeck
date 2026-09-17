@@ -1,0 +1,2980 @@
+[
+  {
+    "coordinate": "androidx.activity:activity-compose:1.13.0",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/androidx/activity/activity-compose/1.13.0/activity-compose-1.13.0.pom",
+    "pomSha256": "cb6a8ff89ffb7f107f214050e9fb32b0d0b0f665d8de7c9e4e2a4d5fea9951e9",
+    "evidence": "cached publisher POM",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "androidx.activity:activity-ktx:1.13.0",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/androidx/activity/activity-ktx/1.13.0/activity-ktx-1.13.0.pom",
+    "pomSha256": "79d63d7b13c43f92faf63ade9fc6a4ab45e8e42493dbaa138c7a736184a4c775",
+    "evidence": "cached publisher POM",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "androidx.activity:activity:1.13.0",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/androidx/activity/activity/1.13.0/activity-1.13.0.pom",
+    "pomSha256": "a5c53e074754835d30621618616e783b5b71875c2e7988ab06082348152e314e",
+    "evidence": "cached publisher POM",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "androidx.annotation:annotation-experimental:1.4.1",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/androidx/annotation/annotation-experimental/1.4.1/annotation-experimental-1.4.1.pom",
+    "pomSha256": "fe57b228417f4d7c677903dc61fb4a7cf993d603499de26d8d8113e477cc4f1b",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "androidx.annotation:annotation-jvm:1.10.0",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/androidx/annotation/annotation-jvm/1.10.0/annotation-jvm-1.10.0.pom",
+    "pomSha256": "5eece0903b4810aa1da85414dc4c2746046d878a543aa12dd4f1fe74171f7506",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "androidx.annotation:annotation:1.10.0",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/androidx/annotation/annotation/1.10.0/annotation-1.10.0.pom",
+    "pomSha256": "880f7bf4b35d060746cbef319d4a052b4bd826bb71b40500e55319721ffa4e76",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "androidx.appcompat:appcompat-resources:1.6.1",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/androidx/appcompat/appcompat-resources/1.6.1/appcompat-resources-1.6.1.pom",
+    "pomSha256": "d9fd339b2b637051ba5934c8d87c7b9c7d368d47b5fa847d6c269da2852cfc63",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "androidx.appcompat:appcompat:1.6.1",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/androidx/appcompat/appcompat/1.6.1/appcompat-1.6.1.pom",
+    "pomSha256": "962dda9beaf8d1c2cc51ffd2ce2be293ebca7172a76ac0cf3470113365cf8088",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "androidx.arch.core:core-common:2.2.0",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/androidx/arch/core/core-common/2.2.0/core-common-2.2.0.pom",
+    "pomSha256": "1e17d4af8d6425be2a69f8af4d654a87e0456259a9eef1542869bcb023547e28",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "androidx.arch.core:core-runtime:2.2.0",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/androidx/arch/core/core-runtime/2.2.0/core-runtime-2.2.0.pom",
+    "pomSha256": "0f953706598140d9d8735cdd5aeb1fa35933f4e2f31c0bf3eb81a053a4c8c1a5",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "androidx.autofill:autofill:1.0.0",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/androidx/autofill/autofill/1.0.0/autofill-1.0.0.pom",
+    "pomSha256": "3677abead5d4e06cf76cbacb954151e051779c2274494451fb424e375aa9e450",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "androidx.collection:collection-jvm:1.5.0",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/androidx/collection/collection-jvm/1.5.0/collection-jvm-1.5.0.pom",
+    "pomSha256": "11c415864d3402f61d426e67210158dce1b04680412526a994f1823ecd3cb388",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "androidx.collection:collection-ktx:1.5.0",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/androidx/collection/collection-ktx/1.5.0/collection-ktx-1.5.0.pom",
+    "pomSha256": "983f8d0630d072d5bfcd166a498ac7213f3a44a98c09051004ce96429d867cea",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "androidx.collection:collection:1.5.0",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/androidx/collection/collection/1.5.0/collection-1.5.0.pom",
+    "pomSha256": "2d65c8d0b36d4b4faadc44aff9bade23d871d7159eedf2b3f02d802b34b77a57",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "androidx.compose.animation:animation-android:1.11.3",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/androidx/compose/animation/animation-android/1.11.3/animation-android-1.11.3.pom",
+    "pomSha256": "d1853ba82328953b6fb7813d771cdab351120653aea04978019aad49e957c7ef",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "androidx.compose.animation:animation-core-android:1.11.3",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/androidx/compose/animation/animation-core-android/1.11.3/animation-core-android-1.11.3.pom",
+    "pomSha256": "f6c619602f2d4f840b2e4d35d60b4f2763ef235c395da81992a0550b21300c2d",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "androidx.compose.animation:animation-core:1.11.3",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/androidx/compose/animation/animation-core/1.11.3/animation-core-1.11.3.pom",
+    "pomSha256": "cf9380bdc886f6032b4f454ea74635032d98af162fc69848efe7254ad77e8cff",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "androidx.compose.animation:animation:1.11.3",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/androidx/compose/animation/animation/1.11.3/animation-1.11.3.pom",
+    "pomSha256": "c8bcba93628b11b7d02b4992ff4a43efde9ef591ca896a720feef21d03748868",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "androidx.compose.foundation:foundation-android:1.11.3",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/androidx/compose/foundation/foundation-android/1.11.3/foundation-android-1.11.3.pom",
+    "pomSha256": "ce6e2b3f512cf68f7498a9f92ae9663929637e2bd38ca267dd1af4aec0c43bde",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "androidx.compose.foundation:foundation-layout-android:1.11.3",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/androidx/compose/foundation/foundation-layout-android/1.11.3/foundation-layout-android-1.11.3.pom",
+    "pomSha256": "09daf687ff3d4352ab10c94ef3f0c29f84fdc68a838ed2ccce7ce76ff7874f5d",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "androidx.compose.foundation:foundation-layout:1.11.3",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/androidx/compose/foundation/foundation-layout/1.11.3/foundation-layout-1.11.3.pom",
+    "pomSha256": "d310ab34b330e3516458577ac371b10fd4ac5969e58f55d2da342195a7721cbe",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "androidx.compose.foundation:foundation:1.11.3",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/androidx/compose/foundation/foundation/1.11.3/foundation-1.11.3.pom",
+    "pomSha256": "22ea187cda166a9e34365273e680b6e77f74d03c723f8ca8e859e0c2ec72a767",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "androidx.compose.material3:material3-android:1.4.0",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/androidx/compose/material3/material3-android/1.4.0/material3-android-1.4.0.pom",
+    "pomSha256": "cc0362653240708a010de50fee8caf884a610fbb10b6013e86694d77c43febc7",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "androidx.compose.material3:material3:1.4.0",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/androidx/compose/material3/material3/1.4.0/material3-1.4.0.pom",
+    "pomSha256": "672b431f59c8e0a8522690b2f46f1b7966710638893c60c31c5f19f8472d62cc",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "androidx.compose.material:material-ripple-android:1.11.3",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/androidx/compose/material/material-ripple-android/1.11.3/material-ripple-android-1.11.3.pom",
+    "pomSha256": "91aca24e824595087ea088887c566be3c6d2dd8f72ff22b18783370546fbcefa",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "androidx.compose.material:material-ripple:1.11.3",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/androidx/compose/material/material-ripple/1.11.3/material-ripple-1.11.3.pom",
+    "pomSha256": "4b3be289c957e7ba3093337c120e8dd4c1b04b64a02995db1ac6708ab9f6f46d",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "androidx.compose.runtime:runtime-android:1.11.3",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/androidx/compose/runtime/runtime-android/1.11.3/runtime-android-1.11.3.pom",
+    "pomSha256": "fe64f3bc45354b62a18c0990af542fcae9db29b16d4625f7d86eec17c41ffcfd",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "androidx.compose.runtime:runtime-annotation-android:1.11.3",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/androidx/compose/runtime/runtime-annotation-android/1.11.3/runtime-annotation-android-1.11.3.pom",
+    "pomSha256": "34caaed1a00c35ebacd197df993b08a558e681397063d3fdbaeca9926fb25ef7",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "androidx.compose.runtime:runtime-annotation:1.11.3",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/androidx/compose/runtime/runtime-annotation/1.11.3/runtime-annotation-1.11.3.pom",
+    "pomSha256": "27859106da79cd1dedb74fd8f05b0caab7bb5d8f939c2240c392fa60c5cc962e",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "androidx.compose.runtime:runtime-retain-android:1.11.3",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/androidx/compose/runtime/runtime-retain-android/1.11.3/runtime-retain-android-1.11.3.pom",
+    "pomSha256": "dae425041efb174f902669e868640ab7030aa4064287213ed04291feaea79661",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "androidx.compose.runtime:runtime-retain:1.11.3",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/androidx/compose/runtime/runtime-retain/1.11.3/runtime-retain-1.11.3.pom",
+    "pomSha256": "71e8bd2a74e5e772f20105b9ac7811226a51d39715bf8f29b766fd768195e59d",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "androidx.compose.runtime:runtime-saveable-android:1.11.3",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/androidx/compose/runtime/runtime-saveable-android/1.11.3/runtime-saveable-android-1.11.3.pom",
+    "pomSha256": "1d3e2036b8eb1f4c945f437de1ac3d26030a013c77c39a191e1dcc414af76101",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "androidx.compose.runtime:runtime-saveable:1.11.3",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/androidx/compose/runtime/runtime-saveable/1.11.3/runtime-saveable-1.11.3.pom",
+    "pomSha256": "2a5c6cc5bbe79c3dfae10340eb2b9b5c55a8c7830ecf63c0743811a7207dea97",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "androidx.compose.runtime:runtime:1.11.3",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/androidx/compose/runtime/runtime/1.11.3/runtime-1.11.3.pom",
+    "pomSha256": "8060833a3de177a92c5a0c6e63d475bece3c53789f7c33350a090cbbedff1bdc",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "androidx.compose.ui:ui-android:1.11.3",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/androidx/compose/ui/ui-android/1.11.3/ui-android-1.11.3.pom",
+    "pomSha256": "7ed3581910ea7cfd1af5f6346c226bf5556d5a6e29db4b358f28ceff5f16d032",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "androidx.compose.ui:ui-geometry-android:1.11.3",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/androidx/compose/ui/ui-geometry-android/1.11.3/ui-geometry-android-1.11.3.pom",
+    "pomSha256": "0ab80c3de29cfcf72c1f24a3dcffb697daa02115f9791c26d8de8f9a70f770be",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "androidx.compose.ui:ui-geometry:1.11.3",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/androidx/compose/ui/ui-geometry/1.11.3/ui-geometry-1.11.3.pom",
+    "pomSha256": "99ac7f91814e42a08cc21c709a4eefbb65956e7ea60b6f9a7edd16101d3d19ad",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "androidx.compose.ui:ui-graphics-android:1.11.3",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/androidx/compose/ui/ui-graphics-android/1.11.3/ui-graphics-android-1.11.3.pom",
+    "pomSha256": "bcef16c88649dbfa7845fb5d4574bd3d73d9c50d029c5f699fbfc510d027e582",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "androidx.compose.ui:ui-graphics:1.11.3",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/androidx/compose/ui/ui-graphics/1.11.3/ui-graphics-1.11.3.pom",
+    "pomSha256": "3d88bd3437e0ccc6ed95c2181acf8d528fce6e76bcdf76349a64afc8314add3e",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "androidx.compose.ui:ui-text-android:1.11.3",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/androidx/compose/ui/ui-text-android/1.11.3/ui-text-android-1.11.3.pom",
+    "pomSha256": "554e61b61f61933e0b9fab87c197af1e5808738dd014df41db2de53f15dce545",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "androidx.compose.ui:ui-text:1.11.3",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/androidx/compose/ui/ui-text/1.11.3/ui-text-1.11.3.pom",
+    "pomSha256": "f7bf3db87326483a83fae293d7e9443aeb5fed6ff29b994c13ed4c34a3d84aad",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "androidx.compose.ui:ui-tooling-android:1.11.3",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/androidx/compose/ui/ui-tooling-android/1.11.3/ui-tooling-android-1.11.3.pom",
+    "pomSha256": "4bd2c66bcfefd3a08fb829fb914757db974ba95a7083f424d406fc554083cb08",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "androidx.compose.ui:ui-tooling-data-android:1.11.3",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/androidx/compose/ui/ui-tooling-data-android/1.11.3/ui-tooling-data-android-1.11.3.pom",
+    "pomSha256": "57191cfc929e87fe1f653d71102ed6c93dd8d9553eb436ac10f9d8af9b6e7a04",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "androidx.compose.ui:ui-tooling-data:1.11.3",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/androidx/compose/ui/ui-tooling-data/1.11.3/ui-tooling-data-1.11.3.pom",
+    "pomSha256": "b1201c1b49f2d8118b2552fe6b644045d467fdd748e055fab3344abe92fdf508",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "androidx.compose.ui:ui-tooling-preview-android:1.11.3",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/androidx/compose/ui/ui-tooling-preview-android/1.11.3/ui-tooling-preview-android-1.11.3.pom",
+    "pomSha256": "a0111a1a044b020a85b253f822c11df8617484d227917d3d77ee4648353e2cf2",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "androidx.compose.ui:ui-tooling-preview:1.11.3",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/androidx/compose/ui/ui-tooling-preview/1.11.3/ui-tooling-preview-1.11.3.pom",
+    "pomSha256": "f5fae2788458963a003639bb5814b8415c08b6cc5c165d14620404c56b5b1f29",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "androidx.compose.ui:ui-tooling:1.11.3",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/androidx/compose/ui/ui-tooling/1.11.3/ui-tooling-1.11.3.pom",
+    "pomSha256": "1bd1207503e26119cf5ce0636f3217e7a1a6baf231e46b0e385953698dc18819",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "androidx.compose.ui:ui-unit-android:1.11.3",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/androidx/compose/ui/ui-unit-android/1.11.3/ui-unit-android-1.11.3.pom",
+    "pomSha256": "09be906d333708b8439054b748db21b2e91154640fefb34d88a5c08918a736e4",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "androidx.compose.ui:ui-unit:1.11.3",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/androidx/compose/ui/ui-unit/1.11.3/ui-unit-1.11.3.pom",
+    "pomSha256": "82f6c0aaba50438e24de9cb56c719cf1cf36fb4167fc727e1ab0ddb8b0d8346e",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "androidx.compose.ui:ui-util-android:1.11.3",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/androidx/compose/ui/ui-util-android/1.11.3/ui-util-android-1.11.3.pom",
+    "pomSha256": "459e37d23de0ddb905d7809841cc755db763f0a3182bad64a64dbc0d3832c29d",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "androidx.compose.ui:ui-util:1.11.3",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/androidx/compose/ui/ui-util/1.11.3/ui-util-1.11.3.pom",
+    "pomSha256": "6edd70df448bdfa874e1a70ce99094fce4bbc264b388669af75444da9c48594a",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "androidx.compose.ui:ui:1.11.3",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/androidx/compose/ui/ui/1.11.3/ui-1.11.3.pom",
+    "pomSha256": "0136ebc70b4ea453471c94c8b077798f80a2a96dbb5253510ede9e6a9a9d9d26",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "androidx.compose:compose-bom:2026.06.00",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/androidx/compose/compose-bom/2026.06.00/compose-bom-2026.06.00.pom",
+    "pomSha256": "e4e8235a1f30f5749a37dd1656a51e5ece1053fc3cd7caf99eacb3359b32bedf",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "androidx.concurrent:concurrent-futures:1.1.0",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/androidx/concurrent/concurrent-futures/1.1.0/concurrent-futures-1.1.0.pom",
+    "pomSha256": "748a34eb5d13d19d187adecaea82667fded5f1b0b98a655e13ed2e4a8b3d8ae6",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "androidx.core:core-ktx:1.19.0",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/androidx/core/core-ktx/1.19.0/core-ktx-1.19.0.pom",
+    "pomSha256": "b8fe1568a1cb462c99c660cebaf80348c2dd1881054be5d9659c1a2589cc3ba8",
+    "evidence": "cached publisher POM",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "androidx.core:core-viewtree:1.0.0",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/androidx/core/core-viewtree/1.0.0/core-viewtree-1.0.0.pom",
+    "pomSha256": "d4f2ed1176fa8c5612b80f74c952a8799142a9ed36022a1a238fde5b140580d9",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "androidx.core:core:1.19.0",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/androidx/core/core/1.19.0/core-1.19.0.pom",
+    "pomSha256": "1a99fe690775ed0e84788d5895f4a55664479176737ca0986336319ecfce8538",
+    "evidence": "cached publisher POM",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "androidx.cursoradapter:cursoradapter:1.0.0",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/androidx/cursoradapter/cursoradapter/1.0.0/cursoradapter-1.0.0.pom",
+    "pomSha256": "62d95c89850af21030b19f14d5f7ecd6d8bcc9a3014c59002ec99624caac8100",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "androidx.customview:customview-poolingcontainer:1.0.0",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/androidx/customview/customview-poolingcontainer/1.0.0/customview-poolingcontainer-1.0.0.pom",
+    "pomSha256": "9fa62196c4c4e79b6a58dbb38a8c022bef8db21989d7dae2da0f6f5b66289a9c",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "androidx.customview:customview:1.0.0",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/androidx/customview/customview/1.0.0/customview-1.0.0.pom",
+    "pomSha256": "ce9e47b87184f5bd5e139e9becd5b26476d42d78c31bf2fdedc37acb41b9ad49",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "androidx.documentfile:documentfile:1.0.0",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/androidx/documentfile/documentfile/1.0.0/documentfile-1.0.0.pom",
+    "pomSha256": "013288a9317a552706ce625fb24493e8223288529223ec578cf855a5ae9c16e5",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "androidx.drawerlayout:drawerlayout:1.0.0",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/androidx/drawerlayout/drawerlayout/1.0.0/drawerlayout-1.0.0.pom",
+    "pomSha256": "da6733425a83f5ce850878fa7201082345fed7c668dd58550fdd19c0396c6fa4",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "androidx.dynamicanimation:dynamicanimation:1.0.0",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/androidx/dynamicanimation/dynamicanimation/1.0.0/dynamicanimation-1.0.0.pom",
+    "pomSha256": "44ce22ee620d28f17301bcc60ad49b69b7d0596c2a87b054ad1e3feac7b4a898",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "androidx.emoji2:emoji2-views-helper:1.4.0",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/androidx/emoji2/emoji2-views-helper/1.4.0/emoji2-views-helper-1.4.0.pom",
+    "pomSha256": "e9b7f90b4d7c4a94bb56f76ee7e2bbe78dbaa3b18deb46858b8693fcee2d714b",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "androidx.emoji2:emoji2:1.4.0",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/androidx/emoji2/emoji2/1.4.0/emoji2-1.4.0.pom",
+    "pomSha256": "1f67221484f7d1260eb6e2b490cd4e7046bf5cb536276d79f972ad3f198b474d",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "androidx.fragment:fragment:1.3.6",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/androidx/fragment/fragment/1.3.6/fragment-1.3.6.pom",
+    "pomSha256": "a470f6744cbf8ab09b477193030a0d27fd4938cf717b5b982f7e6a0ab6e85c55",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "androidx.graphics:graphics-path:1.0.1",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/androidx/graphics/graphics-path/1.0.1/graphics-path-1.0.1.pom",
+    "pomSha256": "866fb357c7146f5f7678ad44e4bc6c2823d568defce1ed2805bb6c899606b228",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "androidx.interpolator:interpolator:1.0.0",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/androidx/interpolator/interpolator/1.0.0/interpolator-1.0.0.pom",
+    "pomSha256": "0ddc07cc39699f48ecd9ec894b5830c0f09e22e82959294edf37217224c88b7b",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "androidx.legacy:legacy-support-core-utils:1.0.0",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/androidx/legacy/legacy-support-core-utils/1.0.0/legacy-support-core-utils-1.0.0.pom",
+    "pomSha256": "8fd093008b3ee7c06e52c78da2af980a7b47b69b967fa91dad7af466f7a00a38",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "androidx.lifecycle:lifecycle-common-java8:2.9.4",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/androidx/lifecycle/lifecycle-common-java8/2.9.4/lifecycle-common-java8-2.9.4.pom",
+    "pomSha256": "f7a0077f2b20312c30ea74c9fe77626fbe2ad09bb48922851cde20bcd1a33266",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "androidx.lifecycle:lifecycle-common-jvm:2.9.4",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/androidx/lifecycle/lifecycle-common-jvm/2.9.4/lifecycle-common-jvm-2.9.4.pom",
+    "pomSha256": "31735e9953aaeeab4e07fcffa4c6ab3519f90b331c4b1da8173df911607d3906",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "androidx.lifecycle:lifecycle-common:2.9.4",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/androidx/lifecycle/lifecycle-common/2.9.4/lifecycle-common-2.9.4.pom",
+    "pomSha256": "0e3a0c8798d26f49238550a3dc4d6bd465d49b82bcb759ca3c463a31600e721c",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "androidx.lifecycle:lifecycle-livedata-core-ktx:2.9.4",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/androidx/lifecycle/lifecycle-livedata-core-ktx/2.9.4/lifecycle-livedata-core-ktx-2.9.4.pom",
+    "pomSha256": "ca2073ac46d364107fdf4d832c5b729e610cdc7d12e736d9151b5a5119be80b9",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "androidx.lifecycle:lifecycle-livedata-core:2.9.4",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/androidx/lifecycle/lifecycle-livedata-core/2.9.4/lifecycle-livedata-core-2.9.4.pom",
+    "pomSha256": "cec1161148e3f6c4b7d513aa989729e84a8ee9471f0c47c03478b3fb3c49ea21",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "androidx.lifecycle:lifecycle-livedata:2.9.4",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/androidx/lifecycle/lifecycle-livedata/2.9.4/lifecycle-livedata-2.9.4.pom",
+    "pomSha256": "24f8b944549912ab683aa70e61d32b5e1aa83c2f1f9d42f09e8eda3237760ab1",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "androidx.lifecycle:lifecycle-process:2.9.4",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/androidx/lifecycle/lifecycle-process/2.9.4/lifecycle-process-2.9.4.pom",
+    "pomSha256": "5eac5a0a27138477f40f0aa0e749cd07fbf5580d4a9adc6d2d59db64cac49b10",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "androidx.lifecycle:lifecycle-runtime-android:2.9.4",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/androidx/lifecycle/lifecycle-runtime-android/2.9.4/lifecycle-runtime-android-2.9.4.pom",
+    "pomSha256": "271e54009fdf3a2cd5ab414e8a09e6af4251b63d484a42c530ab868974a5ea1f",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "androidx.lifecycle:lifecycle-runtime-compose-android:2.9.4",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/androidx/lifecycle/lifecycle-runtime-compose-android/2.9.4/lifecycle-runtime-compose-android-2.9.4.pom",
+    "pomSha256": "a7a073c7db10974627ba883f648a34fe8053f50c294d9192e183c901daea8c65",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "androidx.lifecycle:lifecycle-runtime-compose:2.9.4",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/androidx/lifecycle/lifecycle-runtime-compose/2.9.4/lifecycle-runtime-compose-2.9.4.pom",
+    "pomSha256": "0ef3fb28f89b80b90c78ad6ba345164d5590889ee3459b027f26695936291575",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "androidx.lifecycle:lifecycle-runtime-ktx-android:2.9.4",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/androidx/lifecycle/lifecycle-runtime-ktx-android/2.9.4/lifecycle-runtime-ktx-android-2.9.4.pom",
+    "pomSha256": "78aace79fbced8eb8c17e0b02b2d55be9906fbdda053e6a617ee6e595fcace14",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "androidx.lifecycle:lifecycle-runtime-ktx:2.9.4",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/androidx/lifecycle/lifecycle-runtime-ktx/2.9.4/lifecycle-runtime-ktx-2.9.4.pom",
+    "pomSha256": "0af68ccd282a3f98d832f391b6655098d476f19d91f40f909d3c695814a11cab",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "androidx.lifecycle:lifecycle-runtime:2.9.4",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/androidx/lifecycle/lifecycle-runtime/2.9.4/lifecycle-runtime-2.9.4.pom",
+    "pomSha256": "d617a519ddb36a308213f5b9af99163b0a3a3739ce0381b6c8d0fa6814613a08",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "androidx.lifecycle:lifecycle-viewmodel-android:2.9.4",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/androidx/lifecycle/lifecycle-viewmodel-android/2.9.4/lifecycle-viewmodel-android-2.9.4.pom",
+    "pomSha256": "9660b5a2d80ffe0f0e5b4f993b581d15972a8c14aae51784b6097bc97be0379e",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "androidx.lifecycle:lifecycle-viewmodel-ktx:2.9.4",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/androidx/lifecycle/lifecycle-viewmodel-ktx/2.9.4/lifecycle-viewmodel-ktx-2.9.4.pom",
+    "pomSha256": "0ccd0e9d361ad69b6a7253ab4ed2124a3bd4fbf9b338e36c1431b3c5ee7bc794",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "androidx.lifecycle:lifecycle-viewmodel-savedstate-android:2.9.4",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/androidx/lifecycle/lifecycle-viewmodel-savedstate-android/2.9.4/lifecycle-viewmodel-savedstate-android-2.9.4.pom",
+    "pomSha256": "34ab8491e6b631123ce5f7f0ae06dfa238c211dcf3e71033ed61656f9d47718c",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "androidx.lifecycle:lifecycle-viewmodel-savedstate:2.9.4",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/androidx/lifecycle/lifecycle-viewmodel-savedstate/2.9.4/lifecycle-viewmodel-savedstate-2.9.4.pom",
+    "pomSha256": "6912b55c745c579ec6fcbeb0065d5a17d8b5f06dd0a58788037d41e40db50202",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "androidx.lifecycle:lifecycle-viewmodel:2.9.4",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/androidx/lifecycle/lifecycle-viewmodel/2.9.4/lifecycle-viewmodel-2.9.4.pom",
+    "pomSha256": "054db6f92d9230103b3aca8b0dabcc0d63de26e440ff98eb5b19a2555d3eb037",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "androidx.loader:loader:1.0.0",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/androidx/loader/loader/1.0.0/loader-1.0.0.pom",
+    "pomSha256": "c978d550808b47434aa49a63164110a50b55b0bcc6160a93a2e37d5110df8c5e",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "androidx.localbroadcastmanager:localbroadcastmanager:1.0.0",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/androidx/localbroadcastmanager/localbroadcastmanager/1.0.0/localbroadcastmanager-1.0.0.pom",
+    "pomSha256": "a000041f5a1f79283c5175e1bb60cf3683780f401c6a9d34fbe9751253fa6ff9",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "androidx.navigationevent:navigationevent-android:1.0.0",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/androidx/navigationevent/navigationevent-android/1.0.0/navigationevent-android-1.0.0.pom",
+    "pomSha256": "5cabbb40f3fba11166576a839acf4eb6db59ab5e5ebcb16361d41f8bec805b50",
+    "evidence": "cached publisher POM",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "androidx.navigationevent:navigationevent-compose-android:1.0.0",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/androidx/navigationevent/navigationevent-compose-android/1.0.0/navigationevent-compose-android-1.0.0.pom",
+    "pomSha256": "6a3b7e989b18ab25274dbd0531dcc4d66e4efb8de4985daff539d5131285bff8",
+    "evidence": "cached publisher POM",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "androidx.navigationevent:navigationevent-compose:1.0.0",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/androidx/navigationevent/navigationevent-compose/1.0.0/navigationevent-compose-1.0.0.pom",
+    "pomSha256": "58899c64fefa0768066621c8994385182c52a0848a78c882705f5e7dabd98471",
+    "evidence": "cached publisher POM",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "androidx.navigationevent:navigationevent:1.0.0",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/androidx/navigationevent/navigationevent/1.0.0/navigationevent-1.0.0.pom",
+    "pomSha256": "de7fae42b4234f6fedc7762510bcb5db9860187be56f3bfec34b73db6e4a22a2",
+    "evidence": "cached publisher POM",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "androidx.print:print:1.0.0",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/androidx/print/print/1.0.0/print-1.0.0.pom",
+    "pomSha256": "62482c0594841bee24bb996abb6cb7b320a6a3b77dca9f0a0ba4fe3be5530aa7",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "androidx.profileinstaller:profileinstaller:1.4.0",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/androidx/profileinstaller/profileinstaller/1.4.0/profileinstaller-1.4.0.pom",
+    "pomSha256": "d5fe39981a3b4b7c39585130da0bfc93835054c834a438d3e63e065e5f78be55",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "androidx.resourceinspection:resourceinspection-annotation:1.0.1",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/androidx/resourceinspection/resourceinspection-annotation/1.0.1/resourceinspection-annotation-1.0.1.pom",
+    "pomSha256": "b8eb4938ed95d7fcdaa2712ebca363e46a0f9228b8be7f23154def56846815dc",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "androidx.savedstate:savedstate-android:1.3.2",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/androidx/savedstate/savedstate-android/1.3.2/savedstate-android-1.3.2.pom",
+    "pomSha256": "df09758721e2fe8d5714a2101dcc0941ac824a424b08466e2818876851cdb826",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "androidx.savedstate:savedstate-compose-android:1.3.2",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/androidx/savedstate/savedstate-compose-android/1.3.2/savedstate-compose-android-1.3.2.pom",
+    "pomSha256": "701c5a665f8f3d29bd7c622481f6e34785338738e899de3c44c3ce362f03d90a",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "androidx.savedstate:savedstate-compose:1.3.2",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/androidx/savedstate/savedstate-compose/1.3.2/savedstate-compose-1.3.2.pom",
+    "pomSha256": "95ffc22b591ec37aeab8c7738f434d0ecd8831da2084f207396839a7f71c0083",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "androidx.savedstate:savedstate-ktx:1.3.2",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/androidx/savedstate/savedstate-ktx/1.3.2/savedstate-ktx-1.3.2.pom",
+    "pomSha256": "7c0d5190b3ea64e14782bcf93d9a8f336a026f5609bdaa1f35f63ff426015081",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "androidx.savedstate:savedstate:1.3.2",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/androidx/savedstate/savedstate/1.3.2/savedstate-1.3.2.pom",
+    "pomSha256": "950c897dca07c256745da55b861b9e8a57fe7a41758ba098a3c30821d941e7f8",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "androidx.startup:startup-runtime:1.2.0",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/androidx/startup/startup-runtime/1.2.0/startup-runtime-1.2.0.pom",
+    "pomSha256": "69594163d8bb148df97a9fbb5aa8a92486bb8961db5f73871b8a84122616593b",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "androidx.tracing:tracing:1.2.0",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/androidx/tracing/tracing/1.2.0/tracing-1.2.0.pom",
+    "pomSha256": "f34bec4eb58871d31002901377108aaa1ebfe77fa6d882b8b86200b158e26ea1",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "androidx.transition:transition:1.6.0",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/androidx/transition/transition/1.6.0/transition-1.6.0.pom",
+    "pomSha256": "070d7795010071edefbef94b8c9d5a2cac5cb5f3b1a2c5e558546438177c8ef8",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "androidx.vectordrawable:vectordrawable-animated:1.1.0",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/androidx/vectordrawable/vectordrawable-animated/1.1.0/vectordrawable-animated-1.1.0.pom",
+    "pomSha256": "276a20116b705fb75b9003ee9496c56f6fd3b32375fb232472811eba60a040bd",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "androidx.vectordrawable:vectordrawable:1.1.0",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/androidx/vectordrawable/vectordrawable/1.1.0/vectordrawable-1.1.0.pom",
+    "pomSha256": "5b0e2d5b2179e54804785cbc21ce5f473b5e1ddd55a57da482e94dcd39492bb2",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "androidx.versionedparcelable:versionedparcelable:1.1.1",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/androidx/versionedparcelable/versionedparcelable/1.1.1/versionedparcelable-1.1.1.pom",
+    "pomSha256": "5f51e65873ca612de3838fa90d2ee95b8d040efd31b9c390a19bf94d615cdb2f",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "androidx.viewpager:viewpager:1.0.0",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/androidx/viewpager/viewpager/1.0.0/viewpager-1.0.0.pom",
+    "pomSha256": "1f72f836339d03c6eb013f65075e76ca87075a577578eb4f95f74a3a5d253128",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "androidx.window:window-core-android:1.5.0",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/androidx/window/window-core-android/1.5.0/window-core-android-1.5.0.pom",
+    "pomSha256": "463c50b22a969c6274ebdb7b5f56ba1ea1dde352e9679f0a0ba90f3971dbcd57",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "androidx.window:window-core:1.5.0",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/androidx/window/window-core/1.5.0/window-core-1.5.0.pom",
+    "pomSha256": "e38a30fe9a9ccb575531b265fec8e23207bda9818977aae495f3fe74b9c9e1f3",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "androidx.window:window:1.5.0",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/androidx/window/window/1.5.0/window-1.5.0.pom",
+    "pomSha256": "d4f22b991a69600e2ffc36b42ac199626fd96d5f1648c3beeccd35de06fcc351",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "com.google.android.datatransport:transport-api:2.2.1",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/com/google/android/datatransport/transport-api/2.2.1/transport-api-2.2.1.pom",
+    "pomSha256": "8118f805b855f18f1d12e5af59e914a7f6206f71bb1d1192a8ab9a8db4107afe",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "com.google.android.datatransport:transport-backend-cct:2.3.3",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/com/google/android/datatransport/transport-backend-cct/2.3.3/transport-backend-cct-2.3.3.pom",
+    "pomSha256": "ab4e3c8df8bb695d6466df399f4c2e0da977c04d2fdea8a34ee51281683175b0",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "com.google.android.datatransport:transport-runtime:2.2.6",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/com/google/android/datatransport/transport-runtime/2.2.6/transport-runtime-2.2.6.pom",
+    "pomSha256": "aff04e2de298277827d2031cc265b5a28a030e54210a9ba3a018aa0859d29589",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "com.google.android.gms:play-services-base:18.5.0",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/com/google/android/gms/play-services-base/18.5.0/play-services-base-18.5.0.pom",
+    "pomSha256": "2570b515c2717af386c890e97f644782e3f86da7b677a4ff1036147e7ea622a4",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "Android Software Development Kit License",
+        "url": "https://developer.android.com/studio/terms.html",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "com.google.android.gms:play-services-basement:18.4.0",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/com/google/android/gms/play-services-basement/18.4.0/play-services-basement-18.4.0.pom",
+    "pomSha256": "05ca7c0ace0d6260931f97ed32c60ce598071ff560d3fa44f49e6f0695d2b687",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "Android Software Development Kit License",
+        "url": "https://developer.android.com/studio/terms.html",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "com.google.android.gms:play-services-tasks:18.2.0",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/com/google/android/gms/play-services-tasks/18.2.0/play-services-tasks-18.2.0.pom",
+    "pomSha256": "6b99c48a895d155e58abcee66cc22146db83abd5d84caf6c8f7a2aea9b1bcd21",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "Android Software Development Kit License",
+        "url": "https://developer.android.com/studio/terms.html",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "com.google.firebase:firebase-annotations:16.0.0",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/com/google/firebase/firebase-annotations/16.0.0/firebase-annotations-16.0.0.pom",
+    "pomSha256": "82c6d040edcb3c158b5b9865601d2bd742abcbd97cbd98903bde059da8edd087",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "com.google.firebase:firebase-components:16.1.0",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/com/google/firebase/firebase-components/16.1.0/firebase-components-16.1.0.pom",
+    "pomSha256": "8320c67176d416edcf58b65b2ef491b42faa1360f3cd7bf3d8c2eea4298ae70e",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "com.google.firebase:firebase-encoders-json:17.1.0",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/com/google/firebase/firebase-encoders-json/17.1.0/firebase-encoders-json-17.1.0.pom",
+    "pomSha256": "c823cbed7a0e75bf30fedbba42ff1c0c8752e3dc16edccf7d0f2e5d6cb69c7a8",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "com.google.firebase:firebase-encoders:16.1.0",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/com/google/firebase/firebase-encoders/16.1.0/firebase-encoders-16.1.0.pom",
+    "pomSha256": "687bd5744fdc54fce404a4403ebbdb847fbf651b9b87293a4a56fc4d8fc68e1c",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "com.google.guava:listenablefuture:1.0",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://repo.maven.apache.org/maven2/com/google/guava/listenablefuture/1.0/listenablefuture-1.0.pom",
+    "pomSha256": "53873caf26bc1ed8a567ea6c939ab2aaa3f47a5e32d5cade95ddf5080d23238a",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [
+      {
+        "url": "https://repo.maven.apache.org/maven2/com/google/guava/guava-parent/26.0-android/guava-parent-26.0-android.pom",
+        "sha256": "f8698ab46ca996ce889c1afc8ca4f25eb8ac6b034dc898d4583742360016cc04"
+      }
+    ],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "com.google.mlkit:common:18.11.0",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/com/google/mlkit/common/18.11.0/common-18.11.0.pom",
+    "pomSha256": "e50ec6f1d7c77025cdc4853b835ca4e8b1394966c5029543a699baf252aea057",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "ML Kit Terms of Service",
+        "url": "https://developers.google.com/ml-kit/terms",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "com.google.mlkit:translate:17.0.3",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://dl.google.com/dl/android/maven2/com/google/mlkit/translate/17.0.3/translate-17.0.3.pom",
+    "pomSha256": "f4bab4ff2acfb8e78375a407f9b587b01eec7eeb2a0bf094c1ea5d3c3120d8ab",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "ML Kit Terms of Service",
+        "url": "https://developers.google.com/ml-kit/terms",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "com.squareup.okhttp3:okhttp-android:5.5.0",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://repo.maven.apache.org/maven2/com/squareup/okhttp3/okhttp-android/5.5.0/okhttp-android-5.5.0.pom",
+    "pomSha256": "9e707dd79d04b92a6da7f3fdd135ac6f55ff97e462e0c4daed29c6e894c965b4",
+    "evidence": "cached publisher POM",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "https://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "com.squareup.okhttp3:okhttp:5.5.0",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://repo.maven.apache.org/maven2/com/squareup/okhttp3/okhttp/5.5.0/okhttp-5.5.0.pom",
+    "pomSha256": "1e5299d973d19a225d741795d28c64298105fffe2e060f07282d2b24a4a1da37",
+    "evidence": "cached publisher POM",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "https://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "com.squareup.okio:okio-jvm:3.18.1",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://repo.maven.apache.org/maven2/com/squareup/okio/okio-jvm/3.18.1/okio-jvm-3.18.1.pom",
+    "pomSha256": "6457712bf7dfdfa0d1b25a303600288c34a1ff8613d55c24c8c99bcc63301dd0",
+    "evidence": "cached publisher POM",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "com.squareup.okio:okio:3.18.1",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://repo.maven.apache.org/maven2/com/squareup/okio/okio/3.18.1/okio-3.18.1.pom",
+    "pomSha256": "3320a24236b2b43db1515b56587b18a8a1cdf238f4465e20e3e19e5f4fd10214",
+    "evidence": "cached publisher POM",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "javax.inject:javax.inject:1",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://repo.maven.apache.org/maven2/javax/inject/javax.inject/1/javax.inject-1.pom",
+    "pomSha256": "943e12b100627804638fa285805a0ab788a680266531e650921ebfe4621a8bfa",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "junit:junit:4.13.2",
+    "configurations": [
+      "debugUnitTestRuntimeClasspath"
+    ],
+    "pomUrl": "https://repo.maven.apache.org/maven2/junit/junit/4.13.2/junit-4.13.2.pom",
+    "pomSha256": "569b6977ee4603c965c1c46c3058fa6e969291b0160eb6964dd092cd89eadd94",
+    "evidence": "cached publisher POM",
+    "declaredLicenses": [
+      {
+        "name": "Eclipse Public License 1.0",
+        "url": "http://www.eclipse.org/legal/epl-v10.html",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "org.hamcrest:hamcrest-core:1.3",
+    "configurations": [
+      "debugUnitTestRuntimeClasspath"
+    ],
+    "pomUrl": "https://repo.maven.apache.org/maven2/org/hamcrest/hamcrest-core/1.3/hamcrest-core-1.3.pom",
+    "pomSha256": "fde386a7905173a1b103de6ab820727584b50d0e32282e2797787c20a64ffa93",
+    "evidence": "cached publisher POM",
+    "declaredLicenses": [
+      {
+        "name": "New BSD License",
+        "url": "http://www.opensource.org/licenses/bsd-license.php",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [
+      {
+        "url": "https://repo.maven.apache.org/maven2/org/hamcrest/hamcrest-parent/1.3/hamcrest-parent-1.3.pom",
+        "sha256": "6d535f94efb663bdb682c9f27a50335394688009642ba7a9677504bc1be4129b"
+      }
+    ],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "org.jetbrains.kotlin:kotlin-stdlib:2.3.0",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://repo.maven.apache.org/maven2/org/jetbrains/kotlin/kotlin-stdlib/2.3.0/kotlin-stdlib-2.3.0.pom",
+    "pomSha256": "4d5256d3e4844e656b0ca405f6350d6f21795c24375b3452526c5467dd99b5a2",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "Apache-2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://repo.maven.apache.org/maven2/org/jetbrains/kotlinx/kotlinx-coroutines-android/1.9.0/kotlinx-coroutines-android-1.9.0.pom",
+    "pomSha256": "be86020cd5b93b8a68ca43185a049b9b0baa345fd1be1fdaa014fdaef92d6e7c",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "https://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "org.jetbrains.kotlinx:kotlinx-coroutines-bom:1.9.0",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://repo.maven.apache.org/maven2/org/jetbrains/kotlinx/kotlinx-coroutines-bom/1.9.0/kotlinx-coroutines-bom-1.9.0.pom",
+    "pomSha256": "bea5511e9001f2c593ab5080df131b219ab5e2085cc5979ce583eacd4946fd78",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "https://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:1.9.0",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://repo.maven.apache.org/maven2/org/jetbrains/kotlinx/kotlinx-coroutines-core-jvm/1.9.0/kotlinx-coroutines-core-jvm-1.9.0.pom",
+    "pomSha256": "19c4889941b3aa098bd57cc64f02f9adacc654d571a12a956de4b5bb148c6499",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "https://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://repo.maven.apache.org/maven2/org/jetbrains/kotlinx/kotlinx-coroutines-core/1.9.0/kotlinx-coroutines-core-1.9.0.pom",
+    "pomSha256": "770f2793d05e2b027b9c799938ec1d2d4ef141ce5819c780c32c3995cadb0a47",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "https://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "org.jetbrains.kotlinx:kotlinx-serialization-bom:1.7.3",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://repo.maven.apache.org/maven2/org/jetbrains/kotlinx/kotlinx-serialization-bom/1.7.3/kotlinx-serialization-bom-1.7.3.pom",
+    "pomSha256": "4226a491c5b59ce909f73b65aa98944191c8dcac3825637c6be1069e6b589a46",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "https://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "org.jetbrains.kotlinx:kotlinx-serialization-core-jvm:1.7.3",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://repo.maven.apache.org/maven2/org/jetbrains/kotlinx/kotlinx-serialization-core-jvm/1.7.3/kotlinx-serialization-core-jvm-1.7.3.pom",
+    "pomSha256": "734f5f749208dd0bef3d98caa594cf9222afdf0fee5b6843347a8fe64e240427",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "https://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "org.jetbrains.kotlinx:kotlinx-serialization-core:1.7.3",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://repo.maven.apache.org/maven2/org/jetbrains/kotlinx/kotlinx-serialization-core/1.7.3/kotlinx-serialization-core-1.7.3.pom",
+    "pomSha256": "31d111776b9af777ca167103f2d61fbeeaa32dae6dd6635906b76d8278ba5730",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "https://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "org.jetbrains:annotations:23.0.0",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://repo.maven.apache.org/maven2/org/jetbrains/annotations/23.0.0/annotations-23.0.0.pom",
+    "pomSha256": "c9490f655132328df2cfbcfdf743f53fc3916d6c1d10437175a6ca6e3a67771c",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache Software License, Version 2.0",
+        "url": "https://www.apache.org/licenses/LICENSE-2.0.txt",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "org.json:json:20260814",
+    "configurations": [
+      "debugUnitTestRuntimeClasspath"
+    ],
+    "pomUrl": "https://repo.maven.apache.org/maven2/org/json/json/20260814/json-20260814.pom",
+    "pomSha256": "61937e25d261f93d16e8d9f5ccdb1b700780ec1ccb4876444654736628c62095",
+    "evidence": "cached publisher POM",
+    "declaredLicenses": [
+      {
+        "name": "Public Domain",
+        "url": "https://github.com/stleary/JSON-java/blob/master/LICENSE",
+        "distribution": "repo"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  },
+  {
+    "coordinate": "org.jspecify:jspecify:1.0.0",
+    "configurations": [
+      "debugRuntimeClasspath",
+      "debugUnitTestRuntimeClasspath",
+      "releaseRuntimeClasspath"
+    ],
+    "pomUrl": "https://repo.maven.apache.org/maven2/org/jspecify/jspecify/1.0.0/jspecify-1.0.0.pom",
+    "pomSha256": "cdab929a3b95211f43d2090c5e2d0dfe8465960e378bc32b35841dab324433a6",
+    "evidence": "publisher POM fetched",
+    "declaredLicenses": [
+      {
+        "name": "The Apache License, Version 2.0",
+        "url": "http://www.apache.org/licenses/LICENSE-2.0.txt"
+      }
+    ],
+    "parentPomSources": [],
+    "error": null,
+    "status": "Declaration found; required notices and nested components still need packaging review"
+  }
+]

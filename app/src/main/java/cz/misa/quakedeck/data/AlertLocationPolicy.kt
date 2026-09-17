@@ -51,37 +51,7 @@ class AlertLocationPolicy(context: Context) {
             )
         }
 
-        if (event.points.isEmpty()) {
-            val targetArea = location.eewAreaNameJa
-                ?.takeIf { it.isNotBlank() }
-                ?: geometry.eewAreaAt(location.latitude, location.longitude)?.nameJa
-            val epicentreArea = geometry.eewAreaAt(event.latitude, event.longitude)?.nameJa
-            if (
-                !targetArea.isNullOrBlank() &&
-                !epicentreArea.isNullOrBlank() &&
-                sameArea(targetArea, epicentreArea)
-            ) {
-                return resolveEewAlertScope(
-                    locationFiltering = true,
-                    eventMaximum = event.maxIntensity,
-                    emptyRegionFallback = EewAlertScopeBasis.EMPTY_REGIONS_SAME_EEW_AREA
-                )
-            }
-
-            val distance = EewWaveModel.greatCircleDistanceKm(
-                event.latitude,
-                event.longitude,
-                location.latitude,
-                location.longitude
-            )
-            if (distance <= EMPTY_REGION_EPICENTRE_FALLBACK_KM) {
-                return resolveEewAlertScope(
-                    locationFiltering = true,
-                    eventMaximum = event.maxIntensity,
-                    emptyRegionFallback = EewAlertScopeBasis.EMPTY_REGIONS_NEAR_EPICENTRE
-                )
-            }
-        }
+        LocalEewForecasts.fallbackAlertScope(event, location).valueOrNull()?.let { return it }
 
         return resolveEewAlertScope(
             locationFiltering = true,
@@ -101,22 +71,9 @@ class AlertLocationPolicy(context: Context) {
             }?.let { return it }
         }
 
-        return event.points
-            .asSequence()
-            .mapNotNull { point ->
-                val latitude = point.latitude ?: return@mapNotNull null
-                val longitude = point.longitude ?: return@mapNotNull null
-                val distance = EewWaveModel.greatCircleDistanceKm(
-                    latitude,
-                    longitude,
-                    location.latitude,
-                    location.longitude
-                )
-                point to distance
-            }
-            .filter { (_, distance) -> distance <= EEW_POINT_FALLBACK_KM }
-            .minByOrNull { (_, distance) -> distance }
-            ?.first
+        // A nearby point does not establish an official forecast for this area.
+        // Any spatial inference belongs to the optional private engine.
+        return null
     }
 
     fun observedPoint(event: EarthquakeEvent, location: AlertLocation): IntensityPoint? {
@@ -222,8 +179,6 @@ class AlertLocationPolicy(context: Context) {
         .trim()
 
     companion object {
-        private const val EMPTY_REGION_EPICENTRE_FALLBACK_KM = 75.0
-        private const val EEW_POINT_FALLBACK_KM = 80.0
         private const val OBSERVATION_FALLBACK_KM = 55.0
 
         fun intensityRank(value: String): Int {
@@ -312,6 +267,7 @@ enum class EewAlertScopeBasis(val diagnostic: String) {
     JAPAN_WIDE_MAXIMUM("Japan-wide maximum"),
     OFFICIAL_REGIONAL_FORECAST("Official forecast for the selected location"),
     LOCAL_JMA_METHOD_ESTIMATE("Local JMA-method estimate for the selected location"),
+    NEARBY_FORECAST_PROXY("Local inference from a nearby forecast point"),
     EMPTY_REGIONS_SAME_EEW_AREA("Empty regional forecast · same JMA EEW area"),
     EMPTY_REGIONS_NEAR_EPICENTRE("Empty regional forecast · within 75 km of hypocentre"),
     OUTSIDE_SELECTED_LOCATION("Outside the selected notification location")

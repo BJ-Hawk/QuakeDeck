@@ -28,6 +28,7 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -59,6 +60,7 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.toArgb
@@ -75,6 +77,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -139,6 +142,10 @@ import kotlin.time.Duration.Companion.seconds
 private val DISPLAYED_JST_ZONE = ZoneId.of("Asia/Tokyo")
 private val DISPLAYED_JST_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss 'JST'")
 private val COMPACT_JST_TIME_PATTERN = Regex("\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2} JST")
+private const val DMDSS_EEW_NOTICE_PREFERENCES = "dmdss_eew_notice"
+private const val DMDSS_EEW_NOTICE_ACCEPTED_REVISION = "accepted_revision"
+private const val DMDSS_EEW_NOTICE_REVISION = 20260913
+private const val DMDSS_EEW_NOTICE_URL = "https://dmdata.jp/docs/eew/"
 
 private val MAP_PREFECTURE_BORDER_COLOR = Color(0xFF6F83A8)
 private val MAP_WARNING_ZONE_BORDER_COLOR = Color(0xFFC18B5A)
@@ -2358,6 +2365,20 @@ private fun SourceDialog(
     onDismiss: () -> Unit
 ) {
     val context = LocalContext.current
+    val dmdssNoticePreferences = remember(context) {
+        context.getSharedPreferences(
+            DMDSS_EEW_NOTICE_PREFERENCES,
+            android.content.Context.MODE_PRIVATE
+        )
+    }
+    var dmdssNoticeAccepted by remember {
+        mutableStateOf(
+            dmdssNoticePreferences.getInt(DMDSS_EEW_NOTICE_ACCEPTED_REVISION, 0) >=
+                DMDSS_EEW_NOTICE_REVISION
+        )
+    }
+    var dmdssNoticeOpen by rememberSaveable { mutableStateOf(false) }
+    var connectAfterDmdssNotice by rememberSaveable { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
     val exportCompleteText = uiText(R.string.dmdss_diagnostic_export_complete, language)
     val exportFailedText = uiText(R.string.dmdss_diagnostic_export_failed, language)
@@ -2395,6 +2416,92 @@ private fun SourceDialog(
         },
         language
     )
+
+    if (dmdssNoticeOpen) {
+        AlertDialog(
+            onDismissRequest = {
+                connectAfterDmdssNotice = false
+                dmdssNoticeOpen = false
+            },
+            title = { Text(uiText(R.string.dmdss_eew_notice_title, language)) },
+            text = {
+                Column(
+                    modifier = Modifier.verticalScroll(rememberScrollState()),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text(
+                        uiText(R.string.dmdss_eew_notice_intro, language),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        fontSize = 12.sp,
+                        lineHeight = 16.sp
+                    )
+                    listOf(
+                        R.string.dmdss_eew_caution_1,
+                        R.string.dmdss_eew_caution_2,
+                        R.string.dmdss_eew_caution_3,
+                        R.string.dmdss_eew_caution_4,
+                        R.string.dmdss_eew_caution_5,
+                        R.string.dmdss_eew_caution_6
+                    ).forEach { caution ->
+                        Text(
+                            "• ${uiText(caution, language)}",
+                            fontSize = 11.sp,
+                            lineHeight = 15.sp
+                        )
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        val shouldConnect = connectAfterDmdssNotice
+                        dmdssNoticePreferences.edit()
+                            .putInt(
+                                DMDSS_EEW_NOTICE_ACCEPTED_REVISION,
+                                DMDSS_EEW_NOTICE_REVISION
+                            )
+                            .apply()
+                        dmdssNoticeAccepted = true
+                        connectAfterDmdssNotice = false
+                        dmdssNoticeOpen = false
+                        if (shouldConnect) onDmdssConnect()
+                    }
+                ) {
+                    Text(
+                        uiText(
+                            if (connectAfterDmdssNotice) {
+                                R.string.connect_dmdss
+                            } else {
+                                R.string.done
+                            },
+                            language
+                        )
+                    )
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        context.startActivity(
+                            Intent(Intent.ACTION_VIEW, DMDSS_EEW_NOTICE_URL.toUri())
+                        )
+                    }
+                ) {
+                    Text(uiText(R.string.dmdss_eew_notice_official_link, language))
+                }
+            }
+        )
+        return
+    }
+
+    val requestDmdssConnection = {
+        if (dmdssNoticeAccepted) {
+            onDmdssConnect()
+        } else {
+            connectAfterDmdssNotice = true
+            dmdssNoticeOpen = true
+        }
+    }
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -2443,9 +2550,21 @@ private fun SourceDialog(
                     onClick = if (dmdssAuthorized) {
                         { onSourceSelected(DataSourceMode.DMDSS) }
                     } else {
-                        onDmdssConnect
+                        requestDmdssConnection
                     }
                 )
+                TextButton(
+                    onClick = {
+                        connectAfterDmdssNotice = false
+                        dmdssNoticeOpen = true
+                    },
+                    modifier = Modifier.padding(start = 40.dp)
+                ) {
+                    Text(
+                        uiText(R.string.dmdss_eew_notice_open, language),
+                        fontSize = 10.sp
+                    )
+                }
                 if (dmdssAuthorized) {
                     if (dmdssAuthorizationUpdateRequired) {
                         Text(
@@ -6138,12 +6257,26 @@ private fun ObservedStationRow(
                 Column(Modifier.weight(1f)) {
                     Text(stationLabel, fontSize = 12.sp, lineHeight = 14.sp)
                     when {
-                        useEnglishPlaceNames && automaticTranslation != null -> Text(
-                            uiText(R.string.station_name_translated_by_google, language),
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            fontSize = 9.sp,
-                            lineHeight = 10.sp
-                        )
+                        useEnglishPlaceNames && automaticTranslation != null -> {
+                            val attributionBadge = if (
+                                MaterialTheme.colorScheme.surface.luminance() < 0.5f
+                            ) {
+                                R.drawable.google_translate_attribution_white
+                            } else {
+                                R.drawable.google_translate_attribution
+                            }
+                            Image(
+                                painter = painterResource(attributionBadge),
+                                contentDescription = uiText(
+                                    R.string.google_translate_attribution_description,
+                                    language
+                                ),
+                                modifier = Modifier
+                                    .padding(top = 2.dp)
+                                    .width(176.dp)
+                                    .height(16.dp)
+                            )
+                        }
                         useEnglishPlaceNames && needsOfflineTranslation &&
                             offlineStationTranslationStatus != OfflineStationTranslationStatus.READY -> Text(
                             uiText(R.string.station_name_download_offline_translation, language),
@@ -6775,7 +6908,7 @@ private data class MapViewportState(
 /**
  * Compact overview raster used only while the event/map divider is moving.
  * The normal map remains fully vector-based; this merely avoids retessellating
- * the large N03 land and boundary paths for every intermediate panel height.
+ * the JMA base-map land and boundary paths for every intermediate panel height.
  */
 private fun buildResizeMapRaster(
     data: JapanMapData,
@@ -7094,7 +7227,7 @@ private fun JapanMap(
     }
 
     // During divider drags the map viewport is measured again for every visible
-    // size step. Replaying the full N03 vector paths on every one of those
+    // size step. Replaying the full JMA base vector paths on every one of those
     // frames is needlessly expensive, so keep a compact raster of the stable
     // land/intensity layer ready. It is used only while the panel is actively
     // resizing; the precise vector layer returns immediately on release.
@@ -7233,7 +7366,7 @@ private fun JapanMap(
 
     // While fingers move, Android transforms the retained layer. A short
     // movement debounce commits the exact vector map during deliberate pauses,
-    // without attempting to retessellate the ~280k-point N03 geometry per frame.
+    // without attempting to retessellate the JMA base geometry per frame.
     var committedZoom by remember {
         mutableFloatStateOf(
             initialCamera
@@ -7263,11 +7396,11 @@ private fun JapanMap(
                 municipalityDetailRequested = true
             }
             MapVectorLayer.JMA_QUAKE_AREAS -> jmaDetailRequested = true
-            MapVectorLayer.N03_PREFECTURES -> Unit
+            MapVectorLayer.JMA_PREFECTURES -> Unit
         }
     }
     // Keep municipal paths across normal threshold crossings, but release them
-    // after a settled lower zoom so the N03/JMA tiers return to a lean cache.
+    // after a settled lower zoom so the JMA tiers return to a lean cache.
     LaunchedEffect(committedZoom, municipalityDetailRequested) {
         if (
             !municipalityDetailRequested ||
@@ -7856,10 +7989,6 @@ private fun JapanMap(
                 val exactPath = officialAreas.tsunamiCoastline(areaName)
                 if (exactPath != null) {
                     includePath(exactPath)
-                } else {
-                    TsunamiAreaCatalog.prefectures(areaName).forEach { prefecture ->
-                        data.prefectureCoastlines[prefecture]?.let(::includePath)
-                    }
                 }
             }
             if (!hasAffectedBounds) return false
@@ -8433,18 +8562,18 @@ private fun JapanMap(
             MapVectorLayer.MUNICIPALITIES -> when {
                 renderedMunicipalityMap != null -> MapVectorLayer.MUNICIPALITIES
                 jmaRegionalData != null -> MapVectorLayer.JMA_QUAKE_AREAS
-                else -> MapVectorLayer.N03_PREFECTURES
+                else -> MapVectorLayer.JMA_PREFECTURES
             }
             MapVectorLayer.JMA_QUAKE_AREAS -> if (jmaRegionalData != null) {
                 MapVectorLayer.JMA_QUAKE_AREAS
             } else {
-                MapVectorLayer.N03_PREFECTURES
+                MapVectorLayer.JMA_PREFECTURES
             }
-            MapVectorLayer.N03_PREFECTURES -> MapVectorLayer.N03_PREFECTURES
+            MapVectorLayer.JMA_PREFECTURES -> MapVectorLayer.JMA_PREFECTURES
         }
 
         // The regional context is intentionally NOT part of the expensive cached
-        // N03 layer. It is only two tiny native Paths, so redraw it with the live
+        // JMA base layer. It is only two tiny native Paths, so redraw it with the live
         // gesture transform. This lets Korea/China/Taiwan/Russia keep appearing
         // immediately as the viewport moves while Japan itself remains the fast
         // retained/off-screen texture during finger-down interaction.
@@ -8490,7 +8619,7 @@ private fun JapanMap(
 
         // The off-screen parent owns the retained map texture, so the tier key
         // must replace that parent itself. Keying only the Canvas (or adding a
-        // child graphics layer) leaves the parent's N03 texture eligible for
+        // child graphics layer) leaves the parent's JMA base texture eligible for
         // reuse and can hide the complete 6.5×–21× detailed JMA layer.
         key(activeVectorLayer) {
             Box(
@@ -8506,7 +8635,7 @@ private fun JapanMap(
                         // off-screen layer while a gesture is active. This means
                         // geometry that began outside the viewport is not revealed
                         // until the gesture finishes, but it keeps deep pan/zoom
-                        // buttery smooth even with the high-detail N03 geometry.
+                        // buttery smooth even with the JMA base geometry.
                         compositingStrategy = CompositingStrategy.Offscreen
                     }
             ) {
@@ -8529,7 +8658,7 @@ private fun JapanMap(
                     )
                 }
 
-                // The old N03 renderer stroked the complete nationwide border
+                // The old base renderer stroked the complete nationwide border
                 // twice: once with a land-coloured seam and again with the
                 // visible line. One slightly stronger antialiased border keeps
                 // the same separation without a second ~280k-point traversal.
@@ -8548,12 +8677,12 @@ private fun JapanMap(
 
                     // Resizing the event panel changes the Canvas dimensions on
                     // every drag frame. The prepared raster is reserved for
-                    // that resize interaction only; ordinary N03 pan and zoom
+                    // that resize interaction only; ordinary base-map pan and zoom
                     // always use the topology-safe simplified vector paths.
                     val activeResizeRaster = resizeRaster
                     if (
                         panelResizing &&
-                        activeVectorLayer == MapVectorLayer.N03_PREFECTURES &&
+                        activeVectorLayer == MapVectorLayer.JMA_PREFECTURES &&
                         activeResizeRaster != null
                     ) {
                         native.drawBitmap(
@@ -8567,7 +8696,7 @@ private fun JapanMap(
                         // a time. Paint every polygon neutral first, then apply
                         // the strongest report and finally stroke all boundaries.
                         when (activeVectorLayer) {
-                            MapVectorLayer.N03_PREFECTURES -> {
+                            MapVectorLayer.JMA_PREFECTURES -> {
                                 native.drawPath(renderData.landPath, landPaint)
                                 renderData.prefectures.forEach { prefecture ->
                                     prefectureIntensity[prefecture.nameJa]?.let { intensity ->
@@ -8692,19 +8821,6 @@ private fun JapanMap(
                             tsunamiCoastPaint.color = tsunamiGradeColor(grade).toArgb()
                             tsunamiCoastPaint.alpha = tsunamiFlashAlpha
                             native.drawPath(exactPath, tsunamiCoastPaint)
-                        } else if (activeVectorLayer == MapVectorLayer.N03_PREFECTURES) {
-                            // Unknown/renamed areas retain a safe visual fallback
-                            // only at the N03 tier. The official detailed tiers
-                            // must never receive a low-detail N03 coast overlay.
-                            TsunamiAreaCatalog.prefectures(areaName).forEach { prefecture ->
-                                val fallback = renderData.prefectureCoastlines[prefecture]
-                                if (fallback != null) {
-                                    native.drawPath(fallback, tsunamiCoastBackdropPaint)
-                                    tsunamiCoastPaint.color = tsunamiGradeColor(grade).toArgb()
-                                    tsunamiCoastPaint.alpha = tsunamiFlashAlpha
-                                    native.drawPath(fallback, tsunamiCoastPaint)
-                                }
-                            }
                         }
                     }
                     native.restore()
@@ -9152,7 +9268,7 @@ private fun JapanMap(
             }
         }
 
-        if (activeVectorLayer != MapVectorLayer.N03_PREFECTURES) {
+        if (activeVectorLayer != MapVectorLayer.JMA_PREFECTURES) {
             Box(
                 Modifier
                     .align(Alignment.TopEnd)
@@ -9709,9 +9825,9 @@ private const val OBSERVED_STATION_NAMES_ZOOM = 36f
 private const val BASE_STATION_NAMES_ZOOM = 48f
 
 private fun MapVectorLayer.settleRenderDelay() = when (this) {
-    // Shared-arc N03 simplification keeps this nationwide vector responsive
+    // Offline JMA simplification keeps this nationwide vector responsive
     // enough to settle on the next scheduler turn, like the JMA tier.
-    MapVectorLayer.N03_PREFECTURES -> 0.milliseconds
+    MapVectorLayer.JMA_PREFECTURES -> 0.milliseconds
     // The JMA regions are fast enough to settle essentially immediately.
     MapVectorLayer.JMA_QUAKE_AREAS -> 0.milliseconds
     // Municipality visibility is indexed, but still benefits from one frame.
@@ -9719,11 +9835,11 @@ private fun MapVectorLayer.settleRenderDelay() = when (this) {
 }
 
 /**
- * Calculate the legacy fitted base scale from the hard screen-space N03 rule.
+ * Calculate the legacy fitted base scale from the hard screen-space Japan-map rule.
  * The public 1× view applies a 1.5× camera transform to this fitted geometry.
  *
  * Portrait:
- * - the left-most N03 point may not sit to the right of 25% of the viewport;
+ * - the left-most Japan-map point may not sit to the right of 25% of the viewport;
  * - the right-most point may not sit to the left of 75%;
  * - the top-most point may not sit below 30%;
  * - the bottom-most point may not sit above 70%.
@@ -9759,7 +9875,7 @@ private fun mapFitScale(
 }
 
 /**
- * Constrain camera pan using the same hard screen-space N03 edge rule as the
+ * Constrain camera pan using the same hard screen-space Japan-map edge rule as the
  * 1× scale. In portrait, the projected left/right extremes must always reach
  * into the outer 25% screen bands and the top/bottom extremes into the outer
  * 30% bands. Landscape swaps those percentages.
@@ -9850,7 +9966,7 @@ private fun legendTextColor(value: String): Color = when (value) {
 
 /**
  * Resolve both ordinary prefecture names and JMA EEW forecast-area labels to
- * the N03 prefecture names used by the map. Examples include 北海道道北 → 北海道,
+ * the prefecture names used by incoming reports. Examples include 北海道道北 → 北海道,
  * 沖縄本島地方 → 沖縄県, 奄美地方 → 鹿児島県 and 伊豆諸島 → 東京都.
  */
 internal fun matchMapPrefectures(rawValue: String, available: List<String>): List<String> {

@@ -2,7 +2,7 @@
 
 QuakeDeck is an Android earthquake-monitoring prototype focused on Japan. It uses Kotlin and Jetpack Compose to combine live P2PQuake/JMA reports, EEW visualization, observed intensity mapping, tsunami information, historical report browsing, and deterministic Sandbox testing in one map-first interface.
 
-Current version: **0.10.2-dev.1 (in progress)**. QuakeDeck is still pre-1.0 and should not be treated as an official emergency-warning application.
+Current version: **0.10.2-dev.5 (in progress)**. QuakeDeck is still pre-1.0 and should not be treated as an official emergency-warning application.
 
 The bundled station catalogue now comes directly from JMA's official map and XML code tables. The [migration audit](outputs/jma-station-migration-audit/2026-09-02/README.md) confirms all 4,360 existing station records match in every field. Station updates are audited offline; source, processing and PDL1.0 credits are available in the app and in [the data notes](THIRD_PARTY_DATA.md).
 
@@ -12,21 +12,26 @@ The bundled station catalogue now comes directly from JMA's official map and XML
 >
 > A public checkout still builds successfully, but those locally calculated features are unavailable without the omitted implementation. Forecasts and warnings supplied directly by JMA, DM-D.S.S, or P2PQuake remain supported. The omission is deliberate and is not a missing dependency or repository error.
 
+> The matching input files are also private: `app/src/localForecast/res/raw/jma2001_travel_times.gz` and `app/src/localForecast/res/raw/local_eew_station_avs30.gz`. `-PpublicDistribution=true` forces LITE even in a FULL development checkout. Local proximity-based EEW notification inferences are private too; LITE location-filtered alerts require an applicable official region.
+>
+> **Publication remains pending legal clearance.** The [2 September source audit](outputs/source-legality-audit/2026-09-02/README.md) records JMA/provider permission questions, remaining attribution issues and older forecast code/data still present in Git history. Git ignores do not remove that history. Requesting permission alone does not authorise distribution.
+
 ## Current capabilities
 
 - Immediate remembered-report startup view followed by concurrent P2PQuake REST bootstrap and WebSocket updates
 - JMA earthquake reports, public warning-level EEW, audible paid DM-D.S.S forecast notifications, and tsunami bulletins
 - Normalized 1×–128× map scale, where 1× uses the former 1.5× framing
-- Zoom-exclusive Japan vectors: N03 prefectures below 6.5×, 194 detailed JMA earthquake-reporting areas from 6.5× to below 21×, and municipalities/wards from 21× upward
+- Zoom-exclusive Japan vectors: 47 JMA prefectures below 6.5×, 194 detailed JMA earthquake-reporting areas from 6.5× to below 21×, and municipalities/wards from 21× upward
 - Highest-reported-Shindo coloring for the active vector layer, backed by a bundled station-to-area catalogue so detailed fills remain available offline
-- Official JMA regional, deep-zoom municipality/ward, and tsunami forecast-zone geometry with precomputed prefecture coastlines for faster cold starts
+- Official JMA regional, deep-zoom municipality/ward, and tsunami forecast-zone geometry
 - Persistent JMA, NIED, and local-government station filters for the idle map, with report views restricted to their own observed stations
 - P/S wavefront visualization and destination countdowns when the intentionally local forecast engine is present, plus event focus, observed intensity lists, report history, and persistent main-map camera/panel layout in every build
 - Separately labelled local DM-D.S.S intensity estimates when official regional values are absent, calculated in FULL builds from JMA's published method, JMA2001 travel times, and a derived NIED J-SHIS V4 station AVS30 lookup
 - Persistent source-neutral EEW/report archive and historical browser, including deduplicated DM-D.S.S Forecast revisions, P2PQuake Warnings, and attached cumulative felt-report replay frames
 - Historical EEW area shading uses the same official-first/local hybrid calculation as live in FULL builds; LITE retains official areas only, and historical replay never animates P/S waves or shows destination countdowns
 - Optional P2PQuake felt-report counters attached only to one matching EEW or confirmed earthquake; a later ordinary report amends that same incident while retaining the counter
-- English, Czech, and Japanese UI/place-name handling
+- Shared, redacted P2PQuake/DM-D.S.S packet diagnostics persisted in background batches; raw code-561 felt traffic stays available as evidence without entering the main-thread live queue
+- English, Czech, and Japanese UI/place-name handling, with optional on-device place-name fallback powered by [Google Translate](https://translate.google.com/)
 - Light, dark, and system appearance modes
 - Custom Android notification cards with Shindo or tsunami-grade graphics, alert-level borders, multiline event details, location-aware coverage, audible/silent thresholds, scheduled quiet-hour delivery policies, manual city/postcode relevance filtering, and expiry-safe cold-start incident restoration; active EEW rings/countdowns are restored only when the intentionally local forecast engine is present
 - Opt-in foreground live monitoring with a permanent silent connection-status notification; it reuses the single P2PQuake runtime and continues after QuakeDeck is closed

@@ -89,7 +89,6 @@ class Handler(BaseHTTPRequestHandler):
                         "prefecture": "app/src/main/res/raw/jma_municipality_prefecture_boundaries.gz",
                         "jmaQuakeAreas": "app/src/main/res/raw/jma_quake_regions.gz",
                         "jmaQuakeBorders": "app/src/main/res/raw/jma_quake_region_borders.gz",
-                        "coastlines": "app/src/main/res/raw/japan_prefecture_coastlines_hires.gz",
                         "placeNames": "app/src/main/res/raw/jma_place_names.json"
                     },
                 }

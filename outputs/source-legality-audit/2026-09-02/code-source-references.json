@@ -1,0 +1,4110 @@
+[
+  {
+    "url": "http://schemas.openxmlformats.org/officeDocument/2006/relationships}id",
+    "files": [
+      "tools/station_names/audit_official_jma_catalog.py"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "http://schemas.openxmlformats.org/spreadsheetml/2006/main",
+    "files": [
+      "tools/station_names/audit_official_jma_catalog.py"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "http://{HOST}:{args.port}/",
+    "files": [
+      "tools/map-editor/server.py"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://api.dmdata.jp/v2/contract",
+    "files": [
+      "app/src/main/java/cz/misa/quakedeck/data/DmDssOAuthClient.kt",
+      "web/assets/diagnostics.js"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://api.dmdata.jp/v2/gd/eew",
+    "files": [
+      "app/src/main/java/cz/misa/quakedeck/data/DmDssOAuthClient.kt"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://api.dmdata.jp/v2/socket",
+    "files": [
+      "app/src/main/java/cz/misa/quakedeck/data/DmDssOAuthClient.kt",
+      "app/src/main/java/cz/misa/quakedeck/data/DmDssProvider.kt"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://api.p2pquake.net/v2/history",
+    "files": [
+      "app/src/main/java/cz/misa/quakedeck/data/P2pQuakeProvider.kt"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://api.p2pquake.net/v2/history?codes=552&limit=10",
+    "files": [
+      "app/src/main/java/cz/misa/quakedeck/data/P2pQuakeProvider.kt"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://api.p2pquake.net/v2/jma/quake?limit=30&order=-1",
+    "files": [
+      "app/src/main/java/cz/misa/quakedeck/data/P2pQuakeProvider.kt"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://bj-hawk.github.io",
+    "files": [
+      "tools/test_web_diagnostics.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://bj-hawk.github.io/QuakeDeck/diagnostics.html",
+    "files": [
+      "tools/test_web_diagnostics.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+    "files": [
+      "tools/station_names/build_station_name_audit.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://chibu-vill.note.jp/n/n64079088f82b",
+    "files": [
+      "tools/station_names/update_explicit_office_placements.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://data.bodik.jp/api/3/action/datastore_search?resource_id=dad15967-bb1a-487f-ab7b-908ff373156d&limit=200",
+    "files": [
+      "tools/station_names/report_kumamoto_source_matches.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://data.bodik.jp/dataset/420000_zishinkei",
+    "files": [
+      "tools/station_names/update_nagasaki_earthquake_instrument_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://data.bodik.jp/dataset/430005_00245/resource/dad15967-bb1a-487f-ab7b-908ff373156d",
+    "files": [
+      "tools/station_names/record_kumamoto_installation_source_urls.mjs",
+      "tools/station_names/update_asagiri_sue_network_address.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://date.nager.at/api/v4/Holidays",
+    "files": [
+      "app/src/main/java/cz/misa/quakedeck/data/PublicHolidayCalendar.kt"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://db.go-nagano.net/topics_detail6/id%3D12055",
+    "files": [
+      "tools/station_names/update_nagano_remaining_official_facility_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://developers.google.com/ml-kit/terms",
+    "files": [
+      "web/credits.html"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://dmdata.jp/docs/eew/",
+    "files": [
+      "web/credits.html"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://dmdata.jp/terms/",
+    "files": [
+      "web/credits.html"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://e-ppi.pref.tokushima.lg.jp/file/anken/360000/22270/4/06%20%E4%BB%A4%E5%92%8C%EF%BC%94%E5%B9%B4%E5%BA%A6%E5%BE%B3%E5%B3%B6%E7%9C%8C%E9%9C%87%E5%BA%A6%E6%83%85%E5%A0%B1%E3%83%8D%E3%83%83%E3%83%88%E3%83%AF%E3%83%BC%E3%82%AF%E3%82%B7%E3%82%B9%E3%83%86%E3%83%A0%E5%86%8D%E6%95%B4%E5%82%99%E6%A5%AD%E5%8B%99%EF%BC%88%E7%AC%AC5%E5%88%86%E5%89%B2%EF%BC%89%20%E4%BB%95%E6%A7%98%E6%9B%B8.pdf",
+    "files": [
+      "tools/station_names/update_tokushima_placement_metadata.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://en.vill.ogasawara.tokyo.jp/chichijima/",
+    "files": [
+      "tools/station_names/build_station_name_audit.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://en.vill.ogasawara.tokyo.jp/chichijima/chichijima_info/",
+    "files": [
+      "tools/station_names/build_station_name_audit.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://github.com/BJ-Hawk/QuakeDeck",
+    "files": [
+      "web/contact.html",
+      "web/site-config.js"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://github.com/BJ-Hawk/QuakeDeck/issues",
+    "files": [
+      "web/contact.html",
+      "web/site-config.js"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://itoshimalife.city.itoshima.lg.jp/help/",
+    "files": [
+      "tools/station_names/update_itoshima_intensity_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://jquake.net/en/about.html",
+    "files": [
+      "web/about.html",
+      "web/credits.html"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://manager.dmdata.jp/account/oauth2/v1/auth",
+    "files": [
+      "app/src/main/java/cz/misa/quakedeck/data/DmDssOAuthClient.kt",
+      "web/assets/diagnostics.js"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://manager.dmdata.jp/account/oauth2/v1/revoke",
+    "files": [
+      "app/src/main/java/cz/misa/quakedeck/data/DmDssOAuthClient.kt",
+      "web/assets/diagnostics.js"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://manager.dmdata.jp/account/oauth2/v1/token",
+    "files": [
+      "app/src/main/java/cz/misa/quakedeck/data/DmDssOAuthClient.kt",
+      "web/assets/diagnostics.js"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://maps.app.goo.gl/4Lo1dhyoBMMEqNRv5",
+    "files": [
+      "tools/station_names/build_station_name_audit.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress",
+    "files": [
+      "tools/station_names/build_station_name_audit.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://nagerholidays.com/legal/termsofservice",
+    "files": [
+      "web/credits.html"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-N03-2026.html",
+    "files": [
+      "web/credits.html"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://opendata.pref.shizuoka.jp/dataset/fuji-166/resource/32469/content.html",
+    "files": [
+      "tools/station_names/report_shizuoka_source_matches.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://pikan.net/contact",
+    "files": [
+      "tools/station_names/update_nagano_office_placement.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://sms.dpri.kyoto-u.ac.jp/k-asano/station.html",
+    "files": [
+      "tools/station_names/update_kyoto_network_facilities.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://taro.eri.u-tokyo.ac.jp/saigai/fukuoka/fukuoka.html",
+    "files": [
+      "tools/station_names/update_fukuoka_fire_headquarters_intensity_address.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://tile.openstreetmap.org/${z}/${x}/${y}.png`",
+    "files": [
+      "tools/map-editor/assets/app.js"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://town.taiji.wakayama.jp/",
+    "files": [
+      "tools/station_names/update_explicit_office_placements.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://trip-yamagata-japan.com/barrier-free/detail/index/454",
+    "files": [
+      "tools/station_names/update_explicit_office_placements.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://vill.kitadaito.okinawa.jp/sonsei/gyosei.html",
+    "files": [
+      "tools/station_names/update_kitadaito_nakano_network_address.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.119-aizu.jp/aedmisato.htm",
+    "files": [
+      "tools/station_names/update_explicit_office_placements.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.apache.org/licenses/LICENSE-2.0",
+    "files": [
+      "web/credits.html"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.area.ueda.nagano.jp/reiki/reiki_honbun/w080RG00000088.html",
+    "files": [
+      "tools/station_names/update_nagano_remaining_east_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.bosai.go.jp/information/tender/supply/pdf/shiyousho.pdf",
+    "files": [
+      "tools/station_names/update_nied_knet_placement_metadata.py",
+      "tools/station_names/update_nied_legacy_placement_metadata.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.bosai.go.jp/sp/information/tender/supply/pdf/shiyousho.pdf",
+    "files": [
+      "tools/station_names/build_station_name_audit.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city-yuzawa.jp/uploaded/attachment/26950.pdf",
+    "files": [
+      "tools/station_names/update_yuzawa_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city-yuzawa.jp/uploaded/attachment/34329.pdf",
+    "files": [
+      "tools/station_names/update_yuzawa_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.akita.akita.jp/city/pl/mn/gappei/kyougikai/naiyou/giann34kannkei.pdf",
+    "files": [
+      "tools/station_names/update_akita_facilities.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.akita.lg.jp/kurashi/kyodo-chiiki/1005328/1004537/1009744/1035817.html",
+    "files": [
+      "tools/station_names/update_known_facility_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.akita.lg.jp/kurashi/kyodo-chiiki/1005328/1005353/1022203/1035816.html",
+    "files": [
+      "tools/station_names/update_known_facility_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.asago.hyogo.jp/uploaded/attachment/8574.pdf",
+    "files": [
+      "tools/station_names/update_known_facility_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.asakuchi.lg.jp/page/1911.html",
+    "files": [
+      "tools/station_names/build_station_name_audit.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.asakura.lg.jp/www/contents/1761294319019/files/8.pdf",
+    "files": [
+      "tools/station_names/update_asakura_city_hall_intensity_address.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.azumino.nagano.jp/uploaded/attachment/80973.pdf",
+    "files": [
+      "tools/station_names/update_azumino_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.bando.lg.jp/data/newcityhall/",
+    "files": [
+      "tools/station_names/build_station_name_audit.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.bando.lg.jp/page/page000157.html",
+    "files": [
+      "tools/station_names/update_explicit_office_placements.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.bunkyo.lg.jp/b015/p004391.html",
+    "files": [
+      "tools/station_names/update_bunkyo_sports_center_intensity_address.mjs",
+      "tools/station_names/update_known_facility_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.bunkyo.lg.jp/documents/9819/honpen.pdf",
+    "files": [
+      "tools/station_names/update_bunkyo_sports_center_intensity_address.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.buzen.lg.jp/senkyo-gikai/gikai/documents/2007_6_8.pdf",
+    "files": [
+      "tools/station_names/update_buzen_city_hall_intensity_address.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.buzen.lg.jp/sisetu/siyakusyo/index.html",
+    "files": [
+      "tools/station_names/update_buzen_city_hall_intensity_address.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.chiba.jp/sogoseisaku/kikikanri/kikikanri/documents/12-3-1~3-18.pdf",
+    "files": [
+      "tools/station_names/update_chiba_city_placement_metadata.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.chikugo.lg.jp/shisei/_5644/_7347/_31889.html?media=pc",
+    "files": [
+      "tools/station_names/record_chikugo_yamanoi_locality_evidence.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.chikuma.lg.jp/gyoseijoho/yakusho_madoguchiannai/3136.html",
+    "files": [
+      "tools/station_names/update_nagano_civic_facility_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.chikuma.lg.jp/gyoseijoho/yakusho_madoguchiannai/index.html",
+    "files": [
+      "tools/station_names/update_nagano_northern_facility_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.chikuma.lg.jp/soshiki/koreifukushi/shogaishafukushi/1/1185.html",
+    "files": [
+      "tools/station_names/update_nagano_civic_facility_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.chikushino.fukuoka.jp/map/7315.html",
+    "files": [
+      "tools/station_names/update_chikushino_city_hall_intensity_address.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.chikushino.fukuoka.jp/uploaded/attachment/24754.pdf",
+    "files": [
+      "tools/station_names/update_chikushino_city_hall_intensity_address.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.chino.lg.jp/site/kids/1452.html",
+    "files": [
+      "tools/station_names/update_nagano_facility_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.chiyoda.lg.jp/documents/30954/taisaku.pdf",
+    "files": [
+      "tools/station_names/update_chiyoda_fujimi_mirai_kan_address.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.chiyoda.lg.jp/koho/kurashi/bosai/bosai-taisaku/taisei/aed.html",
+    "files": [
+      "tools/station_names/update_chiyoda_fujimi_mirai_kan_address.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.chuo.yamanashi.jp/benriservice/facilitymap/bunya/koukyousisetsu/684.html",
+    "files": [
+      "tools/station_names/update_known_facility_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.chuo.yamanashi.jp/introduction/shigikai/gikai_1/2025/index.html",
+    "files": [
+      "tools/station_names/update_known_facility_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.daisen.lg.jp/archive/contents-14100",
+    "files": [
+      "tools/station_names/update_daisen_omagari_network_address.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.daisen.lg.jp/uploads/contents/archive_0000000671_00/241.pdf",
+    "files": [
+      "tools/station_names/update_daisen_omagari_network_address.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.dazaifu.lg.jp/soshiki/7/1644.html",
+    "files": [
+      "tools/station_names/update_dazaifu_city_hall_intensity_address.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.dazaifu.lg.jp/uploaded/attachment/5475.pdf",
+    "files": [
+      "tools/station_names/update_dazaifu_city_hall_intensity_address.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.echizen.lg.jp/office/010/060/bousai/tiikibousaikeikaku_d/fil/sinnsai.pdf",
+    "files": [
+      "tools/station_names/update_echizen_imadate_network_address.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.echizen.lg.jp/office/200/030/index.html",
+    "files": [
+      "tools/station_names/update_echizen_imadate_network_address.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.fuefuki.yamanashi.jp/documents/898/4162dd146bd6d.pdf",
+    "files": [
+      "tools/station_names/update_known_facility_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.fuefuki.yamanashi.jp/documents/898/41ac01f670595.pdf",
+    "files": [
+      "tools/station_names/update_explicit_office_placements.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.fuefuki.yamanashi.jp/documents/956/5629d2dc9fe5a.pdf",
+    "files": [
+      "tools/station_names/update_known_facility_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.fuefuki.yamanashi.jp/fukushi-somu/kenko/fukushiippan/fukushikyogikai.html",
+    "files": [
+      "tools/station_names/update_known_facility_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.fuefuki.yamanashi.jp/sakaigawa-shisho/shisejoho/soshiki/shisho/sakaigawashisho.html",
+    "files": [
+      "tools/station_names/update_known_facility_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.fuji.shizuoka.jp/1015400000/shisetsu/p000155.html",
+    "files": [
+      "tools/station_names/build_station_name_audit.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.fujiidera.lg.jp/soshiki/somubu/soumu/osirase/1387413545768.html",
+    "files": [
+      "tools/station_names/update_osaka_southern_city_hall_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.fukui-sakai.lg.jp/anzen/paburikku/documents/05siryou.pdf",
+    "files": [
+      "tools/station_names/update_sakai_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.fukuoka.lg.jp/shimin/bousai/bousai/documents/chiboukei_honpen2024.pdf",
+    "files": [
+      "tools/station_names/update_fukuoka_city_fire_station_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.fukuoka.lg.jp/syobo/somu/about/documents/r6.syoubounennpou.pdf",
+    "files": [
+      "tools/station_names/update_fukuoka_fire_headquarters_intensity_address.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.fukuoka.lg.jp/syobo/somu/about/syozaiti.html",
+    "files": [
+      "tools/station_names/update_fukuoka_city_fire_station_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.fukutsu.lg.jp/material/files/group/1/R04bousaihonpen.pdf",
+    "files": [
+      "tools/station_names/update_fukutsu_intensity_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.fukutsu.lg.jp/shisei/shisetsu/8/4136.html",
+    "files": [
+      "tools/station_names/update_fukutsu_intensity_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.gose.nara.jp/category/7-12-11-0-0-0-0-0-0-0.html",
+    "files": [
+      "tools/station_names/update_explicit_office_placements.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.gujo.gifu.jp/life/docs/regional_disaster_prevention_plan_doc12.pdf",
+    "files": [
+      "tools/station_names/update_known_facility_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.gyoda.lg.jp/material/files/group/14/2sinnsaitaisakur5kaisei.pdf",
+    "files": [
+      "tools/station_names/update_gyoda_municipal_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.gyoda.lg.jp/soshiki/shiminseikatubu/shisyo/gyomu/shinogaiyo/soshiki_annai/2826.html",
+    "files": [
+      "tools/station_names/update_gyoda_municipal_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.gyoda.lg.jp/soshiki/sougouseisakubu/zaisan_kanri/gyomu/syuyo/3020.html",
+    "files": [
+      "tools/station_names/update_gyoda_municipal_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.habikino.lg.jp/kurashi/shisei/habikinoshi/habikinoshinogaiyo/6242.html",
+    "files": [
+      "tools/station_names/update_osaka_southern_city_hall_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.hagi.lg.jp/site/machihaku/h30847.html",
+    "files": [
+      "tools/station_names/build_station_name_audit.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.hakodate.hokkaido.jp/docs/2014022500262/file_contents/240601sankosiryo.pdf",
+    "files": [
+      "tools/station_names/update_known_facility_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.hanamaki.iwate.jp/shisei/shiyakusyo/annai/1003288.html",
+    "files": [
+      "tools/station_names/update_known_facility_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.hanamaki.iwate.jp/shisetsu/shiyakusyo/1004112/1004115.html",
+    "files": [
+      "tools/station_names/build_station_name_audit.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.hannan.lg.jp/shisei/shisei/index.html",
+    "files": [
+      "tools/station_names/update_osaka_coastal_town_hall_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.hatsukaichi.hiroshima.jp/uploaded/attachment/87968.pdf",
+    "files": [
+      "tools/station_names/update_hiroshima_municipal_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.higashihiroshima.lg.jp/material/files/group/5/siryouhen20250530.pdf",
+    "files": [
+      "tools/station_names/update_hiroshima_municipal_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.higashiosaka.lg.jp/0000005557.html",
+    "files": [
+      "tools/station_names/update_osaka_east_south_city_hall_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.himi.toyama.jp/gyosei/soshiki/hishokoho/1/1_1/1144.html",
+    "files": [
+      "tools/station_names/update_toyama_facility_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.hirakata.osaka.jp/category/6-16-1-0-0-0-0-0-0-0.html",
+    "files": [
+      "tools/station_names/update_osaka_northern_city_hall_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.hitachi.lg.jp/_res/projects/default_project/_page_/001/004/798/jishin03.pdf",
+    "files": [
+      "tools/station_names/update_hitachi_juo_branch_network_address.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.hitachi.lg.jp/shisei/shinososhiki/1004542/1016000.html",
+    "files": [
+      "tools/station_names/update_hitachi_juo_branch_network_address.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.hitachi.lg.jp/shisetsu/shikanrenshisetsu/1005730/1005731.html",
+    "files": [
+      "tools/station_names/update_explicit_office_placements.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.hokuto.yamanashi.jp/docs/1195.html",
+    "files": [
+      "tools/station_names/update_explicit_office_placements.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.ibaraki.osaka.jp/office/hobun/reiki_int/reiki_honbun/k213RG00000538.html",
+    "files": [
+      "tools/station_names/update_osaka_fire_network_addresses_2.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.iida.lg.jp/site/kenko/inquiry-001.html",
+    "files": [
+      "tools/station_names/update_nagano_branch_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.iida.lg.jp/soshiki/69/",
+    "files": [
+      "tools/station_names/update_nagano_branch_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.iida.lg.jp/soshiki/8/cityhallguide.html",
+    "files": [
+      "tools/station_names/update_nagano_central_municipal_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.iizuka.lg.jp/shobobosaianzen/bosai/bosai/shisaku/documents/chibouhonpen.pdf",
+    "files": [
+      "tools/station_names/update_iizuka_intensity_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.iizuka.lg.jp/shobobosaianzen/bosai/bosai/shisaku/documents/suibouhohnpen.pdf",
+    "files": [
+      "tools/station_names/update_iizuka_intensity_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.ikeda.osaka.jp/",
+    "files": [
+      "tools/station_names/update_osaka_northern_city_hall_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.imizu.toyama.jp/appupload/EDIT/142/142224.pdf",
+    "files": [
+      "tools/station_names/update_imizu_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.inashiki.lg.jp/page/page001917.html",
+    "files": [
+      "tools/station_names/update_explicit_office_placements.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.ishioka.lg.jp/page/page002803.html",
+    "files": [
+      "tools/station_names/build_station_name_audit.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.itoshima.lg.jp/s004/010/010/050/040/4syoujisinnsaigai.pdf",
+    "files": [
+      "tools/station_names/update_itoshima_intensity_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.iwakuni.lg.jp/soshiki/121/index.html",
+    "files": [
+      "tools/station_names/update_known_facility_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.izu.shizuoka.jp/bunka_sports/3/1/3706.html",
+    "files": [
+      "tools/station_names/build_station_name_audit.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.izumiotsu.lg.jp/shisei/sinogaiyou/index.html",
+    "files": [
+      "tools/station_names/update_osaka_east_south_city_hall_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.izumisano.lg.jp/izumisano/gaiyou/index.html",
+    "files": [
+      "tools/station_names/update_osaka_southeast_city_hall_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.izumo.shimane.jp/www/window/index.html",
+    "files": [
+      "tools/station_names/build_station_name_audit.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.joyo.kyoto.jp/0000001690.html",
+    "files": [
+      "tools/station_names/update_kyoto_network_addresses_4.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.kadoma.osaka.jp/shisei/shisetsushokai/3939.html",
+    "files": [
+      "tools/station_names/update_osaka_central_city_hall_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.kagoshima-izumi.lg.jp/",
+    "files": [
+      "tools/station_names/build_station_name_audit.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.kagoshima-izumi.lg.jp/page/page_40003.html",
+    "files": [
+      "tools/station_names/update_known_facility_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.kagoshima.lg.jp/shimin/sakurajima/soumu/machizukuri/igai/kokyo/koku/fune.html",
+    "files": [
+      "tools/station_names/build_station_name_audit.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.kaizuka.lg.jp/kakuka/soumu/shomu/topics/access_map.html",
+    "files": [
+      "tools/station_names/update_osaka_east_south_city_hall_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.kashiwara.lg.jp/docs/2014062700202/",
+    "files": [
+      "tools/station_names/update_osaka_central_city_hall_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.katagami.lg.jp/gyosei/gyoseijoho/shiyakusho/4855.html",
+    "files": [
+      "tools/station_names/update_katagami_showa_iitagawa_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.katagami.lg.jp/material/files/group/13/20120511-093204.pdf",
+    "files": [
+      "tools/station_names/update_katagami_showa_iitagawa_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.katano.osaka.jp/docs/2011072700017/",
+    "files": [
+      "tools/station_names/update_osaka_east_south_city_hall_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.katori.lg.jp/government/profile/index.html",
+    "files": [
+      "tools/station_names/update_explicit_office_placements.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.kawachinagano.lg.jp/map/shityosya.html",
+    "files": [
+      "tools/station_names/update_osaka_southeast_city_hall_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.kawasaki.jp/601/cmsfiles/contents/0000140/140630/2%2820250827%29.pdf",
+    "files": [
+      "tools/station_names/update_kawasaki_placement_metadata.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.kazo.lg.jp/kurashi_bosai/bosai/1/32453.html",
+    "files": [
+      "tools/station_names/update_kazo_municipal_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.kazo.lg.jp/soshiki/kasai_chiikishinkou/6364.html",
+    "files": [
+      "tools/station_names/update_kazo_municipal_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.kishiwada.lg.jp/life/sub/5/39/",
+    "files": [
+      "tools/station_names/update_explicit_office_placements.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.kitaibaraki.lg.jp/faq/docs/2015040200080/",
+    "files": [
+      "tools/station_names/update_kitaibaraki_city_hall_network_address.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.kizugawa.lg.jp/0000001113.html",
+    "files": [
+      "tools/station_names/update_kizugawa_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.komoro.lg.jp/soshikikarasagasu/bunkacenter/index.html",
+    "files": [
+      "tools/station_names/update_known_facility_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.koshigaya.saitama.jp/kurashi_shisei/shisei/koho/kocho/siminnnoteiannseido_files_28kaitoushuuH27.pdf",
+    "files": [
+      "tools/station_names/update_nishigo_koshigaya_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.koshigaya.saitama.jp/toiawase/map.html",
+    "files": [
+      "tools/station_names/update_nishigo_koshigaya_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.koshu.yamanashi.jp/category/bunya/koshu_gaiyo/choshaannai/",
+    "files": [
+      "tools/station_names/update_explicit_office_placements.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.koshu.yamanashi.jp/docs/2019061900370/",
+    "files": [
+      "tools/station_names/update_known_facility_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.koshu.yamanashi.jp/docs/2019061900387/",
+    "files": [
+      "tools/station_names/update_known_facility_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.koshu.yamanashi.jp/soshiki/",
+    "files": [
+      "tools/station_names/build_station_name_audit.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.kure.lg.jp/",
+    "files": [
+      "tools/station_names/build_station_name_audit.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.kurobe.toyama.jp/attach/EDIT/003/003317.pdf",
+    "files": [
+      "tools/station_names/update_toyama_more_facility_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.kurume.fukuoka.jp/1050kurashi/2040bousaianzen/3003shiru/files/05siryouhenn.pdf",
+    "files": [
+      "tools/station_names/update_kurume_intensity_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.kurume.fukuoka.jp/1090sangyou/2010nyuusatsu/3100bid/files/dennwa_siyousyo.pdf",
+    "files": [
+      "tools/station_names/update_kurume_intensity_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.kushima.lg.jp/main/info/cat3391/",
+    "files": [
+      "tools/station_names/update_explicit_office_placements.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.kyotanabe.lg.jp/cmsfiles/contents/0000013/13351/230309-08.pdf",
+    "files": [
+      "tools/station_names/update_kyoto_network_addresses_4.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.kyotango.lg.jp/top/shisei/gaiyo/4/3920.html",
+    "files": [
+      "tools/station_names/update_kyotango_network_addresses_1.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.kyotango.lg.jp/top/shisei/gaiyo/4/6115.html",
+    "files": [
+      "tools/station_names/update_kyotango_network_addresses_1.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.kyotango.lg.jp/top/soshiki/jogesuido/shisetsukanri/gesui/2/22309.html",
+    "files": [
+      "tools/station_names/update_kyotango_network_addresses_1.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.kyotango.lg.jp/top/soshiki/jogesuido/suido/2/21755.html",
+    "files": [
+      "tools/station_names/update_kyotango_network_addresses_1.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.kyotango.lg.jp/top/soshiki/somu/somu/2/1950.html",
+    "files": [
+      "tools/station_names/update_kyoto_network_addresses_2.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.kyoto.lg.jp/bunshi/page/0000003123.html",
+    "files": [
+      "tools/station_names/update_kyoto_network_addresses_3.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.matsubara.lg.jp/shisei/matsubara_gaiyo/shokai/",
+    "files": [
+      "tools/station_names/update_osaka_coastal_town_hall_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.matsumoto.nagano.jp/soshiki/114/4290.html",
+    "files": [
+      "tools/station_names/update_nagano_civic_facility_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.matsumoto.nagano.jp/soshiki/49/4199.html",
+    "files": [
+      "tools/station_names/update_matsumoto_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.minami-alps.yamanashi.jp/sisetsu/shisetsu/",
+    "files": [
+      "tools/station_names/update_known_facility_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.minami-alps.yamanashi.jp/sisetsu/shisetsu/malps-shirane/",
+    "files": [
+      "tools/station_names/update_known_facility_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.minamiuonuma.niigata.jp/docs/2504.html",
+    "files": [
+      "tools/station_names/update_explicit_office_placements.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.minato.tokyo.jp/documents/46967/20150311_1.pdf",
+    "files": [
+      "tools/station_names/update_minato_main_office_intensity_address.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.minato.tokyo.jp/soshiki/bosai.html",
+    "files": [
+      "tools/station_names/update_minato_main_office_intensity_address.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.mino.gifu.jp/docs/2196.html",
+    "files": [
+      "tools/station_names/update_explicit_office_placements.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.minoh.lg.jp/shisetsu/yobou/shouboushohigashi.html",
+    "files": [
+      "tools/station_names/update_osaka_fire_network_addresses_2.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.mito.lg.jp/page/4338.html",
+    "files": [
+      "tools/station_names/update_mito_municipal_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.mito.lg.jp/site/education/73425.html",
+    "files": [
+      "tools/station_names/update_mito_municipal_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.mito.lg.jp/soshiki/144/index.html",
+    "files": [
+      "tools/station_names/update_mito_municipal_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.mitoyo.lg.jp/material/files/group/16/eg_rubi.pdf",
+    "files": [
+      "tools/station_names/build_station_name_audit.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.miyakojima.lg.jp/gyosei/ecoisland/modeltoshi/tousyo/files/190423_SmartCommunity_Eng.pdf",
+    "files": [
+      "tools/station_names/build_station_name_audit.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.miyakojima.lg.jp/gyosei/mayor/oshirase/files/P00-P03.pdf",
+    "files": [
+      "tools/station_names/build_station_name_audit.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.miyakojima.lg.jp/kurashi/shisetsu/koukyo/ueno_shucchoujo.html",
+    "files": [
+      "tools/station_names/update_known_facility_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.miyakojima.lg.jp/soshiki/kyouiku/syougaigakusyu/syougaikakusyu/bunkazai-Tuzupisukiabu.html",
+    "files": [
+      "tools/station_names/build_station_name_audit.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.miyakojima.lg.jp/soshiki/shityo/seikatukankyou/ueno/",
+    "files": [
+      "tools/station_names/build_station_name_audit.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.miyama.lg.jp/li/shisei/030/180/20210623112702.html",
+    "files": [
+      "tools/station_names/update_miyama_intensity_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.miyama.lg.jp/s005/anzen/030/010/tiikibousaikeikakuhonnpen.pdf",
+    "files": [
+      "tools/station_names/update_miyama_intensity_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.miyazaki.miyazaki.jp/city/management/guidance/tano_branch.html",
+    "files": [
+      "tools/station_names/update_known_facility_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.moriguchi.osaka.jp/gyoseijoho/shiyakusho/access.html",
+    "files": [
+      "tools/station_names/update_osaka_northern_city_hall_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.munakata.lg.jp/kiji003942/3_942_5_04sinsaiokyu.pdf",
+    "files": [
+      "tools/station_names/update_munakata_intensity_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.munakata.lg.jp/kiji003942/3_942_8126_up_6wxx7t31.pdf",
+    "files": [
+      "tools/station_names/update_munakata_intensity_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.nagano.nagano.jp/n085000/shisetsu/p000314.html",
+    "files": [
+      "tools/station_names/update_remaining_nagano_city_branch_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.nagano.nagano.jp/n088450/shisetsu/p000318.html",
+    "files": [
+      "tools/station_names/update_nagano_city_branch_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.nagano.nagano.jp/n088475/shisetsu/p000294.html",
+    "files": [
+      "tools/station_names/update_nagano_city_branch_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.nagano.nagano.jp/n088500/shisetsu/p000291.html",
+    "files": [
+      "tools/station_names/update_nagano_city_branch_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.nagano.nagano.jp/n088525/shisetsu/p000305.html",
+    "files": [
+      "tools/station_names/update_nagano_city_branch_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.nagano.nagano.jp/n088650/shisetsu/p000302.html",
+    "files": [
+      "tools/station_names/update_remaining_nagano_city_branch_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.nagoya.jp/_res/projects/default_project/_page_/001/010/571/jisinshiryo_2025.pdf",
+    "files": [
+      "tools/station_names/update_known_facility_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.nagoya.jp/kankobunkakoryu/cmsfiles/contents/0000029/29846/eigo.pdf",
+    "files": [
+      "tools/station_names/build_station_name_audit.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.nagoya.jp/shisei/gaiyou/1015754/1015760/1033895.html",
+    "files": [
+      "tools/station_names/update_known_facility_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.naka.lg.jp/bousai-anzen-saigai/bousai/page008623.html",
+    "files": [
+      "tools/station_names/update_naka_city_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.nakama.lg.jp/site/bousai/1147.html",
+    "files": [
+      "tools/station_names/update_nakama_fire_hq_intensity_address.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.nakama.lg.jp/uploaded/attachment/13683.pdf",
+    "files": [
+      "tools/station_names/update_nakama_fire_hq_intensity_address.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.nakano.nagano.jp/docs/2014011500334/",
+    "files": [
+      "tools/station_names/update_nagano_municipal_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.nakano.nagano.jp/soshiki/soumu/seisakujoho/",
+    "files": [
+      "tools/station_names/update_nagano_municipal_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.namerikawa.toyama.jp/soshiki/4/2/1/711.html",
+    "files": [
+      "tools/station_names/update_toyama_municipal_hall_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.nanjo.okinawa.jp/movie_library/movie_en/1579322539/1579323323/",
+    "files": [
+      "tools/station_names/build_station_name_audit.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.nanjo.okinawa.jp/userfiles/files/topics/1230/004.pdf",
+    "files": [
+      "tools/station_names/build_station_name_audit.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.nanto.toyama.jp/cms-sypher/open_imgs/info/0000037056.pdf",
+    "files": [
+      "tools/station_names/update_nanto_administrative_network_addresses.mjs",
+      "tools/station_names/update_remaining_toyama_facility_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.nanto.toyama.jp/johoosagasu/kakuka-shisetsuichiran/1/4657.html",
+    "files": [
+      "tools/station_names/update_nanto_administrative_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.nanto.toyama.jp/kurashi-tetsuzuki/yakusho-madoguchiannai/4586.html",
+    "files": [
+      "tools/station_names/update_nanto_administrative_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.nanto.toyama.jp/soshiki/shimin/6/1058.html",
+    "files": [
+      "tools/station_names/update_nanto_administrative_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.narita.chiba.jp/shisei/page276000.html",
+    "files": [
+      "tools/station_names/update_explicit_office_placements.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.nasukarasuyama.lg.jp/city-administration/organization/counter-guide/page001081.html",
+    "files": [
+      "tools/station_names/update_explicit_office_placements.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.nasushiobara.tochigi.jp/soshikikarasagasu/ssisho/3522.html",
+    "files": [
+      "tools/station_names/update_explicit_office_placements.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.nerima.tokyo.jp/kurashi/bosai/keikaku/chiikibou_r5.files/05honpen_bousaikeikaku_d.pdf",
+    "files": [
+      "tools/station_names/update_nerima_ward_office_intensity_address.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.nerima.tokyo.jp/shisetsu/ku/ku/about.html",
+    "files": [
+      "tools/station_names/update_nerima_ward_office_intensity_address.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.nichinan.lg.jp/",
+    "files": [
+      "tools/station_names/build_station_name_audit.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.nihonmatsu.lg.jp/data/doc/1655723818_doc_151_0.pdf",
+    "files": [
+      "tools/station_names/update_nihonmatsu_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.niigata.lg.jp/shisetsu/tyousya/access.html",
+    "files": [
+      "tools/station_names/update_explicit_office_placements.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.nikko.lg.jp/city_nikko/shisetsu/1/5932.html",
+    "files": [
+      "tools/station_names/update_explicit_office_placements.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.nirasaki.lg.jp/shinogaiyo/index.html",
+    "files": [
+      "tools/station_names/update_known_facility_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.nobeoka.miyazaki.jp/site/miryoku/3244.html",
+    "files": [
+      "tools/station_names/build_station_name_audit.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.nobeoka.miyazaki.jp/soshiki/13.html",
+    "files": [
+      "tools/station_names/build_station_name_audit.mjs",
+      "tools/station_names/update_known_facility_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.nobeoka.miyazaki.jp/soshiki/15.html",
+    "files": [
+      "tools/station_names/update_known_facility_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.nogata.fukuoka.jp/library/data/kurashi/pdf/shoubouhonbu/h20nenpou.pdf",
+    "files": [
+      "tools/station_names/update_nogata_fire_headquarters_network_address.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.nogata.fukuoka.jp/var/rev0/0011/8270/1257815933.pdf",
+    "files": [
+      "tools/station_names/update_nogata_fire_headquarters_network_address.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.noshiro.lg.jp/section/somu/somu/gyosei/12244",
+    "files": [
+      "tools/station_names/update_noshiro_city_hall_network_address.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.noshiro.lg.jp/up/files/www/city/nyusatsu/koji-kensa/h26/archives/172592download.pdf",
+    "files": [
+      "tools/station_names/update_noshiro_city_hall_network_address.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.oga.akita.jp/material/files/group/31/bousai_3-1_R6.pdf",
+    "files": [
+      "tools/station_names/update_oga_network_localities.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.okinawa.okinawa.jp/documents/25/honpen.pdf",
+    "files": [
+      "tools/station_names/update_okinawa_city_misato_network_address.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.okinawa.okinawa.jp/k050/anshin/shouboukyuukyuu/shoubou/1008/1108.html",
+    "files": [
+      "tools/station_names/update_okinawa_city_misato_network_address.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.omachi.nagano.jp/00005000/doc/00005200/19-6.pdf",
+    "files": [
+      "tools/station_names/update_nagano_municipal_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.omachi.nagano.jp/jigyosha/brand/damcurry/rwinyxnf51g9e5n6aarx2upd",
+    "files": [
+      "tools/station_names/update_nagano_northern_facility_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.osaka-izumi.lg.jp/index.html",
+    "files": [
+      "tools/station_names/update_osaka_southeast_city_hall_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.osaka.lg.jp/konohana/page/0000487404.html",
+    "files": [
+      "tools/station_names/update_osaka_public_facility_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.osaka.lg.jp/shobo/page/0000018935.html",
+    "files": [
+      "tools/station_names/update_osaka_city_fire_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.osakasayama.osaka.jp/machizukuri_shisei/gaiyo/1/3764.html",
+    "files": [
+      "tools/station_names/update_osaka_southern_city_hall_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.otsu.lg.jp/material/files/group/113/shiryo-1-7.pdf",
+    "files": [
+      "tools/station_names/update_known_facility_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.otsuki.yamanashi.jp/access/",
+    "files": [
+      "tools/station_names/update_explicit_office_placements.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.ritto.lg.jp/material/files/group/20/06siryousyu.pdf",
+    "files": [
+      "tools/station_names/update_known_facility_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.ryugasaki.ibaraki.jp/mobile/annai/index.html",
+    "files": [
+      "tools/station_names/update_explicit_office_placements.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.sado.niigata.jp/soshiki/3001/",
+    "files": [
+      "tools/station_names/update_known_facility_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.sado.niigata.jp/soshiki/3001/index.html",
+    "files": [
+      "tools/station_names/build_station_name_audit.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.saga.lg.jp/sangyo-machizukuri/sangyo-rodo/1/2/2254.html",
+    "files": [
+      "tools/station_names/update_saga_morodomi_branch_network_address.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.sagamihara.kanagawa.jp/_res/projects/default_project/_page_/001/008/827/2026/202606_shuusei.pdf",
+    "files": [
+      "tools/station_names/update_sagamihara_facilities.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.sagamihara.kanagawa.jp/_res/projects/default_project/_page_/001/011/898/renraku_r06.pdf",
+    "files": [
+      "tools/station_names/update_known_facility_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.sagamihara.kanagawa.jp/kurashi/shisetsu/fire_etc/fire/1003261.html",
+    "files": [
+      "tools/station_names/update_known_facility_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.sagamihara.kanagawa.jp/kurashi/shisetsu/shikanren/shiyakusyo/1002683.html",
+    "files": [
+      "tools/station_names/update_known_facility_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.sagamihara.kanagawa.jp/kurashi/shisetsu/shikanren/shiyakusyo/1002703.html",
+    "files": [
+      "tools/station_names/update_known_facility_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.sagamihara.kanagawa.jp/shisei/1026875/faq/etc/1002373.html",
+    "files": [
+      "tools/station_names/update_known_facility_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.sagamihara.kanagawa.jp/shisei/1026875/faq/kouen/1001667.html",
+    "files": [
+      "tools/station_names/update_known_facility_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.saiki.oita.jp/",
+    "files": [
+      "tools/station_names/build_station_name_audit.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.saiki.oita.jp/kiji0032113/index.html",
+    "files": [
+      "tools/station_names/update_explicit_office_placements.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.sakai.lg.jp/",
+    "files": [
+      "tools/station_names/build_station_name_audit.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.sakai.lg.jp/shisei/gaiyo/annai/gyoseikiko/sakai/index.html",
+    "files": [
+      "tools/station_names/update_explicit_office_placements.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.sakai.lg.jp/shisei/gaiyo/annai/gyoseikiko/shobo/mihara.html",
+    "files": [
+      "tools/station_names/update_osaka_public_facility_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.sakai.lg.jp/shisei/gaiyo/shozaichi.html",
+    "files": [
+      "tools/station_names/update_osaka_public_facility_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.saku.nagano.jp/kenko/ikiiki/shisetsu/20200526.html",
+    "files": [
+      "tools/station_names/update_saku_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.saku.nagano.jp/kenko/kenshin_yobosesshu/yobosesshu/yobousessyu-rireki.html",
+    "files": [
+      "tools/station_names/update_saku_health_center_network_address.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.saku.nagano.jp/soshiki/10/80030/index.html",
+    "files": [
+      "tools/station_names/update_saku_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.saku.nagano.jp/soshiki/10/80040/index.html",
+    "files": [
+      "tools/station_names/update_saku_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.sapporo.jp/kensetsu/stn/documents/demaekouza.pdf",
+    "files": [
+      "tools/station_names/build_station_name_audit.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.sapporo.jp/kikikanri/torikumi/keikaku/documents/01r7-jishin-chapter2.pdf",
+    "files": [
+      "tools/station_names/record_sapporo_municipal_meter_source_urls.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.sapporo.jp/ncms/reiki/d1w_reiki_nonframe/H339901010017/H339901010017_j.html",
+    "files": [
+      "tools/station_names/build_station_name_audit.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.sapporo.jp/shobo/chuo/documents/202507mobairu.pdf",
+    "files": [
+      "tools/station_names/build_station_name_audit.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.settsu.osaka.jp/map/shiyakusho/index.html",
+    "files": [
+      "tools/station_names/update_osaka_central_city_hall_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.shiga-konan.lg.jp/soshiki/somu/kanzaikeiyaku/4/2/2/2324.html",
+    "files": [
+      "tools/station_names/update_explicit_office_placements.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.shimonoseki.lg.jp/map/siyakusyo1.html",
+    "files": [
+      "tools/station_names/update_explicit_office_placements.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.shimonoseki.lg.jp/site/toyotabyoin/137278.html",
+    "files": [
+      "tools/station_names/update_known_facility_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.shimonoseki.lg.jp/soshiki/81/2909.html",
+    "files": [
+      "tools/station_names/update_known_facility_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.shimonoseki.lg.jp/soshiki/93/4939.html",
+    "files": [
+      "tools/station_names/update_shimonoseki_toyohoku_network_address.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.shimonoseki.lg.jp/uploaded/attachment/11554.pdf",
+    "files": [
+      "tools/station_names/update_known_facility_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.shimonoseki.lg.jp/uploaded/attachment/85337.pdf",
+    "files": [
+      "tools/station_names/update_shimonoseki_facilities.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.shimonoseki.lg.jp/uploaded/attachment/94966.pdf",
+    "files": [
+      "tools/station_names/update_shimonoseki_toyohoku_network_address.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.shirakawa.fukushima.jp/data/doc/1648634721_doc_43_0.pdf",
+    "files": [
+      "tools/station_names/update_shirakawa_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.shizuoka.lg.jp/s9328/s002700.html",
+    "files": [
+      "tools/station_names/build_station_name_audit.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.suita.osaka.jp/shisei/shisetsu/1019109/1020361.html",
+    "files": [
+      "tools/station_names/update_osaka_fire_network_addresses_2.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.sukagawa.fukushima.jp/shisetsu/1004367/1004368/1004149.html",
+    "files": [
+      "tools/station_names/update_known_facility_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.sukagawa.fukushima.jp/shisetsu/1004367/1004368/8889.html",
+    "files": [
+      "tools/station_names/update_known_facility_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.suwa.lg.jp/map/39308.html",
+    "files": [
+      "tools/station_names/update_nagano_facility_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.suzaka.nagano.jp/soshiki/1010/1/498.html",
+    "files": [
+      "tools/station_names/update_nagano_northern_facility_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.takahagi.ibaraki.jp/kurashi/shoubou_bousai_bouhan/bousai/page005533.html",
+    "files": [
+      "tools/station_names/update_takahagi_agaragawa_network_facility.mjs",
+      "tools/station_names/update_takahagi_city_hall_network_address.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.takaishi.lg.jp/about/access.html",
+    "files": [
+      "tools/station_names/update_osaka_southern_city_hall_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.takamatsu.kagawa.jp/kurashi/kurashi/shobo/keikaku/chiiki_bosai/pabukome_r7.files/r7.jishin-all.pdf",
+    "files": [
+      "tools/station_names/update_known_facility_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.takaoka.toyama.jp/gyosei/gyoseijoho/yakusho_madoguchiannai/1/6568.html",
+    "files": [
+      "tools/station_names/update_takaoka_fukuoka_network_address.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.takaoka.toyama.jp/soshiki/kanzaikeiyakuka/2/4/3321.html",
+    "files": [
+      "tools/station_names/update_toyama_more_facility_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.takeo.lg.jp/kyouiku/cat30/post-81.html",
+    "files": [
+      "tools/station_names/build_station_name_audit.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.taketa.oita.jp/section/reiki/reiki_honbun/r335RG00000244.html",
+    "files": [
+      "tools/station_names/update_taketa_placement_metadata.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.tamano.lg.jp/uploaded/attachment/32842.pdf",
+    "files": [
+      "tools/station_names/update_known_facility_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.tokyo-nakano.lg.jp/about/kuyakusho.html",
+    "files": [
+      "tools/station_names/update_nakano_ward_office_intensity_address.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.tokyo-nakano.lg.jp/kusei/zaisei/kessan/r5kessan.files/R5kessansetsumeisho.pdf",
+    "files": [
+      "tools/station_names/update_nakano_ward_office_intensity_address.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.tomi.nagano.jp/i/pb-cityhall.html",
+    "files": [
+      "tools/station_names/update_nagano_remaining_east_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.tonami.lg.jp/info/48130p/",
+    "files": [
+      "tools/station_names/update_remaining_toyama_facility_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.tonami.lg.jp/info/5643p/",
+    "files": [
+      "tools/station_names/update_toyama_municipal_hall_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.tondabayashi.lg.jp/uploaded/attachment/91520.pdf",
+    "files": [
+      "tools/station_names/update_osaka_remaining_fire_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.toyama.lg.jp/bosai/bosai/1010655/1017500.html",
+    "files": [
+      "tools/station_names/update_toyama_city_hall_network_address.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.toyama.lg.jp/kurashi/1011960/1010683/1010686/1007774.html",
+    "files": [
+      "tools/station_names/update_toyama_city_facility_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.toyama.lg.jp/kurashi/1011960/1010683/1010688/1016782/1007829.html",
+    "files": [
+      "tools/station_names/update_toyama_city_facility_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.toyama.lg.jp/kurashi/1011960/1010683/1010691/1007797.html",
+    "files": [
+      "tools/station_names/update_toyama_city_facility_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.toyama.lg.jp/kurashi/jichi/1010382/1011071/1007438.html?itemtype=1&laytype=1&print=1&temptype=1",
+    "files": [
+      "tools/station_names/update_remaining_toyama_facility_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.toyama.lg.jp/kurashi/sumai/1010267/1008055.html",
+    "files": [
+      "tools/station_names/update_toyama_city_facility_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.toyonaka.osaka.jp/shisetsu/shi/index.html",
+    "files": [
+      "tools/station_names/update_osaka_northern_city_hall_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.toyota.aichi.jp/_res/projects/default_project/_page_/001/007/504/r0705/03.pdf",
+    "files": [
+      "tools/station_names/update_known_facility_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.ueda.nagano.jp/map/13805.html",
+    "files": [
+      "tools/station_names/update_ueda_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.ueda.nagano.jp/soshiki/mtiiki/1059.html",
+    "files": [
+      "tools/station_names/update_ueda_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.ueda.nagano.jp/soshiki/shobo-honsomu/1529.html",
+    "files": [
+      "tools/station_names/update_nagano_facility_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.uenohara.yamanashi.jp/form/detail.php?lif_id=19314&sec_sec1=4",
+    "files": [
+      "tools/station_names/update_explicit_office_placements.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.uenohara.yamanashi.jp/page/1024373.html",
+    "files": [
+      "tools/station_names/update_known_facility_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.unzen.nagasaki.jp/bousai/kiji0034840/3_4840_12374_up_okgjakiw.pdf",
+    "files": [
+      "tools/station_names/build_station_name_audit.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.unzen.nagasaki.jp/kiji0033031/index.html",
+    "files": [
+      "tools/station_names/update_known_facility_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.yamaguchi.lg.jp/map/7167.html",
+    "files": [
+      "tools/station_names/update_yamaguchi_otono_network_address.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.yamaguchi.lg.jp/soshiki/4/164594.html",
+    "files": [
+      "tools/station_names/update_yamaguchi_otono_network_address.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.yamanashi.yamanashi.jp/soshiki/5/2269.html",
+    "files": [
+      "tools/station_names/update_known_facility_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.yamanashi.yamanashi.jp/soshiki/5/7233.html",
+    "files": [
+      "tools/station_names/update_known_facility_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.yamanashi.yamanashi.jp/soshiki/5/7235.html",
+    "files": [
+      "tools/station_names/update_known_facility_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.yanagawa.fukuoka.jp/fs/4/7/4/9/_/file20230607132701.pdf",
+    "files": [
+      "tools/station_names/update_yanagawa_intensity_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.yanagawa.fukuoka.jp/shisei/shinogaiyo/choshaannai/",
+    "files": [
+      "tools/station_names/update_yanagawa_intensity_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.yao.osaka.jp/shisei/yaoshinoshoukai/1009258/1012669.html",
+    "files": [
+      "tools/station_names/update_osaka_central_city_hall_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.yatsushiro.lg.jp/kiji00389/index.html",
+    "files": [
+      "tools/station_names/build_station_name_audit.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.yawata.kyoto.jp/0000000673.html",
+    "files": [
+      "tools/station_names/update_kyoto_network_addresses_4.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.yokote.lg.jp/shigoto/1001164/1001363/1005295/1003080.html",
+    "files": [
+      "tools/station_names/update_yokote_jumonji_network_address.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.city.yokote.lg.jp/shisetsu/1001525/1003643.html",
+    "files": [
+      "tools/station_names/update_yokote_jumonji_network_address.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.data.jma.go.jp/asahikawa/shosai/pdf/20250319oshirase_asa.pdf",
+    "files": [
+      "tools/station_names/build_station_name_audit.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.data.jma.go.jp/eqev/data/gaikyo/monthly/201103/monthly201103.pdf",
+    "files": [
+      "tools/station_names/repair_bunkyo_sports_center_metadata.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.data.jma.go.jp/eqev/data/intens-st/",
+    "files": [
+      "tools/station_names/build_station_name_audit.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.data.jma.go.jp/eqev/data/kyoshin/jishin/110311_tohokuchiho-taiheiyouoki/index2.html",
+    "files": [
+      "tools/station_names/update_known_facility_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.data.jma.go.jp/eqev/data/kyoshin/jma-shindo.html",
+    "files": [
+      "tools/station_names/audit_official_jma_catalog.py",
+      "tools/station_names/build_station_name_audit.mjs",
+      "tools/station_names/match_jma_station_addresses.mjs",
+      "tools/station_names/update_known_facility_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.data.jma.go.jp/ishigaki/bosai/tmanual/pdf/tsunami_manual_all.pdf",
+    "files": [
+      "tools/station_names/build_station_name_audit.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.data.jma.go.jp/kaiyou/db/tide/suisan/suisan.php?stn=YJ",
+    "files": [
+      "tools/station_names/build_station_name_audit.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.data.jma.go.jp/kumagaya/shosai/annai/access.html",
+    "files": [
+      "tools/station_names/build_station_name_audit.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.data.jma.go.jp/multi/quake/quake_detail.html?eventID=$eventId&lang=$reportLanguage",
+    "files": [
+      "app/src/main/java/cz/misa/quakedeck/MainActivity.kt"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.data.jma.go.jp/osaka/an-nai/contact.html",
+    "files": [
+      "tools/station_names/build_station_name_audit.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.data.jma.go.jp/osaka/an-nai/saiyou/R0508_kokkakoumuinopen1.pdf",
+    "files": [
+      "tools/station_names/build_station_name_audit.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.digital.go.jp/policies/base_registry_address_tos",
+    "files": [
+      "web/credits.html"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.digital.go.jp/resources/open_data/public_data_license_v1.0",
+    "files": [
+      "tools/station_names/audit_official_jma_catalog.py",
+      "web/credits.html"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.ds119.jp/shobo/",
+    "files": [
+      "tools/station_names/update_osaka_joint_fire_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.eclipse.org/legal/epl-v10.html",
+    "files": [
+      "web/credits.html"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.fd-takatsuki.jp/119/soshiki/",
+    "files": [
+      "tools/station_names/update_known_facility_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.fdma.go.jp/bousaikeikaku/hokkaido_tohoku/iwate/items/02iwate_shiryou.pdf",
+    "files": [
+      "tools/station_names/update_iwate_network_addresses_part1.mjs",
+      "tools/station_names/update_iwate_network_addresses_part2.mjs",
+      "tools/station_names/update_iwate_network_addresses_part3.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.fdma.go.jp/bousaikeikaku/hokkaido_tohoku/miyagi/items/05_miyagi_shiryou.pdf",
+    "files": [
+      "tools/station_names/update_miyagi_fdma_placement_metadata.py"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.fdma.go.jp/bousaikeikaku/hokkaido_tohoku/yamagata/items/04yamagata_shiryo.pdf",
+    "files": [
+      "tools/station_names/update_known_facility_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.fdma.go.jp/bousaikeikaku/shikoku/ehime/items/05_ehime_shiryou.pdf",
+    "files": [
+      "tools/station_names/update_ehime_network_facilities_part2.mjs",
+      "tools/station_names/update_ehime_network_facilities_part3.mjs",
+      "tools/station_names/update_imabari_network_facilities.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.fdma.go.jp/publication/handbook/items/20260302_binran.pdf",
+    "files": [
+      "tools/station_names/update_osaka_joint_fire_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.gsi.go.jp/",
+    "files": [
+      "tools/station_names/build_station_name_audit.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.gsi.go.jp/kikakuchousei/kikakuchousei40182.html",
+    "files": [
+      "web/credits.html"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.himeshima.jp/",
+    "files": [
+      "tools/station_names/update_explicit_office_placements.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.hinet.bosai.go.jp/notice/replacement/?_r=201403",
+    "files": [
+      "tools/station_names/update_nied_hinet_placement_metadata.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.hinet.bosai.go.jp/notice/replacement2007/?LANG=ja&_r=200801",
+    "files": [
+      "tools/station_names/update_nied_hinet_placement_metadata.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.hinet.bosai.go.jp/st_info/st_update/?LANG=ja&r=HFHKS2007&rym=200711",
+    "files": [
+      "tools/station_names/update_nied_legacy_placement_metadata.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.hinet.bosai.go.jp/st_info/st_update/?LANG=ja&r=HFHKS2007&rym=200801",
+    "files": [
+      "tools/station_names/update_nied_hinet_placement_metadata.mjs",
+      "tools/station_names/update_nied_legacy_placement_metadata.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.hinet.bosai.go.jp/st_info/st_update/?LANG=ja&r=HFHKS2007&rym=200802",
+    "files": [
+      "tools/station_names/update_nied_legacy_placement_metadata.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.ikedamachi.net/soshiki_list.html",
+    "files": [
+      "tools/station_names/update_nagano_more_municipal_hall_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.inacity.jp/koho/shihoina/archive/shihoina_R06/shihouR0601.files/inacity202401.pdf",
+    "files": [
+      "tools/station_names/update_nagano_remaining_east_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.inacity.jp/shisetsu/shiyakusho_shisho/hasesogoshisho.html",
+    "files": [
+      "tools/station_names/update_nagano_remaining_east_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.j-shis.bosai.go.jp/agreement",
+    "files": [
+      "web/credits.html"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.j-shis.bosai.go.jp/api-sstruct-meshinfo",
+    "files": [
+      "tools/build_local_eew_ground_resource.py"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.j-shis.bosai.go.jp/map/api/sstrct/V4/meshinfo.geojson",
+    "files": [
+      "tools/build_local_eew_ground_resource.py"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.jishin.go.jp/main/kansoku/kansoku19/strong_og_2019.html",
+    "files": [
+      "tools/station_names/update_taketa_placement_metadata.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.jma-net.go.jp/daitou/shosai/kansoku/kansoku_jishin.html",
+    "files": [
+      "tools/station_names/update_kitadaito_nakano_network_address.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.jma.go.jp/bosai/oshirase/dokujioshirase_pdf/JPSP/20251023052630_0_Z__J_JPSP_20251023052500_MET_INF_Jdokujioshirase32_NJ000n00_image.pdf",
+    "files": [
+      "tools/station_names/update_known_facility_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.jma.go.jp/bosai/oshirase/dokujioshirase_pdf/JPSP/20260217061734_0_Z__J_JPSP_20260217061600_MET_INF_Jdokujioshirase32_NJ000n00_image.pdf",
+    "files": [
+      "tools/station_names/update_kushimoto_uenoyama_jma_address.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.jma.go.jp/bosai/quake/data/list.json",
+    "files": [
+      "app/src/main/java/cz/misa/quakedeck/data/JmaReportReadiness.kt"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.jma.go.jp/jma/en/photogallery/JICA_training_2024.html",
+    "files": [
+      "tools/station_names/build_station_name_audit.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.jma.go.jp/jma/kishou/books/saigaiji/saigaiji_202101/denbun/202101/17/VP20210117013000_3.html",
+    "files": [
+      "tools/station_names/build_station_name_audit.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.jma.go.jp/jma/kishou/info/coment.html",
+    "files": [
+      "app/src/main/java/cz/misa/quakedeck/data/StationCatalog.kt",
+      "tools/station_names/audit_official_jma_catalog.py",
+      "web/credits.html"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.jma.go.jp/jma/kishou/know/amedas/ame_master_20250707.pdf",
+    "files": [
+      "tools/station_names/build_station_name_audit.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.jma.go.jp/jma/kishou/know/jishin/intens-st/index.html",
+    "files": [
+      "app/src/main/java/cz/misa/quakedeck/data/StationCatalog.kt",
+      "tools/station_names/audit_official_jma_catalog.py",
+      "web/credits.html"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.jma.go.jp/jma/kishou/know/jishin/intens-st/stations.json",
+    "files": [
+      "tools/station_names/audit_official_jma_catalog.py"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.jma.go.jp/jma/press/2305/13a/202305131810.html",
+    "files": [
+      "tools/station_names/build_station_name_audit.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.joho.tagawa.fukuoka.jp/kiji0031997/3_1997_7322_up_324qazyd.pdf",
+    "files": [
+      "tools/station_names/record_fukuoka_locality_sources.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.kamikawa.pref.hokkaido.lg.jp/fs/8/2/6/5/3/9/9/_/03_%E4%B8%8A%E5%B7%9D%E7%B7%8F%E5%90%88%E6%8C%AF%E8%88%88%E5%B1%80%E5%9C%B0%E5%9F%9F%E7%81%BD%E5%AE%B3%E5%AF%BE%E7%AD%96%E8%A6%81%E7%B6%B1(%E8%B3%87%E6%96%99%E7%B7%A8)%E3%80%90R5.4%E6%94%B9%E6%AD%A3%E3%80%91.pdf",
+    "files": [
+      "tools/station_names/record_kamikawa_network_facilities.mjs",
+      "tools/station_names/record_kamikawa_network_facilities_2.mjs",
+      "tools/station_names/update_horokanai_knet_current_fire_branch_address.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.kawauchimura.jp/gyosei/tokeidata/page000087.html",
+    "files": [
+      "tools/station_names/build_station_name_audit.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.kijimadaira-ldc.jp/soshiki/murayakuba/more.p3.html",
+    "files": [
+      "tools/station_names/update_nagano_more_municipal_hall_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.kkj.go.jp/d/?A=a2Fnb3NoaW1hL2thZ29zaGltYV9wcmVmLzIwMjQvMjAyNDAzMDhfMDA2MjVfMDMucGRmCg%3D%3D&L=ja",
+    "files": [
+      "tools/station_names/update_kagoshima_placement_metadata.mjs",
+      "tools/station_names/update_kagoshima_prefectural_network_placements.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.kyoshin.bosai.go.jp/ja/stationlist/",
+    "files": [
+      "tools/station_names/build_station_name_audit.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.kyoshin.bosai.go.jp/ja/stationlist/api/",
+    "files": [
+      "tools/station_names/build_station_name_audit.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.library.pref.ishikawa.lg.jp/shosho/content/item/bib/BDT20000168.0003/rawdip/BDT20000168.0003.pdf",
+    "files": [
+      "tools/station_names/update_kaga_yamanaka_intensity_address.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.m-kouiki119.jp/mrfb/shozaichi/shozokuichiran/",
+    "files": [
+      "tools/station_names/update_nagano_facility_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.minamiaiki.jp/maiki-cms/wp-content/uploads/2025/05/b39e434b0bb55708809efe8b4bf95de3.pdf",
+    "files": [
+      "tools/station_names/update_nagano_remaining_municipal_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.minamimakimura.jp/main/about/access.html",
+    "files": [
+      "tools/station_names/update_nagano_saku_municipal_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.naturalearthdata.com/about/terms-of-use/",
+    "files": [
+      "web/credits.html"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.nebamura.jp/",
+    "files": [
+      "tools/station_names/update_nagano_office_placement.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.nict.go.jp/en/sts/ntp_faq.html",
+    "files": [
+      "web/credits.html"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.openstreetmap.org/copyright",
+    "files": [
+      "tools/map-editor/index.html"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.osaka-airport.co.jp/en",
+    "files": [
+      "tools/station_names/build_station_name_audit.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.p2pquake.net/secondary_use/",
+    "files": [
+      "web/credits.html"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.police.pref.osaka.lg.jp/sogo/keisatsusho/shinai/6401.html",
+    "files": [
+      "tools/station_names/update_osaka_public_facility_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.pref.aichi.jp/uploaded/attachment/542306.pdf",
+    "files": [
+      "tools/station_names/update_iwakura_fire_hq_intensity_address.mjs",
+      "tools/station_names/update_known_facility_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.pref.aichi.jp/uploaded/attachment/593301.pdf",
+    "files": [
+      "tools/station_names/update_aichi_placement_metadata.py"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.pref.aomori.lg.jp/soshiki/kikikanri/bousai/files/shiryo_3.pdf",
+    "files": [
+      "tools/station_names/update_aomori_placement_metadata.mjs",
+      "tools/station_names/update_known_facility_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.pref.gunma.jp/uploaded/attachment/679269.pdf",
+    "files": [
+      "tools/station_names/build_station_name_audit.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.pref.hokkaido.lg.jp/fs/1/3/1/3/5/6/7/2/_/%E2%97%8B%E3%80%90R7%E3%80%91%E8%B3%87%E6%96%992-1%28%E8%A4%87%E6%95%B0%E3%82%B7%E3%83%BC%E3%83%88%29.pdf",
+    "files": [
+      "tools/station_names/update_hokkaido_placement_metadata.py"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.pref.hokkaido.lg.jp/fs/3/3/1/1/6/9/0/_/siryou2-1.2-2.pdf",
+    "files": [
+      "tools/station_names/update_hokkaido_onbetsu_network_address.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.pref.ishikawa.lg.jp/bousai/nenpo/documents/h30-sbn-00zentai.pdf",
+    "files": [
+      "tools/station_names/update_kaga_yamanaka_intensity_address.mjs",
+      "tools/station_names/update_known_facility_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.pref.ishikawa.lg.jp/bousai/nenpo/documents/r2nenpou.pdf",
+    "files": [
+      "tools/station_names/update_known_facility_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.pref.ishikawa.lg.jp/bousai/nenpo/documents/shouboubousainennpouh28.pdf",
+    "files": [
+      "tools/station_names/update_known_facility_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.pref.kagawa.lg.jp/documents/3893/026isski.pdf",
+    "files": [
+      "tools/station_names/update_known_facility_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.pref.kagawa.lg.jp/documents/3893/j-3.pdf",
+    "files": [
+      "tools/station_names/update_known_facility_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.pref.kanagawa.jp/docs/kd8/faq/p3685.html?vm=r",
+    "files": [
+      "tools/station_names/update_known_facility_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.pref.kochi.lg.jp/doc/2018060700028/file_contents/file_20256183171933_2.pdf",
+    "files": [
+      "tools/station_names/update_known_facility_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.pref.kochi.lg.jp/doc/2026022700061/file_contents/04shiyousyo.pdf",
+    "files": [
+      "tools/station_names/update_kochi_placement_metadata.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.pref.miyagi.jp/documents/8097/04-02-2_siryou-honnpenn.pdf",
+    "files": [
+      "tools/station_names/update_miyagi_placement_metadata.py"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.pref.nagano.lg.jp/bosai/kurashi/shobo/kekaku/documents/07_20~30.pdf",
+    "files": [
+      "tools/station_names/update_nagano_network_facilities.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.pref.nagano.lg.jp/kokai/kensei/kenpo/h21/h21-04/documents/20090423_1.pdf",
+    "files": [
+      "tools/station_names/update_nagano_remaining_official_facility_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.pref.nagano.lg.jp/sansei/documents/sakae.pdf",
+    "files": [
+      "tools/station_names/update_sakae_village_hall_network_address.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.pref.nagano.lg.jp/shichoson/kensei/shichoson/gappei/gappei/mejiiko/ichiran/",
+    "files": [
+      "tools/station_names/update_nagano_remaining_municipal_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.pref.niigata.lg.jp/uploaded/attachment/487321.pdf",
+    "files": [
+      "tools/station_names/update_known_facility_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.pref.okayama.jp/uploaded/attachment/385084.pdf",
+    "files": [
+      "tools/station_names/update_okayama_prefectural_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.pref.okayama.jp/uploaded/life/766028_9625698_misc.pdf",
+    "files": [
+      "tools/station_names/update_okayama_placement_metadata.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.pref.osaka.lg.jp/",
+    "files": [
+      "tools/station_names/build_station_name_audit.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.pref.osaka.lg.jp/documents/105964/b2-0720shindonetwork.pdf",
+    "files": [
+      "tools/station_names/update_osaka_network_facilities.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.pref.osaka.lg.jp/o070060/johokokai/archives/access.html",
+    "files": [
+      "tools/station_names/update_osaka_prefecture_and_town_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.pref.saga.lg.jp/kiji003118535/3_118535_up_31abmgvh.pdf",
+    "files": [
+      "tools/station_names/update_known_facility_placements.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.pref.shimane.lg.jp/bousai_info/bousai/bousai/bosai_shiryo/sinsai.data/02-2sinnsaihenn_oukyuutaisaku.pdf",
+    "files": [
+      "tools/station_names/update_shimane_prefectural_seismic_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.pref.shizuoka.jp/_res/projects/default_project/_page_/001/029/862/2-2-5.pdf",
+    "files": [
+      "tools/station_names/update_known_facility_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.pref.shizuoka.jp/governor/ir2002/documents/ir_20221108_en.pdf",
+    "files": [
+      "tools/station_names/build_station_name_audit.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.pref.toyama.jp/documents/25269/02.pdf",
+    "files": [
+      "tools/station_names/update_takaoka_fukuoka_network_address.mjs",
+      "tools/station_names/update_toyama_city_hall_network_address.mjs",
+      "tools/station_names/update_toyama_prefectural_network_facilities.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.pref.wakayama.lg.jp/prefg/011400/d00153903_d/fil/03-4_siryou_3.pdf",
+    "files": [
+      "tools/station_names/update_wakayama_prefectural_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.pref.yamaguchi.lg.jp/uploaded/attachment/174601.pdf",
+    "files": [
+      "tools/station_names/update_yamaguchi_prefectural_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.pref.yamanashi.jp/shobo/documents/88770017458.pdf",
+    "files": [
+      "tools/station_names/repair_bunkyo_sports_center_metadata.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.qsr.mlit.go.jp/takeo/site_files/file/kasegawa/kaseijikanrikeikaku1.pdf",
+    "files": [
+      "tools/station_names/update_ogi_mikatsuki_network_address.mjs",
+      "tools/station_names/update_saga_yamato_network_address.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.senshu-minami119.jp/articles/1081.html",
+    "files": [
+      "tools/station_names/update_osaka_remaining_fire_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.tokara.jp/profile/gaiyou/nakano/",
+    "files": [
+      "tools/station_names/build_station_name_audit.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.tokara.jp/resource/pdf/houshin/tel.pdf",
+    "files": [
+      "tools/station_names/update_known_facility_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.town-kiso.com/chousei/senkyo/100394/101890/",
+    "files": [
+      "tools/station_names/update_kiso_town_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.town-kiso.com/kodomo/kosodate/100325/101510/",
+    "files": [
+      "tools/station_names/update_kiso_town_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.town.agematsu.nagano.jp/aboutus/",
+    "files": [
+      "tools/station_names/update_nagano_office_placement.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.town.aizubange.fukushima.jp/uploaded/attachment/2336.pdf",
+    "files": [
+      "tools/station_names/update_aizubange_town_hall_intensity_address.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.town.aizumisato.fukushima.jp/soshiki/1007/6/kyoudo/4988.html",
+    "files": [
+      "tools/station_names/update_explicit_office_placements.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.town.aizumisato.fukushima.jp/soshiki/1008/1/2_1/581.html",
+    "files": [
+      "tools/station_names/update_explicit_office_placements.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.town.aya.miyazaki.jp/soshiki/index-50.html",
+    "files": [
+      "tools/station_names/update_explicit_office_placements.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.town.fujikawaguchiko.lg.jp/ka/list.php?ka_id=6",
+    "files": [
+      "tools/station_names/update_known_facility_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.town.fujikawaguchiko.yamanashi.jp/ka/list.php?ka_id=3",
+    "files": [
+      "tools/station_names/update_explicit_office_placements.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.town.fujimi.lg.jp/page/accsess.html",
+    "files": [
+      "tools/station_names/update_nagano_east_municipal_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.town.godo.gifu.jp/contents/content04.html",
+    "files": [
+      "tools/station_names/update_godo_town_hall_intensity_address.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.town.godo.gifu.jp/politics/pdf/08_28.pdf",
+    "files": [
+      "tools/station_names/update_godo_town_hall_intensity_address.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.town.hachirogata.akita.jp/_res/projects/default_project/_page_/001/003/306/r4.3gatsu.pdf",
+    "files": [
+      "tools/station_names/update_hachirogata_network_address.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.town.hachirogata.akita.jp/shisetsu/1002923/1002936.html",
+    "files": [
+      "tools/station_names/update_hachirogata_network_address.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.town.hiji.lg.jp/gyoseijoho/shisetsuannai/hijimachiyakubachosha/index.html",
+    "files": [
+      "tools/station_names/update_explicit_office_placements.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.town.ichikawamisato.yamanashi.jp/40administration/19publicagencies/",
+    "files": [
+      "tools/station_names/update_known_facility_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.town.ichikawamisato.yamanashi.jp/40administration/index.html",
+    "files": [
+      "tools/station_names/update_explicit_office_placements.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.town.ide.kyoto.jp/soshiki/kyouikuiinkai/syakaikyouiku/syakai_k_news/4312.html",
+    "files": [
+      "tools/station_names/update_kyoto_network_addresses_5.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.town.iizuna.nagano.jp/docs/336.html",
+    "files": [
+      "tools/station_names/update_nagano_northern_facility_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.town.iizuna.nagano.jp/docs/666.html",
+    "files": [
+      "tools/station_names/update_nagano_more_municipal_hall_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.town.ine.kyoto.jp/material/files/group/3/hinansyoitizu_.pdf",
+    "files": [
+      "tools/station_names/update_kyoto_network_addresses_6.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.town.ino.kochi.jp/",
+    "files": [
+      "tools/station_names/build_station_name_audit.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.town.itoda.lg.jp/administration/information",
+    "files": [
+      "tools/station_names/update_explicit_office_placements.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.town.kaita.lg.jp/soshiki/5/143783.html",
+    "files": [
+      "tools/station_names/update_explicit_office_placements.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.town.kamifurano.hokkaido.jp/contents/20down/koho/s06/06-04-10.pdf",
+    "files": [
+      "tools/station_names/update_known_facility_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.town.kamiichi.toyama.jp/map/3802.html",
+    "files": [
+      "tools/station_names/update_toyama_more_facility_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.town.kanan.osaka.jp/faq/faq_gyosei/1/4442.html",
+    "files": [
+      "tools/station_names/update_osaka_southern_town_hall_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.town.karuizawa.lg.jp/map/m6722.html",
+    "files": [
+      "tools/station_names/update_nagano_east_municipal_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.town.kasagi.lg.jp/contents_detail.php?frmId=465",
+    "files": [
+      "tools/station_names/update_kyoto_network_addresses_5.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.town.kasuya.fukuoka.jp/li/110/010/index.html",
+    "files": [
+      "tools/station_names/update_kasuya_town_hall_network_address.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.town.kasuya.fukuoka.jp/s013/020/010/020/file/shinnsaiR4.7.pdf",
+    "files": [
+      "tools/station_names/update_kasuya_town_hall_network_address.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.town.koge.lg.jp/material/files/group/2/2999_4456_misc.pdf",
+    "files": [
+      "tools/station_names/update_koge_town_hall_intensity_address.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.town.koge.lg.jp/soshiki/chocho/10/1_1/4/816.html",
+    "files": [
+      "tools/station_names/update_koge_town_hall_intensity_address.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.town.kumano.lg.jp/7/6/2/index.html",
+    "files": [
+      "tools/station_names/update_explicit_office_placements.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.town.kumiyama.lg.jp/soshiki/8-1-0-0-0_4.html",
+    "files": [
+      "tools/station_names/update_kyoto_network_addresses_5.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.town.kuzumaki.lg.jp/soshiki/kuzumaki/more.p5.html",
+    "files": [
+      "tools/station_names/build_station_name_audit.mjs",
+      "tools/station_names/update_explicit_office_placements.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.town.mashiki.lg.jp/bousai/kiji0036632/3_6632_19153_up_cu4d7aru.pdf",
+    "files": [
+      "tools/station_names/build_station_name_audit.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.town.matsukawa.lg.jp/choseijoho/matsukawamachinoshokai/matsukawamachiyakuba_soshiki_toiawase/index.html",
+    "files": [
+      "tools/station_names/update_nagano_remaining_municipal_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.town.minamiise.lg.jp/admin/gyousei/info/1460.html",
+    "files": [
+      "tools/station_names/build_station_name_audit.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.town.minobu.lg.jp/page/1269.html",
+    "files": [
+      "tools/station_names/update_explicit_office_placements.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.town.minowa.lg.jp/soshiki/somu/gyomu/13/25.html",
+    "files": [
+      "tools/station_names/update_nagano_ina_valley_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.town.misaki.osaka.jp/ijyu/access/1799.html",
+    "files": [
+      "tools/station_names/update_osaka_southern_town_hall_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.town.mitane.akita.jp/material/files/group/16/dayori55.pdf",
+    "files": [
+      "tools/station_names/update_mitane_yamamoto_network_address.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.town.mitane.akita.jp/soshikikarasagasu/somuka/1/360.html",
+    "files": [
+      "tools/station_names/update_mitane_yamamoto_network_address.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.town.miyaki.lg.jp/kabetsu/mine.html?media=pc",
+    "files": [
+      "tools/station_names/build_station_name_audit.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.town.miyota.nagano.jp/file/183047.pdf",
+    "files": [
+      "tools/station_names/update_nagano_office_placement.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.town.motobu.okinawa.jp/",
+    "files": [
+      "tools/station_names/update_explicit_office_placements.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.town.nagano-takamori.lg.jp/shisetsu/list/0101/",
+    "files": [
+      "tools/station_names/update_nagano_southern_village_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.town.nagawa.nagano.jp/soshiki/somu/johokoho/johokohocatv/1/3/290.html",
+    "files": [
+      "tools/station_names/update_nagano_branch_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.town.nagiso.nagano.jp/s/foreign/en/information.html",
+    "files": [
+      "tools/station_names/build_station_name_audit.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.town.nagiso.nagano.jp/soshiki_list.html",
+    "files": [
+      "tools/station_names/update_nagano_office_placement.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.town.nakafurano.lg.jp/",
+    "files": [
+      "tools/station_names/update_known_facility_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.town.naoshima.lg.jp/about/shisetsu/townhall.html",
+    "files": [
+      "tools/station_names/update_explicit_office_placements.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.town.nose.osaka.jp/soshiki/midorikankyou/midorisinko/katudoousienkyuuhuhojyo/10578.html",
+    "files": [
+      "tools/station_names/update_osaka_prefecture_and_town_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.town.nyuzen.toyama.jp/gyosei/chosei/yakuba/index.html",
+    "files": [
+      "tools/station_names/update_toyama_municipal_hall_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.town.obuse.nagano.jp/group.html",
+    "files": [
+      "tools/station_names/update_nagano_town_hall_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.town.ogano.lg.jp/kurashi-tetsuzuki/bus-taxi/",
+    "files": [
+      "tools/station_names/build_station_name_audit.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.town.ogano.lg.jp/reiki_int/reiki_honbun/r232RG00000441.html",
+    "files": [
+      "tools/station_names/update_known_facility_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.town.ohnan.lg.jp/soshiki/13/",
+    "files": [
+      "tools/station_names/update_known_facility_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.town.okagaki.lg.jp/s001/060/010/201502050003.html",
+    "files": [
+      "tools/station_names/update_okagaki_town_hall_intensity_address.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.town.okagaki.lg.jp/s005/010/010/1041/08kutyozumen.pdf",
+    "files": [
+      "tools/station_names/update_okagaki_town_hall_intensity_address.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.town.saka.lg.jp/category/%E7%94%BA%E6%94%BF%E6%83%85%E5%A0%B1/%E5%9D%82%E7%94%BA%E3%81%AE%E3%81%94%E7%B4%B9%E4%BB%8B/%E5%9D%82%E7%94%BA%E5%BD%B9%E5%A0%B4%E3%81%B8%E3%81%AE%E3%82%A2%E3%82%AF%E3%82%BB%E3%82%B9/",
+    "files": [
+      "tools/station_names/update_explicit_office_placements.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.town.sakaki.nagano.jp/site/userguide/2740.html",
+    "files": [
+      "tools/station_names/update_nagano_town_hall_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.town.sakuho.nagano.jp/soshiki/sogoseisaku/",
+    "files": [
+      "tools/station_names/update_nagano_saku_municipal_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.town.seika.kyoto.jp/chosei/machiyakuba/index.html",
+    "files": [
+      "tools/station_names/update_seika_town_hall_network_address.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.town.shimamoto.lg.jp/site/shimamtosyoubou/",
+    "files": [
+      "tools/station_names/update_osaka_prefecture_and_town_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.town.shimosuwa.lg.jp/www/genre/1000100000078/index.html",
+    "files": [
+      "tools/station_names/update_nagano_office_placement.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.town.shingu.fukuoka.jp/material/files/group/14/gikaikouhou107gou.pdf",
+    "files": [
+      "tools/station_names/update_shingu_town_hall_network_facility.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.town.shingu.fukuoka.jp/soshiki/chiiki_kyodo/6/1/1141.html",
+    "files": [
+      "tools/station_names/update_shingu_town_hall_network_facility.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.town.shirahama.wakayama.jp/soshiki/shobo/gyomu/toukei/3908.html",
+    "files": [
+      "tools/station_names/build_station_name_audit.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.town.showa.yamanashi.jp/soshiki/3/2046.html",
+    "files": [
+      "tools/station_names/update_known_facility_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.town.sotogahama.lg.jp/gyosei/koho/koho_sotogahama/files/201906_soto_prm.pdf",
+    "files": [
+      "tools/station_names/build_station_name_audit.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.town.sotogahama.lg.jp/kanko/spot/spot_tairadate.html",
+    "files": [
+      "tools/station_names/build_station_name_audit.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.town.suo-oshima.lg.jp/soshiki/33/1631.html",
+    "files": [
+      "tools/station_names/update_known_facility_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.town.tadaoka.osaka.jp/gyousei/gaiyou/index.html",
+    "files": [
+      "tools/station_names/update_osaka_coastal_town_hall_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.town.taishi.osaka.jp/",
+    "files": [
+      "tools/station_names/update_osaka_southern_town_hall_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.town.tajiri.osaka.jp/johowosagasu/shisetsuannai/tajirityoyakuba/index.html",
+    "files": [
+      "tools/station_names/update_osaka_coastal_town_hall_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.town.tarui.lg.jp/map/4809.html",
+    "files": [
+      "tools/station_names/update_explicit_office_placements.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.town.tateshina.nagano.jp/gyoseijoho/yakusho_madoguchi/yakuba_annai/index.html",
+    "files": [
+      "tools/station_names/update_nagano_east_municipal_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.town.tateyama.toyama.jp/material/files/group/2/20270312_tateyamatown_tiikibousaiplan_siryou.pdf",
+    "files": [
+      "tools/station_names/update_tateyama_placement_metadata.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.town.tawaramoto.nara.jp/material/files/group/3/240422_25.pdf",
+    "files": [
+      "tools/station_names/update_explicit_office_placements.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.town.toyono.osaka.jp/inq.php",
+    "files": [
+      "tools/station_names/update_osaka_prefecture_and_town_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.town.umi.lg.jp/life/sub/23/31/144/",
+    "files": [
+      "tools/station_names/update_umi_town_hall_network_address.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.town.umi.lg.jp/uploaded/attachment/20731.pdf",
+    "files": [
+      "tools/station_names/update_umi_town_hall_network_address.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.town.utazu.lg.jp/uploaded/attachment/3616.pdf",
+    "files": [
+      "tools/station_names/update_explicit_office_placements.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.town.wassamu.hokkaido.jp/fire-department/introduction/",
+    "files": [
+      "tools/station_names/update_horokanai_knet_current_fire_branch_address.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.town.wazuka.lg.jp/kakukanogoannai/somuka/kakukarenrakusaki/2366.html",
+    "files": [
+      "tools/station_names/update_kyoto_network_addresses_5.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.town.yakushima.kagoshima.jp/material/files/group/3/09_r3bousaimap_kanagadake_30870633.pdf",
+    "files": [
+      "tools/station_names/build_station_name_audit.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.town.yonaguni.okinawa.jp/docs/2018042400588/access.html",
+    "files": [
+      "tools/station_names/build_station_name_audit.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.town.yonaguni.okinawa.jp/docs/2018080700015/",
+    "files": [
+      "tools/station_names/update_explicit_office_placements.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.town.yosano.lg.jp/administration/office-organization/kaya/entry_82/",
+    "files": [
+      "tools/station_names/update_kyoto_network_addresses_2.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.town.yosano.lg.jp/reiki/reiki_honbun/r323RG00000001.html",
+    "files": [
+      "tools/station_names/update_kyoto_network_addresses_3.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.town.yoshitomi.lg.jp/gyosei/z378/",
+    "files": [
+      "tools/station_names/update_yoshitomi_intensity_address.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.town.yoshitomi.lg.jp/user/filer_public/50/8d/508d910c-03bf-47f5-943e-92eaec558b96/04_ji-fu-ting-di-yu-fang-zai-ji-hua-di-4zhang-di-zhen-jin-bo-ying-ji-dui-ce-ji-hua.pdf",
+    "files": [
+      "tools/station_names/record_yoshitomi_town_hall_network_facility.mjs",
+      "tools/station_names/update_yoshitomi_intensity_address.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.urugi.jp/",
+    "files": [
+      "tools/station_names/update_nagano_office_placement.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.vill-shimojo.jp/gyousei/index.html",
+    "files": [
+      "tools/station_names/update_nagano_southern_village_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.vill-tenryu.jp/administrative/government_info/about/info-tenryu-village/sosiki/",
+    "files": [
+      "tools/station_names/update_nagano_remaining_municipal_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.vill.achi.lg.jp/soshiki/2/2009-11-post-81.html",
+    "files": [
+      "tools/station_names/update_achi_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.vill.achi.lg.jp/soshiki/2/2026-post-80.html",
+    "files": [
+      "tools/station_names/update_achi_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.vill.aguni.okinawa.jp/soshiki/index.html",
+    "files": [
+      "tools/station_names/update_explicit_office_placements.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.vill.aoki.nagano.jp/",
+    "files": [
+      "tools/station_names/update_nagano_east_municipal_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.vill.asahi.nagano.jp/official/sonseijoho/asahimuranoshokai/612.html",
+    "files": [
+      "tools/station_names/update_nagano_office_placement.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.vill.awashimaura.lg.jp/wp-content/uploads/2025/10/e760618eb52170f0e17470e12102d730.pdf",
+    "files": [
+      "tools/station_names/build_station_name_audit.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.vill.chihayaakasaka.osaka.jp/sonsei/muranitsuite/index.html",
+    "files": [
+      "tools/station_names/update_osaka_southern_town_hall_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.vill.chikuhoku.lg.jp/fs/5/6/7/_/2ff3111af15700d25d0bddf9d6f242cf.pdf",
+    "files": [
+      "tools/station_names/update_nagano_remaining_official_facility_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.vill.chikuhoku.lg.jp/shisetsu/list/001/",
+    "files": [
+      "tools/station_names/update_nagano_central_municipal_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.vill.funahashi.toyama.jp/gyosei_new/",
+    "files": [
+      "tools/station_names/update_toyama_facility_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.vill.hinohara.tokyo.jp/category/2-3-2-0-0-0-0-0-0-0.html",
+    "files": [
+      "tools/station_names/update_explicit_office_placements.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.vill.hinohara.tokyo.jp/soshiki_list.html",
+    "files": [
+      "tools/station_names/build_station_name_audit.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.vill.iheya.okinawa.jp/soshiki/",
+    "files": [
+      "tools/station_names/build_station_name_audit.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.vill.kawakami.nagano.jp/www/genre/1000200000139/index.html",
+    "files": [
+      "tools/station_names/update_nagano_saku_municipal_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.vill.kiso.nagano.jp/kurashi_joho/bosai_bohan/phone.html?newwindow=true",
+    "files": [
+      "tools/station_names/update_kiso_village_hall_network_address.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.vill.kitaaiki.nagano.jp/fs/7/9/1/2/0/_/__8__________.pdf",
+    "files": [
+      "tools/station_names/update_nagano_office_placement.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.vill.kouzushima.tokyo.jp/",
+    "files": [
+      "tools/station_names/build_station_name_audit.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.vill.kouzushima.tokyo.jp/about/",
+    "files": [
+      "tools/station_names/update_explicit_office_placements.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.vill.kouzushima.tokyo.jp/images/2023/03/20230314-keikaku.pdf",
+    "files": [
+      "tools/station_names/build_station_name_audit.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.vill.matsukawa.nagano.jp/",
+    "files": [
+      "tools/station_names/update_nagano_office_placement.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.vill.minamidaito.okinawa.jp/life/sub/1/25/113/",
+    "files": [
+      "tools/station_names/update_explicit_office_placements.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.vill.minamiminowa.lg.jp/soshiki/soumu/watasitatinomura.html",
+    "files": [
+      "tools/station_names/update_nagano_office_placement.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.vill.minamiyamashiro.lg.jp/cmsfiles/contents/0000002/2519/tenshutsu_yuso.pdf",
+    "files": [
+      "tools/station_names/update_kyoto_network_addresses_6.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.vill.miyada.nagano.jp/ck/2/files/2020sonsei.pdf",
+    "files": [
+      "tools/station_names/update_nagano_office_placement.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.vill.nagano-toyooka.lg.jp/99etc/contact.html",
+    "files": [
+      "tools/station_names/update_nagano_remaining_official_facility_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.vill.nakagawa.nagano.jp/soshiki/soumu/2330.html",
+    "files": [
+      "tools/station_names/update_nagano_ina_valley_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.vill.narusawa.yamanashi.jp/gyosei/muragyosei/shisetsu/yakuba/index.html",
+    "files": [
+      "tools/station_names/update_explicit_office_placements.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.vill.nishigo.fukushima.jp/material/files/group/18/R3nisigoumuranokyouiku.pdf",
+    "files": [
+      "tools/station_names/update_nishigo_koshigaya_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.vill.nishigo.fukushima.jp/material/files/group/5/chiikibousaikeikakusinnsaitaisakuhen.pdf",
+    "files": [
+      "tools/station_names/update_nishigo_koshigaya_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.vill.nozawaonsen.nagano.jp/www/contents/1050000000003/index.html",
+    "files": [
+      "tools/station_names/update_nagano_village_hall_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.vill.ogawa.nagano.jp/docs/6245.html",
+    "files": [
+      "tools/station_names/update_nagano_more_municipal_hall_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.vill.okuwa.lg.jp/kurashi/denwacho/denwatyou-gyousei.html",
+    "files": [
+      "tools/station_names/update_okuwa_village_hall_network_address.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.vill.omi.nagano.jp/omimura/johokokai/index.html",
+    "files": [
+      "tools/station_names/update_nagano_central_municipal_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.vill.otaki.nagano.jp/",
+    "files": [
+      "tools/station_names/build_station_name_audit.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.vill.otaki.nagano.jp/aboutus/gaiyou/facility/yakuba.html",
+    "files": [
+      "tools/station_names/update_nagano_office_placement.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.vill.otari.nagano.jp/gyoseijoho/otarimuranitsuite/index.html",
+    "files": [
+      "tools/station_names/update_nagano_town_hall_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.vill.shinjo.okayama.jp/index.php?id=3369",
+    "files": [
+      "tools/station_names/update_explicit_office_placements.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.vill.takagi.lg.jp/doc/2021070700025/",
+    "files": [
+      "tools/station_names/update_nagano_office_placement.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.vill.takayama.nagano.jp/institution/shisetsu/institution08/",
+    "files": [
+      "tools/station_names/update_nagano_village_hall_network_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.vill.tanohata.iwate.jp/",
+    "files": [
+      "tools/station_names/build_station_name_audit.mjs",
+      "tools/station_names/update_explicit_office_placements.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.vill.tenei.fukushima.jp/site/shisetsu/m01.html",
+    "files": [
+      "tools/station_names/update_known_facility_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.vill.toyone.aichi.jp/",
+    "files": [
+      "tools/station_names/build_station_name_audit.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.vill.yamagata.nagano.jp/government/",
+    "files": [
+      "tools/station_names/update_nagano_office_placement.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.vill.yasuoka.nagano.jp/",
+    "files": [
+      "tools/station_names/build_station_name_audit.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.vill.yasuoka.nagano.jp/access.html",
+    "files": [
+      "tools/station_names/update_nagano_office_placement.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.vill.yasuoka.nagano.jp/docs/29992.html",
+    "files": [
+      "tools/station_names/build_station_name_audit.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www.village.ikusaka.nagano.jp/",
+    "files": [
+      "tools/station_names/update_nagano_office_placement.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www1.g-reiki.net/iheya/reiki_honbun/q946RG00000001.html",
+    "files": [
+      "tools/station_names/update_explicit_office_placements.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www1.g-reiki.net/okaya/reiki_honbun/e705RG00000445.html",
+    "files": [
+      "tools/station_names/update_nagano_remaining_official_facility_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www1.g-reiki.net/town.yakushima.kagoshima/reiki_honbun/r413RG00000156.html",
+    "files": [
+      "tools/station_names/update_known_facility_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://www1.g-reiki.net/vill.kosuge/reiki_honbun/e664RG00000155.html",
+    "files": [
+      "tools/station_names/update_known_facility_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://xml.kishou.go.jp/",
+    "files": [
+      "tools/station_names/audit_official_jma_catalog.py"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://xml.kishou.go.jp/20111125_jmaxml_info.pdf",
+    "files": [
+      "tools/station_names/update_known_facility_addresses.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://xml.kishou.go.jp/20120831_jmaxml_info.pdf",
+    "files": [
+      "tools/station_names/build_station_name_audit.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://xml.kishou.go.jp/20130227_jmaxml_info2.pdf",
+    "files": [
+      "tools/station_names/build_station_name_audit.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://xml.kishou.go.jp/20130628_jmaxml_info.pdf",
+    "files": [
+      "tools/station_names/build_station_name_audit.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://xml.kishou.go.jp/20151023_jmaxml_info.pdf",
+    "files": [
+      "tools/station_names/build_station_name_audit.mjs"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  },
+  {
+    "url": "https://xml.kishou.go.jp/tec_material.html",
+    "files": [
+      "app/src/main/java/cz/misa/quakedeck/data/StationCatalog.kt",
+      "tools/station_names/audit_official_jma_catalog.py",
+      "web/credits.html"
+    ],
+    "status": "Reference inventory; see README for actual use and terms"
+  }
+]

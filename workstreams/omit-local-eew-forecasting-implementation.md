@@ -1,5 +1,31 @@
 # Omit locally calculated EEW forecasting implementation from Git
 
+## 2 September 2026 audit amendment
+
+The [source audit](../outputs/source-legality-audit/2026-09-02/README.md) extends
+the current boundary to private resource inputs and location-notification
+inferences. This amendment supersedes earlier statements below that the inputs
+remain bundled in public builds. The user's current direction is to withhold
+forecast provision pending applicable JMA permission, with provider conditions
+reviewed separately; no application or permission request has been sent.
+
+`-PpublicDistribution=true` now forces LITE even when the private engine is
+present. FULL still builds by presence using the existing local Boolean.
+`app/src/localForecast/res/raw/` holds the two ignored input resources. The
+75 km epicentre/same-area and 80 km nearby-point inference paths now live in
+the same ignored `LocalEewForecastEngine.kt`. Public contracts contain no
+replacement prediction formula. Earlier wave/arrival code still exists in
+local Git history and is not erased by this change.
+
+FULL and public LITE compilation plus 110 unit tests passed in each mode;
+the public class JAR/resource symbols contain no private engine or inputs.
+No APK or device/live validation was performed.
+
+**Manual cross-machine transfer is required:** copy the updated ignored engine
+and both resources under `app/src/localForecast/res/raw/`, with matching tracked
+contracts and build changes. Git cannot transfer them. Do not claim the other
+checkout/FULL build is current until the user confirms the copy.
+
 ## Status — implemented locally; build-validated; pending device/live approval
 
 The approved source-publication boundary is implemented in the permanent

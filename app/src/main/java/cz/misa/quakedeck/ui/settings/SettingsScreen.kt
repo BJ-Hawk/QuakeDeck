@@ -67,6 +67,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -710,10 +711,16 @@ private fun MainSettingsPage(
                     CardDivider()
                     OfflineStationTranslationSettingRow(
                         title = text(R.string.offline_station_translation, selectedLanguage),
-                        helpText = text(
-                            R.string.offline_station_translation_explanation,
-                            selectedLanguage
-                        ),
+                        helpText = buildString {
+                            append(
+                                text(
+                                    R.string.offline_station_translation_explanation,
+                                    selectedLanguage
+                                )
+                            )
+                            append("\n\n")
+                            append(text(R.string.google_translation_disclaimer, selectedLanguage))
+                        },
                         status = offlineStationTranslationStatus,
                         readyLabel = text(
                             R.string.offline_station_translation_ready,
@@ -727,7 +734,10 @@ private fun MainSettingsPage(
                             R.string.offline_station_translation_deleting,
                             selectedLanguage
                         ),
-                        downloadLabel = text(R.string.download, selectedLanguage),
+                        downloadLabel = text(
+                            R.string.enable_translate_with_google,
+                            selectedLanguage
+                        ),
                         deleteLabel = text(R.string.delete, selectedLanguage),
                         onDownload = onDownloadOfflineStationTranslation,
                         onDelete = onDeleteOfflineStationTranslation,
@@ -975,6 +985,8 @@ private fun MainSettingsPage(
                 title = title,
                 body = body,
                 doneLabel = text(R.string.done, selectedLanguage),
+                linkLabel = text(R.string.google_translate_link, selectedLanguage),
+                linkUrl = "https://translate.google.com/",
                 onDismiss = { offlineTranslationHelpDialog = null }
             )
         }
@@ -1783,8 +1795,11 @@ private fun SettingHelpDialog(
     title: String,
     body: String,
     doneLabel: String,
+    linkLabel: String? = null,
+    linkUrl: String? = null,
     onDismiss: () -> Unit
 ) {
+    val uriHandler = LocalUriHandler.current
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(title) },
@@ -1798,6 +1813,11 @@ private fun SettingHelpDialog(
         },
         confirmButton = {
             TextButton(onClick = onDismiss) { Text(doneLabel) }
+        },
+        dismissButton = {
+            if (linkLabel != null && linkUrl != null) {
+                TextButton(onClick = { uriHandler.openUri(linkUrl) }) { Text(linkLabel) }
+            }
         }
     )
 }

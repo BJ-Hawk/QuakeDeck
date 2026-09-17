@@ -196,13 +196,23 @@ val sandboxEnabled = true
 val omitLocalEewForecastEngine = false
 val omitLocalEewForecastEngineRequested = providers
     .gradleProperty("omitLocalEewForecastEngine")
-    .map(String::toBoolean)
+    .map { it.toBooleanStrict() }
     .orElse(omitLocalEewForecastEngine)
+// Public distribution always omits the private engine, even in a FULL checkout.
+// This is a publication boundary, not evidence of permission to distribute FULL.
+val publicDistribution = providers.gradleProperty("publicDistribution")
+    .map { it.toBooleanStrict() }
+    .orElse(false)
 val localEewForecastEngineSource = layout.projectDirectory.file(
     "src/main/java/cz/misa/quakedeck/data/LocalEewForecastEngine.kt"
 )
+val localForecastResources = layout.projectDirectory.dir("src/localForecast/res")
+// An incomplete optional forecast implementation selects LITE automatically.
 val localEewForecastEngineIncluded = omitLocalEewForecastEngineRequested.map { omitted ->
-    !omitted && localEewForecastEngineSource.asFile.isFile
+    !publicDistribution.get() && !omitted && localEewForecastEngineSource.asFile.isFile &&
+        listOf("jma2001_travel_times.gz", "local_eew_station_avs30.gz").all { name ->
+            localForecastResources.file("raw/$name").asFile.isFile
+        }
 }
 val generatedLocalEewBuildInfoDir = layout.buildDirectory.dir(
     "generated/local-eew-build-info/src"
@@ -266,8 +276,8 @@ android {
         applicationId = "cz.misa.quakedeck"
         minSdk = 26
         targetSdk = 36
-        versionCode = 234
-        versionName = "0.10.2-dev.1"
+        versionCode = 238
+        versionName = "0.10.2-dev.5"
         buildConfigField("boolean", "SANDBOX_ENABLED", sandboxEnabled.toString())
         buildConfigField(
             "String",
@@ -305,6 +315,9 @@ android {
     }
     sourceSets.getByName("main").apply {
         res.directories.add(generatedStationDetailsResDir.get().asFile.absolutePath)
+        if (localEewForecastEngineIncluded.get()) {
+            res.directories.add(localForecastResources.asFile.absolutePath)
+        }
         java.directories.add(generatedLocalEewBuildInfoDir.get().asFile.absolutePath)
     }
     bundle {
@@ -323,7 +336,7 @@ tasks.named("preBuild").configure {
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
     dependsOn(generateLocalEewBuildInfo)
     inputs.property("localEewForecastEngineIncluded", localEewForecastEngineIncluded)
-    if (omitLocalEewForecastEngineRequested.get()) {
+    if (!localEewForecastEngineIncluded.get()) {
         exclude("**/LocalEewForecastEngine.kt")
     }
 }

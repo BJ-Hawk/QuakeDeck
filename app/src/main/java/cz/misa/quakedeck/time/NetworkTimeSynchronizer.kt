@@ -40,6 +40,9 @@ object NetworkTimeSynchronizer {
     private const val SAMPLE_COUNT = 3
     private const val SAMPLE_GAP_MILLIS = 120L
 
+    // Process-wide: recreating the activity or overlapping syncs must not reset the budget.
+    private val requestLimiter = NtpRequestLimiter(SystemClock::elapsedRealtime)
+
     suspend fun synchronize(
         server: String = PRIMARY_SERVER,
         timeoutMillis: Int = DEFAULT_TIMEOUT_MILLIS
@@ -107,6 +110,7 @@ object NetworkTimeSynchronizer {
         val response = ByteArray(NTP_PACKET_SIZE)
         DatagramSocket().use { socket ->
             socket.soTimeout = timeoutMillis
+            check(requestLimiter.tryAcquire()) { "NTP hourly request limit reached" }
             socket.send(DatagramPacket(request, request.size, address, NTP_PORT))
 
             val packet = DatagramPacket(response, response.size)

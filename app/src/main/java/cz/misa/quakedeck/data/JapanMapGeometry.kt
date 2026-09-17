@@ -3,9 +3,7 @@ package cz.misa.quakedeck.data
 import android.content.Context
 import android.graphics.Path
 import cz.misa.quakedeck.R
-import org.json.JSONArray
 import org.json.JSONObject
-import java.io.DataInputStream
 import java.util.zip.GZIPInputStream
 import kotlin.math.PI
 import kotlin.math.ln
@@ -24,8 +22,6 @@ data class JapanMapData(
     val landPath: Path,
     val prefectures: List<PrefectureShape>,
     val boundaryPaths: List<Path>,
-    /** Only arcs on the sea-facing edge, grouped by prefecture. */
-    val prefectureCoastlines: Map<String, Path>,
     val minX: Float,
     val minY: Float,
     val maxX: Float,
@@ -35,161 +31,31 @@ data class JapanMapData(
 }
 
 object JapanMapGeometry {
-    private const val COASTLINE_BINARY_MAGIC = 0x5144434C
-    private const val COASTLINE_BINARY_VERSION = 1
-
     @Volatile private var cached: JapanMapData? = null
-    @Volatile private var cachedHighRes: JapanMapData? = null
 
     fun load(context: Context): JapanMapData {
         cached?.let { return it }
         return synchronized(this) {
-            cached ?: loadSimplifiedInternal(context.applicationContext).also { cached = it }
+            cached ?: loadPrefectures(context.applicationContext).also { cached = it }
         }
-    }
-
-    fun loadHighRes(context: Context): JapanMapData {
-        cachedHighRes?.let { return it }
-        return synchronized(this) {
-            cachedHighRes ?: loadInternal(
-                context.applicationContext,
-                R.raw.japan_prefectures_topojson_hires,
-                R.raw.japan_prefecture_coastlines_hires
-            ).also { cachedHighRes = it }
-        }
-    }
-
-    private fun loadInternal(
-        context: Context,
-        resourceId: Int,
-        coastlineResourceId: Int
-    ): JapanMapData {
-        val text = GZIPInputStream(context.resources.openRawResource(resourceId))
-            .bufferedReader(Charsets.UTF_8)
-            .use { it.readText() }
-
-        val root = JSONObject(text)
-        val transform = root.getJSONObject("transform")
-        val scale = transform.getJSONArray("scale")
-        val translate = transform.getJSONArray("translate")
-        val sx = scale.getDouble(0)
-        val sy = scale.getDouble(1)
-        val tx = translate.getDouble(0)
-        val ty = translate.getDouble(1)
-
-        val arcsJson = root.getJSONArray("arcs")
-        val decodedArcs = ArrayList<List<MapPoint>>(arcsJson.length())
-
-        var minX = Float.POSITIVE_INFINITY
-        var minY = Float.POSITIVE_INFINITY
-        var maxX = Float.NEGATIVE_INFINITY
-        var maxY = Float.NEGATIVE_INFINITY
-
-        for (i in 0 until arcsJson.length()) {
-            val encodedArc = arcsJson.getJSONArray(i)
-            var qx = 0L
-            var qy = 0L
-            val points = ArrayList<MapPoint>(encodedArc.length())
-            for (j in 0 until encodedArc.length()) {
-                val delta = encodedArc.getJSONArray(j)
-                qx += delta.getLong(0)
-                qy += delta.getLong(1)
-                val longitude = qx * sx + tx
-                val latitude = qy * sy + ty
-                val point = projectGeo(latitude, longitude)
-                points += point
-                if (point.x < minX) minX = point.x
-                if (point.x > maxX) maxX = point.x
-                if (point.y < minY) minY = point.y
-                if (point.y > maxY) maxY = point.y
-            }
-            decodedArcs += points
-        }
-
-        val landPath = Path().apply { fillType = Path.FillType.EVEN_ODD }
-        val boundaryPath = Path()
-        val prefectureShapes = ArrayList<PrefectureShape>(47)
-
-        val geometryCollection = root
-            .getJSONObject("objects")
-            .getJSONObject("data")
-            .getJSONArray("geometries")
-
-        for (i in 0 until geometryCollection.length()) {
-            val geometry = geometryCollection.getJSONObject(i)
-            val nameJa = geometry.optJSONObject("properties")?.optString("name").orEmpty()
-            val prefecturePath = Path().apply { fillType = Path.FillType.EVEN_ODD }
-            when (geometry.getString("type")) {
-                "Polygon" -> {
-                    appendPolygonToPath(geometry.getJSONArray("arcs"), decodedArcs, prefecturePath)
-                    appendPolygonToPath(geometry.getJSONArray("arcs"), decodedArcs, landPath)
-                }
-
-                "MultiPolygon" -> {
-                    val polygons = geometry.getJSONArray("arcs")
-                    for (polygonIndex in 0 until polygons.length()) {
-                        val polygon = polygons.getJSONArray(polygonIndex)
-                        appendPolygonToPath(polygon, decodedArcs, prefecturePath)
-                        appendPolygonToPath(polygon, decodedArcs, landPath)
-                    }
-                }
-            }
-            if (!prefecturePath.isEmpty && nameJa.isNotBlank()) {
-                prefectureShapes += PrefectureShape(nameJa, prefecturePath)
-            }
-        }
-
-        // All unique TopoJSON arcs go into one native path, so shared borders are
-        // rendered once with only a couple of Canvas calls.
-        decodedArcs.forEach { arc ->
-            if (arc.size < 2) return@forEach
-            boundaryPath.moveTo(arc[0].x, arc[0].y)
-            for (pointIndex in 1 until arc.size) {
-                boundaryPath.lineTo(arc[pointIndex].x, arc[pointIndex].y)
-            }
-        }
-
-        // Sea-facing prefecture edges are generated at build time. The old
-        // cold-start path rasterized a 4096 x 4096 land mask and flood-filled
-        // the ocean on every process launch; loading these compact paths avoids
-        // that expensive invariant work entirely.
-        val prefectureCoastlines = loadPrefectureCoastlines(
-            context = context,
-            resourceId = coastlineResourceId
-        )
-
-        return JapanMapData(
-            landPath = landPath,
-            prefectures = prefectureShapes,
-            boundaryPaths = listOf(boundaryPath),
-            prefectureCoastlines = prefectureCoastlines,
-            // Keep the exact projected extremes from the N03 arcs. Camera
-            // context is applied explicitly by mapFitScale, rather than being
-            // hidden inside these geometry bounds.
-            minX = minX,
-            minY = minY,
-            maxX = maxX,
-            maxY = maxY
-        )
     }
 
     /**
-     * The N03 source was prepared before the JMA detail tiers existed and is
-     * far too intricate for the 1x–6.49x prefecture view. The generated asset
-     * simplifies complete rings (not its tiny TopoJSON arcs), giving the map a
-     * genuinely smaller vector workload while preserving every prefecture.
+     * Official JMA prefecture forecast polygons form the 1x–6.49x base. JMA's
+     * Hokkaido, Kagoshima, and Okinawa subareas are dissolved into 47 prefectures
+     * before the same ~1 km simplification used by the former base layer.
      */
-    private fun loadSimplifiedInternal(context: Context): JapanMapData {
+    private fun loadPrefectures(context: Context): JapanMapData {
         val text = GZIPInputStream(
-            context.resources.openRawResource(R.raw.japan_prefectures_simplified)
+            context.resources.openRawResource(R.raw.jma_prefectures_simplified)
         ).bufferedReader(Charsets.UTF_8).use { it.readText() }
         val root = JSONObject(text)
         val version = root.getInt("version")
-        require(version == 1 || version == 2) { "Unsupported simplified N03 resource" }
+        require(version == 4) { "Unsupported JMA prefecture resource" }
         val quantization = root.getDouble("quantization")
-        require(quantization > 0.0) { "Invalid simplified N03 quantization" }
+        require(quantization > 0.0) { "Invalid JMA prefecture quantization" }
         val bounds = root.getJSONArray("bounds")
-        require(bounds.length() == 4) { "Invalid simplified N03 bounds" }
+        require(bounds.length() == 4) { "Invalid JMA prefecture bounds" }
 
         val minLongitude = bounds.getDouble(0)
         val minLatitude = bounds.getDouble(1)
@@ -200,7 +66,6 @@ object JapanMapGeometry {
         val minY = projectGeo(maxLatitude, minLongitude).y
         val maxY = projectGeo(minLatitude, minLongitude).y
         val landPath = Path().apply { fillType = Path.FillType.EVEN_ODD }
-        val legacyBoundaryPath = Path()
         val boundaryPaths = ArrayList<Path>(47)
         val prefectures = ArrayList<PrefectureShape>(47)
         val areas = root.getJSONArray("areas")
@@ -210,78 +75,19 @@ object JapanMapGeometry {
             val nameJa = area.getString(0)
             val parts = area.getJSONArray(1)
             val prefecturePath = Path().apply { fillType = Path.FillType.EVEN_ODD }
-            for (partIndex in 0 until parts.length()) {
-                val encoded = parts.getJSONArray(partIndex)
-                if (encoded.length() < 6 || encoded.length() % 2 != 0) continue
-                var longitude = 0L
-                var latitude = 0L
-                var offset = 0
-                while (offset < encoded.length()) {
-                    if (offset == 0) {
-                        longitude = encoded.getLong(offset)
-                        latitude = encoded.getLong(offset + 1)
-                    } else {
-                        longitude += encoded.getLong(offset)
-                        latitude += encoded.getLong(offset + 1)
-                    }
-                    val point = projectGeo(latitude / quantization, longitude / quantization)
-                    if (offset == 0) {
-                        prefecturePath.moveTo(point.x, point.y)
-                    } else {
-                        prefecturePath.lineTo(point.x, point.y)
-                    }
-                    offset += 2
-                }
-                prefecturePath.close()
-            }
+            appendEncodedParts(parts, quantization, prefecturePath)
             if (!prefecturePath.isEmpty && nameJa.isNotBlank()) {
                 landPath.addPath(prefecturePath)
-                if (version == 1) legacyBoundaryPath.addPath(prefecturePath)
+                boundaryPaths += prefecturePath
                 prefectures += PrefectureShape(nameJa, prefecturePath)
             }
         }
 
-        require(prefectures.size == 47) { "Incomplete simplified N03 prefecture resource" }
-        if (version == 1) {
-            boundaryPaths += legacyBoundaryPath
-        } else {
-            val groups = root.getJSONArray("boundaries")
-            require(groups.length() == prefectures.size) {
-                "Simplified N03 boundary group count mismatch"
-            }
-            for (groupIndex in 0 until groups.length()) {
-                val group = groups.getJSONArray(groupIndex)
-                val path = Path()
-                for (pathIndex in 0 until group.length()) {
-                    val encoded = group.getJSONArray(pathIndex)
-                    require(encoded.length() >= 4 && encoded.length() % 2 == 0) {
-                        "Invalid simplified N03 boundary path"
-                    }
-                    var longitude = encoded.getLong(0)
-                    var latitude = encoded.getLong(1)
-                    projectGeo(latitude / quantization, longitude / quantization)
-                        .let { path.moveTo(it.x, it.y) }
-                    var offset = 2
-                    while (offset < encoded.length()) {
-                        longitude += encoded.getLong(offset)
-                        latitude += encoded.getLong(offset + 1)
-                        projectGeo(latitude / quantization, longitude / quantization)
-                            .let { path.lineTo(it.x, it.y) }
-                        offset += 2
-                    }
-                }
-                if (!path.isEmpty) boundaryPaths += path
-            }
-            require(boundaryPaths.isNotEmpty()) { "Missing simplified N03 boundaries" }
-        }
+        require(prefectures.size == 47) { "Incomplete JMA prefecture resource" }
         return JapanMapData(
             landPath = landPath,
             prefectures = prefectures,
             boundaryPaths = boundaryPaths,
-            prefectureCoastlines = loadPrefectureCoastlines(
-                context,
-                R.raw.japan_prefecture_coastlines
-            ),
             minX = minX,
             minY = minY,
             maxX = maxX,
@@ -289,75 +95,23 @@ object JapanMapGeometry {
         )
     }
 
-    private fun loadPrefectureCoastlines(
-        context: Context,
-        resourceId: Int
-    ): Map<String, Path> = DataInputStream(
-        GZIPInputStream(context.resources.openRawResource(resourceId))
-    ).use { input ->
-        require(input.readInt() == COASTLINE_BINARY_MAGIC) {
-            "Invalid prefecture coastline resource"
-        }
-        require(input.readInt() == COASTLINE_BINARY_VERSION) {
-            "Unsupported prefecture coastline resource version"
-        }
-        val quantization = input.readInt().toFloat()
-        val prefectureCount = input.readInt()
-        buildMap(prefectureCount) {
-            repeat(prefectureCount) {
-                val nameLength = input.readInt()
-                require(nameLength in 1..256) { "Invalid prefecture name length" }
-                val nameBytes = ByteArray(nameLength)
-                input.readFully(nameBytes)
-                val name = nameBytes.toString(Charsets.UTF_8)
-                val segmentCount = input.readInt()
-                val path = Path()
-                repeat(segmentCount) {
-                    val pointCount = input.readInt()
-                    require(pointCount >= 2) { "Invalid coastline segment" }
-                    repeat(pointCount) { pointIndex ->
-                        val x = input.readInt() / quantization
-                        val y = input.readInt() / quantization
-                        if (pointIndex == 0) path.moveTo(x, y) else path.lineTo(x, y)
-                    }
-                }
-                if (!path.isEmpty) put(name, path)
+    private fun appendEncodedParts(parts: org.json.JSONArray, quantization: Double, path: Path) {
+        for (partIndex in 0 until parts.length()) {
+            val encoded = parts.getJSONArray(partIndex)
+            require(encoded.length() >= 6 && encoded.length() % 2 == 0) {
+                "Invalid JMA prefecture path"
             }
-        }
-    }
-
-    private fun appendPolygonToPath(
-        ringsJson: JSONArray,
-        decodedArcs: List<List<MapPoint>>,
-        destination: Path
-    ) {
-        for (ringIndex in 0 until ringsJson.length()) {
-            val refs = ringsJson.getJSONArray(ringIndex)
-            var started = false
-            var lastPoint: MapPoint? = null
-
-            for (arcPosition in 0 until refs.length()) {
-                val ref = refs.getInt(arcPosition)
-                val arcIndex = if (ref >= 0) ref else -ref - 1
-                if (arcIndex !in decodedArcs.indices) continue
-
-                val source = decodedArcs[arcIndex]
-                if (source.isEmpty()) continue
-
-                val indices = if (ref >= 0) source.indices else source.indices.reversed()
-                for (pointIndex in indices) {
-                    val point = source[pointIndex]
-                    if (!started) {
-                        destination.moveTo(point.x, point.y)
-                        started = true
-                    } else if (lastPoint != point) {
-                        destination.lineTo(point.x, point.y)
-                    }
-                    lastPoint = point
-                }
+            var longitude = 0L
+            var latitude = 0L
+            var offset = 0
+            while (offset < encoded.length()) {
+                longitude += encoded.getLong(offset)
+                latitude += encoded.getLong(offset + 1)
+                val point = projectGeo(latitude / quantization, longitude / quantization)
+                if (offset == 0) path.moveTo(point.x, point.y) else path.lineTo(point.x, point.y)
+                offset += 2
             }
-
-            if (started) destination.close()
+            path.close()
         }
     }
 }

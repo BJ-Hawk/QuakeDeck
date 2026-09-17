@@ -15,7 +15,7 @@ import java.util.zip.GZIPInputStream
  * In other words: surrounding Asia/Pacific geography can fill every piece of
  * screen the user is allowed to pan to, without turning QuakeDeck into a globe.
  * Japan itself is removed during preprocessing so the low-detail context never
- * competes with the much more detailed N03 geometry drawn above it. Coordinates
+ * competes with the much more detailed JMA geometry drawn above it. Coordinates
  * already use the exact same projected map-space as [JapanMapData].
  */
 data class RegionalContextData(

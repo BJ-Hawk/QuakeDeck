@@ -1,0 +1,18 @@
+// Read-only resolved dependency inventory. Does not download in --offline mode.
+gradle.projectsEvaluated {
+    def app = gradle.rootProject.project(':app')
+    app.tasks.register('auditDependencyCoordinates') {
+        doLast {
+            ['releaseRuntimeClasspath', 'debugRuntimeClasspath', 'debugUnitTestRuntimeClasspath'].each { name ->
+                def config = app.configurations.findByName(name)
+                if (config != null) {
+                    config.incoming.resolutionResult.allComponents.each { component ->
+                        if (component.moduleVersion != null) {
+                            println('AUDIT_DEPENDENCY\t' + name + '\t' + component.moduleVersion)
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
