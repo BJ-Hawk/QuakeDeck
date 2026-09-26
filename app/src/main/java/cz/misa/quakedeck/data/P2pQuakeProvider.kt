@@ -16,6 +16,7 @@ import java.time.OffsetDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
+import java.time.temporal.ChronoUnit
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import kotlin.math.abs
@@ -1221,7 +1222,12 @@ class P2pQuakeProvider(
     ): Boolean {
         val confirmedTime = eventInstant(confirmed) ?: return false
         val eewTime = eventInstant(eew) ?: return false
-        if (abs(java.time.Duration.between(confirmedTime, eewTime).seconds) > 15L) return false
+        // P2PQuake/JMA confirmation omits seconds while DM-D.S.S retains them.
+        // Compare both timestamps at the common minute precision only for this
+        // historical EEW-to-confirmed-incident association.
+        if (confirmedTime.truncatedTo(ChronoUnit.MINUTES) != eewTime.truncatedTo(ChronoUnit.MINUTES)) {
+            return false
+        }
         if (!confirmed.hasHypocenter || !eew.hasHypocenter) return true
         return abs(confirmed.latitude - eew.latitude) <= 3.0 &&
             abs(confirmed.longitude - eew.longitude) <= 3.0

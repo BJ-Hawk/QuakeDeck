@@ -153,11 +153,11 @@ The complete audited 4,360-station English map and the first station-information
 card are active in the app. Placement research is underway in
 `outputs/station-name-audit/station_metadata_sources.json` only:
 
-- 3,414 stations have source-supported address data, all with an exact published
+- 3,458 stations have source-supported address data, all with an exact published
   Japanese address.
-- 946 retain municipality-or-ward precision. Three of those also have a
+- 902 retain municipality-or-ward precision. Three of those also have a
   source-supported facility identity but no verified published address; the
-  remaining 943 still require facility/address research.
+  remaining 899 still require facility/address research.
 - Address/precision validation currently reports zero mismatches.
 
 The latest locality-only refinement preserved those coverage counts while making
@@ -166,7 +166,7 @@ official JMA observation-point label as `placementLocalityJa`, rather than a
 coarser municipality or ward label. This is locality evidence only: none was
 promoted to a facility or an exact address, and the JMA list recheck found no
 additional exact name-to-address match. The three facility-only records remain
-explicitly distinct from the 943 records still needing facility/address
+explicitly distinct from the 899 records still needing facility/address
 research.
 
 The latest completed official-source batches converted confirmed facility-only
@@ -387,6 +387,28 @@ City Hall, allowing `1320932` (Machida Morino) to be placed at Machida City Hall
 with its published Japanese address; `1320952` (Machida Honmachida) remains
 locality-only because that evidence does not identify its host facility.
 
+The current JSON-only continuation added exact placements at Matsusaka City
+Hall, Meiwa Town Hall, Okutama Town Hall, Kadogawa Town Hall, Omachi Town Hall,
+Kamimine Town Hall, Kouhoku Town Hall, Kiyama Town Hall, Hanyu City Hall, Shiki
+City Hall, Hasuda City Hall, and Kanra Town Hall. Each promotion was made only
+after a direct official station-to-facility statement and a separate official
+publication of that facility's Japanese address. In particular, Kanra Town's
+current disaster plan explicitly identifies the `甘楽町小幡` meter as being at
+Kanra Town Hall; the town's facility page publishes
+`群馬県甘楽郡甘楽町大字小幡161-1`. Focused Fukushima, Gunma, Kyoto, Saga,
+Miyazaki, and Okinawa searches that named only a locality or a municipality's
+network participation made no promotion.
+
+The latest Miyazaki official-source pass added 11 exact placements: Kijo Town
+Hall, Nishimera Village Office, Morotsuka Village Office, Shiiba Village Office,
+Nobeoka City Hall's Kitaura General Branch and main office, Misato Town Hall,
+Kawaminami Town Hall, Gokase Town Hall, and Miyazaki City's Takaoka and
+Sadowara General Branches. The NIED Miyazaki seismic-network catalogue directly
+ties each station to its host parcel; the relevant current municipality confirms
+the host's present address. Two tempting candidates were deliberately not
+promoted: the former Togo Town Hall site no longer hosts the relocated branch,
+and the former Takanabe Town Hall parcel differs from its current office.
+
 ## Do not redo or change
 
 - Do not rebuild the audit from scratch. For the current placement-research
@@ -458,3 +480,8 @@ locality-only because that evidence does not identify its host facility.
   seismic-network stations, after the 21 Fukui Prefecture stations and `2520431`
   at Azuchi Community Center. This continuation update is coordination-only: it
   does not alter release metadata or the changelog.
+- The current continuation extends that uncommitted JSON-only research with the
+  exact municipal placements listed above, most recently the 11 Miyazaki
+  placements. It also updates this workstream and its `WORKSTREAMS.md` index;
+  no workbook, runtime resource, release metadata, changelog, or unrelated file
+  was changed.

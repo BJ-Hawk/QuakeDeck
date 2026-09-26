@@ -19,19 +19,25 @@ local Git history and is not erased by this change.
 
 FULL and public LITE compilation plus 110 unit tests passed in each mode;
 the public class JAR/resource symbols contain no private engine or inputs.
-No APK or device/live validation was performed.
+No APK or device/live validation was performed for that audit amendment.
 
 **Manual cross-machine transfer is required:** copy the updated ignored engine
 and both resources under `app/src/localForecast/res/raw/`, with matching tracked
 contracts and build changes. Git cannot transfer them. Do not claim the other
 checkout/FULL build is current until the user confirms the copy.
 
-## Status — implemented locally; build-validated; pending device/live approval
+## Status — implemented; build-validated; device/live behavior user-confirmed
 
 The approved source-publication boundary is implemented in the permanent
 checkout. The complete local APK includes the ignored engine; a forced-absent
 public-source configuration also compiles, passes unit tests, and packages an
-APK. No device or live-event validation has been performed for this workstream.
+APK. On 26 September 2026 the user confirmed FULL/LITE behavior as tested,
+including rings, countdowns, automatic framing, expiry, rotation, notification
+restoration, and official-only LITE presentation. This supersedes the earlier
+pending device-validation notes below; no new tests were run for this
+documentation update. Forecast-to-Warning escalation, cancellation, reconnection,
+and recovery of genuinely missed bulletins remain pending in the DM-D.S.S
+workstream. Separate source-audit findings and publication decisions remain open.
 
 ## Objective
 
@@ -292,14 +298,16 @@ must be the matching version and should be compile-checked on the other machine.
 
 ## Exact next steps
 
-1. Run the built-in EEW and combined EEW/tsunami replays on a device with the
-   complete local APK. Confirm P/S rings, destination countdowns, automatic map
-   framing, expiry, rotation, and notification restoration remain correct.
-2. Install or otherwise exercise a forced-absent build and confirm official
-   areas/intensities remain visible, rings/countdowns are absent, the localized
-   explanation appears, and the P2P safety timeout ends without resurrection.
-3. Recheck the next suitable live P2PQuake warning and DM-D.S.S Forecast event.
-   The DM-D.S.S exact event-time-plus-180-second behavior must remain unchanged.
+1. FULL device behavior is tested and confirmed by the user on 26 September 2026:
+   P/S rings, destination countdowns, automatic map framing, expiry, rotation,
+   and notification restoration.
+2. LITE device behavior is tested and confirmed by the user on 26 September 2026:
+   official areas/intensities, absent local rings/countdowns, the localized
+   explanation, and P2P safety timeout without resurrection.
+3. Live P2PQuake Warning and DM-D.S.S Forecast behavior, including the exact
+   event-time-plus-180-second deadline, is user-confirmed. Continue validation
+   only for Forecast-to-Warning escalation, cancellation, reconnection, and
+   genuinely missed-bulletin recovery.
 4. Decide separately whether and where to back up the ignored plaintext file.
 5. Keep Git-history rewriting separate unless the user explicitly authorizes
    it. Earlier commits still expose the former tracked implementation.

@@ -1,0 +1,186 @@
+{
+  "schemaVersion": 1,
+  "reviewed": "2026-09-19",
+  "checkoutCommit": "a339e351f6eb2771d5e1009acb95df3eae5924a6",
+  "scope": "Current dirty working tree; data acquisition, bundling, transformation, local storage, export, redistribution and forecast use",
+  "decisions": [
+    {
+      "source": "Japan Meteorological Agency public website data",
+      "uses": ["earthquake detail readiness", "station catalogue", "XML code tables", "multilingual dictionary", "regional GIS", "JMA2001 travel-time table"],
+      "decision": "PERMITTED_WITH_ATTRIBUTION",
+      "conditions": ["Credit JMA", "Identify QuakeDeck processing/adaptation", "Assess forecast provision separately"],
+      "terms": "https://www.jma.go.jp/jma/kishou/info/coment.html"
+    },
+    {
+      "source": "QuakeDeck local earthquake-motion calculations",
+      "uses": ["point intensity", "P/S arrival time", "wavefront", "regional intensity", "warning end", "fallback alert scope"],
+      "decision": "PRIVATE_ONLY_PENDING_JMA_CLEARANCE",
+      "conditions": ["Do not publish FULL engine", "JMA licence or written classification required for distribution"],
+      "terms": "https://www.jma.go.jp/jma/kishou/minkan/q_a_s.html"
+    },
+    {
+      "source": "P2PQuake API v2",
+      "uses": ["live feed", "recent reports", "history/recovery", "tsunami", "warning EEW", "felt-report aggregates", "local archive", "local diagnostics"],
+      "decision": "PERMITTED",
+      "conditions": ["Respect API rate limits", "Retain JMA attribution for JMA-origin reports"],
+      "terms": "https://www.p2pquake.net/secondary_use/"
+    },
+    {
+      "source": "DM-D.S.S",
+      "uses": ["per-user OAuth", "contract capability check", "eew.forecast socket", "gd.eew recovery", "display", "notification", "local archive", "user-triggered diagnostic export"],
+      "decision": "PERMITTED_FOR_ACCOUNT_HOLDER_CLIENT",
+      "conditions": ["Each user supplies their own account and entitlement", "Required end-user cautions remain visible", "No QuakeDeck relay API", "Do not feed a published QuakeDeck forecast engine without provider authorization"],
+      "terms": "https://dmdata.jp/terms/"
+    },
+    {
+      "source": "NIED K-NET/KiK-net station list",
+      "uses": ["783 K-NET and 7 KiK-net records matched offline", "Network/code displayed in station cards", "Raw provider names and coordinates stored in research and generated resource; loaded without further runtime consumers", "Provider coordinates support 65 approved English names; one approved name uses the NIED station identity"],
+      "decision": "TERMS_APPLICABILITY_UNRESOLVED_NO_BREACH_ESTABLISHED",
+      "conditions": ["Assess the selected factual records and derived names against the supplying site's notice", "Do not infer an address source from row-level sourceUrls", "The previous blanket removal or permission requirement is withdrawn", "JMA-supplied operator labels and base map coordinates are outside this finding"],
+      "terms": "https://www.kyoshin.bosai.go.jp/ja/",
+      "evidence": "nied-station-data-use.md"
+    },
+    {
+      "source": "NIED main-site procurement specification",
+      "uses": ["Station-code join and normalized factual address/facility extraction", "559 current rows retain the bulk importer's exact verification note", "562 NIED-operated rows reference the PDF; this is a provenance-reference count", "Address and facility fields displayed in station cards and included by the build recipe"],
+      "decision": "TERMS_APPLICABILITY_UNRESOLVED_NO_BREACH_ESTABLISHED",
+      "conditions": ["Assess the main site's copyright notice separately from K-NET site terms", "Distinguish factual fields from protected expression or compilation", "Do not characterize the bulk import as isolated address lookup", "Current PDF contains white text in source address cells for all 559 importer-note rows; corroborate intended public detail with visible official sources or clarification", "White text is not itself proof of confidentiality or unlawful use"],
+      "terms": "https://www.bosai.go.jp/about/use.html",
+      "evidence": "nied-station-data-use.md"
+    },
+    {
+      "source": "NIED Hi-net station notices",
+      "uses": ["Seven NIED-operated research rows reference station notices for location evidence", "Short factual addresses used by station cards"],
+      "decision": "TERMS_APPLICABILITY_UNRESOLVED_NO_BREACH_ESTABLISHED",
+      "conditions": ["Assess Hi-net's own notice and distinction between data and derived results", "Do not apply K-NET terms solely because the operator is NIED"],
+      "terms": "https://www.hinet.bosai.go.jp/about_data/?LANG=en",
+      "evidence": "nied-station-data-use.md"
+    },
+    {
+      "source": "NIED J-SHIS V4 AVS30",
+      "uses": ["private station-sampled ground input for local intensity calculations"],
+      "decision": "PRIVATE_ONLY",
+      "conditions": ["Do not redistribute unchanged sampled values", "Contact J-SHIS before commercial results if required"],
+      "terms": "https://www.j-shis.bosai.go.jp/agreement"
+    },
+    {
+      "source": "Digital Agency Address Base Registry",
+      "uses": ["town readings", "locality matching", "derived station names and addresses"],
+      "decision": "PERMITTED_WITH_ATTRIBUTION",
+      "terms": "https://www.digital.go.jp/policies/base_registry_address_tos"
+    },
+    {
+      "source": "Geospatial Information Authority of Japan",
+      "uses": ["reverse-geocoder locality facts", "underlying approved geography in JMA GIS"],
+      "decision": "PERMITTED_WITH_ATTRIBUTION",
+      "terms": "https://www.gsi.go.jp/kikakuchousei/kikakuchousei40182.html"
+    },
+    {
+      "source": "Nagasaki and Kumamoto BODIK plus Shizuoka open data",
+      "uses": ["station locations", "facility addresses"],
+      "decision": "PERMITTED_CC_BY_4_0",
+      "conditions": ["Identify datasets and processing", "Link CC BY 4.0"],
+      "terms": "https://creativecommons.org/licenses/by/4.0/"
+    },
+    {
+      "source": "Municipal, prefectural and FDMA references",
+      "uses": ["individual facility identity", "station placement fact", "postal address"],
+      "decision": "PERMITTED_FACTUAL_USE",
+      "conditions": ["Do not copy protected prose, images or database structure", "Assess systematic sources separately"],
+      "terms": null
+    },
+    {
+      "source": "Google Maps/Street View",
+      "uses": ["one manual visual station-placement check"],
+      "decision": "PERMITTED_LIMITED_REFERENCE",
+      "conditions": ["No imagery or map database is bundled", "No runtime dependency"],
+      "terms": "https://www.google.com/help/terms_maps/"
+    },
+    {
+      "source": "Natural Earth",
+      "uses": ["regional world context outside Japan"],
+      "decision": "PUBLIC_DOMAIN",
+      "terms": "https://www.naturalearthdata.com/about/terms-of-use/"
+    },
+    {
+      "source": "Nager.Date",
+      "uses": ["current and following year public holidays for schedule adjustment"],
+      "decision": "PERMITTED_PRIVATE_OR_NONPROFIT",
+      "conditions": ["Active sponsorship required for commercial use", "Do not operate a holiday portal"],
+      "terms": "https://nagerholidays.com/legal/termsofservice"
+    },
+    {
+      "source": "NICT public NTP",
+      "uses": ["visible JST clock"],
+      "decision": "PERMITTED",
+      "conditions": ["No more than 20 requests per rolling hour on average"],
+      "terms": "https://www.nict.go.jp/en/sts/ntp_faq.html"
+    },
+    {
+      "source": "Android Geocoder",
+      "uses": ["user-initiated alert-location search"],
+      "decision": "PERMITTED_PLATFORM_API_USE",
+      "conditions": ["No bulk database copying or redistribution"],
+      "terms": "https://developer.android.com/reference/android/location/Geocoder"
+    },
+    {
+      "source": "Google ML Kit on-device Translation",
+      "uses": ["optional place-name translation fallback"],
+      "decision": "PERMITTED_WITH_GOOGLE_ATTRIBUTION",
+      "conditions": ["Official attribution badge", "Required disclaimer and Google Translate link", "Personal computing devices only"],
+      "terms": "https://developers.google.com/ml-kit/language/translation/translation-terms"
+    },
+    {
+      "source": "QuakeDeck-built Noto and sandbox fixtures",
+      "uses": ["deterministic integration tests and replay"],
+      "decision": "PERMITTED_AUTHORED_RECONSTRUCTION",
+      "conditions": ["Do not replace with verbatim provider captures without reassessment"],
+      "terms": null
+    }
+  ],
+  "evidence": {
+    "baseStationCatalogue": {
+      "path": "app/src/main/res/raw/jma_intensity_stations.json",
+      "sha256": "e56412f7116b5bae79af901ab3c0a94d36406060ec36b26b6b140ad4704f716f",
+      "rows": 4360,
+      "providerLabels": {"JMA": 670, "NIED": 800, "localGovernment": 2890},
+      "supplier": "Japan Meteorological Agency"
+    },
+    "stationResearch": {
+      "path": "outputs/station-name-audit/station_metadata_sources.json",
+      "sha256": "ed03a14864d68dd25141729be444d3bb34544b16f7ff694e54aeb1fbf37fc7ca",
+      "rows": 4360,
+      "sourceReferences": 9755,
+      "uniqueUrls": 786,
+      "hosts": 476,
+      "niedReferencedRows": 795,
+      "niedProviderTuples": 790,
+      "niedProviderNetworks": {"K-NET": 783, "KiK-net": 7},
+      "niedOperatedRowsWithAddress": 800,
+      "niedOperatedRowsWithJapaneseFacility": 619,
+      "niedProcurementPdfReferencedRows": 562,
+      "niedProcurementExactImporterNoteRows": 559,
+      "niedHinetReferencedRows": 7,
+      "googleMapsUrls": 1
+    },
+    "niedActualUseCorrection": {
+      "path": "nied-station-data-use.md",
+      "pdfVerification": "nied-pdf-evidence.json",
+      "networkDataRules": "https://www.mowlas.bosai.go.jp/policy/data/",
+      "networkGeneralPolicy": "https://www.mowlas.bosai.go.jp/policy/guideline/",
+      "providerCacheRows": 1749,
+      "matchedProviderTupleMismatches": 0,
+      "generatedDetailsSha256": "d2a091eeeb5dcc7ff1566d15314b8531673a2c090c54905d3cfc0261c0741a36",
+      "generatedDetailsNiedRowMismatches": 0,
+      "generatedDetailsAllRowMismatches": 11,
+      "releasedApkInspected": false
+    },
+    "privateForecastFiles": [
+      {"path": "app/src/main/java/cz/misa/quakedeck/data/LocalEewForecastEngine.kt", "sha256": "616d250ec8d64659410cdb42411caef67ef48a19054b3d66d701a57419c670fa"},
+      {"path": "app/src/localForecast/res/raw/jma2001_travel_times.gz", "sha256": "d8b8230628411c22a54764ba86a71bfc393c18dd0bdcd8d2d87f10aac78f4d3d"},
+      {"path": "app/src/localForecast/res/raw/local_eew_station_avs30.gz", "sha256": "a469903cce40f08a21cdf57e4a253e39cc3d03ff186a0bf3f4d788935615f950"}
+    ],
+    "publicBoundaryCheck": "PASS: tools/check_public_forecast_boundary.py --scope worktree",
+    "historicalObjects": ["8b99e37", "e6846b2"]
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "reviewed": "2026-09-19",
+  "scope": "NIED procurement PDF provenance; no legal conclusion inferred from text color",
+  "sourceUrl": "https://www.bosai.go.jp/information/tender/supply/pdf/shiyousho.pdf",
+  "sourceSha256": "17bcbe3cec35e680707845b6151f2a0b553c7eb4f551a6e0c20ed8897e1334eb",
+  "sourcePages": 120,
+  "stationTablePagesOneBased": [
+    68,
+    90
+  ],
+  "extractedStationRows": 1045,
+  "researchSha256": "ed03a14864d68dd25141729be444d3bb34544b16f7ff694e54aeb1fbf37fc7ca",
+  "populationCriterion": "Exact note: Verified against NIED’s official K-NET station specification.",
+  "populationRows": 559,
+  "addressAndFacilityExactMatches": 558,
+  "differences": [
+    {
+      "jmaCode": "0821420",
+      "providerCode": "IBR002",
+      "addressMatches": true,
+      "facilityMatches": false
+    }
+  ],
+  "populationRowsWithWhiteAddressTextInSource": 559,
+  "populationRowsWithWhiteFacilityTextInSource": 555,
+  "visualSamplePageOneBased": 69,
+  "visualSampleProviderCode": "HKD051",
+  "limitations": [
+    "One page visually inspected; text-color counts computed across table pages",
+    "White text does not by itself prove legal confidentiality or unlawful use",
+    "Current document compared to current research; historical downloaded PDF not available"
+  ]
+}
