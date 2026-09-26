@@ -2,7 +2,7 @@
 
 QuakeDeck is an Android earthquake-monitoring prototype focused on Japan. It uses Kotlin and Jetpack Compose to combine live P2PQuake/JMA reports, EEW visualization, observed intensity mapping, tsunami information, historical report browsing, and deterministic Sandbox testing in one map-first interface.
 
-Current version: **0.10.2**. QuakeDeck is still pre-1.0 and should not be treated as an official emergency-warning application.
+Current version: **0.10.3-dev.1**. QuakeDeck is still pre-1.0 and should not be treated as an official emergency-warning application.
 
 The bundled station catalogue now comes directly from JMA's official map and XML code tables. The [migration audit](outputs/jma-station-migration-audit/2026-09-02/README.md) confirms all 4,360 existing station records match in every field. Station updates are audited offline; source, processing and PDL1.0 credits are available in the app and in [the data notes](THIRD_PARTY_DATA.md).
 
@@ -14,7 +14,7 @@ The bundled station catalogue now comes directly from JMA's official map and XML
 
 > The matching input files are also private: `app/src/localForecast/res/raw/jma2001_travel_times.gz` and `app/src/localForecast/res/raw/local_eew_station_avs30.gz`. `-PpublicDistribution=true` forces LITE even in a FULL development checkout. Local proximity-based EEW notification inferences are private too; LITE location-filtered alerts require an applicable official region.
 >
-> **Publication remains pending legal clearance.** The [2 September source audit](outputs/source-legality-audit/2026-09-02/README.md) records JMA/provider permission questions, remaining attribution issues and older forecast code/data still present in Git history. Git ignores do not remove that history. Requesting permission alone does not authorise distribution.
+> FULL local forecasting remains private pending JMA/provider clearance. Redistribution terms for the imported NIED station metadata remain under review. See [the data notes](THIRD_PARTY_DATA.md) for source attribution and licensing details.
 
 ## Current capabilities
 
@@ -41,7 +41,9 @@ The bundled station catalogue now comes directly from JMA's official map and XML
 
 ## Data sources
 
-P2PQuake remains the always-running free baseline and fallback. Users may optionally authorize DM-D.S.S to overlay live EEW forecasts when their account has an active `eew.forecast` plan; the source panel also shows their other active DM-D.S.S plans without using those data feeds yet. **DM-D.S.S integration status: pending testing with actual live EEW events.** A real five-revision event has validated post-fix Base64/GZIP parsing, paired-feed deduplication, Shindo-change notification delivery, full-screen launch, final-bulletin receipt, and timing close to JQuake. The subsequent fix for silent unchanged revisions, exact event-time-plus-180-seconds termination, ended-state restoration, rotation, escalation, foreground reconnection, and post-event recovery is not yet production-verified. See `THIRD_PARTY_DATA.md` for bundled-data attribution and licensing notes.
+P2PQuake remains the always-running free baseline and fallback. Users may optionally authorize DM-D.S.S to overlay live EEW forecasts when their account has an active `eew.forecast` plan; the source panel also shows their other active DM-D.S.S plans without using those data feeds yet.
+
+DM-D.S.S reception, notification delivery, lifecycle handling, account/subscription fallback, and cold-start navigation have been tested and confirmed, along with historical hybrid replay and FULL/LITE behavior. **Pending validation:** Forecast-to-Warning escalation, cancellation, reconnection, and recovery of genuinely missed bulletins. See [the data notes](THIRD_PARTY_DATA.md) for bundled-data attribution and licensing details.
 
 ## Opening and building
 

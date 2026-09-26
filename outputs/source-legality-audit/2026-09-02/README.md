@@ -1,5 +1,7 @@
 # QuakeDeck source-use audit
 
+> **Historical snapshot.** This audit is superseded by the [19 September 2026 data-use legality audit](../2026-09-19/README.md), which reassesses each source according to QuakeDeck's current data flow and corrects the station-overlay and forecast-use findings.
+
 Reviewed: **2 September 2026**.
 
 Follow-up completion updated: **13 September 2026**.

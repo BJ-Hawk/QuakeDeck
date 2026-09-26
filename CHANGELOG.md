@@ -2,6 +2,12 @@
 
 QuakeDeck release history
 
+## v0.10.3-dev.1
+
+- Associates a second-precision archived DM-D.S.S EEW with its matching P2PQuake/JMA confirmed event when the latter supplies only a minute-resolution origin time. The historical replay tolerance is now 30 seconds, while the existing hypocentre proximity check remains in force.
+- Updates the Android Gradle Plugin from 9.4.0 to 9.4.1.
+- Advances the development version to `0.10.3-dev.1` (`versionCode` 239).
+
 ## v0.10.2
 
 - Replaces the third-party station catalogue with a direct JMA map/code-table derivation after an exact 4,360-station, nine-field dry-run audit. Preserves coordinates, Japanese and approved English identities, operator labels, administrative parents, and researched station details; documents the one code-table-only entry without map coordinates.

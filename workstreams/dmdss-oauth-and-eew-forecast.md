@@ -1,14 +1,18 @@
 # DM-D.S.S OAuth and EEW forecast
 
-## Status — 0.10.1 finalized; integration pending further live-event testing
+## Status — tested and confirmed; four live-event scenarios pending validation
 
 The implementation is finalized as **0.10.1** (`versionCode` 233), as approved
 on 2026-09-02. It is no longer an in-progress development release.
 
-**DM-D.S.S is partially live-event validated, not production-verified.**
-Unobserved escalation, cancellation, lifecycle, reconnect, and missed-bulletin
-recovery paths remain explicitly pending live-event testing. Release
-finalization does not imply that every real-world path has passed.
+**User validation confirmation — 26 September 2026:** reception, notification
+delivery, lifecycle behavior, account/subscription fallback, attention settings,
+cold-start navigation, diagnostics export boundaries, historical hybrid replay,
+and FULL/LITE behavior are tested and confirmed. Only Forecast-to-Warning
+escalation, cancellation, reconnection, and recovery of genuinely missed
+bulletins remain pending validation. This records the user's confirmation;
+no new tests were run for this documentation update. Separate source-audit
+findings and the felt-association policy decision remain open.
 
 ## Scope and fixed boundaries
 
@@ -107,7 +111,7 @@ finalization does not imply that every real-world path has passed.
   launch, final-bulletin receipt, and timing close to JQuake.
 - That event exposed repeated unchanged alerts, retained-payload reactivation,
   failed UI expiry, and rotation replaying Report #1. Those fixes shipped in
-  `0.10.0`; their documented live-validation gaps remain open.
+  `0.10.0`; the user confirmed those lifecycle fixes as tested on 26 September 2026.
 - A recorded network handover caused a socket abort followed by prompt
   reconnection and a recovery check reporting no newly missed recent EEW.
   This does not prove every interruption/recovery path.
@@ -134,23 +138,24 @@ the active-EEW gate and ban on felt-only events remain unchanged.
 - FULL and forced-LITE debug Kotlin compilation and 107 unit tests pass,
   including eight new archive/replay forecast regressions. No APK was built
   for this release task.
-- Device-check historical empty-region and mixed official/local EEW frames,
+- User-confirmed on 26 September 2026: historical empty-region and mixed official/local EEW frames,
   forward/backward revision changes, and the transition to confirmed data in
-  portrait/landscape. Confirm no historical rings/countdowns appear.
-- On the next suitable authorized-device live event, verify unchanged versus
+  portrait/landscape, with no historical rings/countdowns.
+- User-confirmed on 26 September 2026: unchanged versus
   changed-intensity alerts, exact 180-second termination, Ended navigation,
-  rotation, and independent Forecast-to-Warning escalation.
-- Exercise cancellation, foreground-service/network reconnection, and
-  `gd.eew` recovery after a genuinely missed live bulletin.
-- Recheck account/subscription fallback, Update authorization, independent
+  rotation.
+- Pending validation: independent Forecast-to-Warning escalation, cancellation,
+  foreground-service/network reconnection, and `gd.eew` recovery after a
+  genuinely missed live bulletin.
+- User-confirmed on 26 September 2026: account/subscription fallback, Update authorization, independent
   attention thresholds, and cold-start notification focus. Successful live
   authorization already demonstrates a usable registered callback; control
   panel changes remain account-side.
-- Check raw export redaction/retention boundaries with further real traffic.
+- User-confirmed on 26 September 2026: raw export redaction/retention boundaries.
 - Obtain a separate decision before changing confirmed-event felt acceptance,
   then validate that decision against real diagnostic evidence.
-- Keep the pending-live-testing label until the user reviews the missing live
-  evidence. A future commit or publication still needs explicit authorization.
+- Keep only the four named scenarios marked pending validation until their
+  evidence is confirmed. A future commit or publication still needs explicit authorization.
 
 ## Release record
 

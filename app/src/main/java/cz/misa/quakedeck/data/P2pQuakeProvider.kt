@@ -1221,7 +1221,10 @@ class P2pQuakeProvider(
     ): Boolean {
         val confirmedTime = eventInstant(confirmed) ?: return false
         val eewTime = eventInstant(eew) ?: return false
-        if (abs(java.time.Duration.between(confirmedTime, eewTime).seconds) > 15L) return false
+        // P2PQuake/JMA confirmed reports have minute precision, while DM-D.S.S
+        // preserves the EEW origin seconds. Allow the latter to fall anywhere
+        // within that minute's first half without severing one real incident.
+        if (abs(java.time.Duration.between(confirmedTime, eewTime).seconds) > 30L) return false
         if (!confirmed.hasHypocenter || !eew.hasHypocenter) return true
         return abs(confirmed.latitude - eew.latitude) <= 3.0 &&
             abs(confirmed.longitude - eew.longitude) <= 3.0

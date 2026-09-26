@@ -1,11 +1,14 @@
 # Local EEW intensity and JMA2001 travel-time prediction
 
-## Status — implementation finalized in 0.10.1; device/live validation tracked separately
+## Status — implementation finalized in 0.10.1; tested and confirmed
 
 The approved implementation is finalized as `0.10.1` (`versionCode` 233),
 including official-authoritative hybrid coverage in live view and historical
-EEW replay. The release is no longer in progress. Remaining device/live checks
-are validation follow-ups, not an unfinished development-version marker.
+EEW replay. The release is no longer in progress. On 26 September 2026 the user
+confirmed historical hybrid replay, broader hybrid-map behavior, selected-location
+estimates, omission ceilings, and FULL/LITE behavior as tested. The separate
+DM-D.S.S integration retains four pending scenarios: Forecast-to-Warning
+escalation, cancellation, reconnection, and genuinely missed-bulletin recovery.
 
 ## Objective
 
@@ -132,10 +135,12 @@ References:
 - The replay regression suite covers archived input preservation, per-revision
   calculations, official/local presentation parity, legacy empty-region frames,
   parser sorting, LITE/no-result handling, and cancelled/confirmed exclusions.
-- No APK was built for this release task. Historical map rendering still needs
-  a device check; broader hybrid-map, selected-location, omission-ceiling, and
-  live DM-D.S.S coverage remain follow-ups. Automated tests are not production
-  proof and release finalization does not change that boundary.
+- No APK was built for the original release task. On 26 September 2026 the user
+  confirmed historical map rendering, revision navigation and transitions,
+  broader hybrid-map behavior, selected-location estimates, omission ceilings,
+  and FULL/LITE behavior as tested. No new tests were run for this documentation
+  update. The four remaining DM-D.S.S scenarios are tracked in its workstream;
+  this confirmation does not close separate source-audit findings.
 
 ## Mandatory cross-machine transfer reminder
 
