@@ -2,6 +2,14 @@
 
 QuakeDeck release history
 
+## v0.10.3-dev.2
+
+- Unifies a matching DM-D.S.S EEW and P2PQuake/JMA official bulletin into one live incident: the active EEW card retains its forecast state while official report revisions and the cumulative felt count amend that same event.
+- Makes a newer cumulative P2PQuake felt aggregate authoritative over an older value already copied into the displayed event, preventing the counter from freezing while upstream updates continue.
+- Keeps the last verified JMA report link usable while a newer detailed-report revision waits for its JMA JSON payload; the newer revision keeps polling and replaces that link only after publication.
+- Retains the existing source-neutral archive of DM-D.S.S/P2P EEW, P2P official, and P2P felt frames for the unchanged static historical replay UI.
+- Advances the development version to `0.10.3-dev.2` (`versionCode` 240).
+
 ## v0.10.3-dev.1
 
 - Associates a second-precision archived DM-D.S.S EEW with its matching P2PQuake/JMA confirmed event by comparing both origin timestamps at the common minute precision. This normalization applies only to historical EEW attachment; the existing hypocentre proximity check remains in force.

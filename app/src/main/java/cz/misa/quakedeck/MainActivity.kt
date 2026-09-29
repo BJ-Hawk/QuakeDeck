@@ -3575,6 +3575,14 @@ private fun EarthquakeReportStageStrip(
 ) {
     val label = earthquakeReportLabel(event, language) ?: return
     val context = LocalContext.current
+    // A later P2PQuake revision can arrive before JMA publishes its detail
+    // JSON. Retain the last proven-good official target for this incident so a
+    // report update never turns an already usable report back into a dead
+    // "preparing" bar. The current revision continues polling in the
+    // background and replaces this fallback once it is genuinely available.
+    var lastAvailableReportLink by remember(event.id) {
+        mutableStateOf<EarthquakeEvent?>(null)
+    }
     val reportUri = remember(
         reportLinkEvent.id,
         reportLinkEvent.reportIssuedAt,
@@ -3599,15 +3607,31 @@ private fun EarthquakeReportStageStrip(
         if (reportUri == null || jmaReportId == null) return@LaunchedEffect
         while (true) {
             reportReadiness = JmaReportReadinessChecker.readinessFor(jmaReportId)
-            if (reportReadiness == JmaReportReadiness.AVAILABLE) return@LaunchedEffect
+            if (reportReadiness == JmaReportReadiness.AVAILABLE) {
+                lastAvailableReportLink = reportLinkEvent
+                return@LaunchedEffect
+            }
             // JMA can expose the event row before its detail JSON. Recheck only
             // while this report card remains composed, and no more than once per
             // short-lived list-cache interval.
             delay(25.seconds)
         }
     }
-    val reportReady = reportReadiness == JmaReportReadiness.AVAILABLE
-    val reportLabel = if (shouldShowOfficialJmaReportPreparing(event, reportReadiness)) {
+    val retainedReportLink = lastAvailableReportLink
+    val displayedReportLink = if (reportReadiness == JmaReportReadiness.AVAILABLE) {
+        reportLinkEvent
+    } else {
+        retainedReportLink ?: reportLinkEvent
+    }
+    val displayedReportUri = remember(displayedReportLink, language) {
+        officialJmaReportUri(displayedReportLink, language)
+    }
+    val reportReady = reportReadiness == JmaReportReadiness.AVAILABLE || retainedReportLink != null
+    val reportLabel = if (shouldShowOfficialJmaReportPreparing(
+            event,
+            if (reportReady) JmaReportReadiness.AVAILABLE else reportReadiness
+        )
+    ) {
         uiText(R.string.official_jma_report_preparing, language)
     } else {
         label
@@ -3628,9 +3652,9 @@ private fun EarthquakeReportStageStrip(
         modifier = Modifier
             .fillMaxWidth()
             .then(
-                if (reportUri != null && reportReady) {
+                if (displayedReportUri != null && reportReady) {
                     Modifier.clickable {
-                        context.startActivity(Intent(Intent.ACTION_VIEW, reportUri))
+                        context.startActivity(Intent(Intent.ACTION_VIEW, displayedReportUri))
                     }
                 } else {
                     Modifier
@@ -3667,7 +3691,7 @@ private fun EarthquakeReportStageStrip(
                     overflow = TextOverflow.Ellipsis
                 )
             }
-            if (reportUri != null && reportReady) {
+            if (displayedReportUri != null && reportReady) {
                 Spacer(Modifier.width((4f * cardScale).dp))
                 Text(
                     text = "↗",

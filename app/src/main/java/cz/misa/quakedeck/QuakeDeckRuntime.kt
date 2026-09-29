@@ -28,6 +28,7 @@ import cz.misa.quakedeck.data.LiveUpdateKind
 import cz.misa.quakedeck.data.LocalEewForecasts
 import cz.misa.quakedeck.data.valueOrNull
 import cz.misa.quakedeck.data.P2pQuakeProvider
+import cz.misa.quakedeck.data.mergeCumulativeUpdate
 import cz.misa.quakedeck.data.PublicHolidayCalendar
 import cz.misa.quakedeck.data.QuakeDataProvider
 import cz.misa.quakedeck.data.ReportArchiveStatus
@@ -38,6 +39,8 @@ import cz.misa.quakedeck.sandbox.SandboxFeature
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoUnit
+import kotlin.math.abs
 
 /**
  * Process-scoped owner of QuakeDeck's live provider and notification policy.
@@ -295,7 +298,8 @@ class QuakeDeckRuntime(context: Context) : QuakeDataProvider {
         }
 
         val dmdssEew = dmdssSnapshot.activeEewEvent
-        val selectedEew = dmdssEew ?: p2pSnapshot.activeEewEvent
+        val selectedEew = dmdssEew?.amendedByMatchingOfficialReport(p2pSnapshot.event)
+            ?: p2pSnapshot.activeEewEvent
         val selectedEvent = selectedEew ?: if (
             origin == DataSourceMode.DMDSS &&
             dmdssSnapshot.liveUpdateKind == LiveUpdateKind.EEW_ENDED
@@ -353,6 +357,45 @@ class QuakeDeckRuntime(context: Context) : QuakeDataProvider {
         }
         return snapshot.copy(liveUpdateSequence = sequence)
     }
+
+    /**
+     * DM-D.S.S owns the active forecast presentation, while P2PQuake carries
+     * the JMA confirmation. They are two reports about one earthquake, not two
+     * cards. Keep the EEW identity and forecast state, then layer the official
+     * report fields and its cumulative felt signal onto that same incident.
+     */
+    private fun EarthquakeEvent.amendedByMatchingOfficialReport(
+        official: EarthquakeEvent
+    ): EarthquakeEvent {
+        if (official.kind != EarthquakeEventKind.CONFIRMED || !sameLiveIncident(this, official)) {
+            return this
+        }
+        val crowd = listOfNotNull(p2pCrowdSignal, official.p2pCrowdSignal)
+            .reduceOrNull(cz.misa.quakedeck.data.P2pCrowdSignal::mergeCumulativeUpdate)
+        return official.copy(
+            id = id,
+            kind = EarthquakeEventKind.EEW,
+            eewAlertLevel = eewAlertLevel,
+            eewHypocenterCondition = eewHypocenterCondition,
+            eewMagnitudeUnit = eewMagnitudeUnit,
+            eewSourceAccuracy = eewSourceAccuracy,
+            localIntensityForecast = localIntensityForecast,
+            p2pCrowdSignal = crowd
+        )
+    }
+
+    private fun sameLiveIncident(first: EarthquakeEvent, second: EarthquakeEvent): Boolean {
+        val firstTime = eventOriginMinute(first) ?: return false
+        val secondTime = eventOriginMinute(second) ?: return false
+        if (firstTime != secondTime) return false
+        if (!first.hasHypocenter || !second.hasHypocenter) return true
+        return abs(first.latitude - second.latitude) <= 3.0 &&
+            abs(first.longitude - second.longitude) <= 3.0
+    }
+
+    private fun eventOriginMinute(event: EarthquakeEvent): LocalDateTime? = runCatching {
+        LocalDateTime.parse(event.originTime, JST_DISPLAY_FORMATTER).truncatedTo(ChronoUnit.MINUTES)
+    }.getOrNull()
 
     /** Attach the visible UI to the already-running process-scoped provider. */
     override fun start(onSnapshot: (AppSnapshot) -> Unit) {

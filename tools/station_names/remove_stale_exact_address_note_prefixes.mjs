@@ -1,0 +1,24 @@
+import { readFileSync, writeFileSync } from 'node:fs';
+
+const inputPath = 'outputs/station-name-audit/station_metadata_sources.json';
+const apply = process.argv.includes('--apply');
+const staleStatement = 'No exact address or precise provider-station metadata is recorded yet.';
+const stalePrefix = `${staleStatement} `;
+const replacementStatement = 'Exact placement address is recorded in this metadata. No separate provider-station metadata is recorded.';
+const raw = readFileSync(inputPath, 'utf8');
+const data = JSON.parse(raw);
+const affected = data.stations.filter((station) => station.placementPrecision === 'exact_address' && station.note?.startsWith(staleStatement));
+if (affected.length !== 398) throw new Error(`Expected 398 stale exact-address notes, found ${affected.length}`);
+const evidenceNotes = affected.filter((station) => station.note !== staleStatement);
+const bareNotes = affected.filter((station) => station.note === staleStatement);
+if (evidenceNotes.length !== 237 || bareNotes.length !== 161) throw new Error(`Unexpected stale-note split: ${evidenceNotes.length} evidence notes, ${bareNotes.length} bare notes`);
+for (const station of affected) if (!station.publishedAddressJa) throw new Error(`Missing exact address for ${station.code}`);
+const output = raw.replaceAll(stalePrefix, '').replaceAll(staleStatement, replacementStatement);
+if (output === raw) throw new Error('No stale prefixes were removed');
+const verified = JSON.parse(output);
+const remaining = verified.stations.filter((station) => station.placementPrecision === 'exact_address' && station.note?.startsWith(staleStatement));
+if (remaining.length !== 0) throw new Error(`${remaining.length} stale exact-address notes remain`);
+const changed = verified.stations.filter((station) => affected.some((original) => original.code === station.code) && !station.note.startsWith(stalePrefix));
+if (changed.length !== affected.length) throw new Error(`Expected ${affected.length} changed records, found ${changed.length}`);
+if (apply) writeFileSync(inputPath, output);
+console.log(`${apply ? 'Updated' : 'Validated'} ${affected.length} stale exact-address notes.`);

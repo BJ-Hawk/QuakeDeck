@@ -153,11 +153,11 @@ The complete audited 4,360-station English map and the first station-information
 card are active in the app. Placement research is underway in
 `outputs/station-name-audit/station_metadata_sources.json` only:
 
-- 3,458 stations have source-supported address data, all with an exact published
+- 3,471 stations have source-supported address data, all with an exact published
   Japanese address.
-- 902 retain municipality-or-ward precision. Three of those also have a
+- 889 retain municipality-or-ward precision. Three of those also have a
   source-supported facility identity but no verified published address; the
-  remaining 899 still require facility/address research.
+  remaining 886 still require facility/address research.
 - Address/precision validation currently reports zero mismatches.
 
 The latest locality-only refinement preserved those coverage counts while making
@@ -166,8 +166,17 @@ official JMA observation-point label as `placementLocalityJa`, rather than a
 coarser municipality or ward label. This is locality evidence only: none was
 promoted to a facility or an exact address, and the JMA list recheck found no
 additional exact name-to-address match. The three facility-only records remain
-explicitly distinct from the 899 records still needing facility/address
+explicitly distinct from the 886 records still needing facility/address
 research.
+
+The latest Yamanashi Prefecture pass promoted 13 stations to exact addresses.
+Its official earthquake-network documentation names the host offices, while
+Hokuto City, Kai City, Ichikawamisato Town, Minobu Town, and Nanbu Town publish
+their full Japanese addresses. The additions cover seven Hokuto general
+branches, Kai City's Futaba and Shikishima offices, Ichikawamisato's Mitama
+Branch, Minobu's Shimobe Branch, and Nanbu Town's main and Nanbu branch offices.
+No placement was inferred from a coordinate, office proximity, or a matching
+locality name alone.
 
 The latest completed official-source batches converted confirmed facility-only
 records to exact published addresses: one in Okinawa (`4735831`, Kita Daito

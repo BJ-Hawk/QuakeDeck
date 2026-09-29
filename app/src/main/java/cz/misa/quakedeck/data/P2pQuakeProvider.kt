@@ -661,7 +661,8 @@ class P2pQuakeProvider(
     }
 
     fun crowdSignalFor(event: EarthquakeEvent): P2pCrowdSignal? =
-        event.p2pCrowdSignal ?: pendingCrowdSignalFor(event)
+        listOfNotNull(event.p2pCrowdSignal, pendingCrowdSignalFor(event))
+            .reduceOrNull(P2pCrowdSignal::mergeCumulativeUpdate)
 
     override fun setReportArchiveEnabled(enabled: Boolean) {
         reportArchiveEnabled = enabled
