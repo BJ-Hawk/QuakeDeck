@@ -14,6 +14,7 @@ New 2026/09/26
 * UI work:
   * Past reports replay - loading bar should be probably anchored to bottom so it's visible when scrolled and doesn't evoke the feeling of app not doing anything wehn loading an event for replay
   * Unify the looks of all menues and windows (mainly Data Sources first) - spacing of rows, unified clickable text
+  * To prevent flashing the Historical events replay window (the blue report type/info on top of event card) should have constant rows. Right now it jumps when issued is empty/filled
   * Remove "P2PQuake crowd signals" from the "Data & Connection" menu in Settings - it's no longer used (confirm in code first)
   * In-progress station location research: start "Englifying" the adresses to be in Google Maps format. On that note, make sure the adress row text (in station detail view) is consistently resized. It is now resized only once, going to different staion with default text size and back doesn't resize it again.
   * Make sure the Event detail and Station detail are the same size at all times. Switching between Earthquake info and Station info (the <-> to the left of Shindo badge) does a small resize (the station info being slightly bigger)
