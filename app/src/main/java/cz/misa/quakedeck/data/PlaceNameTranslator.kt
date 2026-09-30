@@ -29,6 +29,13 @@ object PlaceNameTranslator {
         "鹿児島空港" to "Kagoshima Airport"
     )
 
+    // P2PQuake ScalePrompt uses compact report-area spellings which differ
+    // from the canonical JMA area dictionary. Keep this tiny, evidence-backed
+    // alias map separate from municipalities and stations: these are areas.
+    private val reportingAreaAliases = mapOf(
+        "沖縄県与那国島" to "与那国島地方"
+    )
+
     fun shouldUseEnglish(setting: PlaceNameLanguage): Boolean = when (setting) {
         PlaceNameLanguage.ENGLISH,
         PlaceNameLanguage.CZECH -> true
@@ -101,12 +108,13 @@ object PlaceNameTranslator {
     ): String {
         if (!shouldUseEnglish(setting) || japanese.isBlank()) return japanese
         val dictionaries = getDictionaries(context)
+        val canonicalJapanese = reportingAreaAliases[japanese] ?: japanese
         val translated = areaCode
             ?.takeIf { it.isNotBlank() }
-            ?.let { StationCatalog.reportingAreaEnglishName(context, it, japanese) }
-            ?: dictionaries.epicenter[japanese]
-            ?: dictionaries.epicenter["${japanese}地方"]
-            ?: observation(context, japanese, setting)
+            ?.let { StationCatalog.reportingAreaEnglishName(context, it, canonicalJapanese) }
+            ?: dictionaries.epicenter[canonicalJapanese]
+            ?: dictionaries.epicenter["${canonicalJapanese}地方"]
+            ?: observation(context, canonicalJapanese, setting)
         if (translated.isNotBlank()) return translated
         if (!containsJapanese(japanese)) return japanese
         return areaCode

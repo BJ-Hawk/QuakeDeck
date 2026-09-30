@@ -65,6 +65,19 @@ class CorePolicyTest {
     }
 
     @Test
+    fun jmaReportReadinessDoesNotBorrowJsonFromALaterListRow() {
+        val reportId = "20260930140221"
+        val list = """
+            [
+              {"ttl":"Initial intensity","ctt":"$reportId","json":""},
+              {"ttl":"Another event","ctt":"20260930140536","json":"published.json"}
+            ]
+        """.trimIndent()
+
+        assertEquals(JmaReportReadiness.PREPARING, jmaReportReadinessFromList(reportId, list))
+    }
+
+    @Test
     fun officialJmaReportIdUsesTheReportIssueTimestamp() {
         val event = EarthquakeEvent(
             id = "quake:2026-08-08T21:23:43+09:00",

@@ -31,6 +31,12 @@ object JapanMapCoverage {
             longitude = longitude.coerceIn(MIN_LONGITUDE, MAX_LONGITUDE)
         )
     }
+
+    /** Keep only reports just beyond the bundled geometry eligible for edge focus. */
+    fun isNearEdge(latitude: Double, longitude: Double): Boolean =
+        latitude.isFinite() && longitude.isFinite() &&
+            latitude in (MIN_LATITUDE - 0.75)..(MAX_LATITUDE + 0.75) &&
+            longitude in (MIN_LONGITUDE - 0.75)..(MAX_LONGITUDE + 0.75)
 }
 
 data class JapanMapCoordinate(
@@ -68,11 +74,11 @@ fun EarthquakeEvent.hasJapanMapContent(): Boolean =
             )
 
 /**
- * EEW-only camera anchor. Offshore sources use the nearest point of the current
- * map extent; ordinary earthquake reports never use this clamped fallback.
+ * Camera anchor for EEWs and confirmed reports immediately beyond the bundled
+ * map edge. Genuine distant reports never use this clamped fallback.
  */
 fun EarthquakeEvent.nearestJapanMapEewFocus(): JapanMapCoordinate? =
-    if (kind == EarthquakeEventKind.EEW && hasHypocenter) {
+    if (hasHypocenter && (kind == EarthquakeEventKind.EEW || JapanMapCoverage.isNearEdge(latitude, longitude))) {
         JapanMapCoverage.nearestPoint(latitude, longitude)
     } else {
         null

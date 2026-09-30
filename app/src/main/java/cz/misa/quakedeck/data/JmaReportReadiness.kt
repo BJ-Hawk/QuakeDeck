@@ -53,10 +53,16 @@ internal fun jmaReportReadinessFromList(
     val reportIdMatch = Regex("\\\"ctt\\\"\\s*:\\s*\\\"${Regex.escape(reportId)}\\\"")
         .find(listPayload)
         ?: return JmaReportReadiness.PREPARING
-    val afterReportId = listPayload.substring(reportIdMatch.range.last + 1)
-    val nextReport = Regex("\\{\\s*\\\"ctt\\\"").find(afterReportId)?.range?.first
-        ?: afterReportId.length
-    val matchingReport = afterReportId.substring(0, nextReport)
+    // `ctt` is not guaranteed to be the first property in the list row. Find
+    // the enclosing flat list object instead of looking for the next object
+    // which happens to start with `ctt`; otherwise a later event's published
+    // JSON could make this still-pending report appear openable.
+    val objectStart = listPayload.lastIndexOf('{', reportIdMatch.range.first)
+    val objectEnd = listPayload.indexOf('}', reportIdMatch.range.last)
+    if (objectStart == -1 || objectEnd == -1 || objectEnd <= objectStart) {
+        return JmaReportReadiness.CHECKING
+    }
+    val matchingReport = listPayload.substring(objectStart, objectEnd + 1)
     val json = Regex("\\\"json\\\"\\s*:\\s*\\\"([^\\\"]*)\\\"")
         .find(matchingReport)
         ?.groupValues

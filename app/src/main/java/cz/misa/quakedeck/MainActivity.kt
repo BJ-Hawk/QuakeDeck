@@ -492,10 +492,12 @@ private fun QuakeDeckApp(
     var historicalBrowserOpen by remember { mutableStateOf(false) }
     var historicalCatalogLoading by remember { mutableStateOf(false) }
     var historicalCatalog by remember { mutableStateOf<List<HistoricalEventSummary>>(emptyList()) }
+    var historicalCatalogArchiveFingerprint by remember { mutableStateOf<String?>(null) }
     var historicalCatalogError by remember { mutableStateOf<String?>(null) }
     var historicalIncidentLoading by remember { mutableStateOf(false) }
     var historicalIncidentLoadToken by remember { mutableIntStateOf(0) }
     var historicalIncident by remember { mutableStateOf<HistoricalIncident?>(null) }
+    var historicalIncidentArchiveFingerprint by remember { mutableStateOf<String?>(null) }
     var historicalReportIndex by remember { mutableIntStateOf(0) }
     var historicalInitialFocusToken by remember { mutableIntStateOf(0) }
     var sourceMenuOpen by remember { mutableStateOf(false) }
@@ -643,12 +645,23 @@ private fun QuakeDeckApp(
         settingsOpen = true
     }
 
-    fun refreshHistoricalCatalog() {
+    fun archiveFingerprint() = listOf(
+        reportArchiveStatus.reportCount,
+        reportArchiveStatus.incidentCount,
+        reportArchiveStatus.payloadBytes
+    ).joinToString(":")
+
+    fun refreshHistoricalCatalog(force: Boolean = false) {
+        val fingerprint = archiveFingerprint()
+        if (!force && historicalCatalogArchiveFingerprint == fingerprint) return
         historicalCatalogLoading = true
         historicalCatalogError = null
         provider.loadHistoricalEventCatalog { result ->
             historicalCatalogLoading = false
-            result.onSuccess { historicalCatalog = it }
+            result.onSuccess {
+                historicalCatalog = it
+                historicalCatalogArchiveFingerprint = fingerprint
+            }
                 .onFailure { historicalCatalogError = it.message ?: "Unable to load report archive" }
         }
     }
@@ -1071,25 +1084,19 @@ private fun QuakeDeckApp(
         val incident = historicalIncident ?: return
         val targetIndex = index.coerceIn(0, incident.frames.lastIndex)
         if (targetIndex == historicalReportIndex) return
-        val oldFrame = incident.frames.getOrNull(historicalReportIndex)
         val newFrame = incident.frames[targetIndex]
-        // Historical observations remain open while stepping between reports;
-        // the lower content simply updates to the newly accumulated points.
         historicalReportIndex = targetIndex
-        if (eventMapped && oldFrame != null) {
-            // Adjacent archive frames are separate report IDs. Keep their map
-            // association while retaining the existing camera until Re-focus.
-            mappedEventId = newFrame.event.id
-            focusEventTargetId = newFrame.event.id
-            focusNeedsRefocusRequested =
-                focusedFootprintSignature != eventFocusSignature(newFrame.event)
-        }
+        // Replay is static, but each archived revision remains a distinct
+        // event footprint. Frame it immediately instead of leaving the camera
+        // on an unrelated earlier EEW/report frame.
+        requestEventMapFocus(newFrame.event, manual = true)
     }
 
     fun exitHistoricalMode() {
         clearStationFocus()
         clearObservedIntensityExpansion()
         historicalIncident = null
+        historicalIncidentArchiveFingerprint = null
         historicalReportIndex = 0
         selectedEventId = null
         focusNeedsRefocusRequested = false
@@ -1116,6 +1123,7 @@ private fun QuakeDeckApp(
         clearObservedIntensityExpansion()
         if (testingMode) {
             historicalIncident = null
+            historicalIncidentArchiveFingerprint = null
             historicalReportIndex = 0
             historicalBrowserOpen = false
         }
@@ -1149,8 +1157,10 @@ private fun QuakeDeckApp(
         requestEventMapFocus(firstFrame.event, manual = true)
     }
 
-    LaunchedEffect(reportArchiveStatus.reportCount, historicalIncident?.eventKey) {
+    LaunchedEffect(archiveFingerprint(), historicalIncident?.eventKey) {
         val currentIncident = historicalIncident ?: return@LaunchedEffect
+        val fingerprint = archiveFingerprint()
+        if (historicalIncidentArchiveFingerprint == fingerprint) return@LaunchedEffect
         val currentArchiveKey = currentIncident.frames
             .getOrNull(historicalReportIndex)
             ?.archiveKey
@@ -1164,6 +1174,7 @@ private fun QuakeDeckApp(
                     ?.takeIf { it >= 0 }
                     ?: historicalReportIndex.coerceAtMost(refreshed.frames.lastIndex)
                 historicalIncident = refreshed
+                historicalIncidentArchiveFingerprint = fingerprint
                 historicalReportIndex = preservedIndex
                 if (eventMapped) {
                     val refreshedFrame = refreshed.frames.getOrNull(preservedIndex)
@@ -2197,6 +2208,8 @@ private fun QuakeDeckApp(
             onClearReportArchive = {
                 if (historicalMode) exitHistoricalMode()
                 historicalCatalog = emptyList()
+                historicalCatalogArchiveFingerprint = null
+                historicalIncidentArchiveFingerprint = null
                 provider.clearReportArchive()
             },
             textScale = textScale,
@@ -2248,7 +2261,7 @@ private fun QuakeDeckApp(
             loading = historicalCatalogLoading || historicalIncidentLoading,
             events = historicalCatalog,
             error = historicalCatalogError,
-            onRetry = ::refreshHistoricalCatalog,
+            onRetry = { refreshHistoricalCatalog(force = true) },
             onSelectEvent = { summary ->
                 if (!historicalIncidentLoading) {
                     val loadToken = ++historicalIncidentLoadToken
@@ -2260,6 +2273,7 @@ private fun QuakeDeckApp(
                         result.onSuccess { incident ->
                             clearObservedIntensityExpansion()
                             historicalIncident = incident
+                            historicalIncidentArchiveFingerprint = archiveFingerprint()
                             historicalReportIndex = 0
                             portraitBeforeObservationsFraction = null
                             portraitPendingObservationRestore = null
@@ -3570,6 +3584,7 @@ private fun earthquakeReportLabel(
 private fun EarthquakeReportStageStrip(
     event: EarthquakeEvent,
     reportLinkEvent: EarthquakeEvent = event,
+    checkJmaReadiness: Boolean,
     language: PlaceNameLanguage,
     cardScale: Float
 ) {
@@ -3594,17 +3609,17 @@ private fun EarthquakeReportStageStrip(
     val jmaReportId = remember(reportLinkEvent.reportIssuedAt) {
         officialJmaReportId(reportLinkEvent)
     }
-    var reportReadiness by remember(reportUri, jmaReportId) {
+    var reportReadiness by remember(reportUri, jmaReportId, checkJmaReadiness) {
         mutableStateOf(
-            if (reportUri == null || jmaReportId == null) {
+            if (!checkJmaReadiness || reportUri == null || jmaReportId == null) {
                 JmaReportReadiness.AVAILABLE
             } else {
                 JmaReportReadiness.CHECKING
             }
         )
     }
-    LaunchedEffect(reportUri, jmaReportId) {
-        if (reportUri == null || jmaReportId == null) return@LaunchedEffect
+    LaunchedEffect(reportUri, jmaReportId, checkJmaReadiness) {
+        if (!checkJmaReadiness || reportUri == null || jmaReportId == null) return@LaunchedEffect
         while (true) {
             reportReadiness = JmaReportReadinessChecker.readinessFor(jmaReportId)
             if (reportReadiness == JmaReportReadiness.AVAILABLE) {
@@ -3626,7 +3641,8 @@ private fun EarthquakeReportStageStrip(
     val displayedReportUri = remember(displayedReportLink, language) {
         officialJmaReportUri(displayedReportLink, language)
     }
-    val reportReady = reportReadiness == JmaReportReadiness.AVAILABLE || retainedReportLink != null
+    val reportReady = !checkJmaReadiness ||
+        reportReadiness == JmaReportReadiness.AVAILABLE || retainedReportLink != null
     val reportLabel = if (shouldShowOfficialJmaReportPreparing(
             event,
             if (reportReady) JmaReportReadiness.AVAILABLE else reportReadiness
@@ -3885,6 +3901,7 @@ private fun ReportCardGrid(
             EarthquakeReportStageStrip(
                 event = event,
                 reportLinkEvent = officialReportEvent,
+                checkJmaReadiness = !browsingHistory,
                 language = language,
                 cardScale = cardScale
             )
@@ -7887,9 +7904,11 @@ private fun JapanMap(
             gestureScale = 1f
             gesturePan = Offset.Zero
 
-            val epicenterOnMap = event.hasJapanMapEpicenter()
+            val epicenterFocus = event.nearestJapanMapEewFocus()
+            val epicenterOnMap = event.hasJapanMapEpicenter() || epicenterFocus != null
             val epicenter = if (epicenterOnMap) {
-                sourceToBase(data.project(event.latitude, event.longitude))
+                val coordinate = epicenterFocus ?: JapanMapCoordinate(event.latitude, event.longitude)
+                sourceToBase(data.project(coordinate.latitude, coordinate.longitude))
             } else {
                 null
             }
@@ -8435,7 +8454,13 @@ private fun JapanMap(
 
         LaunchedEffect(viewportWidth, viewportHeight, fitScale, baseLeft, baseTop) {
             val previous = previousViewportState
-            if (previous != null && committedZoom > 0f) {
+            val viewportIsUsable = viewportWidth > 0f && viewportHeight > 0f &&
+                fitScale.isFinite() && fitScale > 0f
+            if (
+                previous != null && committedZoom > 0f && viewportIsUsable &&
+                previous.width > 0f && previous.height > 0f &&
+                previous.fitScale.isFinite() && previous.fitScale > 0f
+            ) {
                 // Preserve the same geographic point beneath the viewport centre,
                 // not merely the same pixel pan, while the panel changes map size.
                 // This applies to both free-map and focused cameras: resizing the
@@ -8459,13 +8484,15 @@ private fun JapanMap(
                     sourceHeight = sourceHeight
                 )
             }
-            previousViewportState = MapViewportState(
-                width = viewportWidth,
-                height = viewportHeight,
-                fitScale = fitScale,
-                baseLeft = baseLeft,
-                baseTop = baseTop
-            )
+            if (viewportIsUsable) {
+                previousViewportState = MapViewportState(
+                    width = viewportWidth,
+                    height = viewportHeight,
+                    fitScale = fitScale,
+                    baseLeft = baseLeft,
+                    baseTop = baseTop
+                )
+            }
         }
 
         // The event-card button can re-run the exact same camera fit without

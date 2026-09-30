@@ -727,23 +727,7 @@ class P2pQuakeProvider(
                 archiveStore.loadEarthquakeReports()
                     .groupBy { it.eventKey }
                     .mapNotNull { (eventKey, records) ->
-                        buildHistoricalIncident(eventKey, records)?.let { incident ->
-                            val finalEvent = incident.frames.lastOrNull()?.event ?: return@let null
-                            val finalCrowdSignal = historicalCrowdSignalFor(
-                                confirmed = finalEvent,
-                                associations = associations
-                            )
-                            HistoricalEventSummary(
-                                eventKey = eventKey,
-                                event = finalEvent.copy(p2pCrowdSignal = finalCrowdSignal),
-                                reportCount = incident.reportCount,
-                                firstReportAt = incident.frames.firstOrNull()?.sourceReceivedAt,
-                                lastReportAt = incident.frames.lastOrNull()?.sourceReceivedAt,
-                                hasCorrection = incident.frames.any {
-                                    !it.event.reportCorrection.isNullOrBlank()
-                                }
-                            )
-                        }
+                        buildHistoricalSummary(eventKey, records, associations)
                     }
             }
             mainHandler.post { onResult(result) }
@@ -754,6 +738,37 @@ class P2pQuakeProvider(
         val eews: List<EarthquakeEvent>,
         val signals: List<P2pCrowdSignal>
     )
+
+    /** Catalogue rows need only the final confirmed event, not a full replay. */
+    private fun buildHistoricalSummary(
+        eventKey: String,
+        records: List<ArchivedEarthquakeReport>,
+        associations: HistoricalCrowdAssociations
+    ): HistoricalEventSummary? {
+        var accumulated: EarthquakeEvent? = null
+        var parsedCount = 0
+        var hasCorrection = false
+        records.forEach { record ->
+            val report = parseQuake(record.rawJson) ?: return@forEach
+            accumulated = accumulated?.let { mergeConfirmedEvent(it, report) } ?: report
+            parsedCount++
+            hasCorrection = hasCorrection || !report.reportCorrection.isNullOrBlank()
+        }
+        val finalEvent = accumulated ?: return null
+        return HistoricalEventSummary(
+            eventKey = eventKey,
+            event = finalEvent.copy(
+                reportCount = parsedCount,
+                p2pCrowdSignal = historicalCrowdSignalFor(finalEvent, associations)
+            ),
+            reportCount = parsedCount,
+            firstReportAt = records.firstOrNull()?.sourceTime?.let(::formatJst)
+                ?.takeUnless { it == "—" },
+            lastReportAt = records.lastOrNull()?.sourceTime?.let(::formatJst)
+                ?.takeUnless { it == "—" },
+            hasCorrection = hasCorrection
+        )
+    }
 
     private fun parseHistoricalCrowdAssociations(
         candidates: List<ArchivedReportRecord>
@@ -795,10 +810,11 @@ class P2pQuakeProvider(
     ) {
         archiveExecutor.execute {
             val result = runCatching {
+                val records = archiveStore.loadEarthquakeReportsForEvent(eventKey)
                 buildHistoricalIncident(
                     eventKey = eventKey,
-                    records = archiveStore.loadEarthquakeReportsForEvent(eventKey),
-                    associatedCandidates = archiveStore.loadAssociatedReportCandidates()
+                    records = records,
+                    associatedCandidates = archiveStore.loadAssociatedReportCandidatesForEventDay(eventKey)
                 ) ?: error("No archived reports found for this event")
             }
             mainHandler.post { onResult(result) }

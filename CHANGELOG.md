@@ -2,6 +2,23 @@
 
 QuakeDeck release history
 
+## v0.10.3-dev.4
+
+- Prevents invalid zero-size map viewport state from corrupting camera preservation and clamping every subsequent focused map view to the southwest edge.
+- Applies JMA publication readiness only to the current live report; historical and manually opened recent reports keep their valid official links without being mislabeled as preparing.
+- Retains a loaded historical catalogue until archive contents change, and reloads an opened replay only after the archive fingerprint changes.
+- Allows a confirmed historical event just outside the bundled Japan-map boundary to use the same nearest-edge focus as its associated EEW, while rejecting genuinely distant global epicentres.
+- Advances the development version to `0.10.3-dev.4` (`versionCode` 242).
+
+## v0.10.3-dev.3
+
+- Preserves a valid DM-D.S.S EEW hypocentre, magnitude, depth and local forecast when an incomplete P2PQuake initial report amends the same live incident. P/S waves, EEW focus and forecast calculation therefore remain available.
+- Removes the matching P2PQuake baseline report from the combined live Recent earthquakes list while its official data is displayed as an amendment to the active DM-D.S.S EEW.
+- Refocuses the map on each mappable frame selected in static historical replay, including EEW frames and their offshore nearest-map anchors.
+- Canonicalizes P2PQuake's compact `沖縄県与那国島` initial-report area to the Yonaguni JMA reporting area before English/Czech translation.
+- Makes archive catalogue rows lightweight and scopes a single incident replay's associated EEW/felt query to the relevant calendar day, avoiding repeated full replay construction and full-archive association scans.
+- Advances the development version to `0.10.3-dev.3` (`versionCode` 241).
+
 ## v0.10.3-dev.2
 
 - Unifies a matching DM-D.S.S EEW and P2PQuake/JMA official bulletin into one live incident: the active EEW card retains its forecast state while official report revisions and the cumulative felt count amend that same event.

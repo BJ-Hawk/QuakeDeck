@@ -299,6 +299,29 @@ internal class ReportArchiveStore(context: Context) :
 
 
     fun loadAssociatedReportCandidates(): List<ArchivedReportRecord> {
+        return loadAssociatedReportCandidates(selection = "code IN (552, 554, 556, 9611)", args = null)
+    }
+
+    /**
+     * An incident replay only needs associated packets from the earthquake's
+     * JST calendar day. This avoids
+     * decoding every historical EEW/felt payload before opening one event.
+     */
+    fun loadAssociatedReportCandidatesForEventDay(eventKey: String): List<ArchivedReportRecord> {
+        val date = eventKey.removePrefix("quake:").take(10)
+        if (date.length != 10) return loadAssociatedReportCandidates()
+        val dashed = date.replace('/', '-')
+        val slashed = date.replace('-', '/')
+        return loadAssociatedReportCandidates(
+            selection = "code IN (552, 554, 556, 9611) AND (source_time LIKE ? OR source_time LIKE ?)",
+            args = arrayOf("$dashed%", "$slashed%")
+        )
+    }
+
+    private fun loadAssociatedReportCandidates(
+        selection: String,
+        args: Array<String>?
+    ): List<ArchivedReportRecord> {
         val result = mutableListOf<ArchivedReportRecord>()
         readableDatabase.query(
             "reports",
@@ -311,8 +334,8 @@ internal class ReportArchiveStore(context: Context) :
                 "event_key",
                 "raw_json"
             ),
-            "code IN (552, 554, 556, 9611)",
-            null,
+            selection,
+            args,
             null,
             null,
             "source_time ASC, received_at ASC, archive_key ASC"

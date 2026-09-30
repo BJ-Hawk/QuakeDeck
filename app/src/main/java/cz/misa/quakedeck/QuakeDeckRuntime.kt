@@ -337,6 +337,15 @@ class QuakeDeckRuntime(context: Context) : QuakeDataProvider {
                     p2pSnapshot.activeEewUntilMillis
                 },
                 event = selectedEvent,
+                // The P2PQuake baseline retains its own source event for
+                // archive/recovery purposes. Do not expose that as a second
+                // live incident while its official bulletin is amending the
+                // visible DM-D.S.S EEW.
+                history = if (dmdssEew != null) {
+                    p2pSnapshot.history.filterNot { sameLiveIncident(dmdssEew, it) }
+                } else {
+                    p2pSnapshot.history
+                },
                 statusText = if (dmdssEew != null) {
                     dmdssSnapshot.statusText
                 } else {
@@ -372,9 +381,19 @@ class QuakeDeckRuntime(context: Context) : QuakeDataProvider {
         }
         val crowd = listOfNotNull(p2pCrowdSignal, official.p2pCrowdSignal)
             .reduceOrNull(cz.misa.quakedeck.data.P2pCrowdSignal::mergeCumulativeUpdate)
+        val officialHasHypocenter = official.hasHypocenter
         return official.copy(
             id = id,
             kind = EarthquakeEventKind.EEW,
+            // A ScalePrompt deliberately carries no hypocentre. It can amend
+            // official report data, but it must never erase the valid DM-D.S.S
+            // EEW origin that drives waves, local estimates and map focus.
+            place = if (officialHasHypocenter) official.place else place,
+            magnitude = if (officialHasHypocenter) official.magnitude else magnitude,
+            depthKm = if (officialHasHypocenter) official.depthKm else depthKm,
+            latitude = if (officialHasHypocenter) official.latitude else latitude,
+            longitude = if (officialHasHypocenter) official.longitude else longitude,
+            hasHypocenter = hasHypocenter || officialHasHypocenter,
             eewAlertLevel = eewAlertLevel,
             eewHypocenterCondition = eewHypocenterCondition,
             eewMagnitudeUnit = eewMagnitudeUnit,

@@ -276,8 +276,8 @@ android {
         applicationId = "cz.misa.quakedeck"
         minSdk = 26
         targetSdk = 36
-        versionCode = 240
-        versionName = "0.10.3-dev.2"
+        versionCode = 242
+        versionName = "0.10.3-dev.4"
         buildConfigField("boolean", "SANDBOX_ENABLED", sandboxEnabled.toString())
         buildConfigField(
             "String",
