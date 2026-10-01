@@ -3901,7 +3901,8 @@ private fun ReportCardGrid(
             EarthquakeReportStageStrip(
                 event = event,
                 reportLinkEvent = officialReportEvent,
-                checkJmaReadiness = !browsingHistory,
+                checkJmaReadiness = !browsingHistory &&
+                    requiresJmaPublicationCheck(officialReportEvent),
                 language = language,
                 cardScale = cardScale
             )

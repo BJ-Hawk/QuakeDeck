@@ -24,6 +24,16 @@ internal fun shouldShowOfficialJmaReportPreparing(
 ): Boolean = event.reportStage == EarthquakeReportStage.DETAILED &&
     readiness == JmaReportReadiness.PREPARING
 
+/**
+ * P2PQuake's DetailScale packet is the completed JMA detailed bulletin. Do
+ * not hide its official report link behind a second, fallible JMA-list lookup.
+ * The readiness check remains available for a distinct future pending-detail
+ * state that does not yet carry that completed bulletin type.
+ */
+internal fun requiresJmaPublicationCheck(event: EarthquakeEvent): Boolean =
+    event.reportStage == EarthquakeReportStage.DETAILED &&
+        !event.reportType.equals("DetailScale", ignoreCase = true)
+
 private const val JMA_QUAKE_LIST_URL = "https://www.jma.go.jp/bosai/quake/data/list.json"
 private const val JMA_LIST_CACHE_MILLIS = 25_000L
 

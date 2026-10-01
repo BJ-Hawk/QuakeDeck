@@ -118,6 +118,19 @@ class CorePolicyTest {
     }
 
     @Test
+    fun completedP2pDetailScaleDoesNotRequireAJmaListAvailabilityGate() {
+        val completed = earthquakeEvent(EarthquakeReportStage.DETAILED).copy(
+            reportType = "DetailScale"
+        )
+        val pending = earthquakeEvent(EarthquakeReportStage.DETAILED).copy(
+            reportType = "FuturePendingDetail"
+        )
+
+        assertFalse(requiresJmaPublicationCheck(completed))
+        assertTrue(requiresJmaPublicationCheck(pending))
+    }
+
+    @Test
     fun mapCoverageRejectsInvalidAndOutOfBoundsCoordinates() {
         assertTrue(JapanMapCoverage.contains(35.6762, 139.6503))
         assertFalse(JapanMapCoverage.contains(Double.NaN, 139.6503))
