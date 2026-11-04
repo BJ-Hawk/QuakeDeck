@@ -93,6 +93,7 @@ class NotificationCoordinator(
     }
     private var lastHandledSequence = 0L
     private val locationRelevantEews = LinkedHashSet<String>()
+    private val drillNotificationTags = LinkedHashSet<String>()
     private val attentionPresentedEews = LinkedHashSet<String>()
     private val eewNotificationAlerts = EewNotificationAlertTracker()
     private val fullForecastPresentedEews = LinkedHashSet<String>()
@@ -177,6 +178,15 @@ class NotificationCoordinator(
                 setSound(null, null)
             },
             NotificationChannel(
+                CHANNEL_DRILL,
+                localized(R.string.notification_channel_drill_name),
+                NotificationManager.IMPORTANCE_LOW
+            ).apply {
+                description = localized(R.string.notification_channel_drill_description)
+                enableVibration(false)
+                setSound(null, null)
+            },
+            NotificationChannel(
                 CHANNEL_TEST,
                 localized(R.string.notification_channel_test_name),
                 NotificationManager.IMPORTANCE_DEFAULT
@@ -192,11 +202,24 @@ class NotificationCoordinator(
             ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) ==
             PackageManager.PERMISSION_GRANTED
 
+    fun onDrillPreferenceChanged(enabled: Boolean) {
+        if (enabled) return
+        drillNotificationTags.forEach { manager.cancel(it, ID_EARTHQUAKE) }
+        drillNotificationTags.clear()
+        // Android may still hold a drill notification from an earlier app process.
+        context.getSystemService(NotificationManager::class.java).activeNotifications
+            .filter { it.notification.channelId == CHANNEL_DRILL }
+            .forEach { manager.cancel(it.tag, it.id) }
+    }
+
     fun process(snapshot: AppSnapshot) {
         // The official P2PQuake sandbox must exercise the exact same notification
         // path and appearance as production data. Only QuakeDeck's deterministic,
         // user-started replay fixtures are muted to prevent intentional replay loops
         // from producing real device alerts.
+        val sequence = snapshot.liveUpdateSequence
+        if (sequence <= 0L || sequence <= lastHandledSequence) return
+        lastHandledSequence = sequence
         if (!settings.notificationsEnabled) {
             recordDmdssEewDecision(snapshot, "All notifications disabled")
             return
@@ -205,9 +228,6 @@ class NotificationCoordinator(
             recordDmdssEewDecision(snapshot, "Built-in replay intentionally muted")
             return
         }
-        val sequence = snapshot.liveUpdateSequence
-        if (sequence <= 0L || sequence <= lastHandledSequence) return
-        lastHandledSequence = sequence
         if (!hasPermission()) {
             recordDmdssEewDecision(snapshot, "Android notification permission denied")
             return
@@ -216,10 +236,47 @@ class NotificationCoordinator(
         val locationFiltering = settings.locationBasedNotificationsEnabled
         val alertLocation = settings.alertLocation
 
-        when (snapshot.liveUpdateKind) {
+        val updateEvent = snapshot.eewUpdateEvent ?: snapshot.event
+        val notificationKind = if (snapshot.liveUpdateKind == LiveUpdateKind.CANCELLED &&
+            updateEvent.kind == cz.misa.quakedeck.data.EarthquakeEventKind.EEW) LiveUpdateKind.EEW_ENDED
+            else snapshot.liveUpdateKind
+        if (updateEvent.isDrill) {
+            if (!settings.receiveSilentTestDrills || notificationKind !in setOf(
+                    LiveUpdateKind.EEW, LiveUpdateKind.EEW_DETECTED, LiveUpdateKind.EEW_ENDED
+                )) return
+            // The explicit drill opt-in exercises visual delivery nationwide, even at
+            // night or below real-alert thresholds. The master switch/permission above
+            // still apply. Never request sound, vibration, screen wake or full screen.
+            val ended = notificationKind == LiveUpdateKind.EEW_ENDED
+            val result = postEarthquake(
+                event = updateEvent,
+                channel = CHANNEL_DRILL,
+                titleRes = when {
+                    ended && updateEvent.isCancelled -> R.string.notification_eew_cancelled_title
+                    ended -> R.string.notification_eew_ended_title
+                    updateEvent.eewAlertLevel == EewAlertLevel.FORECAST -> R.string.notification_eew_forecast_title
+                    else -> R.string.notification_eew_title
+                },
+                urgent = false,
+                forceSilent = true,
+                activeUntilMillis = snapshot.activeEewUntilMillis,
+                visualKind = AlertVisualKind.EEW,
+                cancelled = ended
+            )
+            val tag = updateEvent.eewNotificationIdentity()
+            if (result == PostResult.POSTED) drillNotificationTags += tag
+            while (drillNotificationTags.size > 64) {
+                val oldest = drillNotificationTags.first()
+                manager.cancel(oldest, ID_EARTHQUAKE)
+                drillNotificationTags.remove(oldest)
+            }
+            recordDmdssEewDecision(snapshot, "DRILL · ${result.diagnostic} · always silent")
+            return
+        }
+        when (notificationKind) {
             LiveUpdateKind.EEW_DETECTED,
             LiveUpdateKind.EEW -> {
-                val event = snapshot.activeEewEvent ?: snapshot.event
+                val event = eewNotificationEvent(snapshot)
                 val forecastOnly = event.eewAlertLevel == EewAlertLevel.FORECAST
                 val notificationPolicy = event.eewAlertLevel.notificationPolicy(
                     warningEnabled = settings.eewNotificationsEnabled,
@@ -335,23 +392,28 @@ class NotificationCoordinator(
                 }
             }
 
-            LiveUpdateKind.EEW_ENDED -> if (
-                settings.notificationUpdatesEnabled
-            ) {
-                val event = snapshot.event
-                val notificationEnabled = event.eewAlertLevel.notificationEnabled(
+            LiveUpdateKind.EEW_ENDED -> {
+                val event = updateEvent
+                val notificationEnabled = eewEndDeliveryEnabled(event,
+                    updatesEnabled = settings.notificationUpdatesEnabled,
                     warningEnabled = settings.eewNotificationsEnabled,
-                    forecastEnabled = settings.eewForecastNotificationsEnabled
+                    forecastEnabled = settings.eewForecastNotificationsEnabled,
+                    locationFiltering = locationFiltering,
+                    previouslyInScope = event.id in locationRelevantEews
                 )
-                if (notificationEnabled && (!locationFiltering || event.id in locationRelevantEews)) {
-                    postEarthquake(
+                if (notificationEnabled) {
+                    val result = postEarthquake(
                         event = event,
                         channel = CHANNEL_UPDATES,
-                        titleRes = R.string.notification_eew_ended_title,
+                        titleRes = if (event.isCancelled) R.string.notification_eew_cancelled_title
+                            else R.string.notification_eew_ended_title,
                         urgent = false,
                         visualKind = AlertVisualKind.EEW,
                         cancelled = true
                     )
+                    recordDmdssEewDecision(snapshot, result.diagnostic)
+                } else {
+                    recordDmdssEewDecision(snapshot, "EEW end update disabled or outside selected location")
                 }
             }
 
@@ -574,7 +636,9 @@ class NotificationCoordinator(
                 displayNotificationIntensity(intensity)
             )
         }
-        val displayPlace = if (event.id.startsWith("injected-")) {
+        val displayPlace = if (event.id.startsWith("eew-detection:")) {
+            localized(R.string.notification_eew_details_pending)
+        } else if (event.id.startsWith("injected-")) {
             event.place
         } else {
             PlaceNameTranslator.epicenter(
@@ -593,7 +657,9 @@ class NotificationCoordinator(
             )
         }
 
-        val title = localized(titleRes)
+        val title = if (event.isDrill) {
+            "${localized(R.string.drill_label)} · ${localized(titleRes)}"
+        } else localized(titleRes)
         val badgeIntensity = localPoint?.intensity ?: maximumIntensity
         val knownBadgeIntensity = badgeIntensity
             ?.takeUnless { it.isBlank() || it == "—" }
@@ -656,7 +722,8 @@ class NotificationCoordinator(
             intensityQualifier = badgeSub,
             alertTitle = title,
             place = displayPlace,
-            showIntensity = !cancelled
+            showIntensity = !cancelled,
+            drillLabel = localized(R.string.drill_label).takeIf { event.isDrill }
         )
 
         return post(
@@ -669,7 +736,7 @@ class NotificationCoordinator(
             channel = channel,
             title = title,
             body = body,
-            urgent = urgent,
+            urgent = urgent && !event.isDrill,
             reportId = event.id,
             reportEventPayload = NotificationEventPayload.encode(
                 event = event,
@@ -685,9 +752,12 @@ class NotificationCoordinator(
                     NotificationLaunchKind.EARTHQUAKE
                 }
             ),
-            forceSilent = forceSilent,
+            ignoreQuietHours = event.isDrill,
+            forceSilent = forceSilent || event.isDrill,
             suppressAlert = suppressAlert,
-            fullScreenIntent = localEewAttentionMode == LocalEewAttentionMode.FULL_SCREEN,
+            diagnosticEvent = event.takeIf { visualKind == AlertVisualKind.EEW },
+            diagnosticKind = if (cancelled) LiveUpdateKind.EEW_ENDED else LiveUpdateKind.EEW,
+            fullScreenIntent = !event.isDrill && localEewAttentionMode == LocalEewAttentionMode.FULL_SCREEN,
             smallIcon = if (visualKind == AlertVisualKind.EEW) {
                 R.drawable.ic_notification_eew
             } else {
@@ -893,7 +963,9 @@ class NotificationCoordinator(
         suppressAlert: Boolean = false,
         fullScreenIntent: Boolean = false,
         smallIcon: Int = R.drawable.ic_notification,
-        visual: NotificationVisual? = null
+        visual: NotificationVisual? = null,
+        diagnosticEvent: EarthquakeEvent? = null,
+        diagnosticKind: LiveUpdateKind = LiveUpdateKind.NONE
     ): PostResult {
         val withinQuietHours = !ignoreQuietHours && isQuietHours()
         if (withinQuietHours) {
@@ -907,7 +979,26 @@ class NotificationCoordinator(
         val quietHoursSilent =
             withinQuietHours && settings.quietHoursMode == QuietHoursMode.ALL_SILENT
         val silent = forceSilent || suppressAlert || quietHoursSilent
-        val effectiveChannel = if (forceSilent || quietHoursSilent) CHANNEL_SILENT else channel
+        val effectiveChannel = when {
+            diagnosticEvent?.isDrill == true -> CHANNEL_DRILL
+            forceSilent || quietHoursSilent -> CHANNEL_SILENT
+            else -> channel
+        }
+        fun recordSubmission(result: PostResult, layout: String) {
+            val event = diagnosticEvent ?: return
+            val details = cz.misa.quakedeck.data.eewDecisionDiagnostic(event, "android-submission",
+                result.diagnostic, diagnosticKind, null, System.currentTimeMillis())
+                .put("notificationTag", tag).put("channel", effectiveChannel)
+                .put("silent", silent).put("suppressedUnchangedIntensity", suppressAlert)
+                .put("urgent", urgent).put("layout", layout)
+                .put("appNotificationsEnabled", manager.areNotificationsEnabled())
+                .put("channelImportance", context.getSystemService(NotificationManager::class.java)
+                    ?.getNotificationChannel(effectiveChannel)?.importance ?: -1)
+                .put("fullScreenRequested", fullScreenIntent)
+                .put("fullScreenAllowed", fullScreenIntent && canUseFullScreenIntent())
+            dmdssDiagnostics.recordPacket("LOCAL", "decision", details.toString(),
+                source = if (event.reportType?.startsWith("VXSE") == true) "DM-D.S.S" else "P2PQuake")
+        }
 
         val intent = Intent(context, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
@@ -1003,6 +1094,7 @@ class NotificationCoordinator(
         val notification = builder.build()
         try {
             manager.notify(tag, id, notification)
+            runCatching { recordSubmission(PostResult.POSTED, if (visual == null) "standard" else "custom") }
             return PostResult.POSTED
         } catch (customViewFailure: RuntimeException) {
             if (visual == null) return PostResult.SYSTEM_REJECTED
@@ -1043,14 +1135,24 @@ class NotificationCoordinator(
                 .fold(
                     onSuccess = { PostResult.POSTED },
                     onFailure = { PostResult.SYSTEM_REJECTED }
-                )
+                ).also { result -> runCatching { recordSubmission(result, "standard-fallback") } }
         }
     }
 
     private fun recordDmdssEewDecision(snapshot: AppSnapshot, result: String) {
-        if (!snapshot.dmdssEewUpdate || snapshot.liveUpdateKind != LiveUpdateKind.EEW) return
-        val event = snapshot.activeEewEvent ?: snapshot.event
-        dmdssDiagnostics.recordNotification(event.id, result)
+        if (snapshot.liveUpdateKind !in setOf(LiveUpdateKind.EEW, LiveUpdateKind.EEW_DETECTED,
+                LiveUpdateKind.EEW_ENDED, LiveUpdateKind.CANCELLED)) return
+        val event = eewNotificationEvent(snapshot)
+        if (event.kind != cz.misa.quakedeck.data.EarthquakeEventKind.EEW) return
+        if (snapshot.dmdssEewUpdate) dmdssDiagnostics.recordNotification(event.id, result)
+        dmdssDiagnostics.recordEewDecision(event, "notification",
+            "$result · Warning enabled=${settings.eewNotificationsEnabled} · Forecast enabled=${settings.eewForecastNotificationsEnabled}" +
+                " · updates=${settings.notificationUpdatesEnabled} · locationFiltering=${settings.locationBasedNotificationsEnabled}" +
+                " · quietHours=${settings.quietHoursMode.name}" +
+                " · Forecast threshold=${settings.minimumLocalEewForecastAttentionIntensity.name}" +
+                " · belowThreshold=${settings.eewForecastBelowThresholdMode.name}",
+            if (snapshot.dmdssEewUpdate) "DM-D.S.S" else "P2PQuake",
+            snapshot.liveUpdateKind, snapshot.activeEewUntilMillis)
     }
 
     private fun notificationRemoteViews(
@@ -1237,6 +1339,7 @@ class NotificationCoordinator(
         testingMode: Boolean,
         relevantIntensity: String
     ): LocalEewAttentionMode {
+        if (event.isDrill) return LocalEewAttentionMode.NONE
         val forecast = event.eewAlertLevel == EewAlertLevel.FORECAST
         val selectedMode = if (forecast) {
             settings.localEewForecastAttentionMode
@@ -1313,6 +1416,7 @@ class NotificationCoordinator(
         const val CHANNEL_EARTHQUAKE = "earthquake_reports"
         const val CHANNEL_UPDATES = "report_updates"
         const val CHANNEL_SILENT = "silent_notifications"
+        const val CHANNEL_DRILL = "silent_test_drills"
         const val CHANNEL_TEST = "notification_tests"
         private const val ID_EARTHQUAKE = 1001
         private const val ID_TSUNAMI = 2001

@@ -50,6 +50,8 @@ data class DmDssDiagnosticsSnapshot(
     val lastAcceptedSerial: String? = null,
     val lastAcceptedAlertLevel: String? = null,
     val lastAcceptedSource: String? = null,
+    val lastAcceptedIssuedAtMillis: Long? = null,
+    val lastAcceptedCancelled: Boolean? = null,
     val lastRejectedAtMillis: Long? = null,
     val lastRejectedReason: String? = null,
     val lastTransportIssueAtMillis: Long? = null,
@@ -98,6 +100,8 @@ class DmDssDiagnosticsStore(context: Context) {
         lastAcceptedSerial = prefs.getString(KEY_ACCEPTED_SERIAL, null),
         lastAcceptedAlertLevel = prefs.getString(KEY_ACCEPTED_LEVEL, null),
         lastAcceptedSource = prefs.getString(KEY_ACCEPTED_SOURCE, null),
+        lastAcceptedIssuedAtMillis = prefs.optionalLong(KEY_ACCEPTED_ISSUED_AT),
+        lastAcceptedCancelled = prefs.optionalBoolean(KEY_ACCEPTED_CANCELLED),
         lastRejectedAtMillis = prefs.optionalLong(KEY_REJECTED_AT),
         lastRejectedReason = prefs.getString(KEY_REJECTED_REASON, null),
         lastTransportIssueAtMillis = prefs.optionalLong(KEY_TRANSPORT_ISSUE_AT),
@@ -141,6 +145,9 @@ class DmDssDiagnosticsStore(context: Context) {
             putString(KEY_ACCEPTED_SERIAL, event.reportSerial)
             putString(KEY_ACCEPTED_LEVEL, event.eewAlertLevel.name)
             putString(KEY_ACCEPTED_SOURCE, source)
+            EewLifecyclePolicy.sourceMillis(event.reportIssuedAt)?.let { putLong(KEY_ACCEPTED_ISSUED_AT, it) }
+                ?: remove(KEY_ACCEPTED_ISSUED_AT)
+            putBoolean(KEY_ACCEPTED_CANCELLED, event.isCancelled)
         }
     }
 
@@ -214,6 +221,14 @@ class DmDssDiagnosticsStore(context: Context) {
         packetHistory.append(entry)
     }
 
+    fun recordEewDecision(
+        event: EarthquakeEvent, stage: String, result: String, source: String,
+        kind: LiveUpdateKind, deadlineMillis: Long? = null,
+        nowMillis: Long = System.currentTimeMillis()
+    ) = recordPacket("LOCAL", "decision", eewDecisionDiagnostic(
+        event, stage, result, kind, deadlineMillis, nowMillis
+    ).toString(), nowMillis, source)
+
     fun flushPacketHistoryAsync() = packetHistory.flushAsync()
 
     private fun readPersistedPacketHistory(): List<DmDssPacketDiagnostic> = runCatching {
@@ -257,6 +272,8 @@ class DmDssDiagnosticsStore(context: Context) {
         const val KEY_ACCEPTED_SERIAL = "accepted_serial"
         const val KEY_ACCEPTED_LEVEL = "accepted_level"
         const val KEY_ACCEPTED_SOURCE = "accepted_source"
+        const val KEY_ACCEPTED_ISSUED_AT = "accepted_issued_at"
+        const val KEY_ACCEPTED_CANCELLED = "accepted_cancelled"
         const val KEY_REJECTED_AT = "rejected_at"
         const val KEY_REJECTED_REASON = "rejected_reason"
         const val KEY_TRANSPORT_ISSUE_AT = "transport_issue_at"
@@ -282,6 +299,14 @@ internal fun sanitizeDmDssPacket(payload: String): String = sanitizeDmDssDiagnos
         if (sanitized.length <= MAX_PACKET_CHARS) sanitized
         else sanitized.take(MAX_PACKET_CHARS) + "\n[TRUNCATED BY QUAKEDECK]"
     }
+
+internal fun eewDecisionDiagnostic(event: EarthquakeEvent, stage: String, result: String,
+    kind: LiveUpdateKind, deadlineMillis: Long?, recordedAtMillis: Long): JSONObject = JSONObject()
+    .put("type", "eew-decision").put("stage", stage).put("eventId", event.id)
+    .put("serial", event.reportSerial ?: JSONObject.NULL).put("issuedAt", event.reportIssuedAt ?: JSONObject.NULL)
+    .put("recordedAtMillis", recordedAtMillis).put("alertLevel", event.eewAlertLevel.name)
+    .put("cancelled", event.isCancelled).put("isDrill", event.isDrill).put("updateKind", kind.name)
+    .put("deadlineMillis", deadlineMillis ?: JSONObject.NULL).put("result", result)
 
 internal fun sanitizeDmDssDiagnosticText(value: String): String {
     var sanitized = value
@@ -309,6 +334,10 @@ fun DmDssDiagnosticsSnapshot.toMachineReadableJson(
     .put("schemaVersion", 3)
     .put("exportedAt", Instant.ofEpochMilli(exportedAtMillis).toString())
     .put("exportedAtMillis", exportedAtMillis)
+    .put("build", JSONObject()
+        .put("versionName", cz.misa.quakedeck.BuildConfig.VERSION_NAME)
+        .put("versionCode", cz.misa.quakedeck.BuildConfig.VERSION_CODE)
+        .put("edition", LocalEewForecasts.buildEdition.name))
     .put(
         "storage",
         JSONObject()
@@ -338,6 +367,8 @@ fun DmDssDiagnosticsSnapshot.toMachineReadableJson(
             .putNullable("lastAcceptedSerial", lastAcceptedSerial?.let(::sanitizeDmDssDiagnosticText))
             .putNullable("lastAcceptedAlertLevel", lastAcceptedAlertLevel?.let(::sanitizeDmDssDiagnosticText))
             .putNullable("lastAcceptedSource", lastAcceptedSource?.let(::sanitizeDmDssDiagnosticText))
+            .putNullable("lastAcceptedIssuedAtMillis", lastAcceptedIssuedAtMillis)
+            .putNullable("lastAcceptedCancelled", lastAcceptedCancelled)
             .putNullable("lastRejectedAtMillis", lastRejectedAtMillis)
             .putNullable("lastRejectedReason", lastRejectedReason?.let(::sanitizeDmDssDiagnosticText))
             .putNullable("lastTransportIssueAtMillis", lastTransportIssueAtMillis)

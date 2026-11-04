@@ -14,7 +14,8 @@ internal fun notificationWatchText(
     intensityQualifier: String?,
     alertTitle: String,
     place: String,
-    showIntensity: Boolean = true
+    showIntensity: Boolean = true,
+    drillLabel: String? = null
 ): NotificationWatchText {
     val knownIntensity = intensityTitle?.takeIf { showIntensity && it.isNotBlank() }
     val watchTitle = if (knownIntensity != null) {
@@ -33,5 +34,8 @@ internal fun notificationWatchText(
         .distinct()
         .joinToString(" · ")
 
-    return NotificationWatchText(title = watchTitle, body = watchBody)
+    val labelledTitle = if (!drillLabel.isNullOrBlank() && !watchTitle.startsWith(drillLabel)) {
+        "$drillLabel · $watchTitle"
+    } else watchTitle
+    return NotificationWatchText(title = labelledTitle, body = watchBody)
 }

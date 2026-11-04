@@ -16,7 +16,6 @@ import java.time.OffsetDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
-import java.time.temporal.ChronoUnit
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
 import kotlin.math.abs
@@ -35,6 +34,7 @@ class P2pQuakeProvider(
     private val archiveStore = ReportArchiveStore(appContext)
     private val deliveryDiagnostics = DmDssDiagnosticsStore(appContext)
     private val archiveExecutor = Executors.newSingleThreadExecutor()
+    private val archiveReadExecutor = Executors.newSingleThreadExecutor()
     private val recentReportCache = RecentReportCache(appContext)
     private val recentCacheExecutor = Executors.newSingleThreadExecutor()
     @Volatile private var reportArchiveEnabled = persistentSettings.reportArchiveEnabled
@@ -73,6 +73,8 @@ class P2pQuakeProvider(
     private var activeEew = false
     private var activeEewEvent: EarthquakeEvent? = null
     private var activeEewUntilMillis: Long? = null
+    private var pendingEewDetection: EarthquakeEvent? = null
+    private val eewRevisions = EewRevisionTracker()
     private var eewCleanupRunnable: Runnable? = null
     private var lastTsunami: TsunamiReport? = null
     private var activeTsunami = false
@@ -179,6 +181,8 @@ class P2pQuakeProvider(
             lastEvent = null
             eventHistory.clear()
             sandboxTimelineOffsets.clear()
+            eewRevisions.clear()
+            pendingEewDetection = null
             synchronized(seenMessageIds) { seenMessageIds.clear() }
             prepareRecentReportRefresh()
 
@@ -719,16 +723,16 @@ class P2pQuakeProvider(
     override fun loadHistoricalEventCatalog(
         onResult: (Result<List<HistoricalEventSummary>>) -> Unit
     ) {
-        archiveExecutor.execute {
+        archiveReadExecutor.execute {
             val result = runCatching {
-                val associations = parseHistoricalCrowdAssociations(
-                    archiveStore.loadAssociatedReportCandidates()
-                )
-                archiveStore.loadEarthquakeReports()
+                val candidates = archiveStore.loadCatalogReports()
+                val confirmed = candidates.filter { it.code == 551 && it.eventKey != null }
                     .groupBy { it.eventKey }
                     .mapNotNull { (eventKey, records) ->
-                        buildHistoricalSummary(eventKey, records, associations)
+                        buildHistoricalSummary(requireNotNull(eventKey), records)
                     }
+                (confirmed + EewHistory.summaries(candidates, confirmed.map { it.event }))
+                    .sortedByDescending { EewLifecyclePolicy.sourceMillis(it.event.originTime) ?: Long.MIN_VALUE }
             }
             mainHandler.post { onResult(result) }
         }
@@ -742,8 +746,7 @@ class P2pQuakeProvider(
     /** Catalogue rows need only the final confirmed event, not a full replay. */
     private fun buildHistoricalSummary(
         eventKey: String,
-        records: List<ArchivedEarthquakeReport>,
-        associations: HistoricalCrowdAssociations
+        records: List<ArchivedReportRecord>
     ): HistoricalEventSummary? {
         var accumulated: EarthquakeEvent? = null
         var parsedCount = 0
@@ -758,8 +761,7 @@ class P2pQuakeProvider(
         return HistoricalEventSummary(
             eventKey = eventKey,
             event = finalEvent.copy(
-                reportCount = parsedCount,
-                p2pCrowdSignal = historicalCrowdSignalFor(finalEvent, associations)
+                reportCount = parsedCount
             ),
             reportCount = parsedCount,
             firstReportAt = records.firstOrNull()?.sourceTime?.let(::formatJst)
@@ -808,8 +810,13 @@ class P2pQuakeProvider(
         eventKey: String,
         onResult: (Result<HistoricalIncident>) -> Unit
     ) {
-        archiveExecutor.execute {
+        archiveReadExecutor.execute {
             val result = runCatching {
+                if (eventKey.startsWith(EewHistory.KEY_PREFIX)) {
+                    return@runCatching EewHistory.incident(eventKey,
+                        archiveStore.loadAssociatedReportCandidatesForEventDay(eventKey))
+                        ?: error("No archived EEW revisions found for this event")
+                }
                 val records = archiveStore.loadEarthquakeReportsForEvent(eventKey)
                 buildHistoricalIncident(
                     eventKey = eventKey,
@@ -894,11 +901,10 @@ class P2pQuakeProvider(
             val signal: P2pCrowdSignal? = null
         )
 
-        val eewSources = candidates.asSequence()
-            .filter { it.code == 556 && !it.rawJson.optBoolean("cancelled", false) }
-            .mapNotNull { record ->
-                parseEew(record.rawJson)
-                    ?.takeIf { historicalEewMatches(finalConfirmed, it) }
+        val eewSources = EewHistory.decoded(candidates).asSequence()
+            .mapNotNull { (record, parsedEew) ->
+                parsedEew
+                    .takeIf { historicalEewMatches(finalConfirmed, it) }
                     ?.let { eew ->
                         ReplaySource(
                             archiveKey = record.archiveKey,
@@ -1233,22 +1239,8 @@ class P2pQuakeProvider(
         }
         .map { it.second }
 
-    private fun historicalEewMatches(
-        confirmed: EarthquakeEvent,
-        eew: EarthquakeEvent
-    ): Boolean {
-        val confirmedTime = eventInstant(confirmed) ?: return false
-        val eewTime = eventInstant(eew) ?: return false
-        // P2PQuake/JMA confirmation omits seconds while DM-D.S.S retains them.
-        // Compare both timestamps at the common minute precision only for this
-        // historical EEW-to-confirmed-incident association.
-        if (confirmedTime.truncatedTo(ChronoUnit.MINUTES) != eewTime.truncatedTo(ChronoUnit.MINUTES)) {
-            return false
-        }
-        if (!confirmed.hasHypocenter || !eew.hasHypocenter) return true
-        return abs(confirmed.latitude - eew.latitude) <= 3.0 &&
-            abs(confirmed.longitude - eew.longitude) <= 3.0
-    }
+    private fun historicalEewMatches(confirmed: EarthquakeEvent, eew: EarthquakeEvent): Boolean =
+        EewHistory.matchesConfirmed(confirmed, eew)
 
     private fun publishArchiveStatus() {
         archiveStatusListener?.invoke(archiveStatus)
@@ -2226,31 +2218,30 @@ class P2pQuakeProvider(
         activeEew = false
         activeEewEvent = null
         activeEewUntilMillis = null
+        pendingEewDetection = null
     }
 
-    private fun activateEewDetectionTimeout() {
+    private fun activateEewDetectionTimeout(detection: EarthquakeEvent) {
         cancelEewCleanup()
         activeEew = true
         activeEewEvent = null
+        pendingEewDetection = detection
         activeEewUntilMillis = System.currentTimeMillis() + 30_000L
         val runnable = Runnable {
             eewCleanupRunnable = null
             if (!activeEew || activeEewEvent != null) return@Runnable
             activeEew = false
             activeEewUntilMillis = null
-            val visibleEvent = lastEvent ?: waitingSnapshot(
-                mode = sourceMode,
-                state = currentState,
-                status = "EEW detection expired",
-                testingMode = testingMode
-            ).event
+            val visibleEvent = lastEvent ?: detection
+            pendingEewDetection = null
             emit(
                 liveSnapshot(
                     state = currentState,
                     activeEew = false,
                     event = visibleEvent,
                     status = "EEW detection expired without warning details · ${sourceLabel()}",
-                    updateKind = LiveUpdateKind.EEW_ENDED
+                    updateKind = LiveUpdateKind.EEW_ENDED,
+                    eewUpdateEvent = detection
                 )
             )
         }
@@ -2272,6 +2263,7 @@ class P2pQuakeProvider(
 
         activeEew = true
         activeEewEvent = event
+        pendingEewDetection = null
         activeEewUntilMillis = targetMillis
         val expectedId = event.id
         val expectedSerial = event.reportSerial
@@ -2296,7 +2288,8 @@ class P2pQuakeProvider(
                     } else {
                         "EEW warning display safety timeout · ${sourceLabel()}"
                     },
-                    updateKind = LiveUpdateKind.EEW_ENDED
+                    updateKind = LiveUpdateKind.EEW_ENDED,
+                    eewUpdateEvent = active
                 )
             )
         }
@@ -2639,13 +2632,8 @@ class P2pQuakeProvider(
         // A generic detection packet must never erase a detailed warning that
         // is already running its area-based passage timer.
         if (activeEewEvent != null) return
-        activateEewDetectionTimeout()
-        val event = lastEvent ?: waitingSnapshot(
-            mode = sourceMode,
-            state = ConnectionState.CONNECTED,
-            status = "EEW detected · waiting for details",
-            testingMode = testingMode
-        ).event
+        val event = pendingEewDetection ?: pendingEewDetectionEvent(System.currentTimeMillis())
+        activateEewDetectionTimeout(event)
         val detectionType = json.optString("type").takeIf { it.isNotBlank() }
         emit(
             liveSnapshot(
@@ -2673,19 +2661,22 @@ class P2pQuakeProvider(
         val issuedAt = formatJst(issue?.optString("time").orEmpty())
 
         if (json.optBoolean("cancelled", false)) {
-            val warning = activeEewEvent ?: lastEvent?.takeIf {
+            val warning = activeEewEvent ?: eewRevisions.current(eventId) ?: lastEvent?.takeIf {
                 it.kind == EarthquakeEventKind.EEW
             }
             if (warning != null && (eventId.isBlank() || warning.id == eventId)) {
-                if (!testingMode && isOlderSerial(serial, warning.reportSerial)) {
-                    return LiveUpdateKind.NONE
-                }
                 val cancelled = warning.copy(
                     reportSerial = serial.ifBlank { warning.reportSerial },
                     reportIssuedAt = issuedAt.takeUnless { it == "—" }
                         ?: warning.reportIssuedAt,
                     isCancelled = true
                 )
+                val rejection = eewRevisions.rejection(cancelled)
+                if (!testingMode && rejection != null) {
+                    deliveryDiagnostics.recordEewDecision(cancelled, "ingest", rejection, "P2PQuake", LiveUpdateKind.EEW_ENDED)
+                    return LiveUpdateKind.NONE
+                }
+                eewRevisions.record(cancelled)
                 clearActiveEew()
 
                 val current = lastEvent
@@ -2709,16 +2700,22 @@ class P2pQuakeProvider(
                             } else {
                                 "EEW cancelled · ${sourceLabel()}"
                             },
-                            updateKind = LiveUpdateKind.CANCELLED
+                            updateKind = LiveUpdateKind.EEW_ENDED,
+                            eewUpdateEvent = cancelled
                         )
                     )
                 }
-                return LiveUpdateKind.CANCELLED
+                return LiveUpdateKind.EEW_ENDED
             }
             return LiveUpdateKind.NONE
         }
 
         val parsedEew = parseEew(json) ?: return LiveUpdateKind.NONE
+        val rejection = eewRevisions.rejection(parsedEew)
+        if (!testingMode && rejection != null) {
+            deliveryDiagnostics.recordEewDecision(parsedEew, "ingest", rejection, "P2PQuake", LiveUpdateKind.EEW)
+            return LiveUpdateKind.NONE
+        }
         val current = lastEvent
         val currentWarning = activeEewEvent
         val eew = parsedEew.copy(
@@ -2766,10 +2763,13 @@ class P2pQuakeProvider(
         }
 
         if (!activateEew(eew)) {
+            deliveryDiagnostics.recordEewDecision(eew, "lifecycle", "Stale bulletin not activated", "P2PQuake",
+                LiveUpdateKind.NONE, P2pEewLifecyclePolicy.deadline(eew, System.currentTimeMillis()).epochMillis)
             // A delayed/recovered warning whose estimated passage already ended
             // is useful as history, but must not flash as a new active alert.
             return LiveUpdateKind.NONE
         }
+        eewRevisions.record(eew)
 
         val visibleEvent = current.takeIf { matchesConfirmed }
             ?: eew.also { lastEvent = it }
@@ -2904,83 +2904,13 @@ class P2pQuakeProvider(
     }
 
     private fun parseEew(json: JSONObject): EarthquakeEvent? {
-        val earthquake = json.optJSONObject("earthquake") ?: return null
-        val hypo = earthquake.optJSONObject("hypocenter") ?: return null
-        val issue = json.optJSONObject("issue")
-        val eventId = issue?.optString("eventId").ifNullOrBlank {
-            "eew-${issue?.optString("time").orEmpty().ifBlank {
-                earthquake.optString("originTime")
-            }}"
-        }
-        val lat = hypo.optDouble("latitude", Double.NaN)
-        val lon = hypo.optDouble("longitude", Double.NaN)
-        if (!lat.isFinite() || !lon.isFinite()) return null
-
-        val timelineOffsetMillis = sandboxTimelineOffset(
-            eventId = eventId,
-            referenceTimes = listOf(
-                issue?.optString("time").orEmpty(),
-                json.optString("time"),
-                earthquake.optString("arrivalTime"),
-                earthquake.optString("originTime")
-            )
-        )
-
-        val areasJson = json.optJSONArray("areas")
-        val points = buildList {
-            if (areasJson != null) {
-                for (i in 0 until areasJson.length()) {
-                    val area = areasJson.optJSONObject(i) ?: continue
-                    val rawScaleFrom = area.optInt("scaleFrom", -1)
-                    val rawScaleTo = area.optInt("scaleTo", rawScaleFrom)
-                    val upperOpenEnded = rawScaleTo == 99
-                    val rawScale = if (upperOpenEnded) rawScaleFrom else rawScaleTo
-                    val pref = area.optString("pref")
-                    val areaName = area.optString("name")
-                    val name = listOf(pref, areaName)
-                        .filter { it.isNotBlank() }.distinct().joinToString(" · ")
-                    if (name.isNotBlank()) {
-                        add(
-                            IntensityPoint(
-                                name = name,
-                                intensity = scaleName(rawScale),
-                                intensityFrom = scaleName(rawScaleFrom)
-                                    .takeUnless { it == "—" },
-                                intensityUpperOpenEnded = upperOpenEnded,
-                                arrivalTime = formatJst(area.optString("arrivalTime"))
-                                    .takeUnless { it == "—" },
-                                prefecture = pref,
-                                stationName = areaName.takeIf { it.isNotBlank() },
-                                isArea = true
-                            )
-                        )
-                    }
-                }
-            }
-        }.sortedByDescending { scaleRank(it.intensity) }
-
-        val maxScale = points.maxByOrNull { scaleRank(it.intensity) }?.intensity
-            ?: json.optString("quakedeckMaxIntensity").takeUnless { it.isBlank() }
-            ?: "—"
-        return EarthquakeEvent(
-            id = eventId,
-            place = hypo.optString("name").ifBlank { "EEW" },
-            originTime = formatJst(earthquake.optString("originTime")),
-            magnitude = hypo.optDouble("magnitude", 0.0),
-            depthKm = hypo.optInt("depth", 0),
-            maxIntensity = maxScale,
-            latitude = lat,
-            longitude = lon,
-            points = points,
-            kind = EarthquakeEventKind.EEW,
-            eewAlertLevel = runCatching {
-                EewAlertLevel.valueOf(json.optString("quakedeckAlertLevel"))
-            }.getOrDefault(EewAlertLevel.WARNING),
-            reportSerial = issue?.optString("serial")?.takeIf { it.isNotBlank() },
-            reportIssuedAt = formatJst(issue?.optString("time").orEmpty()).takeUnless { it == "—" },
-            reportType = issue?.optString("type")?.takeIf { it.isNotBlank() },
-            timelineOffsetMillis = timelineOffsetMillis
-        )
+        val parsed = P2pEewParser.parse(json) ?: return null
+        return parsed.copy(timelineOffsetMillis = sandboxTimelineOffset(
+            eventId = parsed.id,
+            referenceTimes = listOf(json.optJSONObject("issue")?.optString("time").orEmpty(),
+                json.optString("time"), json.optJSONObject("earthquake")?.optString("arrivalTime").orEmpty(),
+                json.optJSONObject("earthquake")?.optString("originTime").orEmpty())
+        ))
     }
 
     private fun addToHistory(event: EarthquakeEvent): EarthquakeEvent {
@@ -3310,10 +3240,13 @@ class P2pQuakeProvider(
         activeEew: Boolean,
         event: EarthquakeEvent,
         status: String,
-        updateKind: LiveUpdateKind
+        updateKind: LiveUpdateKind,
+        eewUpdateEvent: EarthquakeEvent? = if (updateKind in setOf(
+                LiveUpdateKind.EEW, LiveUpdateKind.EEW_DETECTED, LiveUpdateKind.EEW_ENDED))
+            activeEewEvent ?: event.takeIf { it.kind == EarthquakeEventKind.EEW } else null
     ): AppSnapshot {
         liveUpdateSequence++
-        return AppSnapshot(
+        val snapshot = AppSnapshot(
             sourceMode = sourceMode,
             connectionState = state,
             activeEew = activeEew,
@@ -3325,12 +3258,16 @@ class P2pQuakeProvider(
             history = eventHistory.toList(),
             statusText = status,
             liveUpdateKind = updateKind,
+            eewUpdateEvent = eewUpdateEvent,
             liveUpdateSequence = liveUpdateSequence,
             testingMode = testingMode,
             builtInReplayActive = builtInReplayActive,
             showingRememberedReports = showingRememberedReports,
             recentReportsRefreshing = recentReportsRefreshing
         )
+        eewUpdateEvent?.let { deliveryDiagnostics.recordEewDecision(it, "lifecycle", status,
+            "P2PQuake", updateKind, snapshot.activeEewUntilMillis) }
+        return snapshot
     }
 
     private fun emit(snapshot: AppSnapshot) {

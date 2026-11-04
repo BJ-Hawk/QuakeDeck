@@ -2,6 +2,21 @@
 
 QuakeDeck release history
 
+## v0.10.3-dev.7 (in progress)
+
+- Keeps newly issued DM-D.S.S and P2PQuake EEW bulletins eligible by issue-time freshness, independently of the estimated origin and FULL wave-passage cap. A newer public Warning can supersede a connected paid Forecast for the same incident.
+- Applies later cancellations even when their serial is lower, retains terminal ordering after expiry, and prevents an older Warning from the other feed reopening the cancelled incident. EEW termination uses its own identity/settings while confirmed reports can remain visible.
+- Gives generic P2PQuake detections neutral pending-details state instead of reusing an unrelated earthquake's place and Shindo.
+- Recovers newer same-level revisions and cancellation state in issue order; compares source revisions without local forecasts or crowd enrichment while retaining real companion-product regional changes.
+- Exposes standalone EEW incidents, including cancellations, in History. Retains terminal replay frames and gives archived EEW frames content-based keys so reused serials and companion products do not collide.
+- Moves coalesced DM-D.S.S JSON pong replies off the UI queue, atomically checks/enqueues the latest ping ID, rejects obsolete socket messages, and adds bounded error context. This does not claim to resolve every observed network/provider failure.
+- Adds bounded per-bulletin lifecycle/notification submission decisions and export build/edition metadata without changing the existing packet retention/redaction limits.
+- Adds exact October 16 wire fixtures and regression coverage for Forecast-to-Warning escalation, both feeds, cancellation #37 after final #42, the missing-#40 reconnect gap, stale Kumamoto identity, source deduplication and standalone historical replay.
+- Loads History from a persistent compact catalogue instead of decoding every archived station/region/felt payload. Existing archives convert once in bounded batches while complete replay payloads remain intact; new reports receive their catalogue projection as they are archived.
+- Separates catalogue/replay reading from the download worker, indexes confirmed-to-EEW catalogue matching by origin minute, and uses indexed day ranges for selected-incident associated reports. Ignores superseded catalogue results after archive clearing/retry.
+- Adds the opt-in “Receive silent test drills” setting for DM-D.S.S EEW exercises, with immediate subscription refresh, DRILL labels in the map, detail cards, destination prediction and phone/watch notifications, and retained labelling on notification taps. Drill notifications require the master notification switch and permission, bypass real-alert location/threshold/quiet-hours filters, and never request sound, vibration, screen wake or full screen. Exercises use separate incident identities, yield to real alerts, stay out of earthquake History, and are cleared when reception is disabled.
+- Advances the cumulative local development hotfix to `0.10.3-dev.7` (`versionCode` 245). Build, unit-test, device and live-drill validation remain pending.
+
 ## v0.10.3-dev.4
 
 - Prevents invalid zero-size map viewport state from corrupting camera preservation and clamping every subsequent focused map view to the southwest edge.

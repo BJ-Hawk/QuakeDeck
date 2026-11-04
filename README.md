@@ -2,7 +2,13 @@
 
 QuakeDeck is an Android earthquake-monitoring prototype focused on Japan. It uses Kotlin and Jetpack Compose to combine live P2PQuake/JMA reports, EEW visualization, observed intensity mapping, tsunami information, historical report browsing, and deterministic Sandbox testing in one map-first interface.
 
-Current version: **0.10.3-dev.4**. QuakeDeck is still pre-1.0 and should not be treated as an official emergency-warning application.
+Current version: **0.10.3-dev.7**. QuakeDeck is still pre-1.0 and should not be treated as an official emergency-warning application.
+
+The local October 16 EEW hotfix keeps fresh official bulletins eligible independently of origin/wave-passage estimates, handles later lower-serial cancellations, isolates generic detections from previous earthquake reports, reconciles newer recovered revisions, and exposes EEW-only History incidents. Exact incident regressions cover both FULL and LITE. Device notification and background-network validation remain pending; see [the incident workstream](workstreams/eew-october-16-delivery-fixes.md).
+
+History now uses a persistent compact catalogue and a separate reader worker, avoiding full station/felt decoding and waits behind archive downloads. Existing archives build that catalogue once; opening an event still loads its complete original replay. See [historical loading validation](workstreams/historical-event-loading.md) for the checked behavior and pending device timings.
+
+DM-D.S.S exercises can be received with **Settings → Data & connection → Receive silent test drills** (off by default). Drill labels remain visible in map/detail/destination views and phone/watch notifications, including notification taps. Drill notifications require the master notification switch and Android permission, remain silent even during quiet hours, and never wake the screen or request full screen. Real alerts take priority and drills stay out of earthquake History. Build, unit-test and device/live-drill checks for this addition are pending in Android Studio; see [the drill workstream](workstreams/silent-dmdss-test-drills.md).
 
 The bundled station catalogue now comes directly from JMA's official map and XML code tables. The [migration audit](outputs/jma-station-migration-audit/2026-09-02/README.md) confirms all 4,360 existing station records match in every field. Station updates are audited offline; source, processing and PDL1.0 credits are available in the app and in [the data notes](THIRD_PARTY_DATA.md).
 
@@ -43,7 +49,7 @@ The bundled station catalogue now comes directly from JMA's official map and XML
 
 P2PQuake remains the always-running free baseline and fallback. Users may optionally authorize DM-D.S.S to overlay live EEW forecasts when their account has an active `eew.forecast` plan; the source panel also shows their other active DM-D.S.S plans without using those data feeds yet.
 
-DM-D.S.S reception, notification delivery, lifecycle handling, account/subscription fallback, and cold-start navigation have been tested and confirmed, along with historical hybrid replay and FULL/LITE behavior. **Pending validation:** Forecast-to-Warning escalation, cancellation, reconnection, and recovery of genuinely missed bulletins. See [the data notes](THIRD_PARTY_DATA.md) for bundled-data attribution and licensing details.
+Earlier integration/device checks covered baseline reception, account/subscription fallback, navigation and historical hybrid replay. The October 16 incident exposed additional delivery/lifecycle defects; those fixes and the historical-loading changes now pass all 149 unit tests in both FULL and LITE. **Pending device/live validation:** Forecast-to-Warning escalation, cancellation and notification restoration, reconnection, recovery of genuinely missed bulletins, and historical-loading timings. See [the incident workstream](workstreams/eew-october-16-delivery-fixes.md), [historical loading validation](workstreams/historical-event-loading.md) and [the data notes](THIRD_PARTY_DATA.md).
 
 ## Opening and building
 

@@ -170,6 +170,46 @@ class DmDssDiagnosticsTest {
     }
 
     @Test
+    fun latestPingCheckAndSendCannotRaceWithAReceivedNewId() {
+        val tracker = LatestDmDssPingTracker()
+        val stale = tracker.receive("stale")
+        val latest = tracker.receive("latest")
+        assertNull(tracker.replyIfLatest(stale) { error("Stale pong queued") })
+        val enteredSend = java.util.concurrent.CountDownLatch(1)
+        val releaseSend = java.util.concurrent.CountDownLatch(1)
+        val attemptedReceive = java.util.concurrent.CountDownLatch(1)
+        val completedReceive = java.util.concurrent.CountDownLatch(1)
+        val executor = java.util.concurrent.Executors.newFixedThreadPool(2)
+        try {
+            val sent = executor.submit<Boolean?> {
+                tracker.replyIfLatest(latest) { payload ->
+                    assertEquals("latest", JSONObject(payload).getString("pingId"))
+                    enteredSend.countDown()
+                    assertTrue(releaseSend.await(2, java.util.concurrent.TimeUnit.SECONDS))
+                    true
+                }
+            }
+            assertTrue(enteredSend.await(2, java.util.concurrent.TimeUnit.SECONDS))
+            val received = executor.submit {
+                attemptedReceive.countDown()
+                tracker.receive("newer")
+                completedReceive.countDown()
+            }
+            assertTrue(attemptedReceive.await(2, java.util.concurrent.TimeUnit.SECONDS))
+            assertFalse(completedReceive.await(50, java.util.concurrent.TimeUnit.MILLISECONDS))
+            releaseSend.countDown()
+            assertEquals(true, sent.get(2, java.util.concurrent.TimeUnit.SECONDS))
+            received.get(2, java.util.concurrent.TimeUnit.SECONDS)
+            assertNull(tracker.replyIfLatest(latest) { error("Superseded pong queued") })
+            assertEquals("newer", tracker.diagnostic().getString("lastPingId"))
+            assertTrue(tracker.diagnostic().getLong("queuedAtMillis") > 0)
+        } finally {
+            releaseSend.countDown()
+            executor.shutdownNow()
+        }
+    }
+
+    @Test
     fun readablePacketHistoryNamesSocketFailureAndReconnectControlPackets() {
         val packets = listOf(
             DmDssPacketDiagnostic(

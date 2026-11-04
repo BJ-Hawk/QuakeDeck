@@ -495,6 +495,8 @@
     <string name="notification_eew_title">Earthquake Early Warning</string>
     <string name="notification_eew_forecast_title">Earthquake Early Warning forecast</string>
     <string name="notification_eew_ended_title">Earthquake Early Warning ended</string>
+    <string name="notification_eew_cancelled_title">Earthquake Early Warning cancelled</string>
+    <string name="notification_eew_details_pending">Earthquake details pending</string>
     <string name="notification_earthquake_title">Earthquake report</string>
     <string name="notification_earthquake_updated_title">Earthquake report updated</string>
     <string name="notification_earthquake_cancelled_title">Earthquake report cancelled</string>
@@ -667,4 +669,10 @@
     <string name="activity_time_duration_minutes">%1$dm</string>
     <string name="activity_time_duration_hours">%1$dh %2$dm</string>
     <string name="activity_time_duration_days">%1$dd %2$dh %3$dm</string>
+    <string name="receive_silent_test_drills">Receive silent test drills</string>
+    <string name="receive_silent_test_drills_explanation">Receive DM-D.S.S exercises labelled DRILL. Shows silent notifications nationwide, including during quiet hours, without sound, vibration or screen wake. Notifications must be enabled. Real alerts take priority; drills stay out of earthquake History.</string>
+    <string name="drill_label">DRILL</string>
+    <string name="drill_banner">DRILL · Silent test — no real earthquake</string>
+    <string name="notification_channel_drill_name">Silent test drills</string>
+    <string name="notification_channel_drill_description">Clearly labelled provider exercises without sound or vibration</string>
 </resources>

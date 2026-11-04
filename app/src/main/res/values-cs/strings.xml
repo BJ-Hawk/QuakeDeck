@@ -496,6 +496,8 @@
     <string name="notification_eew_title">Včasné varování před zemětřesením</string>
     <string name="notification_eew_forecast_title">Předpověď včasného varování před zemětřesením</string>
     <string name="notification_eew_ended_title">Včasné varování před zemětřesením ukončeno</string>
+    <string name="notification_eew_cancelled_title">Včasné varování před zemětřesením zrušeno</string>
+    <string name="notification_eew_details_pending">Čeká se na podrobnosti zemětřesení</string>
     <string name="notification_earthquake_title">Hlášení o zemětřesení</string>
     <string name="notification_earthquake_updated_title">Hlášení o zemětřesení aktualizováno</string>
     <string name="notification_earthquake_cancelled_title">Hlášení o zemětřesení odvoláno</string>
@@ -670,4 +672,10 @@
     <string name="activity_time_duration_minutes">%1$d min</string>
     <string name="activity_time_duration_hours">%1$d h %2$d min</string>
     <string name="activity_time_duration_days">%1$d d %2$d h %3$d min</string>
+    <string name="receive_silent_test_drills">Přijímat tichá testovací cvičení</string>
+    <string name="receive_silent_test_drills_explanation">Přijímat cvičení DM-D.S.S označená CVIČENÍ. Tichá oznámení pro celé Japonsko se zobrazí i v době klidu, bez zvuku, vibrací a probuzení displeje. Oznámení musí být zapnutá. Skutečné výstrahy mají přednost; cvičení se neukládají do historie zemětřesení.</string>
+    <string name="drill_label">CVIČENÍ</string>
+    <string name="drill_banner">CVIČENÍ · Tichý test — nejde o skutečné zemětřesení</string>
+    <string name="notification_channel_drill_name">Tichá testovací cvičení</string>
+    <string name="notification_channel_drill_description">Jasně označená cvičení poskytovatele bez zvuku a vibrací</string>
 </resources>

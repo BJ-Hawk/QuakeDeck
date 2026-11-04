@@ -564,6 +564,11 @@ class AppSettings(context: Context) {
             prefs.edit { putBoolean("report_archive_enabled", value) }
         }
 
+    /** Opt-in reception of provider exercises; their notifications always stay silent. */
+    var receiveSilentTestDrills: Boolean
+        get() = prefs.getBoolean("receive_silent_test_drills", false)
+        set(value) { prefs.edit { putBoolean("receive_silent_test_drills", value) } }
+
     var p2pCrowdSignalsEnabled: Boolean
         get() = prefs.getBoolean("p2p_crowd_signals_enabled", false)
         set(value) {

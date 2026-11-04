@@ -6,8 +6,8 @@ data class P2pEewLifecycleDeadline(
 )
 
 /**
- * Chooses the optional modelled warning end when available. The fallback is a
- * transport-safety staleness limit, not a prediction of ground-motion arrival.
+ * A modelled passage may extend the display, but cannot discard a fresh official
+ * bulletin. The freshness deadline is a transport limit, not a wave prediction.
  */
 object P2pEewLifecyclePolicy {
     fun deadline(
@@ -19,8 +19,8 @@ object P2pEewLifecyclePolicy {
             receivedAtEpochMillis
         )
         return P2pEewLifecycleDeadline(
-            epochMillis = forecast.valueOrNull()
-                ?: operationalExpiryMillis(event, receivedAtEpochMillis),
+            epochMillis = maxOf(forecast.valueOrNull() ?: Long.MIN_VALUE,
+                operationalExpiryMillis(event, receivedAtEpochMillis)),
             forecastDerived = forecast is LocalEewForecastResult.Available
         )
     }
@@ -29,12 +29,7 @@ object P2pEewLifecyclePolicy {
         event: EarthquakeEvent,
         receivedAtEpochMillis: Long
     ): Long {
-        val issued = event.reportIssuedAt?.let {
-            EewWaveModel.timelineEpochMillis(event, it)
-        }
-        val origin = EewWaveModel.timelineEpochMillis(event, event.originTime)
-        return (issued ?: origin ?: receivedAtEpochMillis) + MAX_ACTIVE_MILLIS
+        return EewLifecyclePolicy.deadline(event, receivedAtEpochMillis)
     }
 
-    private const val MAX_ACTIVE_MILLIS = 180_000L
 }

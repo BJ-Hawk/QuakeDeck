@@ -490,6 +490,8 @@
     <string name="notification_eew_title">緊急地震速報</string>
     <string name="notification_eew_forecast_title">緊急地震速報（予報）</string>
     <string name="notification_eew_ended_title">緊急地震速報 終了</string>
+    <string name="notification_eew_cancelled_title">緊急地震速報 取消</string>
+    <string name="notification_eew_details_pending">地震の詳細を確認中</string>
     <string name="notification_earthquake_title">地震情報</string>
     <string name="notification_earthquake_updated_title">地震情報 更新</string>
     <string name="notification_earthquake_cancelled_title">地震情報 取消</string>
@@ -661,4 +663,10 @@
     <string name="activity_time_duration_minutes">%1$d分</string>
     <string name="activity_time_duration_hours">%1$d時間%2$d分</string>
     <string name="activity_time_duration_days">%1$d日%2$d時間%3$d分</string>
+    <string name="receive_silent_test_drills">訓練報をサイレントで受信</string>
+    <string name="receive_silent_test_drills_explanation">DM-D.S.Sの試験・訓練報を「訓練」と明記して受信します。全国の訓練を通知し、静かな時間帯も音・振動・画面点灯は行いません。通知の有効化が必要です。実際の速報を優先し、訓練報は地震履歴に保存しません。</string>
+    <string name="drill_label">訓練</string>
+    <string name="drill_banner">訓練 · サイレントテスト — 実際の地震ではありません</string>
+    <string name="notification_channel_drill_name">サイレント訓練通知</string>
+    <string name="notification_channel_drill_description">音と振動なしで、訓練と明記した試験・訓練報を通知します</string>
 </resources>

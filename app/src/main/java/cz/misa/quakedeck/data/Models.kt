@@ -134,6 +134,8 @@ data class EarthquakeEvent(
     val hasHypocenter: Boolean = true,
     val reportCorrection: String? = null,
     val isCancelled: Boolean = false,
+    /** Provider exercise data, never a real earthquake. Retained across notification taps. */
+    val isDrill: Boolean = false,
     val eewHypocenterCondition: String? = null,
     val eewMagnitudeUnit: String? = null,
     val eewSourceAccuracy: EewSourceAccuracy? = null,
@@ -240,6 +242,8 @@ data class AppSnapshot(
     val history: List<EarthquakeEvent> = emptyList(),
     val statusText: String = "",
     val liveUpdateKind: LiveUpdateKind = LiveUpdateKind.NONE,
+    /** The incident this EEW update terminates/detects, even while a confirmed report is visible. */
+    val eewUpdateEvent: EarthquakeEvent? = null,
     val liveUpdateSequence: Long = 0L,
     val dmdssEewUpdate: Boolean = false,
     val testingMode: Boolean = false,

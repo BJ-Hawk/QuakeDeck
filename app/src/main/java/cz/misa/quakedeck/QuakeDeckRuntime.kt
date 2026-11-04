@@ -61,6 +61,7 @@ class QuakeDeckRuntime(context: Context) : QuakeDataProvider {
     private val dmdssOAuth = DmDssOAuthClient(appContext)
     private val dmdssProvider = DmDssProvider(appContext, dmdssOAuth)
     private val dmdssDiagnosticsStore = DmDssDiagnosticsStore(appContext)
+    private val eewCancellations = cz.misa.quakedeck.data.EewCancellationTracker()
 
     @Volatile
     var requestedMode: DataSourceMode = settings.dataSourceMode
@@ -184,7 +185,7 @@ class QuakeDeckRuntime(context: Context) : QuakeDataProvider {
     private fun handleDmdssSnapshot(snapshot: AppSnapshot) {
         val previousSignal = dmdssSnapshot.activeEewEvent?.p2pCrowdSignal
             ?: dmdssSnapshot.event.p2pCrowdSignal
-        p2pProvider.setExternalEewForCrowdAssociation(snapshot.activeEewEvent)
+        p2pProvider.setExternalEewForCrowdAssociation(snapshot.activeEewEvent?.takeUnless { it.isDrill })
         dmdssSnapshot = snapshot.withAssociatedP2pCrowdSignal(previousSignal)
         publishCombined(origin = DataSourceMode.DMDSS)
     }
@@ -194,6 +195,7 @@ class QuakeDeckRuntime(context: Context) : QuakeDataProvider {
     ): AppSnapshot {
         val active = activeEewEvent
         val target = active ?: event.takeIf { it.kind == EarthquakeEventKind.EEW } ?: return this
+        if (target.isDrill) return this
         val signal = p2pProvider.crowdSignalFor(target)
             ?: retainedSignal?.takeIf { previous ->
                 previous.startedAt.isNotBlank() && target.id == dmdssSnapshot.event.id
@@ -208,6 +210,12 @@ class QuakeDeckRuntime(context: Context) : QuakeDataProvider {
 
     @Synchronized
     private fun publishCombined(origin: DataSourceMode) {
+        if (!p2pSnapshot.testingMode) {
+            val source = if (origin == DataSourceMode.DMDSS) dmdssSnapshot else p2pSnapshot
+            eewCancellations.record(source.eewUpdateEvent ?: source.event)
+            p2pSnapshot = eewCancellations.reconcile(p2pSnapshot)
+            dmdssSnapshot = eewCancellations.reconcile(dmdssSnapshot)
+        }
         val combined = combinedSnapshot(origin)
         publishSnapshot(
             snapshot = combined,
@@ -298,8 +306,9 @@ class QuakeDeckRuntime(context: Context) : QuakeDataProvider {
         }
 
         val dmdssEew = dmdssSnapshot.activeEewEvent
-        val selectedEew = dmdssEew?.amendedByMatchingOfficialReport(p2pSnapshot.event)
-            ?: p2pSnapshot.activeEewEvent
+        val preferred = cz.misa.quakedeck.data.preferredActiveEew(dmdssEew, p2pSnapshot.activeEewEvent)
+        val usingDmdss = preferred != null && preferred === dmdssEew
+        val selectedEew = if (usingDmdss) preferred.amendedByMatchingOfficialReport(p2pSnapshot.event) else preferred
         val selectedEvent = selectedEew ?: if (
             origin == DataSourceMode.DMDSS &&
             dmdssSnapshot.liveUpdateKind == LiveUpdateKind.EEW_ENDED
@@ -310,6 +319,10 @@ class QuakeDeckRuntime(context: Context) : QuakeDataProvider {
         }
         val updateKind = when (origin) {
             DataSourceMode.DMDSS -> if (
+                !usingDmdss && selectedEew != null && dmdssSnapshot.liveUpdateKind == LiveUpdateKind.EEW
+            ) {
+                LiveUpdateKind.NONE
+            } else if (
                 dmdssSnapshot.liveUpdateKind == LiveUpdateKind.EEW_ENDED &&
                 p2pSnapshot.activeEew
             ) {
@@ -318,7 +331,7 @@ class QuakeDeckRuntime(context: Context) : QuakeDataProvider {
                 dmdssSnapshot.liveUpdateKind
             }
             DataSourceMode.FREE -> if (
-                dmdssEew != null && p2pSnapshot.liveUpdateKind in P2P_EEW_UPDATES
+                usingDmdss && p2pSnapshot.liveUpdateKind in P2P_EEW_UPDATES
             ) {
                 LiveUpdateKind.NONE
             } else {
@@ -331,7 +344,7 @@ class QuakeDeckRuntime(context: Context) : QuakeDataProvider {
                 connectionState = ConnectionState.CONNECTED,
                 activeEew = selectedEew != null,
                 activeEewEvent = selectedEew,
-                activeEewUntilMillis = if (dmdssEew != null) {
+                activeEewUntilMillis = if (usingDmdss) {
                     dmdssSnapshot.activeEewUntilMillis
                 } else {
                     p2pSnapshot.activeEewUntilMillis
@@ -346,7 +359,7 @@ class QuakeDeckRuntime(context: Context) : QuakeDataProvider {
                 } else {
                     p2pSnapshot.history
                 },
-                statusText = if (dmdssEew != null) {
+                statusText = if (usingDmdss) {
                     dmdssSnapshot.statusText
                 } else {
                     "DM-D.S.S EEW forecast connected · P2PQuake baseline active"
@@ -404,6 +417,7 @@ class QuakeDeckRuntime(context: Context) : QuakeDataProvider {
     }
 
     private fun sameLiveIncident(first: EarthquakeEvent, second: EarthquakeEvent): Boolean {
+        if (first.isDrill != second.isDrill) return false
         val firstTime = eventOriginMinute(first) ?: return false
         val secondTime = eventOriginMinute(second) ?: return false
         if (firstTime != secondTime) return false
@@ -471,6 +485,12 @@ class QuakeDeckRuntime(context: Context) : QuakeDataProvider {
                 callback(result)
             }
         }
+    }
+
+    fun setReceiveSilentTestDrills(enabled: Boolean) {
+        settings.receiveSilentTestDrills = enabled
+        notificationCoordinator.onDrillPreferenceChanged(enabled)
+        dmdssProvider.onDrillPreferenceChanged()
     }
 
     fun disconnectDmdss(callback: (Boolean) -> Unit = {}) {
@@ -715,6 +735,7 @@ internal fun notificationSnapshotForProviderUpdate(
     }
     return combined.copy(
         event = provider.event,
+        eewUpdateEvent = provider.eewUpdateEvent,
         tsunami = provider.tsunami,
         activeEewUntilMillis = provider.activeEewUntilMillis,
         dmdssEewUpdate = origin == DataSourceMode.DMDSS && combined.dmdssEewUpdate

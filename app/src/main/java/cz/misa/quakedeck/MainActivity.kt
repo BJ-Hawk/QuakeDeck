@@ -379,6 +379,7 @@ private fun QuakeDeckApp(
     var p2pCrowdSignalsEnabled by remember {
         mutableStateOf(appSettings.p2pCrowdSignalsEnabled)
     }
+    var receiveSilentTestDrills by remember { mutableStateOf(appSettings.receiveSilentTestDrills) }
     var reportArchiveEnabled by remember { mutableStateOf(appSettings.reportArchiveEnabled) }
     var automaticHistoricalDownload by remember {
         mutableStateOf(appSettings.automaticHistoricalDownload && appSettings.reportArchiveEnabled)
@@ -491,6 +492,7 @@ private fun QuakeDeckApp(
     var historicalBrowserReturnTarget by remember { mutableStateOf(OverlayReturnTarget.MAP) }
     var historicalBrowserOpen by remember { mutableStateOf(false) }
     var historicalCatalogLoading by remember { mutableStateOf(false) }
+    var historicalCatalogLoadToken by remember { mutableIntStateOf(0) }
     var historicalCatalog by remember { mutableStateOf<List<HistoricalEventSummary>>(emptyList()) }
     var historicalCatalogArchiveFingerprint by remember { mutableStateOf<String?>(null) }
     var historicalCatalogError by remember { mutableStateOf<String?>(null) }
@@ -584,7 +586,8 @@ private fun QuakeDeckApp(
         SandboxClockBridge.synchronizeFromSnapshot(appClock, rawSnapshot)
     }
 
-    val notificationLaunch = notificationLaunchFromIntent ?: retainedNotificationLaunch
+    val notificationLaunch = (notificationLaunchFromIntent ?: retainedNotificationLaunch)
+        ?.takeUnless { it.event?.isDrill == true && !receiveSilentTestDrills }
     val snapshot = rawSnapshot.withNotificationLaunch(notificationLaunch)
 
     LaunchedEffect(
@@ -597,13 +600,7 @@ private fun QuakeDeckApp(
             ?.takeIf { it.kind == NotificationLaunchKind.EEW }
             ?: return@LaunchedEffect
         val retainedId = retained.event?.id ?: return@LaunchedEffect
-        val providerEndedThisEew =
-            !rawSnapshot.activeEew &&
-                rawSnapshot.event.id == retainedId &&
-                (rawSnapshot.liveUpdateKind == LiveUpdateKind.EEW_ENDED ||
-                    rawSnapshot.liveUpdateKind == LiveUpdateKind.CANCELLED ||
-                    rawSnapshot.event.kind != EarthquakeEventKind.EEW ||
-                    rawSnapshot.event.isCancelled)
+        val providerEndedThisEew = rawSnapshot.hasEndedEew(retainedId)
         if (providerEndedThisEew) retainedNotificationLaunch = null
     }
 
@@ -653,10 +650,13 @@ private fun QuakeDeckApp(
 
     fun refreshHistoricalCatalog(force: Boolean = false) {
         val fingerprint = archiveFingerprint()
+        if (!force && historicalCatalogLoading) return
         if (!force && historicalCatalogArchiveFingerprint == fingerprint) return
+        val loadToken = ++historicalCatalogLoadToken
         historicalCatalogLoading = true
         historicalCatalogError = null
         provider.loadHistoricalEventCatalog { result ->
+            if (loadToken != historicalCatalogLoadToken) return@loadHistoricalEventCatalog
             historicalCatalogLoading = false
             result.onSuccess {
                 historicalCatalog = it
@@ -2185,6 +2185,14 @@ private fun QuakeDeckApp(
                 appSettings.p2pCrowdSignalsEnabled = enabled
                 provider.setP2pCrowdSignalsEnabled(enabled)
             },
+            receiveSilentTestDrills = receiveSilentTestDrills,
+            onReceiveSilentTestDrillsChanged = { enabled ->
+                receiveSilentTestDrills = enabled
+                if (!enabled && retainedNotificationLaunch?.event?.isDrill == true) {
+                    retainedNotificationLaunch = null
+                }
+                runtime.setReceiveSilentTestDrills(enabled)
+            },
             reportArchiveEnabled = reportArchiveEnabled,
             onReportArchiveEnabledChanged = { enabled ->
                 reportArchiveEnabled = enabled
@@ -2207,6 +2215,10 @@ private fun QuakeDeckApp(
             onBrowseHistoricalReports = ::openHistoricalBrowserFromSettings,
             onClearReportArchive = {
                 if (historicalMode) exitHistoricalMode()
+                historicalCatalogLoadToken++
+                historicalCatalogLoading = false
+                historicalIncidentLoadToken++
+                historicalIncidentLoading = false
                 historicalCatalog = emptyList()
                 historicalCatalogArchiveFingerprint = null
                 historicalIncidentArchiveFingerprint = null
@@ -2315,7 +2327,9 @@ private fun MapAlertIndicators(
         if (snapshot.activeEew) {
             val forecast = snapshot.activeEewEvent?.eewAlertLevel == EewAlertLevel.FORECAST
             MapAlertBadge(
-                label = uiText(
+                label = (if (snapshot.activeEewEvent?.isDrill == true) {
+                    uiText(R.string.drill_label, language) + " · "
+                } else "") + uiText(
                     if (forecast) R.string.eew_forecast else R.string.eew_warning,
                     language
                 ),
@@ -3840,6 +3854,15 @@ private fun ReportCardGrid(
         color = MaterialTheme.colorScheme.surfaceVariant
     ) {
         Column(verticalArrangement = Arrangement.Top) {
+            if (event.isDrill) {
+                Text(
+                    text = uiText(R.string.drill_banner, language),
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp, vertical = 6.dp),
+                    color = MaterialTheme.colorScheme.primary,
+                    fontWeight = FontWeight.Black,
+                    fontSize = 12.sp
+                )
+            }
             ReportTopGrid(
                 location = location,
                 event = event,
@@ -4241,7 +4264,9 @@ private fun EventPanel(
                     ) {
                         Column(Modifier.padding(horizontal = 12.dp, vertical = 9.dp)) {
                             Text(
-                                uiText(
+                                (if (eewReportEvent?.isDrill == true) {
+                                    uiText(R.string.drill_label, placeNameLanguage) + " · "
+                                } else "") + uiText(
                                     if (activeForecast) {
                                         R.string.eew_forecast_active
                                     } else {
@@ -4309,7 +4334,8 @@ private fun EventPanel(
                     DestinationCountdownCard(
                         prediction = prediction,
                         japaneseIntensity = japaneseIntensity,
-                        language = placeNameLanguage
+                        language = placeNameLanguage,
+                        isDrill = selectedEvent.isDrill
                     )
                 }
                 if (localForecastUnavailable) {
@@ -6721,7 +6747,8 @@ private fun formatCompactDuration(seconds: Long): String {
 private fun DestinationCountdownCard(
     prediction: EewWaveModel.DestinationPrediction,
     japaneseIntensity: Boolean,
-    language: PlaceNameLanguage
+    language: PlaceNameLanguage,
+    isDrill: Boolean = false
 ) {
     val context = LocalContext.current
     val intensityLabel = prediction.predictedIntensity?.let { upper ->
@@ -6778,7 +6805,8 @@ private fun DestinationCountdownCard(
             ) {
                 Column(Modifier.weight(1f)) {
                     Text(
-                        "${prediction.destinationName} · " +
+                        (if (isDrill) uiText(R.string.drill_label, language) + " · " else "") +
+                            "${prediction.destinationName} · " +
                             uiText(R.string.destination_prediction, language),
                         color = MaterialTheme.colorScheme.onSurface,
                         fontWeight = FontWeight.Black,

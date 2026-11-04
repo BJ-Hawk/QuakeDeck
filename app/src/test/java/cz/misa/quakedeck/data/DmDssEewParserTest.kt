@@ -33,12 +33,12 @@ class DmDssEewParserTest {
     }
 
     @Test
-    fun forecastAlwaysExpiresExactly180SecondsAfterTheEvent() {
+    fun forecastExpires180SecondsAfterIssueRatherThanOrigin() {
         val update = DmDssEewParser.parseEnvelope(forecastEnvelope(), previous = null)!!
-        val eventTime = DmDssEewParser.forecastExpiryMillis(update.event) - 180_000L
+        val issued = requireNotNull(EewLifecyclePolicy.sourceMillis(update.event.reportIssuedAt))
 
-        assertEquals(eventTime + 180_000L, update.expiresAtMillis)
-        assertEquals(eventTime + 180_000L, DmDssEewParser.forecastExpiryMillis(update.event))
+        assertEquals(issued + 180_000L, update.expiresAtMillis)
+        assertEquals(issued + 180_000L, DmDssEewParser.forecastExpiryMillis(update.event))
     }
 
     @Test

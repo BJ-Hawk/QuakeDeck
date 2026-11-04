@@ -2,13 +2,13 @@ package cz.misa.quakedeck.data
 
 import org.json.JSONArray
 import org.json.JSONObject
+import java.security.MessageDigest
 
 /** Source-neutral EEW archive envelope; no local forecasting equations live here. */
 internal object EewArchiveFrame {
     fun encode(event: EarthquakeEvent): JSONObject {
         val issuedAt = sourceTime(event.reportIssuedAt ?: event.originTime)
-        return JSONObject()
-            .put("id", "eew-frame:${event.id}:${event.reportSerial ?: issuedAt}")
+        val frame = JSONObject()
             .put("code", 556)
             .put("time", issuedAt)
             .put("cancelled", event.isCancelled)
@@ -54,6 +54,12 @@ internal object EewArchiveFrame {
                     )
                 }
             })
+        // Serials can be reused by cancellations and companion products can add
+        // regions. A serial-only primary key silently dropped those frames.
+        val fingerprint = MessageDigest.getInstance("SHA-256")
+            .digest(frame.toString().toByteArray(Charsets.UTF_8))
+            .joinToString("") { "%02x".format(it) }
+        return frame.put("id", "eew-frame:${event.id}:$fingerprint")
     }
 
     /**

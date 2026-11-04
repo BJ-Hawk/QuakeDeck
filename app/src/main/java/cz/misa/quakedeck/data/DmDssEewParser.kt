@@ -56,13 +56,18 @@ internal object DmDssEewParser {
 
     fun parseEnvelope(
         envelope: JSONObject,
-        previous: EarthquakeEvent?
-    ): DmDssEewUpdate? = (parseEnvelopeResult(envelope, previous) as? DmDssEewParseResult.Accepted)
+        previous: EarthquakeEvent?,
+        receivedAtMillis: Long = System.currentTimeMillis(),
+        receiveSilentTestDrills: Boolean = false
+    ): DmDssEewUpdate? = (parseEnvelopeResult(envelope, previous, receivedAtMillis,
+        receiveSilentTestDrills) as? DmDssEewParseResult.Accepted)
         ?.update
 
     fun parseEnvelopeResult(
         envelope: JSONObject,
-        previous: EarthquakeEvent?
+        previous: EarthquakeEvent?,
+        receivedAtMillis: Long = System.currentTimeMillis(),
+        receiveSilentTestDrills: Boolean = false
     ): DmDssEewParseResult {
         if (envelope.optString("type") != "data") return rejected(DmDssEewRejection.NOT_DATA)
         if (envelope.optString("classification") != "eew.forecast") {
@@ -71,7 +76,8 @@ internal object DmDssEewParser {
         if (envelope.optString("format") != "json") {
             return rejected(DmDssEewRejection.WRONG_FORMAT)
         }
-        if (envelope.optJSONObject("head")?.optBoolean("test", false) == true) {
+        val headerTest = envelope.optJSONObject("head")?.optBoolean("test", false) == true
+        if (headerTest && !receiveSilentTestDrills) {
             return rejected(DmDssEewRejection.TEST_BULLETIN)
         }
 
@@ -90,8 +96,13 @@ internal object DmDssEewParser {
         if (report.optJSONObject("_schema")?.optString("type") != "eew-information") {
             return rejected(DmDssEewRejection.WRONG_SCHEMA)
         }
-        if (report.optString("status") != "通常") {
+        val bulletinStatus = report.optString("status")
+        if (bulletinStatus !in setOf("通常", "訓練", "試験")) {
             return rejected(DmDssEewRejection.NON_STANDARD_STATUS)
+        }
+        val isDrill = headerTest || bulletinStatus != "通常"
+        if (isDrill && !receiveSilentTestDrills) {
+            return rejected(DmDssEewRejection.TEST_BULLETIN)
         }
         val payload = report.optJSONObject("body")
             ?: return rejected(DmDssEewRejection.MISSING_EVENT_BODY)
@@ -100,14 +111,15 @@ internal object DmDssEewParser {
             payload,
             type,
             previous,
-            "DM-D.S.S EEW forecast",
-            envelope.optString("id")
+            if (isDrill) "DRILL · DM-D.S.S EEW forecast" else "DM-D.S.S EEW forecast",
+            envelope.optString("id"), receivedAtMillis, isDrill
         )
     }
 
     fun parseGdItem(
         item: JSONObject,
-        previous: EarthquakeEvent?
+        previous: EarthquakeEvent?,
+        receivedAtMillis: Long = System.currentTimeMillis()
     ): DmDssEewParseResult {
         val telegram = item.optJSONArray("telegrams")?.optJSONObject(0)
         val type = telegram?.optJSONObject("head")?.optString("type")
@@ -118,7 +130,7 @@ internal object DmDssEewParser {
             type = type,
             previous = previous,
             statusPrefix = "DM-D.S.S recovered recent EEW",
-            fallbackEventId = ""
+            fallbackEventId = "", receivedAtMillis = receivedAtMillis
         )
     }
 
@@ -128,10 +140,14 @@ internal object DmDssEewParser {
         type: String,
         previous: EarthquakeEvent?,
         statusPrefix: String,
-        fallbackEventId: String
+        fallbackEventId: String,
+        receivedAtMillis: Long,
+        isDrill: Boolean = false
     ): DmDssEewParseResult {
 
+        // Exercise IDs must never share cancellation/revision state with real incidents.
         val eventId = report.optString("eventId").ifBlank { fallbackEventId }
+            .let { if (isDrill) "drill:dmdss:$it" else it }
         val serial = report.optString("serialNo").ifBlank { report.optString("serial") }
             .takeIf(String::isNotBlank)
         val issuedAtRaw = report.optString("reportDateTime").ifBlank {
@@ -141,7 +157,9 @@ internal object DmDssEewParser {
         val issuedAtMillis = parseMillis(issuedAtRaw)
         val cancelled = payload.optBoolean("isCanceled", false) || report.optString("infoType") == "取消"
         if (cancelled) {
-            val active = previous?.takeIf { eventId.isBlank() || it.id == eventId }
+            val active = previous?.takeIf {
+                it.isDrill == isDrill && (eventId.isBlank() || it.id == eventId)
+            }
                 ?: return rejected(DmDssEewRejection.CANCELLATION_WITHOUT_EVENT)
             return accepted(
                 DmDssEewUpdate(
@@ -182,7 +200,8 @@ internal object DmDssEewParser {
             ?: "—"
         val originTimeRaw = earthquake.optString("originTime")
             .ifBlank { earthquake.optString("arrivalTime") }
-        val expiry = forecastExpiryMillis(originTimeRaw, issuedAtRaw)
+        val expiry = (parseMillis(issuedAtRaw) ?: parseMillis(originTimeRaw) ?: receivedAtMillis)
+            .plus(FORECAST_ACTIVE_MILLIS)
         val finalLabel = if (payload.optBoolean("isLastInfo", false)) " · final bulletin" else ""
         val event = EarthquakeEvent(
             id = eventId.ifBlank { "dmdss-$issuedAtRaw" },
@@ -197,6 +216,7 @@ internal object DmDssEewParser {
             longitude = longitude,
             points = points,
             kind = EarthquakeEventKind.EEW,
+            isDrill = isDrill,
             eewAlertLevel = if (payload.optBoolean("isWarning", false)) {
                 EewAlertLevel.WARNING
             } else {
@@ -215,7 +235,7 @@ internal object DmDssEewParser {
         return accepted(
             DmDssEewUpdate(
                 event = event,
-                active = expiry == null || expiry > System.currentTimeMillis(),
+                active = expiry > receivedAtMillis,
                 kind = LiveUpdateKind.EEW,
                 status = "$statusPrefix$finalLabel",
                 expiresAtMillis = expiry,
@@ -344,14 +364,10 @@ internal object DmDssEewParser {
         else -> "—" to false
     }
 
-    private fun forecastExpiryMillis(originTime: String, reportTime: String): Long? =
-        (parseMillis(originTime) ?: parseMillis(reportTime))?.plus(FORECAST_ACTIVE_MILLIS)
-
     fun forecastExpiryMillis(
         event: EarthquakeEvent,
         receivedAtMillis: Long = System.currentTimeMillis()
-    ): Long = (parseMillis(event.originTime) ?: parseMillis(event.reportIssuedAt) ?: receivedAtMillis)
-        .plus(FORECAST_ACTIVE_MILLIS)
+    ): Long = EewLifecyclePolicy.deadline(event, receivedAtMillis)
 
     private fun parseMillis(value: String?): Long? {
         if (value.isNullOrBlank() || value == "—") return null
@@ -405,5 +421,10 @@ internal fun isDuplicateDmDssRevision(
     if (candidate.reportSerial.isNullOrBlank() || candidate.reportSerial != current.reportSerial) {
         return false
     }
-    return candidate.copy(reportType = null) == current.copy(reportType = null)
+    return candidate.sourceRevision() == current.sourceRevision()
 }
+
+private fun EarthquakeEvent.sourceRevision() = copy(
+    reportType = null, localIntensityForecast = null, p2pCrowdSignal = null,
+    timelineOffsetMillis = 0L, reportCorrection = if (isCancelled) null else reportCorrection
+)

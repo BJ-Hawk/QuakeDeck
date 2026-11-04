@@ -78,6 +78,7 @@ object NotificationEventPayload {
             .put("hasHypocenter", event.hasHypocenter)
             .putNullable("reportCorrection", event.reportCorrection)
             .put("isCancelled", event.isCancelled)
+            .put("isDrill", event.isDrill)
             .putNullable("eewHypocenterCondition", event.eewHypocenterCondition)
             .putNullable("eewMagnitudeUnit", event.eewMagnitudeUnit)
             .putNullable("eewSourceAccuracy", event.eewSourceAccuracy?.let { accuracy ->
@@ -174,6 +175,7 @@ object NotificationEventPayload {
             hasHypocenter = json.optBoolean("hasHypocenter", true),
             reportCorrection = json.nullableString("reportCorrection"),
             isCancelled = json.optBoolean("isCancelled", false),
+            isDrill = json.optBoolean("isDrill", false),
             eewHypocenterCondition = json.nullableString("eewHypocenterCondition"),
             eewMagnitudeUnit = json.nullableString("eewMagnitudeUnit"),
             eewSourceAccuracy = accuracy,
@@ -298,17 +300,9 @@ fun AppSnapshot.withNotificationLaunch(
         NotificationLaunchKind.EARTHQUAKE -> this
         NotificationLaunchKind.EEW -> {
             val notificationEvent = payload.event ?: return this
+            if (notificationEvent.isDrill && activeEewEvent?.isDrill == false && activeEew) return this
             if (payload.activeUntilMillis?.let { nowEpochMillis >= it } == true) return this
-            if (
-                !activeEew &&
-                event.id == notificationEvent.id &&
-                (liveUpdateKind == LiveUpdateKind.EEW_ENDED ||
-                    liveUpdateKind == LiveUpdateKind.CANCELLED ||
-                    event.kind != EarthquakeEventKind.EEW ||
-                    event.isCancelled)
-            ) {
-                return this
-            }
+            if (hasEndedEew(notificationEvent.id)) return this
             if (activeEew && activeEewEvent?.id == notificationEvent.id) {
                 this
             } else {
@@ -338,4 +332,14 @@ fun AppSnapshot.withNotificationLaunch(
             }
         }
     }
+}
+
+/** Termination refers to its own EEW, even when another report is selected. */
+fun AppSnapshot.hasEndedEew(eventId: String): Boolean {
+    val ended = eewUpdateEvent?.takeIf { it.id == eventId }
+    if (ended != null && (ended.isCancelled || liveUpdateKind == LiveUpdateKind.EEW_ENDED ||
+            liveUpdateKind == LiveUpdateKind.CANCELLED)) return true
+    return !activeEew && event.id == eventId &&
+        (liveUpdateKind == LiveUpdateKind.EEW_ENDED || liveUpdateKind == LiveUpdateKind.CANCELLED ||
+            event.kind != EarthquakeEventKind.EEW || event.isCancelled)
 }

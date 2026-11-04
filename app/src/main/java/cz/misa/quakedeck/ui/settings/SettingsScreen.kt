@@ -215,6 +215,8 @@ fun QuakeDeckSettings(
     onInjectTsunamiWarningRequested: (Long) -> Unit,
     p2pCrowdSignalsEnabled: Boolean,
     onP2pCrowdSignalsEnabledChanged: (Boolean) -> Unit,
+    receiveSilentTestDrills: Boolean,
+    onReceiveSilentTestDrillsChanged: (Boolean) -> Unit,
     reportArchiveEnabled: Boolean,
     onReportArchiveEnabledChanged: (Boolean) -> Unit,
     automaticHistoricalDownload: Boolean,
@@ -412,6 +414,8 @@ fun QuakeDeckSettings(
                                 p2pCrowdSignalsEnabled = p2pCrowdSignalsEnabled,
                                 onP2pCrowdSignalsEnabledChanged =
                                     onP2pCrowdSignalsEnabledChanged,
+                                receiveSilentTestDrills = receiveSilentTestDrills,
+                                onReceiveSilentTestDrillsChanged = onReceiveSilentTestDrillsChanged,
                                 reportArchiveEnabled = reportArchiveEnabled,
                                 onReportArchiveEnabledChanged = onReportArchiveEnabledChanged,
                                 automaticHistoricalDownload = automaticHistoricalDownload,
@@ -665,6 +669,8 @@ private fun MainSettingsPage(
     onSandboxRequested: () -> Unit,
     p2pCrowdSignalsEnabled: Boolean,
     onP2pCrowdSignalsEnabledChanged: (Boolean) -> Unit,
+    receiveSilentTestDrills: Boolean,
+    onReceiveSilentTestDrillsChanged: (Boolean) -> Unit,
     reportArchiveEnabled: Boolean,
     onReportArchiveEnabledChanged: (Boolean) -> Unit,
     automaticHistoricalDownload: Boolean,
@@ -949,6 +955,13 @@ private fun MainSettingsPage(
                     snapshot = snapshot,
                     requestedMode = requestedMode,
                     onClick = onDataSourceRequested
+                )
+                CardDivider()
+                SwitchSettingRow(
+                    title = text(R.string.receive_silent_test_drills, selectedLanguage),
+                    supportingText = text(R.string.receive_silent_test_drills_explanation, selectedLanguage),
+                    checked = receiveSilentTestDrills,
+                    onCheckedChange = onReceiveSilentTestDrillsChanged
                 )
                 CardDivider()
                 SwitchSettingRow(

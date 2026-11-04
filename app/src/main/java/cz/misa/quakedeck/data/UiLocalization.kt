@@ -58,6 +58,10 @@ object UiLocalization {
     /** Translate provider/application status text that still arrives as runtime state. */
     fun status(context: Context, value: String, setting: PlaceNameLanguage): String {
         val localized = localizedContext(context, setting)
+        if (value.startsWith("DRILL · ")) {
+            return localized.getString(R.string.drill_label) + " · " +
+                status(context, value.removePrefix("DRILL · "), setting)
+        }
         val status = value.ifBlank { "No connection details available" }
         val resourceId: Int? = when (status) {
             "Connected" -> R.string.connected

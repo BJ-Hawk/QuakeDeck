@@ -9,6 +9,7 @@ import org.json.JSONArray
 import org.json.JSONObject
 import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
+import java.time.LocalDate
 
 internal data class ArchiveWriteResult(
     val added: Int,
@@ -45,6 +46,12 @@ internal class ReportArchiveStore(context: Context) :
 
     private val databaseFile = context.applicationContext.getDatabasePath(DATABASE_NAME)
 
+    init {
+        // Catalogue/replay reads must not wait for backfill's network worker or
+        // prevent a short live archive transaction from completing.
+        setWriteAheadLoggingEnabled(true)
+    }
+
     override fun onCreate(db: SQLiteDatabase) {
         db.execSQL(
             """
@@ -59,12 +66,14 @@ internal class ReportArchiveStore(context: Context) :
                 event_key TEXT,
                 source TEXT NOT NULL,
                 payload_bytes INTEGER NOT NULL,
+                catalog_json TEXT,
                 raw_json TEXT NOT NULL
             )
             """.trimIndent()
         )
         db.execSQL("CREATE INDEX reports_event_idx ON reports(event_key, source_time, received_at)")
         db.execSQL("CREATE INDEX reports_code_time_idx ON reports(code, source_time, received_at)")
+        createCatalogIndex(db)
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
@@ -122,6 +131,17 @@ internal class ReportArchiveStore(context: Context) :
                 "CREATE UNIQUE INDEX reports_semantic_unique_idx ON reports(semantic_key)"
             )
         }
+        if (oldVersion < 3) {
+            // Add only a rebuildable projection; preserve every original byte,
+            // semantic identity and reception timestamp in the existing rows.
+            db.execSQL("ALTER TABLE reports ADD COLUMN catalog_json TEXT")
+            createCatalogIndex(db)
+        }
+    }
+
+    private fun createCatalogIndex(db: SQLiteDatabase) {
+        db.execSQL("CREATE INDEX reports_catalog_pending_idx ON reports(code) " +
+            "WHERE catalog_json IS NULL AND code IN (551, 556)")
     }
 
     fun storeReports(reports: List<JSONObject>, source: String): ArchiveWriteResult {
@@ -161,6 +181,9 @@ internal class ReportArchiveStore(context: Context) :
                     put("event_key", eventKey)
                     put("source", source)
                     put("payload_bytes", raw.toByteArray(StandardCharsets.UTF_8).size)
+                    if (code == 551 || code == 556) {
+                        put("catalog_json", HistoricalCatalogPayload.fromReport(json).toString())
+                    }
                     put("raw_json", raw)
                 }
                 val row = db.insertWithOnConflict(
@@ -257,8 +280,40 @@ internal class ReportArchiveStore(context: Context) :
         return result
     }
 
-    fun loadEarthquakeReports(): List<ArchivedEarthquakeReport> =
-        loadEarthquakeReportsForEvent(null)
+    /** No station, felt, tsunami or forecast payloads are decoded for list rows. */
+    fun loadCatalogReports(): List<ArchivedReportRecord> {
+        prepareLegacyCatalogPayloads()
+        return loadAssociatedReportCandidates(
+            selection = "code IN (551, 556)", args = null, payloadColumn = "catalog_json"
+        )
+    }
+
+    private fun prepareLegacyCatalogPayloads() {
+        val db = writableDatabase
+        while (true) {
+            // Bounded batches avoid holding all legacy station arrays in memory
+            // or locking out live writes during a first-open conversion.
+            val pending = db.query("reports", arrayOf("archive_key", "raw_json"),
+                "catalog_json IS NULL AND code IN (551, 556)", null,
+                null, null, null, "64").use { cursor ->
+                buildList {
+                    while (cursor.moveToNext()) {
+                        val payload = runCatching {
+                            HistoricalCatalogPayload.fromReport(JSONObject(cursor.getString(1))).toString()
+                        }.getOrDefault("{}")
+                        add(cursor.getString(0) to payload)
+                    }
+                }
+            }
+            if (pending.isEmpty()) return
+            db.transaction {
+                pending.forEach { (key, payload) ->
+                    db.update("reports", ContentValues().apply { put("catalog_json", payload) },
+                        "archive_key = ? AND catalog_json IS NULL", arrayOf(key))
+                }
+            }
+        }
+    }
 
     fun loadEarthquakeReportsForEvent(eventKey: String?): List<ArchivedEarthquakeReport> {
         val result = mutableListOf<ArchivedEarthquakeReport>()
@@ -308,19 +363,31 @@ internal class ReportArchiveStore(context: Context) :
      * decoding every historical EEW/felt payload before opening one event.
      */
     fun loadAssociatedReportCandidatesForEventDay(eventKey: String): List<ArchivedReportRecord> {
-        val date = eventKey.removePrefix("quake:").take(10)
-        if (date.length != 10) return loadAssociatedReportCandidates()
-        val dashed = date.replace('/', '-')
-        val slashed = date.replace('-', '/')
+        if (eventKey.startsWith(EewHistory.KEY_PREFIX)) {
+            return loadAssociatedReportCandidates("code = 556 AND event_key = ?",
+                arrayOf("event:${eventKey.removePrefix(EewHistory.KEY_PREFIX)}"))
+        }
+        val date = runCatching {
+            LocalDate.parse(eventKey.removePrefix("quake:").take(10).replace('/', '-'))
+        }.getOrNull() ?: return loadAssociatedReportCandidates()
+        val dashed = date.toString()
+        val slashed = dashed.replace('-', '/')
+        // Use the next lexical prefix, not the next calendar day: crossing a
+        // year would otherwise include the other timestamp format in the range.
+        val prefixEnd = dashed.dropLast(1) + (dashed.last() + 1)
         return loadAssociatedReportCandidates(
-            selection = "code IN (552, 554, 556, 9611) AND (source_time LIKE ? OR source_time LIKE ?)",
-            args = arrayOf("$dashed%", "$slashed%")
+            // Ranges use reports_code_time_idx with SQLite's default binary
+            // collation; LIKE would scan each code's entire timestamp history.
+            selection = "(code IN (552, 554, 556, 9611) AND source_time >= ? AND source_time < ?) OR " +
+                "(code IN (552, 554, 556, 9611) AND source_time >= ? AND source_time < ?)",
+            args = arrayOf(dashed, prefixEnd, slashed, prefixEnd.replace('-', '/'))
         )
     }
 
     private fun loadAssociatedReportCandidates(
         selection: String,
-        args: Array<String>?
+        args: Array<String>?,
+        payloadColumn: String = "raw_json"
     ): List<ArchivedReportRecord> {
         val result = mutableListOf<ArchivedReportRecord>()
         readableDatabase.query(
@@ -332,7 +399,7 @@ internal class ReportArchiveStore(context: Context) :
                 "received_at",
                 "issue_type",
                 "event_key",
-                "raw_json"
+                payloadColumn
             ),
             selection,
             args,
@@ -424,7 +491,7 @@ internal class ReportArchiveStore(context: Context) :
 
     private companion object {
         const val DATABASE_NAME = "quakedeck_report_archive.db"
-        const val DATABASE_VERSION = 2
+        const val DATABASE_VERSION = 3
         val TRANSPORT_ONLY_FIELDS = setOf("id", "time")
     }
 }
