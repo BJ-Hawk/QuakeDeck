@@ -24,7 +24,8 @@ data class DmDssPacketDiagnostic(
     val transport: String,
     val type: String,
     val payload: String,
-    val source: String = DIAGNOSTIC_SOURCE_DMDSS
+    val source: String = DIAGNOSTIC_SOURCE_DMDSS,
+    val p2pCode: Int? = null
 )
 
 internal enum class DiagnosticPacketDetailKind {
@@ -112,7 +113,11 @@ class DmDssDiagnosticsStore(context: Context) {
         val code = decoded?.optInt("code")
         val crowd = source == DIAGNOSTIC_SOURCE_P2PQUAKE && (code == 561 || code == P2P_CROWD_SIGNAL_CODE)
         val packet = IncomingDiagnosticPacket(
-            DmDssPacketDiagnostic(nowMillis, "IN", transport, type, payload, source), crowd
+            DmDssPacketDiagnostic(
+                nowMillis, "IN", transport, type, payload, source,
+                p2pCode = code?.takeIf { source == DIAGNOSTIC_SOURCE_P2PQUAKE && it > 0 }
+            ),
+            crowd
         )
         synchronized(queuedPackets) {
             while (!crowd && queuedPackets.isNotEmpty() &&
@@ -160,7 +165,7 @@ class DmDssDiagnosticsStore(context: Context) {
         }
     }
 
-    fun snapshot(): DmDssDiagnosticsSnapshot = DmDssDiagnosticsSnapshot(
+    fun snapshot(includePacketHistory: Boolean = true): DmDssDiagnosticsSnapshot = DmDssDiagnosticsSnapshot(
         socketState = prefs.getString(KEY_SOCKET_STATE, null),
         socketStateChangedAtMillis = prefs.optionalLong(KEY_SOCKET_STATE_CHANGED),
         connectedAtMillis = prefs.optionalLong(KEY_CONNECTED_AT),
@@ -188,7 +193,9 @@ class DmDssDiagnosticsStore(context: Context) {
         lastNotificationAtMillis = prefs.optionalLong(KEY_NOTIFICATION_AT),
         lastNotificationEventId = prefs.getString(KEY_NOTIFICATION_EVENT, null),
         lastNotificationResult = prefs.getString(KEY_NOTIFICATION_RESULT, null),
-        packetHistory = packetHistory.snapshot().sortedBy { it.recordedAtMillis }
+        packetHistory = if (includePacketHistory) {
+            packetHistory.snapshot().sortedBy { it.recordedAtMillis }
+        } else emptyList()
     )
 
     fun recordSocket(state: String, nowMillis: Long = System.currentTimeMillis()) {
@@ -298,7 +305,8 @@ class DmDssDiagnosticsStore(context: Context) {
             transport = transport,
             type = type,
             payload = sanitizedPayload,
-            source = source
+            source = source,
+            p2pCode = decoded?.optInt("code")?.takeIf { source == DIAGNOSTIC_SOURCE_P2PQUAKE && it > 0 }
         )
         packetHistory.append(entry)
     }
@@ -423,12 +431,14 @@ internal fun trimDmDssPacketHistory(
 }
 
 fun DmDssDiagnosticsSnapshot.toMachineReadableJson(
-    exportedAtMillis: Long = System.currentTimeMillis()
+    exportedAtMillis: Long = System.currentTimeMillis(),
+    selection: JSONObject? = null
 ): String = JSONObject()
     .put("schema", "cz.misa.quakedeck.dmdss-diagnostics")
     .put("schemaVersion", 3)
     .put("exportedAt", Instant.ofEpochMilli(exportedAtMillis).toString())
     .put("exportedAtMillis", exportedAtMillis)
+    .put("selection", selection)
     .put("build", JSONObject()
         .put("versionName", cz.misa.quakedeck.BuildConfig.VERSION_NAME)
         .put("versionCode", cz.misa.quakedeck.BuildConfig.VERSION_CODE)
@@ -495,6 +505,7 @@ private fun DmDssPacketDiagnostic.toJson(): JSONObject = JSONObject()
     .put("direction", direction)
     .put("transport", transport)
     .put("type", type)
+    .put("p2pCode", p2pCode)
     .put("payload", payload)
 
 private fun JSONObject.putNullable(name: String, value: Any?): JSONObject =
@@ -509,7 +520,8 @@ private fun JSONObject.toPacketDiagnostic(): DmDssPacketDiagnostic? {
         transport = optString("transport"),
         type = optString("type"),
         payload = optString("payload"),
-        source = optString("source").ifBlank { DIAGNOSTIC_SOURCE_DMDSS }
+        source = optString("source").ifBlank { DIAGNOSTIC_SOURCE_DMDSS },
+        p2pCode = optInt("p2pCode").takeIf { it > 0 }
     )
 }
 

@@ -1,5 +1,7 @@
 # Workstreams
 
+- [Replay, map alerts, and Data Sources UI](workstreams/replay-and-alert-ui.md) — **FIRST PASS IMPLEMENTED LOCALLY IN 0.10.4-dev.1 / 248.** Android Studio validation, the remaining menu pass, and Google Maps-friendly station addresses are open.
+
 - [Silent DM-D.S.S test drills](workstreams/silent-dmdss-test-drills.md) — **IMPLEMENTED LOCALLY IN 0.10.3-dev.7 / 245; BUILD, UNIT-TEST AND DEVICE/LIVE VALIDATION PENDING IN ANDROID STUDIO.** Opt-in silent exercises use explicit drill labels across map/details/destination and phone/watch notification reopening, separate incident identities, real-alert priority and no earthquake-History entries. Seven regression checks were added but not run. No GitHub access, build/test execution, APK, staging, commit or push during this workstream.
 
 - [Historical event loading](workstreams/historical-event-loading.md) — **IMPLEMENTED LOCALLY; FULL/LITE COMPILE AND ALL 149 UNIT TESTS PASS; DEVICE TIMINGS PENDING.** Persistent compact catalogue, reader/download separation, origin-minute matching and indexed incident-day queries preserve complete replay payloads. Existing archives convert once in bounded batches. Includes projection, matching and host SQLite migration/query checks.

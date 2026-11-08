@@ -57,7 +57,14 @@
     <string name="dmdss_diagnostic_reporting_area">Ohlašovací oblast: %1$s</string>
     <string name="dmdss_diagnostic_location">Místo: %1$s</string>
     <string name="dmdss_diagnostic_forecast_area">Oblast předpovědi: %1$s</string>
-    <string name="dmdss_diagnostic_export_json">Exportovat surovou diagnostiku JSON</string>
+    <string name="dmdss_diagnostic_export_json">Exportovat diagnostiku</string>
+    <string name="dmdss_export_last_event">Exportovat poslední událost</string>
+    <string name="dmdss_export_last_hour">Exportovat poslední hodinu</string>
+    <string name="dmdss_export_last_day">Exportovat poslední den (24 hodin)</string>
+    <string name="dmdss_export_last_week">Exportovat poslední týden</string>
+    <string name="dmdss_export_all">Exportovat vše</string>
+    <string name="dmdss_export_include_connections">Zahrnout pakety připojení</string>
+    <string name="dmdss_export_retention_note">Export vychází z uchované historie. Poslední událost zahrnuje pakety nejnovější rozpoznané události.</string>
     <string name="dmdss_diagnostic_export_complete">Diagnostika doručování byla exportována.</string>
     <string name="dmdss_diagnostic_export_failed">Diagnostiku doručování nelze exportovat.</string>
     <string name="dmdss_diagnostic_none">Zatím žádný záznam</string>
@@ -68,8 +75,8 @@
     <string name="map_display">Zobrazení mapy</string>
     <string name="live_preview">Živý náhled</string>
     <string name="data_connection">Data a připojení</string>
-    <string name="p2p_crowd_signals">Hromadné signály P2PQuake</string>
-    <string name="p2p_crowd_signals_explanation">Zobrazovat nepotvrzené události z hlášení otřesů jako běžné události. Odpovídající oficiální zpráva o zemětřesení doplní tutéž událost a zachová počet hlášení.</string>
+    <string name="p2p_crowd_signals">Počty hlášení otřesů z P2PQuake</string>
+    <string name="p2p_crowd_signals_explanation">Zobrazovat počty hlášení otřesů z P2PQuake u odpovídajících zpráv o zemětřesení a včasných varování (EEW).</string>
     <string name="p2p_felt_reports_event">Nepotvrzená hlášení otřesů</string>
     <string name="p2p_felt_reports_count">%1$d hlášení otřesů · P2PQuake</string>
     <string name="testing_sandbox">Testování a sandbox</string>

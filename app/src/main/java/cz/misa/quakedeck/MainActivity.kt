@@ -44,9 +44,13 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -69,6 +73,7 @@ import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.positionChange
 import androidx.compose.ui.layout.Layout
+import androidx.compose.ui.layout.Placeable
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.layout.positionInRoot
@@ -78,6 +83,7 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -86,6 +92,7 @@ import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.createBitmap
 import androidx.core.net.toUri
@@ -502,7 +509,7 @@ private fun QuakeDeckApp(
     var historicalIncidentArchiveFingerprint by remember { mutableStateOf<String?>(null) }
     var historicalReportIndex by remember { mutableIntStateOf(0) }
     var historicalInitialFocusToken by remember { mutableIntStateOf(0) }
-    var sourceMenuOpen by remember { mutableStateOf(false) }
+    var sourceMenuOpen by rememberSaveable { mutableStateOf(false) }
     var requestedMode by remember { mutableStateOf(runtime.requestedMode) }
     val appClock = remember { AppClockController() }
     var lastP2pUpdateMillis by remember { mutableLongStateOf(0L) }
@@ -856,6 +863,20 @@ private fun QuakeDeckApp(
     }
     val selectedEvent = historicalFrame?.event ?: regularSelectedEvent
     val browsingHistory = historicalMode || selectedEvent.id != snapshot.event.id
+    val activeEewReport = (snapshot.activeEewEvent ?: snapshot.event)
+        .takeIf { snapshot.activeEew && !it.isCancelled }
+    var eewDetailsDismissed by remember(activeEewReport?.id, testingMode) {
+        mutableStateOf(false)
+    }
+    // The tsunami report ID identifies a bulletin, not the whole active warning.
+    var tsunamiDetailsDismissed by remember(snapshot.activeTsunami, testingMode) {
+        mutableStateOf(false)
+    }
+    val liveWaveEvent = snapshot.activeEewEvent?.takeIf {
+        !historicalMode && snapshot.activeEew && !it.isCancelled
+    }
+    val selectedEventIsActiveEew = activeEewReport != null &&
+        (selectedEvent.id == snapshot.event.id || selectedEvent.id == activeEewReport.id)
     val selectedEventCanMap = selectedEvent.hasJapanMapContent()
     val eventMapped =
         mappedEventId == selectedEvent.id &&
@@ -863,6 +884,8 @@ private fun QuakeDeckApp(
             selectedEventCanMap
     val cleanMapEvent = remember { waitingSnapshot().event }
     val mapEvent = if (eventMapped || focusedStation != null) selectedEvent else cleanMapEvent
+    val focusedEewForMap = liveWaveEvent.takeIf { eventMapped && selectedEventIsActiveEew }
+    var alertPanelFocusRequest by remember { mutableIntStateOf(0) }
 
     fun eventFocusSignature(event: EarthquakeEvent): String = buildString {
         append(event.hasHypocenter)
@@ -892,6 +915,8 @@ private fun QuakeDeckApp(
 
     fun requestEventMapFocus(target: EarthquakeEvent, manual: Boolean) {
         cancelAutoFocusExpiry()
+        tsunamiFocusRequest = 0
+        tsunamiFocusAfterLayoutId = null
         if (!target.hasJapanMapContent()) {
             mappedEventId = null
             focusEventTargetId = null
@@ -965,30 +990,35 @@ private fun QuakeDeckApp(
             retainedNotificationLaunch = null
             notificationFocusAfterLayoutId = null
         }
-        clearStationFocus()
+        clearStationFocus(restoreCamera = false)
+        administrativeFocusTarget = null
         if (target.id != selectedEvent.id) {
             clearObservedIntensityExpansion()
         }
         selectedEventId = target.id
-        if (eventMapped) {
-            requestEventMapFocus(target, manual = true)
-        } else {
-            cancelAutoFocusExpiry()
-            mappedEventId = null
-            focusEventTargetId = null
-            focusNeedsRefocusRequested = false
-            focusedFootprintSignature = null
+        if (activeEewReport != null &&
+            (target.id == snapshot.event.id || target.id == activeEewReport.id)
+        ) {
+            eewDetailsDismissed = false
         }
+        requestEventMapFocus(target, manual = true)
     }
 
-    fun fitJapanAndClearEventFocus() {
-        tsunamiFocusAfterLayoutId = null
+    fun clearEventMapFocus() {
         clearStationFocus(restoreCamera = false)
         cancelAutoFocusExpiry()
+        administrativeFocusTarget = null
         mappedEventId = null
         focusEventTargetId = null
         focusNeedsRefocusRequested = false
         focusedFootprintSignature = null
+    }
+
+    fun fitJapanAndClearEventFocus() {
+        tsunamiFocusAfterLayoutId = null
+        tsunamiFocusRequest = 0
+        notificationFocusAfterLayoutId = null
+        clearEventMapFocus()
         appSettings.clearMainMapCameraState(currentMainScreenLandscape)
         fitJapanIsLatestCameraRequest = true
         fitJapanRequest++
@@ -1004,6 +1034,35 @@ private fun QuakeDeckApp(
             fitJapanAndClearEventFocus()
         } else {
             requestEventMapFocus(selectedEvent, manual = true)
+        }
+    }
+
+    fun closeLiveReport() {
+        if (selectedEvent.id == snapshot.event.id) {
+            lastAutoOpenedLiveEventId = selectedEvent.id
+            lastAutoFitHadFootprint = true
+        }
+        if (selectedEventIsActiveEew) {
+            eewDetailsDismissed = true
+        } else if (retainedNotificationLaunch?.kind != NotificationLaunchKind.TSUNAMI) {
+            retainedNotificationLaunch = null
+        }
+        notificationFocusAfterLayoutId = null
+        clearObservedIntensityExpansion()
+        clearEventMapFocus()
+        selectedEventId = null
+        portraitBeforeObservationsFraction = null
+        portraitPendingObservationRestore = null
+    }
+
+    fun dismissTsunamiReport() {
+        val hadTsunamiFocus = tsunamiFocusRequest > 0
+        tsunamiDetailsDismissed = true
+        tsunamiFocusAfterLayoutId = null
+        tsunamiFocusRequest = 0
+        if (hadTsunamiFocus && focusedStation == null) {
+            if (eventMapped) requestEventMapFocus(selectedEvent, manual = true)
+            else fitJapanAndClearEventFocus()
         }
     }
 
@@ -1030,6 +1089,7 @@ private fun QuakeDeckApp(
             // Retain its complete forecast-area state and issue the same
             // affected-coast camera command used by a live code-552 update.
             retainedNotificationLaunch = notificationLaunch
+            tsunamiDetailsDismissed = false
             lastCameraHandledLiveSequence = maxOf(
                 lastCameraHandledLiveSequence,
                 rawSnapshot.liveUpdateSequence
@@ -1060,6 +1120,11 @@ private fun QuakeDeckApp(
                     event = target
                 )
             if (target.id != selectedEvent.id) clearObservedIntensityExpansion()
+            if (activeEewReport != null &&
+                (target.id == snapshot.event.id || target.id == activeEewReport.id)
+            ) {
+                eewDetailsDismissed = false
+            }
             selectedEventId = target.id
             // Cold launch can receive the same live snapshot after this effect.
             // Its automatic camera policy must not override the explicit user
@@ -1080,10 +1145,9 @@ private fun QuakeDeckApp(
 
     fun selectHistoricalReport(index: Int) {
         val incident = historicalIncident ?: return
-        val targetIndex = index.coerceIn(0, incident.frames.lastIndex)
-        if (targetIndex == historicalReportIndex) return
-        val newFrame = incident.frames[targetIndex]
-        historicalReportIndex = targetIndex
+        val newFrame = incident.frames.getOrNull(index) ?: return
+        clearStationFocus(restoreCamera = false)
+        historicalReportIndex = index
         // Replay is static, but each archived revision remains a distinct
         // event footprint. Frame it immediately instead of leaving the camera
         // on an unrelated earlier EEW/report frame.
@@ -1149,10 +1213,9 @@ private fun QuakeDeckApp(
     }
 
     LaunchedEffect(historicalInitialFocusToken) {
-        val firstFrame = historicalIncident?.frames?.firstOrNull() ?: return@LaunchedEffect
-        historicalReportIndex = 0
+        if (historicalIncident == null) return@LaunchedEffect
         selectedEventId = null
-        requestEventMapFocus(firstFrame.event, manual = true)
+        selectHistoricalReport(historicalReportIndex)
     }
 
     LaunchedEffect(archiveFingerprint(), historicalIncident?.eventKey) {
@@ -1211,12 +1274,17 @@ private fun QuakeDeckApp(
 
             LiveUpdateKind.EEW,
             LiveUpdateKind.CONFIRMED -> {
-                fitJapanIsLatestCameraRequest = false
                 val liveId = snapshot.event.id
                 val hasFootprint = snapshot.event.points.isNotEmpty()
                 val canMap = snapshot.event.hasJapanMapContent()
 
-                if (lastAutoOpenedLiveEventId != liveId) {
+                if (eewDetailsDismissed) {
+                    // Leave this warning's display closed even if its next
+                    // bulletin adds a mappable footprint or a matching report.
+                    lastAutoOpenedLiveEventId = liveId
+                    lastAutoFitHadFootprint = hasFootprint
+                } else if (lastAutoOpenedLiveEventId != liveId) {
+                    fitJapanIsLatestCameraRequest = false
                     lastAutoOpenedLiveEventId = liveId
                     lastAutoFitHadFootprint = hasFootprint
                     selectedEventId = null
@@ -1269,6 +1337,7 @@ private fun QuakeDeckApp(
                     // mappable, then later gain Japanese observations. Open the
                     // map only when that useful footprint actually arrives.
                     lastAutoFitHadFootprint = true
+                    fitJapanIsLatestCameraRequest = false
                     selectedEventId = null
                     mappedEventId = liveId
                     focusEventTargetId = liveId
@@ -1305,9 +1374,11 @@ private fun QuakeDeckApp(
                 // warning card and coast overlay update immediately. Frame the
                 // affected forecast coasts without pretending an older selected
                 // earthquake is related; a later code-551 controls event focus.
-                fitJapanIsLatestCameraRequest = false
-                tsunamiFocusRequest++
-                tsunamiFocusAfterLayoutId = snapshot.tsunami?.id
+                if (!tsunamiDetailsDismissed) {
+                    fitJapanIsLatestCameraRequest = false
+                    tsunamiFocusRequest++
+                    tsunamiFocusAfterLayoutId = snapshot.tsunami?.id
+                }
             }
 
             LiveUpdateKind.TSUNAMI_CANCELLED -> {
@@ -1461,6 +1532,49 @@ private fun QuakeDeckApp(
             }
         }
 
+        fun openAlertPanel() {
+            if (isLandscape) {
+                landscapePanelCollapsed = false
+            } else if (portraitPanelCollapsed) {
+                portraitPanelCollapsed = false
+                portraitMapFraction = portraitRestoreMapFraction
+                    .coerceIn(0.30f, portraitMaxMapFraction)
+            }
+            alertPanelFocusRequest++
+        }
+
+        val mapAlerts: @Composable () -> Unit = {
+            if (!historicalMode) {
+                MapAlertIndicators(
+                    snapshot = snapshot,
+                    language = placeNameLanguage,
+                    onFocusEew = {
+                        if (activeEewReport != null) {
+                            eewDetailsDismissed = false
+                            clearStationFocus(restoreCamera = false)
+                            clearObservedIntensityExpansion()
+                            administrativeFocusTarget = null
+                            selectedEventId = null
+                            requestEventMapFocus(snapshot.event, manual = true)
+                            notificationFocusAfterLayoutId = snapshot.event.id
+                            openAlertPanel()
+                        }
+                    },
+                    onFocusTsunami = {
+                        snapshot.tsunami?.let { report ->
+                            tsunamiDetailsDismissed = false
+                            clearEventMapFocus()
+                            notificationFocusAfterLayoutId = null
+                            fitJapanIsLatestCameraRequest = false
+                            tsunamiFocusRequest++
+                            tsunamiFocusAfterLayoutId = report.id
+                            openAlertPanel()
+                        }
+                    }
+                )
+            }
+        }
+
         LaunchedEffect(
             notificationFocusAfterLayoutId,
             isLandscape,
@@ -1473,8 +1587,7 @@ private fun QuakeDeckApp(
 
             // Let the report-card measurement update the portrait map fraction
             // and let JapanMap receive that viewport before issuing the final
-            // explicit focus. This is the cold-start equivalent of the second
-            // tap that was previously required on a restored notification.
+            // explicit focus from a notification or alert badge.
             withFrameNanos { }
             if (
                 notificationFocusAfterLayoutId == requestedId &&
@@ -1519,17 +1632,14 @@ private fun QuakeDeckApp(
                     key(orientationKey) {
                         JapanMap(
                             event = mapEvent,
-                            activeEewEvent = snapshot.activeEewEvent
-                                ?.takeIf { !historicalMode && snapshot.activeEew && eventMapped && !browsingHistory },
+                            activeEewEvent = focusedEewForMap,
+                            liveWaveEvent = liveWaveEvent,
                             tsunami = snapshot.tsunami.takeUnless { historicalMode },
                             activeTsunami = snapshot.activeTsunami && !historicalMode,
                             fitJapanRequest = fitJapanRequest,
                             tsunamiFocusRequest = tsunamiFocusRequest,
                             fitJapanIsLatestRequest = fitJapanIsLatestCameraRequest,
                             timelineNowMillis = if (historicalMode) 0L else eewTimelineNowMillis,
-                            animateEew = !historicalMode && snapshot.activeEew &&
-                                mapEvent.id == snapshot.event.id &&
-                                !mapEvent.isCancelled,
                             focusEvent = eventMapped,
                             focusRequest = focusEventRequest,
                             focusRequestIsManual = focusEventRequestIsManual,
@@ -1559,15 +1669,9 @@ private fun QuakeDeckApp(
                                 }
                             },
                             onFitJapan = ::fitJapanAndClearEventFocus,
+                            mapAlerts = mapAlerts,
                             alertLocation = alertLocation,
                             language = placeNameLanguage
-                        )
-                    }
-                    if (!historicalMode) {
-                        MapAlertIndicators(
-                            snapshot = snapshot,
-                            language = placeNameLanguage,
-                            modifier = Modifier.align(Alignment.TopEnd)
                         )
                     }
                 }
@@ -1599,10 +1703,7 @@ private fun QuakeDeckApp(
                             offlineStationTranslator = offlineStationTranslator,
                             offlineStationTranslationStatus = offlineStationTranslationStatus,
                             observedIntensityExpandedPrefectures = observedIntensityExpandedPrefectures,
-                            onReportIndexChanged = {
-                                clearStationFocus()
-                                selectHistoricalReport(it)
-                            },
+                            onReportIndexChanged = ::selectHistoricalReport,
                             onBrowseEvents = ::openHistoricalBrowserFromMap,
                             onReturnToLive = ::exitHistoricalMode,
                             onFocusEvent = ::focusSelectedEvent,
@@ -1622,23 +1723,17 @@ private fun QuakeDeckApp(
                             timelineNowMillis = eewTimelineNowMillis,
                             eventMapped = eventMapped,
                             focusNeedsRefocus = focusNeedsRefocus,
+                            showSelectedReport = !selectedEventIsActiveEew || !eewDetailsDismissed,
+                            showTsunamiReport = !tsunamiDetailsDismissed,
+                            alertPanelFocusRequest = alertPanelFocusRequest,
                             placeNameLanguage = placeNameLanguage,
                             offlineStationTranslator = offlineStationTranslator,
                             offlineStationTranslationStatus = offlineStationTranslationStatus,
                             observedIntensityExpandedPrefectures = observedIntensityExpandedPrefectures,
                             alertLocation = alertLocation,
                             onSelectEvent = ::selectReport,
-                            onCloseReport = {
-                                retainedNotificationLaunch = null
-                                notificationFocusAfterLayoutId = null
-                                clearObservedIntensityExpansion()
-                                cancelAutoFocusExpiry()
-                                selectedEventId = null
-                                mappedEventId = null
-                                focusEventTargetId = null
-                                focusNeedsRefocusRequested = false
-                                focusedFootprintSignature = null
-                            },
+                            onCloseReport = ::closeLiveReport,
+                            onCloseTsunamiReport = ::dismissTsunamiReport,
                             onFocusEvent = ::focusSelectedEvent,
                             selectedStation = focusedStation,
                             stationInfoVisible = stationInfoVisible,
@@ -1658,17 +1753,14 @@ private fun QuakeDeckApp(
                     key(orientationKey) {
                         JapanMap(
                             event = mapEvent,
-                            activeEewEvent = snapshot.activeEewEvent
-                                ?.takeIf { !historicalMode && snapshot.activeEew && eventMapped && !browsingHistory },
+                            activeEewEvent = focusedEewForMap,
+                            liveWaveEvent = liveWaveEvent,
                             tsunami = snapshot.tsunami.takeUnless { historicalMode },
                             activeTsunami = snapshot.activeTsunami && !historicalMode,
                             fitJapanRequest = fitJapanRequest,
                             tsunamiFocusRequest = tsunamiFocusRequest,
                             fitJapanIsLatestRequest = fitJapanIsLatestCameraRequest,
                             timelineNowMillis = if (historicalMode) 0L else eewTimelineNowMillis,
-                            animateEew = !historicalMode && snapshot.activeEew &&
-                                mapEvent.id == snapshot.event.id &&
-                                !mapEvent.isCancelled,
                             focusEvent = eventMapped,
                             focusRequest = focusEventRequest,
                             focusRequestIsManual = focusEventRequestIsManual,
@@ -1698,15 +1790,9 @@ private fun QuakeDeckApp(
                                 }
                             },
                             onFitJapan = ::fitJapanAndClearEventFocus,
+                            mapAlerts = mapAlerts,
                             alertLocation = alertLocation,
                             language = placeNameLanguage
-                        )
-                    }
-                    if (!historicalMode) {
-                        MapAlertIndicators(
-                            snapshot = snapshot,
-                            language = placeNameLanguage,
-                            modifier = Modifier.align(Alignment.TopEnd)
                         )
                     }
                 }
@@ -1755,10 +1841,7 @@ private fun QuakeDeckApp(
                         offlineStationTranslator = offlineStationTranslator,
                         offlineStationTranslationStatus = offlineStationTranslationStatus,
                         observedIntensityExpandedPrefectures = observedIntensityExpandedPrefectures,
-                        onReportIndexChanged = {
-                            clearStationFocus()
-                            selectHistoricalReport(it)
-                        },
+                        onReportIndexChanged = ::selectHistoricalReport,
                         onBrowseEvents = ::openHistoricalBrowserFromMap,
                         onReturnToLive = ::exitHistoricalMode,
                         onFocusEvent = ::focusSelectedEvent,
@@ -1791,6 +1874,9 @@ private fun QuakeDeckApp(
                         timelineNowMillis = eewTimelineNowMillis,
                         eventMapped = eventMapped,
                         focusNeedsRefocus = focusNeedsRefocus,
+                        showSelectedReport = !selectedEventIsActiveEew || !eewDetailsDismissed,
+                        showTsunamiReport = !tsunamiDetailsDismissed,
+                        alertPanelFocusRequest = alertPanelFocusRequest,
                         placeNameLanguage = placeNameLanguage,
                         offlineStationTranslator = offlineStationTranslator,
                         offlineStationTranslationStatus = offlineStationTranslationStatus,
@@ -1801,19 +1887,8 @@ private fun QuakeDeckApp(
                             portraitBeforeObservationsFraction = null
                             portraitPendingObservationRestore = null
                         },
-                        onCloseReport = {
-                            retainedNotificationLaunch = null
-                            notificationFocusAfterLayoutId = null
-                            clearObservedIntensityExpansion()
-                            cancelAutoFocusExpiry()
-                            selectedEventId = null
-                            mappedEventId = null
-                            focusEventTargetId = null
-                            focusNeedsRefocusRequested = false
-                            focusedFootprintSignature = null
-                            portraitBeforeObservationsFraction = null
-                            portraitPendingObservationRestore = null
-                        },
+                        onCloseReport = ::closeLiveReport,
+                        onCloseTsunamiReport = ::dismissTsunamiReport,
                         onFocusEvent = ::focusSelectedEvent,
                         selectedStation = focusedStation,
                         stationInfoVisible = stationInfoVisible,
@@ -2239,7 +2314,7 @@ private fun QuakeDeckApp(
             dmdssAuthorizationUpdateRequired = runtime.isDmdssAuthorizationUpdateRequired,
             dmdssContracts = runtime.dmdssContractSummary,
             dmdssAvailableClassifications = runtime.dmdssAvailableClassifications,
-            readDmdssDiagnostics = { runtime.dmdssDiagnostics },
+            readDmdssDiagnostics = runtime::readDmdssDiagnostics,
             language = placeNameLanguage,
             onSourceSelected = {
                 requestedMode = it
@@ -2285,7 +2360,10 @@ private fun QuakeDeckApp(
                             clearObservedIntensityExpansion()
                             historicalIncident = incident
                             historicalIncidentArchiveFingerprint = archiveFingerprint()
-                            historicalReportIndex = 0
+                            historicalReportIndex = incident.frames.indexOfFirst {
+                                it.kind != HistoricalAssociatedReportKind.FELT_REPORTS &&
+                                    it.event.hasJapanMapContent()
+                            }.coerceAtLeast(0)
                             portraitBeforeObservationsFraction = null
                             portraitPendingObservationRestore = null
                             historicalBrowserOpen = false
@@ -2310,38 +2388,36 @@ private fun QuakeDeckApp(
 private fun MapAlertIndicators(
     snapshot: AppSnapshot,
     language: PlaceNameLanguage,
-    modifier: Modifier = Modifier
+    onFocusEew: () -> Unit,
+    onFocusTsunami: () -> Unit
 ) {
-    Column(
-        modifier = modifier.padding(8.dp),
-        horizontalAlignment = Alignment.End,
-        verticalArrangement = Arrangement.spacedBy(5.dp)
-    ) {
-        if (snapshot.activeTsunami) {
-            MapAlertBadge(
-                label = uiText(R.string.tsunami_warning, language),
-                warning = true
-            )
-        }
-        if (snapshot.activeEew) {
-            val forecast = snapshot.activeEewEvent?.eewAlertLevel == EewAlertLevel.FORECAST
-            MapAlertBadge(
-                label = (if (snapshot.activeEewEvent?.isDrill == true) {
-                    uiText(R.string.drill_label, language) + " · "
-                } else "") + uiText(
-                    if (forecast) R.string.eew_forecast else R.string.eew_warning,
-                    language
-                ),
-                warning = !forecast
-            )
-        }
+    if (snapshot.activeTsunami) {
+        MapAlertBadge(
+            label = uiText(R.string.tsunami_warning, language),
+            warning = true,
+            onClick = onFocusTsunami
+        )
+    }
+    if (snapshot.activeEew) {
+        val forecast = snapshot.activeEewEvent?.eewAlertLevel == EewAlertLevel.FORECAST
+        MapAlertBadge(
+            label = (if (snapshot.activeEewEvent?.isDrill == true) {
+                uiText(R.string.drill_label, language) + " · "
+            } else "") + uiText(
+                if (forecast) R.string.eew_forecast else R.string.eew_warning,
+                language
+            ),
+            warning = !forecast,
+            onClick = onFocusEew
+        )
     }
 }
 
 @Composable
 private fun MapAlertBadge(
     label: String,
-    warning: Boolean
+    warning: Boolean,
+    onClick: () -> Unit
 ) {
     val container = if (warning) {
         MaterialTheme.colorScheme.errorContainer
@@ -2359,6 +2435,7 @@ private fun MapAlertBadge(
         FORECAST_ALERT_OUTLINE
     }
     Surface(
+        modifier = Modifier.clickable(role = Role.Button, onClick = onClick),
         shape = RoundedCornerShape(7.dp),
         color = container.copy(alpha = 0.92f),
         border = androidx.compose.foundation.BorderStroke(
@@ -2384,7 +2461,7 @@ private fun SourceDialog(
     dmdssAuthorizationUpdateRequired: Boolean,
     dmdssContracts: DmDssContractSummary?,
     dmdssAvailableClassifications: Set<String>,
-    readDmdssDiagnostics: () -> DmDssDiagnosticsSnapshot,
+    readDmdssDiagnostics: (Boolean) -> DmDssDiagnosticsSnapshot,
     language: PlaceNameLanguage,
     onSourceSelected: (DataSourceMode) -> Unit,
     onDmdssConnect: () -> Unit,
@@ -2396,7 +2473,7 @@ private fun SourceDialog(
     var polledDmdssDiagnostics by remember { mutableStateOf(DmDssDiagnosticsSnapshot()) }
     LaunchedEffect(Unit) {
         while (true) {
-            polledDmdssDiagnostics = withContext(Dispatchers.IO) { readDmdssDiagnostics() }
+            polledDmdssDiagnostics = withContext(Dispatchers.IO) { readDmdssDiagnostics(false) }
             delay(2_000L)
         }
     }
@@ -2418,21 +2495,27 @@ private fun SourceDialog(
     val scope = rememberCoroutineScope()
     val exportCompleteText = uiText(R.string.dmdss_diagnostic_export_complete, language)
     val exportFailedText = uiText(R.string.dmdss_diagnostic_export_failed, language)
-    var packetHistoryExpanded by rememberSaveable { mutableStateOf(false) }
-    val readablePacketHistory = remember(dmdssDiagnostics.packetHistory) {
-        humanReadablePacketDiagnostics(dmdssDiagnostics.packetHistory.takeLast(20)).asReversed()
-    }
+    val sourceScrollState = rememberScrollState()
+    var exportOptionsOpen by rememberSaveable { mutableStateOf(false) }
+    var exportRangeName by rememberSaveable { mutableStateOf(DiagnosticExportRange.LAST_EVENT.name) }
+    var includeConnectionPackets by rememberSaveable { mutableStateOf(false) }
     val exportDiagnostics = rememberLauncherForActivityResult(
         ActivityResultContracts.CreateDocument("application/json")
     ) { uri ->
         uri ?: return@rememberLauncherForActivityResult
+        val range = DiagnosticExportRange.valueOf(exportRangeName)
+        val includeConnections = includeConnectionPackets
         scope.launch {
             val result = withContext(Dispatchers.IO) {
                 runCatching {
+                    val diagnostic = readDmdssDiagnostics(true).toSelectedDiagnosticJson(
+                        range,
+                        includeConnections
+                    )
                     val stream = context.contentResolver.openOutputStream(uri, "wt")
                         ?: error("Unable to open the selected diagnostics file")
                     stream.bufferedWriter(Charsets.UTF_8).use { writer ->
-                        writer.write(readDmdssDiagnostics().toMachineReadableJson())
+                        writer.write(diagnostic)
                     }
                 }
             }
@@ -2530,6 +2613,23 @@ private fun SourceDialog(
         return
     }
 
+    if (exportOptionsOpen) {
+        DiagnosticExportDialog(
+            language = language,
+            range = DiagnosticExportRange.valueOf(exportRangeName),
+            onRangeChange = { exportRangeName = it.name },
+            includeConnectionPackets = includeConnectionPackets,
+            onIncludeConnectionPacketsChange = { includeConnectionPackets = it },
+            onDismiss = { exportOptionsOpen = false },
+            onExport = {
+                exportOptionsOpen = false
+                val stamp = DMDSS_EXPORT_FILE_TIME_FORMATTER.format(Instant.now())
+                exportDiagnostics.launch("quakedeck-delivery-diagnostics-$stamp.json")
+            }
+        )
+        return
+    }
+
     val requestDmdssConnection = {
         if (dmdssNoticeAccepted) {
             onDmdssConnect()
@@ -2544,8 +2644,8 @@ private fun SourceDialog(
         title = { Text(uiText(R.string.data_source, language)) },
         text = {
             Column(
-                modifier = Modifier.verticalScroll(rememberScrollState()),
-                verticalArrangement = Arrangement.spacedBy(10.dp)
+                modifier = Modifier.verticalScroll(sourceScrollState),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Box(
@@ -2566,41 +2666,38 @@ private fun SourceDialog(
                 HorizontalDivider()
                 Text(uiText(R.string.sources, language), fontWeight = FontWeight.Bold)
 
-                SourceChoiceRow(
-                    selected = requestedMode == DataSourceMode.FREE,
-                    title = "FREE",
-                    subtitle = uiText(R.string.p2pquake_source_subtitle, language),
-                    onClick = { onSourceSelected(DataSourceMode.FREE) }
-                )
-                SourceChoiceRow(
-                    selected = requestedMode == DataSourceMode.DMDSS,
-                    title = "DM-D.S.S",
-                    subtitle = uiText(
-                        if (dmdssAuthorized) {
-                            R.string.dmdss_eew_connected_subtitle
+                Column(Modifier.selectableGroup()) {
+                    SourceChoiceRow(
+                        selected = requestedMode == DataSourceMode.FREE,
+                        title = "FREE",
+                        subtitle = uiText(R.string.p2pquake_source_subtitle, language),
+                        onClick = { onSourceSelected(DataSourceMode.FREE) }
+                    )
+                    SourceChoiceRow(
+                        selected = requestedMode == DataSourceMode.DMDSS,
+                        title = "DM-D.S.S",
+                        subtitle = uiText(
+                            if (dmdssAuthorized) {
+                                R.string.dmdss_eew_connected_subtitle
+                            } else {
+                                R.string.dmdss_connect_subtitle
+                            },
+                            language
+                        ),
+                        onClick = if (dmdssAuthorized) {
+                            { onSourceSelected(DataSourceMode.DMDSS) }
                         } else {
-                            R.string.dmdss_connect_subtitle
-                        },
-                        language
-                    ),
-                    onClick = if (dmdssAuthorized) {
-                        { onSourceSelected(DataSourceMode.DMDSS) }
-                    } else {
-                        requestDmdssConnection
-                    }
-                )
-                TextButton(
+                            requestDmdssConnection
+                        }
+                    )
+                }
+                SourceDialogAction(
+                    label = uiText(R.string.dmdss_eew_notice_open, language),
                     onClick = {
                         connectAfterDmdssNotice = false
                         dmdssNoticeOpen = true
-                    },
-                    modifier = Modifier.padding(start = 40.dp)
-                ) {
-                    Text(
-                        uiText(R.string.dmdss_eew_notice_open, language),
-                        fontSize = 10.sp
-                    )
-                }
+                    }
+                )
                 if (dmdssAuthorized) {
                     if (dmdssAuthorizationUpdateRequired) {
                         Text(
@@ -2649,200 +2746,57 @@ private fun SourceDialog(
                             }
                         }
                     }
-                    TextButton(
-                        onClick = onDmdssReauthorize,
-                        modifier = Modifier.align(Alignment.End)
-                    ) {
-                        Text(
-                            uiText(
+                    Column {
+                        SourceDialogAction(
+                            label = uiText(
                                 if (dmdssAuthorizationUpdateRequired) {
                                     R.string.dmdss_update_authorization_required
                                 } else {
                                     R.string.dmdss_update_authorization
                                 },
                                 language
-                            )
+                            ),
+                            onClick = onDmdssReauthorize
+                        )
+                        SourceDialogAction(
+                            label = uiText(R.string.disconnect_dmdss, language),
+                            onClick = onDmdssDisconnect
                         )
                     }
-                    TextButton(
-                        onClick = onDmdssDisconnect,
-                        modifier = Modifier.align(Alignment.End)
-                    ) {
-                        Text(uiText(R.string.disconnect_dmdss, language))
-                    }
+                }
 
-                    HorizontalDivider()
-                    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                        Text(
-                            uiText(R.string.dmdss_delivery_diagnostics, language),
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 11.sp
-                        )
-                        DmdssDiagnosticLine(
-                            uiText(R.string.dmdss_diagnostic_connection, language),
-                            listOfNotNull(
-                                dmdssDiagnostics.socketState,
-                                (if (dmdssDiagnostics.socketState == "Connected") {
-                                    dmdssDiagnostics.connectedAtMillis
-                                } else {
-                                    dmdssDiagnostics.socketStateChangedAtMillis
-                                })
-                                    ?.let(::formatDmdssDiagnosticTime)
-                            ).joinToString(" · ").ifBlank {
-                                uiText(R.string.dmdss_diagnostic_none, language)
-                            }
-                        )
-                        DmdssDiagnosticLine(
-                            uiText(R.string.dmdss_diagnostic_socket_activity, language),
-                            dmdssDiagnostics.lastSocketActivityAtMillis
-                                ?.let(::formatDmdssDiagnosticTime)
-                                ?: uiText(R.string.dmdss_diagnostic_none, language)
-                        )
-                        if (dmdssDiagnostics.lastNetworkType != null) {
-                            DmdssDiagnosticLine(
-                                uiText(R.string.dmdss_diagnostic_socket_context, language),
-                                listOfNotNull(
-                                    dmdssDiagnostics.lastNetworkType,
-                                    dmdssDiagnostics.lastSocketLifetimeMillis?.let {
-                                        "lifetime ${formatDmdssDiagnosticDuration(it)}"
-                                    },
-                                    dmdssDiagnostics.lastSocketCallbackCurrent?.let {
-                                        if (it) "current listener" else "stale listener"
-                                    },
-                                    dmdssDiagnostics.lastReconnectDelayMillis?.let {
-                                        "retry ${formatDmdssDiagnosticDuration(it)}"
-                                    }
-                                ).joinToString(" · ")
-                            )
-                        }
-                        DmdssDiagnosticLine(
-                            uiText(R.string.dmdss_diagnostic_bulletin, language),
-                            if (dmdssDiagnostics.lastAcceptedAtMillis == null) {
-                                uiText(R.string.dmdss_diagnostic_none, language)
-                            } else {
-                                listOfNotNull(
-                                    formatDmdssDiagnosticTime(dmdssDiagnostics.lastAcceptedAtMillis),
-                                    dmdssDiagnostics.lastAcceptedSource,
-                                    dmdssDiagnostics.lastAcceptedEventId,
-                                    dmdssDiagnostics.lastAcceptedSerial?.let { "#$it" }
-                                ).joinToString(" · ")
-                            }
-                        )
-                        dmdssDiagnostics.lastRejectedAtMillis?.let { rejectedAt ->
-                            DmdssDiagnosticLine(
-                                uiText(R.string.dmdss_diagnostic_rejected, language),
-                                listOfNotNull(
-                                    formatDmdssDiagnosticTime(rejectedAt),
-                                    dmdssDiagnostics.lastRejectedReason
-                                ).joinToString(" · ")
-                            )
-                        }
-                        dmdssDiagnostics.lastTransportIssueAtMillis?.let { issueAt ->
-                            DmdssDiagnosticLine(
-                                uiText(R.string.dmdss_diagnostic_transport_issue, language),
-                                listOfNotNull(
-                                    formatDmdssDiagnosticTime(issueAt),
-                                    dmdssDiagnostics.lastTransportIssue
-                                ).joinToString(" · ")
-                            )
-                        }
-                        DmdssDiagnosticLine(
-                            uiText(R.string.dmdss_diagnostic_recovery, language),
-                            if (dmdssDiagnostics.lastRecoveryAtMillis == null) {
-                                uiText(R.string.dmdss_diagnostic_none, language)
-                            } else {
-                                listOfNotNull(
-                                    formatDmdssDiagnosticTime(dmdssDiagnostics.lastRecoveryAtMillis),
-                                    dmdssDiagnostics.lastRecoveryResult
-                                ).joinToString(" · ")
-                            }
-                        )
-                        DmdssDiagnosticLine(
-                            uiText(R.string.dmdss_diagnostic_notification, language),
-                            if (dmdssDiagnostics.lastNotificationAtMillis == null) {
-                                uiText(R.string.dmdss_diagnostic_none, language)
-                            } else {
-                                listOfNotNull(
-                                    formatDmdssDiagnosticTime(dmdssDiagnostics.lastNotificationAtMillis),
-                                    dmdssDiagnostics.lastNotificationEventId,
-                                    dmdssDiagnostics.lastNotificationResult
-                                ).joinToString(" · ")
-                            }
-                        )
-                        val activeEewEvent = snapshot.activeEewEvent
-                        val localForecast = activeEewEvent?.localIntensityForecast
-                        DmdssDiagnosticLine(
-                            uiText(R.string.dmdss_diagnostic_local_forecast, language),
-                            if (localForecast == null) {
-                                uiText(R.string.dmdss_diagnostic_none, language)
-                            } else {
-                                UiLocalization.format(
-                                    context,
-                                    R.string.dmdss_diagnostic_local_forecast_ready,
-                                    language,
-                                    localForecast.regions.size,
-                                    localForecast.officialRegionAnchorCount,
-                                    activeEewEvent.localSupplementalIntensityRegions().size,
-                                    localForecast.officialOmissionCeilingCount,
-                                    localForecast.nationwideMaximum.upperDisplayIntensity,
-                                    localForecast.regions.count {
-                                        it.extrapolatedBelowJmaValidationRange
-                                    }
-                                )
-                            }
-                        )
-                        TextButton(
-                            onClick = { packetHistoryExpanded = !packetHistoryExpanded },
-                            contentPadding = PaddingValues(horizontal = 0.dp, vertical = 2.dp)
-                        ) {
-                            Text(
-                                "${uiText(R.string.dmdss_diagnostic_packet_history, language)} " +
-                                    "(${dmdssDiagnostics.packetHistory.size}) · " +
-                                    uiText(
-                                        if (packetHistoryExpanded) {
-                                            R.string.dmdss_diagnostic_hide_packets
-                                        } else {
-                                            R.string.dmdss_diagnostic_show_packets
-                                        },
-                                        language
-                                    ),
-                                fontSize = 10.sp
-                            )
-                        }
-                        if (packetHistoryExpanded) {
-                            readablePacketHistory.forEach { readable ->
-                                Text(
-                                    listOf(
-                                        formatDmdssDiagnosticTime(readable.packet.recordedAtMillis),
-                                        readable.packet.source,
-                                        readable.summary
-                                    ).joinToString(" · "),
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 9.sp
-                                )
-                                diagnosticPacketDetailText(
-                                    context = context,
-                                    readable = readable,
-                                    language = language
-                                )?.let { detail ->
-                                    Text(
-                                        detail,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                        fontSize = 8.sp
-                                    )
-                                }
-                            }
-                        }
-                        TextButton(
-                            onClick = {
-                                val stamp = DMDSS_EXPORT_FILE_TIME_FORMATTER.format(Instant.now())
-                                exportDiagnostics.launch("quakedeck-delivery-diagnostics-$stamp.json")
-                            },
-                            modifier = Modifier.align(Alignment.End)
-                        ) {
-                            Text(uiText(R.string.dmdss_diagnostic_export_json, language))
-                        }
+                HorizontalDivider()
+                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Text(
+                        uiText(R.string.dmdss_delivery_diagnostics, language),
+                        fontWeight = FontWeight.Bold
+                    )
+                    val socketState = dmdssDiagnostics.socketState
+                        ?.takeIf { requestedMode == DataSourceMode.DMDSS && dmdssAuthorized }
+                    val connectionTime = when (socketState) {
+                        null -> null
+                        "Connected" -> dmdssDiagnostics.connectedAtMillis
+                        else -> dmdssDiagnostics.socketStateChangedAtMillis
                     }
+                    DmdssDiagnosticLine(
+                        uiText(R.string.dmdss_diagnostic_connection, language),
+                        listOfNotNull(socketState ?: statusLabel, connectionTime?.let(::formatDmdssDiagnosticTime))
+                            .joinToString(" · ")
+                    )
+                    val transportIssue = dmdssDiagnostics.lastTransportIssueAtMillis?.let { issueAt ->
+                        listOfNotNull(
+                            formatDmdssDiagnosticTime(issueAt),
+                            dmdssDiagnostics.lastTransportIssue?.let(::shortTransportIssue)
+                        ).joinToString(" · ")
+                    }
+                    DmdssDiagnosticLine(
+                        uiText(R.string.dmdss_diagnostic_transport_issue, language),
+                        transportIssue ?: uiText(R.string.dmdss_diagnostic_none, language)
+                    )
+                    SourceDialogAction(
+                        label = uiText(R.string.dmdss_diagnostic_export_json, language),
+                        onClick = { exportOptionsOpen = true }
+                    )
                 }
 
                 HorizontalDivider()
@@ -2858,15 +2812,15 @@ private fun SourceDialog(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     fontSize = 11.sp
                 )
-                listOf(
-                    R.string.station_catalog_source_link to StationCatalog.SOURCE_PAGE,
-                    R.string.station_catalog_codes_link to StationCatalog.CODE_TABLE_PAGE,
-                    R.string.station_catalog_terms_link to StationCatalog.TERMS_PAGE
-                ).forEach { (label, url) ->
-                    TextButton(onClick = {
-                        context.startActivity(Intent(Intent.ACTION_VIEW, url.toUri()))
-                    }) {
-                        Text(uiText(label, language), fontSize = 11.sp)
+                Column {
+                    listOf(
+                        R.string.station_catalog_source_link to StationCatalog.SOURCE_PAGE,
+                        R.string.station_catalog_codes_link to StationCatalog.CODE_TABLE_PAGE,
+                        R.string.station_catalog_terms_link to StationCatalog.TERMS_PAGE
+                    ).forEach { (label, url) ->
+                        SourceDialogAction(uiText(label, language)) {
+                            context.startActivity(Intent(Intent.ACTION_VIEW, url.toUri()))
+                        }
                     }
                 }
             }
@@ -2887,34 +2841,12 @@ private fun DmdssDiagnosticLine(label: String, value: String) {
 private fun formatDmdssDiagnosticTime(millis: Long): String =
     DMDSS_DIAGNOSTIC_TIME_FORMATTER.format(Instant.ofEpochMilli(millis))
 
-private fun formatDmdssDiagnosticDuration(millis: Long): String = when {
-    millis < 1_000L -> "${millis} ms"
-    millis < 60_000L -> "${millis / 1_000L} s"
-    else -> "${millis / 60_000L} min ${(millis % 60_000L) / 1_000L} s"
-}
-
-private fun diagnosticPacketDetailText(
-    context: android.content.Context,
-    readable: HumanReadablePacketDiagnostic,
-    language: PlaceNameLanguage
-): String? {
-    val raw = readable.detail ?: return null
-    val display = when (readable.detailKind) {
-        DiagnosticPacketDetailKind.REPORTING_AREA ->
-            PlaceNameTranslator.intensityReportingArea(context, raw, language)
-        DiagnosticPacketDetailKind.LOCATION ->
-            PlaceNameTranslator.observation(context, raw, language)
-        DiagnosticPacketDetailKind.FORECAST_AREA ->
-            TsunamiAreaCatalog.displayName(raw, language)
-        null -> raw
-    }
-    val resource = when (readable.detailKind) {
-        DiagnosticPacketDetailKind.REPORTING_AREA -> R.string.dmdss_diagnostic_reporting_area
-        DiagnosticPacketDetailKind.LOCATION -> R.string.dmdss_diagnostic_location
-        DiagnosticPacketDetailKind.FORECAST_AREA -> R.string.dmdss_diagnostic_forecast_area
-        null -> return display
-    }
-    return UiLocalization.format(context, resource, language, display)
+private fun shortTransportIssue(issue: String): String {
+    val reason = issue.split(" · ")
+        .filterNot { it.endsWith(" listener") || it.startsWith("close=") }
+        .joinToString(" · ")
+        .lineSequence().firstOrNull().orEmpty().trim()
+    return if (reason.length <= 100) reason else reason.take(99).trimEnd() + "…"
 }
 
 private val DMDSS_DIAGNOSTIC_TIME_FORMATTER: DateTimeFormatter =
@@ -2945,15 +2877,102 @@ private fun SourceChoiceRow(
     onClick: () -> Unit
 ) {
     Row(
-        Modifier.fillMaxWidth().clickable(onClick = onClick).padding(vertical = 3.dp),
+        Modifier
+            .fillMaxWidth()
+            .heightIn(min = 48.dp)
+            .selectable(selected = selected, role = Role.RadioButton, onClick = onClick)
+            .padding(horizontal = 12.dp, vertical = 8.dp),
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        RadioButton(selected = selected, onClick = onClick)
+        RadioButton(selected = selected, onClick = null)
         Column {
             Text(title, fontWeight = FontWeight.Bold)
-            Text(subtitle, color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 11.sp)
+            Text(
+                subtitle,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                style = MaterialTheme.typography.bodySmall
+            )
         }
     }
+}
+
+@Composable
+private fun SourceDialogAction(label: String, onClick: () -> Unit) {
+    TextButton(onClick = onClick, modifier = Modifier.fillMaxWidth()) {
+        Text(label, modifier = Modifier.fillMaxWidth())
+    }
+}
+
+@Composable
+private fun DiagnosticExportDialog(
+    language: PlaceNameLanguage,
+    range: DiagnosticExportRange,
+    onRangeChange: (DiagnosticExportRange) -> Unit,
+    includeConnectionPackets: Boolean,
+    onIncludeConnectionPacketsChange: (Boolean) -> Unit,
+    onDismiss: () -> Unit,
+    onExport: () -> Unit
+) {
+    val exportLabel = uiText(R.string.dmdss_diagnostic_export_json, language)
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(exportLabel) },
+        text = {
+            Column(Modifier.verticalScroll(rememberScrollState())) {
+                Column(Modifier.selectableGroup()) {
+                    DiagnosticExportRange.entries.forEach { option ->
+                        val label = uiText(
+                            when (option) {
+                                DiagnosticExportRange.LAST_EVENT -> R.string.dmdss_export_last_event
+                                DiagnosticExportRange.LAST_HOUR -> R.string.dmdss_export_last_hour
+                                DiagnosticExportRange.LAST_DAY -> R.string.dmdss_export_last_day
+                                DiagnosticExportRange.LAST_WEEK -> R.string.dmdss_export_last_week
+                                DiagnosticExportRange.ALL -> R.string.dmdss_export_all
+                            },
+                            language
+                        )
+                        Row(
+                            Modifier.fillMaxWidth().heightIn(min = 48.dp).selectable(
+                                selected = range == option,
+                                role = Role.RadioButton,
+                                onClick = { onRangeChange(option) }
+                            ),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            RadioButton(selected = range == option, onClick = null)
+                            Text(label, style = MaterialTheme.typography.bodyMedium)
+                        }
+                    }
+                }
+                HorizontalDivider()
+                Row(
+                    Modifier.fillMaxWidth().heightIn(min = 48.dp).toggleable(
+                        value = includeConnectionPackets,
+                        role = Role.Checkbox,
+                        onValueChange = onIncludeConnectionPacketsChange
+                    ),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Checkbox(checked = includeConnectionPackets, onCheckedChange = null)
+                    Text(
+                        uiText(R.string.dmdss_export_include_connections, language),
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+                Text(
+                    uiText(R.string.dmdss_export_retention_note, language),
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
+        },
+        confirmButton = { TextButton(onClick = onExport) { Text(exportLabel) } },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text(uiText(R.string.cancel, language)) }
+        }
+    )
 }
 
 private fun connectionColor(state: ConnectionState): Color = when (state) {
@@ -3267,31 +3286,18 @@ private fun AdaptiveTwoLineText(
     textAlign: TextAlign = TextAlign.Start,
     maxLines: Int = 2
 ) {
-    val currentFontScale = LocalDensity.current.fontScale
-    var fittedSize by remember(
-        text,
-        baseFontSize.value,
-        minFontSize.value,
-        maxLines,
-        currentFontScale
-    ) {
-        mutableStateOf(baseFontSize)
-    }
-    var measuredWidth by remember(text) { mutableIntStateOf(0) }
-
     Text(
         text = text,
-        modifier = modifier.onSizeChanged { size ->
-            // A ratio, orientation or panel-width change gets a fresh fit pass.
-            // Only width is tracked so shrinking the font cannot reset itself.
-            if (size.width > 0 && size.width != measuredWidth) {
-                measuredWidth = size.width
-                fittedSize = baseFontSize
-            }
-        },
+        modifier = modifier,
         color = color,
-        fontSize = fittedSize,
-        lineHeight = fittedSize,
+        autoSize = remember(minFontSize, baseFontSize) {
+            TextAutoSize.StepBased(
+                minFontSize = minFontSize,
+                maxFontSize = baseFontSize,
+                stepSize = 0.5.sp
+            )
+        },
+        lineHeight = 1.em,
         fontWeight = fontWeight,
         textAlign = textAlign,
         maxLines = maxLines,
@@ -3299,17 +3305,7 @@ private fun AdaptiveTwoLineText(
         overflow = TextOverflow.Ellipsis,
         style = LocalTextStyle.current.copy(
             platformStyle = PlatformTextStyle(includeFontPadding = false)
-        ),
-        onTextLayout = { result ->
-            if (
-                (result.didOverflowWidth || result.didOverflowHeight) &&
-                fittedSize.value > minFontSize.value
-            ) {
-                fittedSize = (fittedSize.value - 0.5f)
-                    .coerceAtLeast(minFontSize.value)
-                    .sp
-            }
-        }
+        )
     )
 }
 
@@ -3390,20 +3386,87 @@ private fun ReportGridButton(
     }
 }
 
+private data class ReportCardDetails(
+    val location: ReportLocationParts,
+    val primary: String,
+    val secondary: String
+)
+
+private data class ReportCardDetailLayout(
+    val region: Placeable,
+    val prefecture: Placeable,
+    val primary: Placeable,
+    val secondary: Placeable,
+    val label: Placeable
+)
+
 @Composable
-private fun ReportTopGrid(
-    location: ReportLocationParts,
+private fun ReportCardDetailCells(
+    details: ReportCardDetails,
+    primaryColor: Color,
+    label: String,
+    onToggleInformation: (() -> Unit)?
+) {
+    ReportGridTextCell(
+        modifier = Modifier,
+        text = details.location.region,
+        strong = true,
+        maxLines = 2
+    )
+    val prefecture = details.location.prefecture
+    ReportGridTextCell(
+        modifier = Modifier,
+        text = prefecture ?: "\u00A0",
+        strong = true,
+        color = if (prefecture == null) Color.Transparent else MaterialTheme.colorScheme.onSurfaceVariant,
+        maxLines = 2
+    )
+    ReportGridTextCell(
+        modifier = Modifier,
+        text = details.primary,
+        color = primaryColor,
+        maxLines = 1
+    )
+    ReportGridTextCell(
+        modifier = Modifier,
+        text = details.secondary,
+        color = MaterialTheme.colorScheme.secondary,
+        align = TextAlign.End,
+        maxLines = 1
+    )
+    AdaptiveTwoLineText(
+        text = label,
+        modifier = onToggleInformation?.let { Modifier.clickable(onClick = it) } ?: Modifier,
+        baseFontSize = 12.5.sp,
+        minFontSize = 9.5.sp,
+        color = MaterialTheme.colorScheme.onSurface,
+        fontWeight = FontWeight.Black,
+        textAlign = TextAlign.End,
+        maxLines = 1
+    )
+}
+
+@Composable
+private fun ReportInformationGrid(
+    eventDetails: ReportCardDetails,
+    stationDetails: ReportCardDetails?,
     event: EarthquakeEvent,
     isEew: Boolean,
     japaneseIntensity: Boolean,
     language: PlaceNameLanguage,
     cardScale: Float,
-    informationToggleAvailable: Boolean = false,
     stationInformationVisible: Boolean = false,
     informationIntensity: String = event.maxIntensity,
     onToggleInformation: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
+    val informationToggleAvailable = stationDetails != null
+    val eventPrimaryColor = if (event.isCancelled) {
+        MaterialTheme.colorScheme.error
+    } else {
+        MaterialTheme.colorScheme.onSurfaceVariant
+    }
+    val stationPrimaryColor = MaterialTheme.colorScheme.onSurfaceVariant
     val density = LocalDensity.current
     val badgeFontSize = 17.sp
     val badgeWidthPx = with(density) {
@@ -3422,49 +3485,14 @@ private fun ReportTopGrid(
     Layout(
         modifier = modifier.fillMaxWidth(),
         content = {
-            ReportGridTextCell(
-                modifier = Modifier,
-                text = location.region,
-                strong = true,
-                maxLines = 2
-            )
-            if (location.prefecture != null) {
-                ReportGridTextCell(
-                    modifier = Modifier,
-                    text = location.prefecture,
-                    strong = true,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 2
-                )
-            } else {
-                ReportGridTextCell(
-                    modifier = Modifier,
-                    text = "\u00A0",
-                    strong = true,
-                    color = Color.Transparent,
-                    maxLines = 1
-                )
-            }
-            AdaptiveTwoLineText(
-                text = if (informationToggleAvailable) {
-                    uiText(
-                        if (stationInformationVisible) R.string.station_info else R.string.earthquake_info,
-                        language
-                    )
-                } else {
-                    uiText(R.string.max_intensity, language)
-                },
-                modifier = if (informationToggleAvailable) {
-                    Modifier.clickable(onClick = onToggleInformation)
-                } else {
-                    Modifier
-                },
-                baseFontSize = 12.5.sp,
-                minFontSize = 9.5.sp,
-                color = MaterialTheme.colorScheme.onSurface,
-                fontWeight = FontWeight.Black,
-                textAlign = TextAlign.End,
-                maxLines = 1
+            ReportCardDetailCells(
+                details = eventDetails,
+                primaryColor = eventPrimaryColor,
+                label = uiText(
+                    if (informationToggleAvailable) R.string.earthquake_info else R.string.max_intensity,
+                    language
+                ),
+                onToggleInformation = onToggleInformation.takeIf { informationToggleAvailable }
             )
             if (informationToggleAvailable) {
                 AdaptiveTwoLineText(
@@ -3519,6 +3547,14 @@ private fun ReportTopGrid(
                     )
                 }
             }
+            if (stationDetails != null) {
+                ReportCardDetailCells(
+                    details = stationDetails,
+                    primaryColor = stationPrimaryColor,
+                    label = uiText(R.string.station_info, language),
+                    onToggleInformation = onToggleInformation
+                )
+            }
         }
     ) { measurables, constraints ->
         val totalWidth = constraints.maxWidth
@@ -3535,22 +3571,39 @@ private fun ReportTopGrid(
             maxHeight = Constraints.Infinity
         )
 
-        val region = measurables[0].measure(fixedWidth(leftWidth))
-        val prefecture = measurables[1].measure(fixedWidth(leftWidth))
-        val maxLabel = measurables[2].measure(fixedWidth(rightTextWidth))
-        val predicted = measurables[3].measure(fixedWidth(rightTextWidth))
+        fun measureDetails(start: Int) = ReportCardDetailLayout(
+            region = measurables[start].measure(fixedWidth(leftWidth)),
+            prefecture = measurables[start + 1].measure(fixedWidth(leftWidth)),
+            primary = measurables[start + 2].measure(fixedWidth(leftWidth)),
+            secondary = measurables[start + 3].measure(fixedWidth(rightWidth)),
+            label = measurables[start + 4].measure(fixedWidth(rightTextWidth))
+        )
 
-        val rowOneHeight = max(region.height, maxLabel.height)
-        val rowTwoHeight = max(prefecture.height, predicted.height)
-        val totalHeight = (rowOneHeight + rowTwoHeight).coerceAtLeast(1)
-        val badge = measurables[4].measure(Constraints.fixed(badgeWidth, totalHeight))
+        val eventLayout = measureDetails(0)
+        val predicted = measurables[5].measure(fixedWidth(rightTextWidth))
+        val stationLayout = if (informationToggleAvailable) measureDetails(7) else eventLayout
+
+        // Both modes share the row sizes. Only place the visible mode's cells.
+        val rowOneHeight = maxOf(
+            eventLayout.region.height, stationLayout.region.height,
+            eventLayout.label.height, stationLayout.label.height
+        )
+        val rowTwoHeight = maxOf(eventLayout.prefecture.height, stationLayout.prefecture.height, predicted.height)
+        val detailHeight = maxOf(
+            eventLayout.primary.height, stationLayout.primary.height,
+            eventLayout.secondary.height, stationLayout.secondary.height
+        )
+        val headingHeight = (rowOneHeight + rowTwoHeight).coerceAtLeast(1)
+        val badge = measurables[6].measure(Constraints.fixed(badgeWidth, headingHeight))
         val badgeX = totalWidth - badgeWidth
+        val (region, prefecture, primary, secondary, label) =
+            if (stationInformationVisible) stationLayout else eventLayout
 
-        layout(totalWidth, totalHeight) {
+        layout(totalWidth, headingHeight + detailHeight) {
             region.placeRelative(0, (rowOneHeight - region.height) / 2)
-            maxLabel.placeRelative(
+            label.placeRelative(
                 leftWidth,
-                (rowOneHeight - maxLabel.height) / 2
+                (rowOneHeight - label.height) / 2
             )
             prefecture.placeRelative(
                 0,
@@ -3561,6 +3614,8 @@ private fun ReportTopGrid(
                 rowOneHeight + (rowTwoHeight - predicted.height) / 2
             )
             badge.placeRelative(badgeX, 0)
+            primary.placeRelative(0, headingHeight)
+            secondary.placeRelative(leftWidth, headingHeight)
         }
     }
 }
@@ -3816,14 +3871,6 @@ private fun ReportCardGrid(
     } else {
         stationDetails?.facilityNameJa ?: station?.areaNameJa
     }
-    val location = if (showStationInfo) {
-        ReportLocationParts(
-            region = stationDisplayName.ifBlank { sourceStationName },
-            prefecture = stationSecondaryName?.takeIf { it.isNotBlank() }
-        )
-    } else {
-        eventLocation
-    }
     val locale = UiLocalization.locale(context, language)
     val eventDetail = if (event.id == "waiting") {
         "—"
@@ -3844,13 +3891,22 @@ private fun ReportCardGrid(
         listOfNotNull(provider, providerIdentity ?: catalogStation.code)
             .joinToString(" · ")
     }.orEmpty()
-    val primaryDetail = if (showStationInfo) {
-        stationDetails?.publishedAddressJa
-            ?: uiText(R.string.station_address_unknown, language)
-    } else {
-        displayEventOriginTime(event.originTime)
+    val eventCardDetails = ReportCardDetails(
+        location = eventLocation,
+        primary = displayEventOriginTime(event.originTime),
+        secondary = eventDetail
+    )
+    val stationCardDetails = stationPoint?.let {
+        ReportCardDetails(
+            location = ReportLocationParts(
+                region = stationDisplayName.ifBlank { sourceStationName },
+                prefecture = stationSecondaryName?.takeIf { it.isNotBlank() }
+            ),
+            primary = stationDetails?.publishedAddressJa
+                ?: uiText(R.string.station_address_unknown, language),
+            secondary = stationProviderText
+        )
     }
-    val secondaryDetail = if (showStationInfo) stationProviderText else eventDetail
     val observationLabel = if (observationsExpanded) {
         uiText(if (isEew) R.string.hide_predicted_intensities else R.string.hide_observed_intensities, language)
     } else {
@@ -3872,14 +3928,14 @@ private fun ReportCardGrid(
                     fontSize = 12.sp
                 )
             }
-            ReportTopGrid(
-                location = location,
+            ReportInformationGrid(
+                eventDetails = eventCardDetails,
+                stationDetails = stationCardDetails,
                 event = event,
                 isEew = isEew,
                 japaneseIntensity = japaneseIntensity,
                 language = language,
                 cardScale = cardScale,
-                informationToggleAvailable = stationPoint != null,
                 stationInformationVisible = showStationInfo,
                 informationIntensity = if (showStationInfo) {
                     stationPoint.intensity
@@ -3890,29 +3946,6 @@ private fun ReportCardGrid(
                     onStationInfoVisibleChanged(!showStationInfo)
                 }
             )
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.Top
-            ) {
-                ReportGridTextCell(
-                    modifier = Modifier.weight(0.55f),
-                    text = primaryDetail,
-                    color = if (!showStationInfo && event.isCancelled) {
-                        MaterialTheme.colorScheme.error
-                    } else {
-                        MaterialTheme.colorScheme.onSurfaceVariant
-                    },
-                    maxLines = 1
-                )
-                ReportGridTextCell(
-                    modifier = Modifier.weight(0.45f),
-                    text = secondaryDetail,
-                    color = MaterialTheme.colorScheme.secondary,
-                    align = TextAlign.End,
-                    maxLines = 1
-                )
-            }
 
             event.p2pCrowdSignal?.let { crowd ->
                 HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
@@ -4008,6 +4041,9 @@ private fun EventPanel(
     timelineNowMillis: Long,
     eventMapped: Boolean,
     focusNeedsRefocus: Boolean,
+    showSelectedReport: Boolean,
+    showTsunamiReport: Boolean,
+    alertPanelFocusRequest: Int,
     placeNameLanguage: PlaceNameLanguage,
     offlineStationTranslator: OfflineStationTranslator,
     offlineStationTranslationStatus: OfflineStationTranslationStatus,
@@ -4015,6 +4051,7 @@ private fun EventPanel(
     alertLocation: AlertLocation,
     onSelectEvent: (EarthquakeEvent) -> Unit,
     onCloseReport: () -> Unit,
+    onCloseTsunamiReport: () -> Unit,
     onFocusEvent: () -> Unit,
     selectedStation: IntensityPoint?,
     stationInfoVisible: Boolean,
@@ -4055,15 +4092,13 @@ private fun EventPanel(
     } else {
         selectedEvent.points
     }
-    val activeEewForSelected = snapshot.activeEewEvent?.takeIf {
-        snapshot.activeEew &&
-            selectedEvent.id == snapshot.event.id &&
-            !it.isCancelled
-    }
     val isCurrentActiveEew =
         snapshot.activeEew &&
-            selectedEvent.id == snapshot.event.id &&
+            (selectedEvent.id == snapshot.event.id || selectedEvent.id == snapshot.activeEewEvent?.id) &&
             !selectedEvent.isCancelled
+    val activeEewForSelected = snapshot.activeEewEvent?.takeIf {
+        showSelectedReport && isCurrentActiveEew && !it.isCancelled
+    }
     val needsDestinationEewArea =
         activeEewForSelected != null && alertLocation.eewAreaNameJa == null
     val resolvedDestinationEewAreaName by produceState<String?>(
@@ -4120,7 +4155,7 @@ private fun EventPanel(
     }
     // Observed intensities is a dedicated scrolling mode: its report controls
     // are fixed from the first frame, not merely after scrolling past them.
-    val reportGridPinned = observationsExpanded
+    val reportGridPinned = showSelectedReport && observationsExpanded
     val observedContentTopInRootPx = listViewportTopInRootPx + if (reportGridPinned) {
         reportGridHeightPx
     } else {
@@ -4128,6 +4163,14 @@ private fun EventPanel(
     }
     LaunchedEffect(observationsExpanded, selectedStation) {
         if (!observationsExpanded || selectedStation == null) selectedStationBottomDocked = false
+    }
+    LaunchedEffect(alertPanelFocusRequest) {
+        if (alertPanelFocusRequest == 0) return@LaunchedEffect
+        if (observationsExpanded) {
+            onObservationsExpandedChanged?.invoke(false)
+            observationsExpanded = false
+        }
+        listState.scrollToItem(0)
     }
 
     val normalRecentHistory = remember(snapshot.history, snapshot.event.id) {
@@ -4142,11 +4185,12 @@ private fun EventPanel(
         }
     }
 
-    val closeHistoricalReport: () -> Unit = {
-        onStationFocusCleared()
+    val closeVisibleReport: () -> Unit = closeReport@{
+        observationsExpanded = false
         val anchor = returnScrollAnchor
         val closingEventId = selectedEvent.id
         onCloseReport()
+        if (!browsingHistory) return@closeReport
         scrollScope.launch {
             // Restore only after the normal latest-report list has been
             // composed again. Its keys match the list from which the report
@@ -4239,12 +4283,13 @@ private fun EventPanel(
                     Spacer(Modifier.height(6.dp))
                 }
 
-                snapshot.tsunami?.let { tsunami ->
+                snapshot.tsunami?.takeIf { showTsunamiReport }?.let { tsunami ->
                     TsunamiAlertCard(
                         report = tsunami,
                         active = snapshot.activeTsunami,
                         timelineNowMillis = timelineNowMillis,
-                        language = placeNameLanguage
+                        language = placeNameLanguage,
+                        onCloseReport = onCloseTsunamiReport
                     )
                     Spacer(Modifier.height(8.dp))
                 }
@@ -4253,7 +4298,7 @@ private fun EventPanel(
                 // scrolling list. Keeping this inline banner underneath that
                 // pinned copy made it invisible while its height survived as
                 // a large empty gap above the destination prediction.
-                if (isCurrentActiveEew && !observationsExpanded) {
+                if (showSelectedReport && isCurrentActiveEew && !observationsExpanded) {
                     val activeForecast =
                         eewReportEvent?.eewAlertLevel == EewAlertLevel.FORECAST
                     val activeContainer = if (activeForecast) {
@@ -4302,13 +4347,13 @@ private fun EventPanel(
                     Spacer(Modifier.height(8.dp))
                 }
 
-                if (observationsExpanded) {
+                if (reportGridPinned) {
                     Spacer(
                         Modifier.height(
                             with(LocalDensity.current) { reportGridHeightPx.toDp() }
                         )
                     )
-                } else {
+                } else if (showSelectedReport) {
                     Box(
                         Modifier.onGloballyPositioned { coordinates ->
                             reportGridHeightPx = coordinates.size.height
@@ -4325,6 +4370,7 @@ private fun EventPanel(
                         eventMapped = eventMapped,
                         focusNeedsRefocus = focusNeedsRefocus,
                         browsingHistory = browsingHistory,
+                        closeButtonEnabled = browsingHistory || eventMapped || isCurrentActiveEew,
                         observationsExpanded = observationsExpanded,
                         selectedStation = selectedStation,
                         stationInfoVisible = stationInfoVisible,
@@ -4332,7 +4378,7 @@ private fun EventPanel(
                         onRefocusStation = onRefocusStation,
                         onStationInfoVisibleChanged = onStationInfoVisibleChanged,
                         onCloseStationInfo = onStationFocusCleared,
-                        onCloseReport = closeHistoricalReport,
+                        onCloseReport = closeVisibleReport,
                         onToggleObservations = toggleObservations
                     )
                     }
@@ -4352,7 +4398,7 @@ private fun EventPanel(
                     LocalForecastUnavailableCard(placeNameLanguage)
                 }
 
-                if (observationsExpanded && selectedIntensityPoints.isNotEmpty()) {
+                if (reportGridPinned && selectedIntensityPoints.isNotEmpty()) {
                     Spacer(Modifier.height(4.dp))
                     if (selectedEvent.kind == EarthquakeEventKind.CONFIRMED) {
                         ObservedIntensityGroups(
@@ -4564,6 +4610,7 @@ private fun EventPanel(
                     eventMapped = eventMapped,
                     focusNeedsRefocus = focusNeedsRefocus,
                     browsingHistory = browsingHistory,
+                    closeButtonEnabled = browsingHistory || eventMapped || isCurrentActiveEew,
                     observationsExpanded = observationsExpanded,
                     selectedStation = selectedStation,
                     stationInfoVisible = stationInfoVisible,
@@ -4571,7 +4618,7 @@ private fun EventPanel(
                     onRefocusStation = onRefocusStation,
                     onStationInfoVisibleChanged = onStationInfoVisibleChanged,
                     onCloseStationInfo = onStationFocusCleared,
-                    onCloseReport = closeHistoricalReport,
+                    onCloseReport = closeVisibleReport,
                     onToggleObservations = toggleObservations
                 )
             }
@@ -4630,6 +4677,11 @@ private fun HistoricalEventPanel(
     onSummaryHeightChanged: ((Int) -> Unit)? = null
 ) {
     val frame = incident.frames.getOrNull(reportIndex) ?: return
+    val reportStepIndices = remember(incident.frames) {
+        incident.frames.indices.filter {
+            incident.frames[it].kind != HistoricalAssociatedReportKind.FELT_REPORTS
+        }
+    }
     val event = frame.event
     val context = LocalContext.current
     val displayPlace = PlaceNameTranslator.epicenter(
@@ -4742,7 +4794,9 @@ private fun HistoricalEventPanel(
                                 color = MaterialTheme.colorScheme.onPrimaryContainer,
                                 fontWeight = FontWeight.Black,
                                 fontSize = 14.sp,
-                                lineHeight = 14.sp
+                                lineHeight = 14.sp,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
                             )
                             Text(
                                 buildString {
@@ -4754,24 +4808,28 @@ private fun HistoricalEventPanel(
                                 color = MaterialTheme.colorScheme.onPrimaryContainer,
                                 fontWeight = FontWeight.SemiBold,
                                 fontSize = 11.sp,
-                                lineHeight = 11.sp
+                                lineHeight = 11.sp,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
                             )
-                            frame.reportIssuedAt?.let { issued ->
-                                Text(
-                                    uiText(R.string.issued, placeNameLanguage) + " " + issued,
-                                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.82f),
-                                    fontSize = 9.5.sp,
-                                    lineHeight = 9.5.sp
-                                )
-                            }
-                            frame.sourceReceivedAt?.let { received ->
-                                Text(
-                                    uiText(R.string.received, placeNameLanguage) + " " + received,
-                                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.82f),
-                                    fontSize = 9.5.sp,
-                                    lineHeight = 9.5.sp
-                                )
-                            }
+                            val issued = frame.reportIssuedAt.orEmpty().ifBlank { "—" }
+                            Text(
+                                uiText(R.string.issued, placeNameLanguage) + " " + issued,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.82f),
+                                fontSize = 9.5.sp,
+                                lineHeight = 9.5.sp,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                            val received = frame.sourceReceivedAt.orEmpty().ifBlank { "—" }
+                            Text(
+                                uiText(R.string.received, placeNameLanguage) + " " + received,
+                                color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.82f),
+                                fontSize = 9.5.sp,
+                                lineHeight = 9.5.sp,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
                         }
                     }
 
@@ -4837,11 +4895,9 @@ private fun HistoricalEventPanel(
                     HistoricalReportNavigation(
                         reportIndex = reportIndex,
                         reportCount = incident.reportCount,
+                        reportStepIndices = reportStepIndices,
                         language = placeNameLanguage,
-                        onFirst = { onReportIndexChanged(0) },
-                        onPrevious = { onReportIndexChanged(reportIndex - 1) },
-                        onNext = { onReportIndexChanged(reportIndex + 1) },
-                        onLast = { onReportIndexChanged(incident.reportCount - 1) },
+                        onReportIndexChanged = onReportIndexChanged,
                         onBrowseEvents = onBrowseEvents
                     )
 
@@ -5060,15 +5116,15 @@ private fun historicalAssociatedReportLabel(
 private fun HistoricalReportNavigation(
     reportIndex: Int,
     reportCount: Int,
+    reportStepIndices: List<Int>,
     language: PlaceNameLanguage,
-    onFirst: () -> Unit,
-    onPrevious: () -> Unit,
-    onNext: () -> Unit,
-    onLast: () -> Unit,
+    onReportIndexChanged: (Int) -> Unit,
     onBrowseEvents: () -> Unit
 ) {
-    val canGoBack = reportIndex > 0
-    val canGoForward = reportIndex < reportCount - 1
+    val first = reportStepIndices.firstOrNull()?.takeIf { it < reportIndex }
+    val previous = reportStepIndices.lastOrNull { it < reportIndex }
+    val next = reportStepIndices.firstOrNull { it > reportIndex }
+    val last = reportStepIndices.lastOrNull()?.takeIf { it > reportIndex }
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(9.dp),
@@ -5086,8 +5142,8 @@ private fun HistoricalReportNavigation(
                 horizontalArrangement = Arrangement.spacedBy(5.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                HistoricalNavButton("|‹", canGoBack, onFirst, Modifier.weight(1f))
-                HistoricalNavButton("‹", canGoBack, onPrevious, Modifier.weight(1f))
+                HistoricalNavButton("|‹", first, onReportIndexChanged, Modifier.weight(1f))
+                HistoricalNavButton("‹", previous, onReportIndexChanged, Modifier.weight(1f))
                 Box(
                     modifier = Modifier
                         .weight(1.35f)
@@ -5100,8 +5156,8 @@ private fun HistoricalReportNavigation(
                         fontSize = 11.sp
                     )
                 }
-                HistoricalNavButton("›", canGoForward, onNext, Modifier.weight(1f))
-                HistoricalNavButton("›|", canGoForward, onLast, Modifier.weight(1f))
+                HistoricalNavButton("›", next, onReportIndexChanged, Modifier.weight(1f))
+                HistoricalNavButton("›|", last, onReportIndexChanged, Modifier.weight(1f))
             }
             OutlinedButton(
                 onClick = onBrowseEvents,
@@ -5120,14 +5176,18 @@ private fun HistoricalReportNavigation(
 @Composable
 private fun HistoricalNavButton(
     label: String,
-    enabled: Boolean,
-    onClick: () -> Unit,
+    targetIndex: Int?,
+    onReportIndexChanged: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val enabled = targetIndex != null
     Surface(
         modifier = modifier
             .height(30.dp)
-            .then(if (enabled) Modifier.clickable(onClick = onClick) else Modifier),
+            .then(
+                targetIndex?.let { index -> Modifier.clickable { onReportIndexChanged(index) } }
+                    ?: Modifier
+            ),
         shape = RoundedCornerShape(8.dp),
         color = if (enabled) {
             MaterialTheme.colorScheme.primaryContainer
@@ -6465,7 +6525,8 @@ private fun TsunamiAlertCard(
     report: TsunamiReport,
     active: Boolean,
     timelineNowMillis: Long,
-    language: PlaceNameLanguage
+    language: PlaceNameLanguage,
+    onCloseReport: () -> Unit
 ) {
     var expanded by remember(report.id, report.cancelled) {
         mutableStateOf(false)
@@ -6586,6 +6647,14 @@ private fun TsunamiAlertCard(
                     style = LocalTextStyle.current.copy(
                         platformStyle = PlatformTextStyle(includeFontPadding = false)
                     )
+                )
+            }
+
+            if (active && !report.cancelled) {
+                ReportGridButton(
+                    text = uiText(R.string.close_report, language),
+                    cardScale = LocalDensity.current.fontScale.coerceIn(0.80f, 2.00f),
+                    onClick = onCloseReport
                 )
             }
 
@@ -7063,13 +7132,13 @@ private fun buildResizeMapRaster(
 private fun JapanMap(
     event: EarthquakeEvent,
     activeEewEvent: EarthquakeEvent?,
+    liveWaveEvent: EarthquakeEvent?,
     tsunami: TsunamiReport?,
     activeTsunami: Boolean,
     fitJapanRequest: Int,
     tsunamiFocusRequest: Int,
     fitJapanIsLatestRequest: Boolean,
     timelineNowMillis: Long,
-    animateEew: Boolean,
     focusEvent: Boolean,
     focusRequest: Int,
     focusRequestIsManual: Boolean,
@@ -7089,6 +7158,7 @@ private fun JapanMap(
     onCameraSettled: (MainMapCameraState) -> Unit,
     onUserCameraChanged: () -> Unit,
     onFitJapan: () -> Unit,
+    mapAlerts: @Composable () -> Unit,
     alertLocation: AlertLocation,
     language: PlaceNameLanguage
 ) {
@@ -7199,6 +7269,13 @@ private fun JapanMap(
                     color = extraColors.mapBranding,
                     fontSize = 12.sp
                 )
+            }
+            Column(
+                Modifier.align(Alignment.TopEnd).padding(8.dp),
+                horizontalAlignment = Alignment.End,
+                verticalArrangement = Arrangement.spacedBy(5.dp)
+            ) {
+                mapAlerts()
             }
         }
         return
@@ -8614,7 +8691,7 @@ private fun JapanMap(
         // prefecture fallback and then again with exact JMA coast geometry once
         // that detail finishes loading.
         LaunchedEffect(tsunamiFocusRequest, tsunamiFocusRevision) {
-            if (tsunamiFocusRequest > 0 && activeTsunami) {
+            if (tsunamiFocusRequest > 0 && activeTsunami && !fitJapanIsLatestRequest) {
                 manualCameraOverrideUntilMillis = 0L
                 pendingAutomaticCameraRefit = false
                 if (!focusActiveTsunami()) {
@@ -9269,40 +9346,38 @@ private fun JapanMap(
                 }
             }
 
-            if (event.id != "waiting") {
-                activeEewEvent
-                    ?.takeIf { animateEew && !it.isCancelled }
-                    ?.let { warning ->
-                        EewWaveModel.wavefrontState(warning, timelineNowMillis)
-                            .valueOrNull()
-                            ?.let { waves ->
-                            fun drawWavefront(radiusKm: Double, color: Color) {
-                                val ringPoints = EewWaveModel.geodesicCircle(
-                                    latitude = warning.latitude,
-                                    longitude = warning.longitude,
-                                    radiusKm = radiusKm
-                                )
-                                if (ringPoints.size < 2) return
+            liveWaveEvent?.let { warning ->
+                EewWaveModel.wavefrontState(warning, timelineNowMillis)
+                    .valueOrNull()
+                    ?.let { waves ->
+                        fun drawWavefront(radiusKm: Double, color: Color) {
+                            val ringPoints = EewWaveModel.geodesicCircle(
+                                latitude = warning.latitude,
+                                longitude = warning.longitude,
+                                radiusKm = radiusKm
+                            )
+                            if (ringPoints.size < 2) return
 
-                                val path = Path()
-                                ringPoints.forEachIndexed { index, point ->
-                                    val projected = committedGeo(point.latitude, point.longitude)
-                                    if (index == 0) path.moveTo(projected.x, projected.y)
-                                    else path.lineTo(projected.x, projected.y)
-                                }
-                                drawPath(
-                                    path = path,
-                                    color = color,
-                                    style = Stroke(width = with(density) { 2.2.dp.toPx() })
-                                )
+                            val path = Path()
+                            ringPoints.forEachIndexed { index, point ->
+                                val projected = committedGeo(point.latitude, point.longitude)
+                                if (index == 0) path.moveTo(projected.x, projected.y)
+                                else path.lineTo(projected.x, projected.y)
                             }
+                            drawPath(
+                                path = path,
+                                color = color,
+                                style = Stroke(width = with(density) { 2.2.dp.toPx() })
+                            )
+                        }
 
-                            // P is the faster blue front; S is the slower orange front.
-                            // Surface radii account for hypocentral depth rather than
-                            // drawing arbitrary fixed circles around the epicentre.
-                            drawWavefront(waves.pWaveRadiusKm, Color(0xFF51C9FF))
-                            drawWavefront(waves.sWaveRadiusKm, Color(0xFFFFA640))
+                        // P is the faster blue front; S is the slower orange front.
+                        // Surface radii account for hypocentral depth rather than
+                        // drawing arbitrary fixed circles around the epicentre.
+                        drawWavefront(waves.pWaveRadiusKm, Color(0xFF51C9FF))
+                        drawWavefront(waves.sWaveRadiusKm, Color(0xFFFFA640))
 
+                        if (activeEewEvent != null) {
                             val destination = committedGeo(
                                 alertLocation.latitude,
                                 alertLocation.longitude
@@ -9317,7 +9392,9 @@ private fun JapanMap(
                             }
                         }
                     }
+            }
 
+            if (event.id != "waiting") {
                 val epi = committedGeo(event.latitude, event.longitude)
                 if (event.shouldDrawMapEpicenter(visibleMarker(epi))) {
                     drawEpicenterMarker(
@@ -9357,26 +9434,34 @@ private fun JapanMap(
             }
         }
 
-        if (activeVectorLayer != MapVectorLayer.JMA_PREFECTURES) {
-            Box(
-                Modifier
-                    .align(Alignment.TopEnd)
-                    .padding(8.dp)
-                    .size(30.dp)
-                    .background(
-                        extraColors.mapControlSurface.copy(alpha = 0.88f),
-                        CircleShape
+        Column(
+            Modifier.align(Alignment.TopEnd).padding(8.dp),
+            horizontalAlignment = Alignment.End,
+            verticalArrangement = Arrangement.spacedBy(5.dp)
+        ) {
+            mapAlerts()
+            if (activeVectorLayer != MapVectorLayer.JMA_PREFECTURES) {
+                Box(
+                    Modifier
+                        .size(30.dp)
+                        .background(
+                            extraColors.mapControlSurface.copy(alpha = 0.88f),
+                            CircleShape
+                        )
+                        .clickable(
+                            role = Role.Button,
+                            onClickLabel = uiText(R.string.map_border_legend_title, language)
+                        ) { mapBorderLegendOpen = true },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "?",
+                        color = extraColors.mapControlForeground,
+                        fontSize = 15.sp,
+                        lineHeight = 16.sp,
+                        fontWeight = FontWeight.Bold
                     )
-                    .clickable { mapBorderLegendOpen = true },
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = "?",
-                    color = extraColors.mapControlForeground,
-                    fontSize = 15.sp,
-                    lineHeight = 16.sp,
-                    fontWeight = FontWeight.Bold
-                )
+                }
             }
         }
 

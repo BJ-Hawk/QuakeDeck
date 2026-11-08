@@ -262,12 +262,6 @@ private fun HistoricalBrowserBody(
                 )
             }
 
-            if (loading) {
-                item(key = "loading-progress") {
-                    LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
-                }
-            }
-
             error?.let { message ->
                 item(key = "warning") {
                     Text(
@@ -301,6 +295,12 @@ private fun HistoricalBrowserBody(
                     )
                 }
             }
+        }
+
+        if (loading) {
+            LinearProgressIndicator(
+                modifier = Modifier.align(Alignment.BottomCenter).fillMaxWidth()
+            )
         }
 
         if (showTopButton) {

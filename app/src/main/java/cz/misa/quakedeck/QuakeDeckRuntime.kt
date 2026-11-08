@@ -144,8 +144,8 @@ class QuakeDeckRuntime(context: Context) : QuakeDataProvider {
     val latestDmdssSnapshot: AppSnapshot
         get() = dmdssSnapshot
 
-    val dmdssDiagnostics: DmDssDiagnosticsSnapshot
-        get() = dmdssDiagnosticsStore.snapshot()
+    fun readDmdssDiagnostics(includePacketHistory: Boolean): DmDssDiagnosticsSnapshot =
+        dmdssDiagnosticsStore.snapshot(includePacketHistory)
 
     @Synchronized
     fun startProcess() {

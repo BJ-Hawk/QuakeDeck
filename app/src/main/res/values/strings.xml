@@ -57,7 +57,14 @@
     <string name="dmdss_diagnostic_reporting_area">Reporting area: %1$s</string>
     <string name="dmdss_diagnostic_location">Location: %1$s</string>
     <string name="dmdss_diagnostic_forecast_area">Forecast area: %1$s</string>
-    <string name="dmdss_diagnostic_export_json">Export raw diagnostics JSON</string>
+    <string name="dmdss_diagnostic_export_json">Export diagnostic</string>
+    <string name="dmdss_export_last_event">Export last event</string>
+    <string name="dmdss_export_last_hour">Export last hour</string>
+    <string name="dmdss_export_last_day">Export last day (24 hours)</string>
+    <string name="dmdss_export_last_week">Export last week</string>
+    <string name="dmdss_export_all">Export all</string>
+    <string name="dmdss_export_include_connections">Include connection packets</string>
+    <string name="dmdss_export_retention_note">Exports use retained history. Last event groups packets with the newest identifiable event.</string>
     <string name="dmdss_diagnostic_export_complete">Delivery diagnostics exported.</string>
     <string name="dmdss_diagnostic_export_failed">Unable to export delivery diagnostics.</string>
     <string name="dmdss_diagnostic_none">No record yet</string>
@@ -68,8 +75,8 @@
     <string name="map_display">Map display</string>
     <string name="live_preview">Live preview</string>
     <string name="data_connection">Data &amp; connection</string>
-    <string name="p2p_crowd_signals">P2PQuake crowd signals</string>
-    <string name="p2p_crowd_signals_explanation">Show unconfirmed felt-report incidents as regular events. A coincident official earthquake report amends the same event while retaining the felt-report count.</string>
+    <string name="p2p_crowd_signals">P2PQuake felt-report counts</string>
+    <string name="p2p_crowd_signals_explanation">Show P2PQuake felt-report counts on matching earthquake reports and earthquake early warnings.</string>
     <string name="p2p_felt_reports_event">Unconfirmed felt reports</string>
     <string name="p2p_felt_reports_count">%1$d felt reports · P2PQuake</string>
     <string name="testing_sandbox">Testing &amp; Sandbox</string>

@@ -908,15 +908,25 @@ class P2pQuakeProvider(
                 event = cumulative
             )
         }
+        val finalConfirmed = confirmedFrames.last().event
+        val matchingEews = EewHistory.decoded(associatedCandidates)
+            .filter { (_, event) -> historicalEewMatches(finalConfirmed, event) }
+        val feltReports = buildHistoricalFeltReports(
+            candidates = associatedCandidates,
+            confirmed = finalConfirmed,
+            matchingEews = matchingEews.map { it.second }
+        )
         val associatedReports = buildHistoricalAssociatedReports(
             parsedRecords = parsedRecords,
             frames = confirmedFrames,
-            candidates = associatedCandidates
+            candidates = associatedCandidates,
+            feltReports = feltReports
         )
         val replayFrames = buildHistoricalReplayFrames(
             parsedRecords = parsedRecords,
             confirmedFrames = confirmedFrames,
-            candidates = associatedCandidates
+            matchingEews = matchingEews,
+            feltReports = feltReports
         )
         val replayFrameIndexByArchiveKey = replayFrames.associate { it.archiveKey to it.index }
         return HistoricalIncident(
@@ -930,17 +940,57 @@ class P2pQuakeProvider(
         )
     }
 
-    /**
-     * Uses the existing report-step navigation as a full received-data replay:
-     * EEW forecasts, attached cumulative felt snapshots, then ordinary reports.
-     * No replay-only controls or wave simulation are introduced by this model.
-     */
+    private data class HistoricalFeltReport(
+        val record: ArchivedReportRecord,
+        val signal: P2pCrowdSignal,
+        val order: HistoricalReplayOrderKey
+    )
+
+    private fun buildHistoricalFeltReports(
+        candidates: List<ArchivedReportRecord>,
+        confirmed: EarthquakeEvent,
+        matchingEews: List<EarthquakeEvent>
+    ): List<HistoricalFeltReport> {
+        val latestByCluster = mutableMapOf<String, P2pCrowdSignal>()
+        return candidates.asSequence()
+            .filter { it.code == P2P_CROWD_SIGNAL_CODE }
+            .mapNotNull { record ->
+                val signal = parseP2pCrowdSignal(record.rawJson)
+                    ?.takeIf { it.isInformative() }
+                    ?: return@mapNotNull null
+                if (!signal.coincidesWith(confirmed) && matchingEews.none(signal::canBelongToEew)) {
+                    return@mapNotNull null
+                }
+                val timelineAtMillis = historicalReplayTimelineMillis(
+                    sourceTime = record.sourceTime,
+                    rawJson = record.rawJson,
+                    fallbackTime = signal.updatedAt,
+                    receivedAt = record.receivedAt
+                )
+                HistoricalFeltReport(
+                    record,
+                    signal,
+                    HistoricalReplayOrderKey(timelineAtMillis, record.receivedAt, record.archiveKey)
+                )
+            }
+            .sortedBy { it.order }
+            .filter { (_, signal) ->
+                val previous = latestByCluster[signal.startedAt]
+                val cumulative = previous?.mergeCumulativeUpdate(signal) ?: signal
+                latestByCluster[signal.startedAt] = cumulative
+                // Timestamp-only updates and stale lower totals add no felt state.
+                previous == null || cumulative.copy(updatedAt = previous.updatedAt) != previous
+            }
+            .toList()
+    }
+
+    /** Reconstructs static earthquake, EEW and cumulative felt states in bulletin order. */
     private fun buildHistoricalReplayFrames(
         parsedRecords: List<Pair<ArchivedEarthquakeReport, EarthquakeEvent>>,
         confirmedFrames: List<HistoricalReportFrame>,
-        candidates: List<ArchivedReportRecord>
+        matchingEews: List<Pair<ArchivedReportRecord, EarthquakeEvent>>,
+        feltReports: List<HistoricalFeltReport>
     ): List<HistoricalReportFrame> {
-        val finalConfirmed = confirmedFrames.lastOrNull()?.event ?: return confirmedFrames
         data class ReplaySource(
             val archiveKey: String,
             val kind: HistoricalAssociatedReportKind,
@@ -953,57 +1003,35 @@ class P2pQuakeProvider(
             val signal: P2pCrowdSignal? = null
         )
 
-        val eewSources = EewHistory.decoded(candidates).asSequence()
-            .mapNotNull { (record, parsedEew) ->
-                parsedEew
-                    .takeIf { historicalEewMatches(finalConfirmed, it) }
-                    ?.let { eew ->
-                        ReplaySource(
-                            archiveKey = record.archiveKey,
-                            kind = HistoricalAssociatedReportKind.EEW,
-                            timelineAtMillis = historicalReplayTimelineMillis(
-                                sourceTime = record.sourceTime,
-                                rawJson = record.rawJson,
-                                fallbackTime = eew.reportIssuedAt,
-                                receivedAt = record.receivedAt
-                            ),
-                            receivedAt = record.receivedAt,
-                            sourceTime = record.sourceTime,
-                            reportType = "EEW",
-                            reportIssuedAt = eew.reportIssuedAt,
-                            event = EewArchiveFrame.forReplay(eew, record.rawJson)
-                        )
-                    }
-            }.toList()
-        val eewEvents = eewSources.mapNotNull { it.event }
-        val feltSources = candidates.asSequence()
-            .filter { it.code == P2P_CROWD_SIGNAL_CODE }
-            .mapNotNull { record ->
-                parseP2pCrowdSignal(record.rawJson)
-                    ?.takeIf { it.isInformative() }
-                    ?.takeIf { signal ->
-                        signal.coincidesWith(finalConfirmed) ||
-                            eewEvents.any { signal.canBelongToEew(it) }
-                    }
-                    ?.let { signal ->
-                        ReplaySource(
-                            archiveKey = record.archiveKey,
-                            kind = HistoricalAssociatedReportKind.FELT_REPORTS,
-                            timelineAtMillis = historicalReplayTimelineMillis(
-                                sourceTime = record.sourceTime,
-                                rawJson = record.rawJson,
-                                fallbackTime = signal.updatedAt,
-                                receivedAt = record.receivedAt
-                            ),
-                            receivedAt = record.receivedAt,
-                            sourceTime = record.sourceTime?.takeIf(String::isNotBlank)
-                                ?: signal.updatedAt,
-                            reportType = "P2PQuake felt reports",
-                            reportIssuedAt = null,
-                            signal = signal
-                        )
-                    }
-            }.toList()
+        val eewSources = matchingEews.map { (record, eew) ->
+            ReplaySource(
+                archiveKey = record.archiveKey,
+                kind = HistoricalAssociatedReportKind.EEW,
+                timelineAtMillis = historicalReplayTimelineMillis(
+                    sourceTime = record.sourceTime,
+                    rawJson = record.rawJson,
+                    fallbackTime = eew.reportIssuedAt,
+                    receivedAt = record.receivedAt
+                ),
+                receivedAt = record.receivedAt,
+                sourceTime = record.sourceTime,
+                reportType = "EEW",
+                reportIssuedAt = eew.reportIssuedAt,
+                event = EewArchiveFrame.forReplay(eew, record.rawJson)
+            )
+        }
+        val feltSources = feltReports.map { (record, signal, order) ->
+            ReplaySource(
+                archiveKey = record.archiveKey,
+                kind = HistoricalAssociatedReportKind.FELT_REPORTS,
+                timelineAtMillis = order.timelineAtMillis,
+                receivedAt = record.receivedAt,
+                sourceTime = record.sourceTime?.takeIf(String::isNotBlank) ?: signal.updatedAt,
+                reportType = "P2PQuake felt reports",
+                reportIssuedAt = null,
+                signal = signal
+            )
+        }
         val confirmedSources = parsedRecords.mapIndexed { index, (record, report) ->
             val frame = confirmedFrames[index]
             ReplaySource(
@@ -1115,7 +1143,8 @@ class P2pQuakeProvider(
     private fun buildHistoricalAssociatedReports(
         parsedRecords: List<Pair<ArchivedEarthquakeReport, EarthquakeEvent>>,
         frames: List<HistoricalReportFrame>,
-        candidates: List<ArchivedReportRecord>
+        candidates: List<ArchivedReportRecord>,
+        feltReports: List<HistoricalFeltReport>
     ): List<HistoricalAssociatedReport> {
         val timeline = mutableListOf<Pair<Long, HistoricalAssociatedReport>>()
         val frameByArchiveKey = frames.associateBy { it.archiveKey }
@@ -1203,20 +1232,8 @@ class P2pQuakeProvider(
             )
         }
 
-        candidates.filter { it.code == P2P_CROWD_SIGNAL_CODE }.forEach { record ->
-            val signal = parseP2pCrowdSignal(record.rawJson)
-                ?.takeIf { it.isInformative() }
-                ?: return@forEach
-            val attachedToEew = eewCandidates.any { eewRecord ->
-                parseEew(eewRecord.rawJson)?.let { eew ->
-                    historicalEewMatches(finalEvent, eew) && signal.canBelongToEew(eew)
-                } == true
-            }
-            if (!signal.coincidesWith(finalEvent) && !attachedToEew) return@forEach
-            val instant = sourceInstant(record.sourceTime.orEmpty())
-                ?: reportSourceInstant(record.rawJson)
-                ?: Instant.ofEpochMilli(record.receivedAt)
-            timeline += instant.toEpochMilli() to HistoricalAssociatedReport(
+        feltReports.forEach { (record, signal, order) ->
+            timeline += order.timelineAtMillis to HistoricalAssociatedReport(
                 archiveKey = record.archiveKey,
                 kind = HistoricalAssociatedReportKind.FELT_REPORTS,
                 reportType = "P2PQuake felt reports",
