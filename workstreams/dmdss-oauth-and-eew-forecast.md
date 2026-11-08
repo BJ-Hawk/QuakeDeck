@@ -165,3 +165,20 @@ the active-EEW gate and ban on felt-only events remain unchanged.
 - The cumulative [changelog](../CHANGELOG.md) is the release summary; this
   workstream records boundaries, evidence, and remaining validation rather
   than repeating the full development-version chronology.
+
+## 0.10.3-dev.9 confirmed JMA reports
+
+- QuakeDeck asks the DM-D.S.S account for both feed permissions. It opens one socket for the intersection of valid contracts and granted scopes, then checks the types acknowledged by the socket. EEW and VXSE51/52/53 can work independently. Older forecast authorizations can keep forecast access while the app prompts for the report scope when the account has the matching plan.
+- VXSE51 supplies initial area intensity, VXSE52 supplies hypocenter details, and VXSE53 supplies observed station intensity and hypocenter details. JMA event IDs link stages even when the origin minute changes. Unreported station values are skipped, and test confirmed bulletins stay out of the real report and alert paths.
+- P2PQuake still supplies tsunami and felt data and covers any of the three JMA report types that the DM-D.S.S socket has not acknowledged. Report fallback is restored as the socket closes, with a rate-limited P2PQuake history request.
+- Validate in Android Studio with both subscriptions, forecast only, reports only and neither. Check an old grant with a newly active report subscription, a disconnect during an incident, real VXSE51/52/53 delivery through the full notification path, and archived station/replay behavior. Provider account and handset validation are pending.
+
+- Provider attribution follow-up in dev.9: confirmed DM-D.S.S updates now appear in the DM-D.S.S row and leave the P2PQuake update age alone. Full acknowledged VXSE51/52/53 coverage blocks P2PQuake confirmed reports from the live/recent path, including late startup fetches and unknown P2PQuake issue types. Partial coverage and disconnects retain fallback. Verify the connection drawer during the next real bulletin.
+
+### Tsunami source follow-up
+
+QuakeDeck requests VTSE41 and VTSE51 under the same earthquake-and-tsunami classification and OAuth permission as VXSE51/52/53. Acknowledged VTSE41 makes DM-D.S.S the live tsunami source. VTSE51 updates coastal arrival details on an existing matching alert. Test bulletins stay outside the real alert path.
+
+P2PQuake restores an already-active warning at startup and recovers missed updates after a disconnect. A missing or unreadable DM-D.S.S warning feed restores live P2PQuake fallback until the direct feed is usable again. The connection drawer shows which provider covers tsunami alerts.
+
+Android Studio validation is pending. Verify a warning, a partial lift, a full all-clear, and a disconnect while a warning is active. Check that reconnecting keeps the current alert and doesn't repeat a copy of the same bulletin.

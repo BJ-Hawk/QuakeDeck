@@ -162,6 +162,9 @@ internal class ReportArchiveStore(context: Context) :
                     issue?.optString("time").orEmpty()
                 }
                 val eventKey = when {
+                    code == 551 && issue?.optString("telegramType").orEmpty().isNotBlank() &&
+                        issue?.optString("eventId").orEmpty().isNotBlank() ->
+                        "jma:${issue?.optString("eventId")}"
                     earthquake?.optString("time").orEmpty().isNotBlank() ->
                         "quake:${earthquake?.optString("time")}"
                     issue?.optString("eventId").orEmpty().isNotBlank() ->

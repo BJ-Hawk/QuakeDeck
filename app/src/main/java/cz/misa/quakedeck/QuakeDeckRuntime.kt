@@ -59,7 +59,15 @@ class QuakeDeckRuntime(context: Context) : QuakeDataProvider {
     private val settings = AppSettings(appContext)
     private val p2pProvider = P2pQuakeProvider(appContext)
     private val dmdssOAuth = DmDssOAuthClient(appContext)
-    private val dmdssProvider = DmDssProvider(appContext, dmdssOAuth)
+    private val dmdssProvider = DmDssProvider(
+        appContext,
+        dmdssOAuth,
+        parseConfirmedReport = p2pProvider::parseQuake,
+        onConfirmedReport = p2pProvider::acceptDmdssConfirmedReport,
+        onConfirmedTypesChanged = p2pProvider::setDmdssConfirmedTypes,
+        onTsunamiReport = p2pProvider::acceptDmdssTsunamiReport,
+        onTsunamiAvailabilityChanged = p2pProvider::setDmdssTsunamiAvailable
+    )
     private val dmdssDiagnosticsStore = DmDssDiagnosticsStore(appContext)
     private val eewCancellations = cz.misa.quakedeck.data.EewCancellationTracker()
 
@@ -74,10 +82,13 @@ class QuakeDeckRuntime(context: Context) : QuakeDataProvider {
     )
 
     @Volatile
+    private var p2pConnectionSnapshot = p2pSnapshot
+
+    @Volatile
     private var dmdssSnapshot = waitingSnapshot(
         DataSourceMode.DMDSS,
         ConnectionState.DISCONNECTED,
-        "Connect DM-D.S.S to use EEW forecasts"
+        "Connect DM-D.S.S to use its subscribed feeds"
     )
 
     private var combinedLiveSequence = 0L
@@ -91,6 +102,10 @@ class QuakeDeckRuntime(context: Context) : QuakeDataProvider {
 
     @Volatile
     private var dmdssContractCheckInFlight = false
+    private var lastDmdssContractCheckElapsed = 0L
+
+    var dmdssAvailableClassifications: Set<String> = emptySet()
+        private set
 
     val notificationCoordinator = NotificationCoordinator(appContext, settings)
 
@@ -102,7 +117,7 @@ class QuakeDeckRuntime(context: Context) : QuakeDataProvider {
         private set
 
     @Volatile
-    var lastProviderUpdateMillis: Long = 0L
+    var lastP2pUpdateMillis: Long = 0L
         private set
 
     @Volatile
@@ -121,10 +136,10 @@ class QuakeDeckRuntime(context: Context) : QuakeDataProvider {
         get() = dmdssOAuth.isAuthorized
 
     val isDmdssAuthorizationUpdateRequired: Boolean
-        get() = dmdssOAuth.authorizationUpdateRequired
+        get() = dmdssOAuth.authorizationUpdateRequired(dmdssContractSummary)
 
     val latestP2pSnapshot: AppSnapshot
-        get() = p2pSnapshot
+        get() = p2pConnectionSnapshot
 
     val latestDmdssSnapshot: AppSnapshot
         get() = dmdssSnapshot
@@ -159,6 +174,14 @@ class QuakeDeckRuntime(context: Context) : QuakeDataProvider {
 
     private fun handleP2pSnapshot(snapshot: AppSnapshot) {
         p2pSnapshot = if (snapshot.testingMode) snapshot.withSandboxLocalForecast() else snapshot
+        if (snapshot.dmdssReportUpdate) {
+            if (dmdssSnapshot.connectionState == ConnectionState.CONNECTED) {
+                dmdssSnapshot = dmdssSnapshot.copy(statusText = snapshot.statusText)
+            }
+        } else {
+            p2pConnectionSnapshot = p2pSnapshot
+            lastP2pUpdateMillis = System.currentTimeMillis()
+        }
         dmdssSnapshot = dmdssSnapshot.withAssociatedP2pCrowdSignal()
         publishCombined(origin = DataSourceMode.FREE)
     }
@@ -234,7 +257,6 @@ class QuakeDeckRuntime(context: Context) : QuakeDataProvider {
         notificationSnapshot: AppSnapshot = snapshot
     ) {
         latestSnapshot = snapshot
-        lastProviderUpdateMillis = System.currentTimeMillis()
 
         // Notifications must not depend on whether the Activity is visible or
         // whether Compose is currently allowed to recompose. The map-facing
@@ -362,7 +384,7 @@ class QuakeDeckRuntime(context: Context) : QuakeDataProvider {
                 statusText = if (usingDmdss) {
                     dmdssSnapshot.statusText
                 } else {
-                    "DM-D.S.S EEW forecast connected · P2PQuake baseline active"
+                    dmdssProvider.connectedFeedStatus()
                 },
                 liveUpdateKind = updateKind,
                 dmdssEewUpdate = origin == DataSourceMode.DMDSS &&
@@ -496,6 +518,7 @@ class QuakeDeckRuntime(context: Context) : QuakeDataProvider {
     fun disconnectDmdss(callback: (Boolean) -> Unit = {}) {
         dmdssProvider.stop()
         dmdssContractSummary = null
+        dmdssAvailableClassifications = emptySet()
         setDataSourceMode(DataSourceMode.FREE)
         dmdssOAuth.disconnect { revoked -> mainHandler.post { callback(revoked) } }
     }
@@ -505,31 +528,44 @@ class QuakeDeckRuntime(context: Context) : QuakeDataProvider {
             !dmdssOAuth.isAuthorized || p2pSnapshot.testingMode
         ) return
         dmdssContractCheckInFlight = true
-        dmdssSnapshot = waitingSnapshot(
-            DataSourceMode.DMDSS,
-            ConnectionState.CONNECTING,
-            "Checking DM-D.S.S account access…"
-        )
-        publishCombined(origin = DataSourceMode.DMDSS)
+        lastDmdssContractCheckElapsed = android.os.SystemClock.elapsedRealtime()
+        if (dmdssSnapshot.connectionState != ConnectionState.CONNECTED) {
+            dmdssSnapshot = waitingSnapshot(
+                DataSourceMode.DMDSS,
+                ConnectionState.CONNECTING,
+                "Checking DM-D.S.S account access…"
+            )
+            publishCombined(origin = DataSourceMode.DMDSS)
+        }
         dmdssOAuth.readContracts { result ->
             mainHandler.post {
                 dmdssContractCheckInFlight = false
+                if (requestedMode != DataSourceMode.DMDSS || !dmdssOAuth.isAuthorized ||
+                    p2pSnapshot.testingMode
+                ) return@post
                 result.onSuccess { summary ->
                     dmdssContractSummary = summary
-                    if (summary.eewForecastAvailable && requestedMode == DataSourceMode.DMDSS &&
-                        !p2pSnapshot.testingMode
-                    ) {
+                    val feeds = dmdssOAuth.availableFeeds(summary)
+                    dmdssAvailableClassifications = feeds.mapTo(linkedSetOf()) { it.classification }
+                    if (feeds.isNotEmpty()) {
+                        dmdssProvider.configureFeeds(feeds)
                         dmdssProvider.start(::handleDmdssSnapshot)
                     } else {
                         dmdssProvider.stop()
                         dmdssSnapshot = waitingSnapshot(
                             DataSourceMode.DMDSS,
                             ConnectionState.DISCONNECTED,
-                            "No active DM-D.S.S EEW forecast plan"
+                            if (dmdssOAuth.authorizationUpdateRequired(summary)) {
+                                "DM-D.S.S authorization update needed"
+                            } else {
+                                "No active DM-D.S.S forecast or earthquake report plan"
+                            }
                         )
                         publishCombined(origin = DataSourceMode.DMDSS)
                     }
                 }.onFailure { error ->
+                    if (dmdssSnapshot.connectionState == ConnectionState.CONNECTED) return@onFailure
+                    dmdssAvailableClassifications = emptySet()
                     dmdssProvider.stop()
                     dmdssSnapshot = waitingSnapshot(
                         DataSourceMode.DMDSS,
@@ -651,6 +687,10 @@ class QuakeDeckRuntime(context: Context) : QuakeDataProvider {
     override fun onAppForeground() {
         p2pProvider.onAppForeground()
         dmdssProvider.onAppForeground()
+        val elapsed = android.os.SystemClock.elapsedRealtime()
+        if (elapsed - lastDmdssContractCheckElapsed >= 60_000L) {
+            refreshDmdssContractsAndConnect()
+        }
     }
 
     override fun onAppBackground() = p2pProvider.onAppBackground()

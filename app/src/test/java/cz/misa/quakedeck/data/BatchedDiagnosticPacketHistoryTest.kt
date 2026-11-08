@@ -59,8 +59,8 @@ class BatchedDiagnosticPacketHistoryTest {
         try {
             // This is the same ingress function invoked by WebSocket.onMessage.
             receipt.submit {
-                val record: (String) -> Unit = { raw ->
-                    history.append(packet(JSONObject(raw).optInt("seq"), raw))
+                val record: (String, JSONObject?) -> Unit = { raw, decoded ->
+                    history.append(packet(requireNotNull(decoded).optInt("seq"), raw))
                 }
                 repeat(600) { index ->
                     receiveP2pLivePacket("""{"code":561,"seq":$index}""", record) {
@@ -185,15 +185,15 @@ class BatchedDiagnosticPacketHistoryTest {
     fun operationalAndCumulativePacketsKeepTheirOriginalDispatchOrder() {
         val recorded = mutableListOf<String>()
         val dispatched = mutableListOf<Int>()
-        val codes = listOf(551, 552, 554, 556, 9611, 555)
-        (listOf(561) + codes).forEach { code ->
-            receiveP2pLivePacket("""{"code":$code}""", { recorded.add(it) }) {
+        val codes = listOf(551, 552, 554, 556, 9611)
+        (listOf(561, 555) + codes + 999).forEach { code ->
+            receiveP2pLivePacket("""{"code":$code}""", { raw, _ -> recorded.add(raw) }) {
                 dispatched.add(it.getInt("code"))
             }
         }
-        receiveP2pLivePacket("invalid", { recorded.add(it) }) { fail("Invalid JSON dispatched") }
+        receiveP2pLivePacket("invalid", { raw, _ -> recorded.add(raw) }) { fail("Invalid JSON dispatched") }
         assertEquals(codes, dispatched)
-        assertEquals(7, recorded.size) // Includes 561 and malformed evidence; excludes 555.
+        assertEquals(8, recorded.size) // Retains 561, unknown and malformed evidence. Omits 555.
     }
 
     private fun history(

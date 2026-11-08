@@ -72,6 +72,8 @@ import cz.misa.quakedeck.R
 import cz.misa.quakedeck.data.AppSnapshot
 import cz.misa.quakedeck.data.ConnectionState
 import cz.misa.quakedeck.data.DataSourceMode
+import cz.misa.quakedeck.data.DmDssFeed
+import cz.misa.quakedeck.data.DmDssTsunamiParser
 import cz.misa.quakedeck.data.LocalEewForecasts
 import cz.misa.quakedeck.data.PlaceNameLanguage
 import cz.misa.quakedeck.data.QuakeDeckBuildEdition
@@ -110,7 +112,7 @@ fun ExpandableStatusChrome(
     historicalMode: Boolean,
     liveWarningActive: Boolean,
     clockController: AppClockController,
-    lastProviderUpdateMillis: Long,
+    lastP2pUpdateMillis: Long,
     onReconnect: () -> Unit,
     onSourceMenu: () -> Unit,
     onSettings: () -> Unit,
@@ -283,7 +285,7 @@ fun ExpandableStatusChrome(
                         clockMode = clockController.mode,
                         clockController = clockController,
                         wallNowMillis = wallNowMillis,
-                        lastProviderUpdateMillis = lastProviderUpdateMillis,
+                        lastP2pUpdateMillis = lastP2pUpdateMillis,
                         onReconnect = onReconnect,
                         onSourceMenu = {
                             settledOpen = false
@@ -569,7 +571,7 @@ private fun StatusDrawer(
     clockMode: AppClockMode,
     clockController: AppClockController,
     wallNowMillis: Long,
-    lastProviderUpdateMillis: Long,
+    lastP2pUpdateMillis: Long,
     onReconnect: () -> Unit,
     onSourceMenu: () -> Unit,
     onSettings: () -> Unit,
@@ -803,10 +805,22 @@ private fun StatusDrawer(
                 title = "P2PQuake",
                 state = connectionLabel(p2pSnapshot.connectionState, language),
                 stateColor = connectionColor(p2pSnapshot.connectionState),
-                detail = localizedStatus(p2pSnapshot.statusText, language),
+                detail = if (!sandbox.active && requestedMode == DataSourceMode.DMDSS &&
+                    dmdssSnapshot.dmdssLiveTypes.containsAll(DmDssFeed.CONFIRMED.types) &&
+                    p2pSnapshot.connectionState == ConnectionState.CONNECTED
+                ) {
+                    localized(
+                        if (DmDssTsunamiParser.WARNING_TYPE in dmdssSnapshot.dmdssLiveTypes) {
+                            R.string.p2pquake_live_support_feeds_with_dmdss_tsunami
+                        } else R.string.p2pquake_live_support_feeds,
+                        language
+                    )
+                } else {
+                    localizedStatus(p2pSnapshot.statusText, language)
+                },
                 trailing = formatLastUpdate(
                     wallNowMillis = wallNowMillis,
-                    lastProviderUpdateMillis = lastProviderUpdateMillis,
+                    lastP2pUpdateMillis = lastP2pUpdateMillis,
                     language = language
                 )
             )
@@ -1286,19 +1300,30 @@ private fun actualProviderLabel(
         localized(R.string.built_in_replay, language)
     sandbox.active -> localized(R.string.p2pquake_sandbox, language)
     requestedMode == DataSourceMode.DMDSS &&
-        dmdssSnapshot.connectionState == ConnectionState.CONNECTED ->
-        localized(R.string.p2pquake_plus_dmdss, language)
+        dmdssSnapshot.connectionState == ConnectionState.CONNECTED -> {
+        val liveTypes = dmdssSnapshot.dmdssLiveTypes
+        val eew = if (liveTypes.any { it in DmDssFeed.FORECAST.types }) {
+            "DM-D.S.S + P2PQuake"
+        } else "P2PQuake"
+        val reports = when {
+            liveTypes.containsAll(DmDssFeed.CONFIRMED.types) -> "DM-D.S.S"
+            liveTypes.any { it in DmDssFeed.CONFIRMED.types } -> "DM-D.S.S + P2PQuake"
+            else -> "P2PQuake"
+        }
+        val tsunami = if (DmDssTsunamiParser.WARNING_TYPE in liveTypes) "DM-D.S.S" else "P2PQuake"
+        localized(R.string.active_eew_and_report_providers, language, eew, reports, tsunami)
+    }
     else -> localized(R.string.p2pquake_live, language)
 }
 
 @Composable
 private fun formatLastUpdate(
     wallNowMillis: Long,
-    lastProviderUpdateMillis: Long,
+    lastP2pUpdateMillis: Long,
     language: PlaceNameLanguage
 ): String? {
-    if (lastProviderUpdateMillis <= 0L) return null
-    val seconds = ((wallNowMillis - lastProviderUpdateMillis).coerceAtLeast(0L) / 1_000L)
+    if (lastP2pUpdateMillis <= 0L) return null
+    val seconds = ((wallNowMillis - lastP2pUpdateMillis).coerceAtLeast(0L) / 1_000L)
         .coerceAtMost(9_999L)
     return localized(R.string.last_update_seconds, language, seconds)
 }

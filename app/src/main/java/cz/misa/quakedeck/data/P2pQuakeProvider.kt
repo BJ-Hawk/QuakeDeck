@@ -17,6 +17,8 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
 import java.util.concurrent.Executors
+import java.util.concurrent.ScheduledFuture
+import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.TimeUnit
 import kotlin.math.abs
 import kotlin.math.min
@@ -34,6 +36,15 @@ class P2pQuakeProvider(
     private val archiveStore = ReportArchiveStore(appContext)
     private val deliveryDiagnostics = DmDssDiagnosticsStore(appContext)
     private val archiveExecutor = Executors.newSingleThreadExecutor()
+    private val ingressScheduler = Executors.newSingleThreadScheduledExecutor { task ->
+        Thread(task, "QuakeDeck-P2P-ingress").apply { isDaemon = true }
+    }
+    private val archiveStatsQueued = AtomicBoolean()
+    private val crowdArchiveQueue = ArrayDeque<JSONObject>()
+    private var crowdArchiveDrainQueued = false
+    private var crowdArchiveSkipped = 0
+    private val pendingCrowdPackets = LinkedHashMap<String, JSONObject>()
+    private var crowdDrainQueued = false
     private val archiveReadExecutor = Executors.newSingleThreadExecutor()
     private val recentReportCache = RecentReportCache(appContext)
     private val recentCacheExecutor = Executors.newSingleThreadExecutor()
@@ -77,10 +88,18 @@ class P2pQuakeProvider(
     private val eewRevisions = EewRevisionTracker()
     private var eewCleanupRunnable: Runnable? = null
     private var lastTsunami: TsunamiReport? = null
+    private var latestLiveTsunamiIssue: Instant? = null
+    private var latestLiveTsunamiEnded = false
+    private var lastTsunamiFromDmdss = false
+    private var dmdssTsunamiAvailable = false
+    private var tsunamiRecoveryCall: Call? = null
     private var activeTsunami = false
     private var liveUpdateSequence = 0L
     private val seenMessageIds = LinkedHashSet<String>()
+    private val seenOfficialReportIds = LinkedHashSet<String>()
     private val eventHistory = mutableListOf<EarthquakeEvent>()
+    private val confirmedComponents = LinkedHashMap<String, MutableMap<String, EarthquakeEvent>>()
+    private val confirmedWithdrawals = LinkedHashMap<Pair<String, String>, Long>()
     // Kept as evidence only. A cluster is never promoted to a visible event;
     // it is claimed only when one EEW or confirmed incident identifies it.
     private val pendingCrowdSignals = LinkedHashMap<String, P2pCrowdSignal>()
@@ -99,10 +118,15 @@ class P2pQuakeProvider(
     private var builtInReplayActive = false
     private var builtInReplayLabel: String? = null
     private var injectedTestRestoreRunnable: Runnable? = null
-    private var connectionGeneration = 0
-    private var socketOpenedAtElapsedMillis = 0L
+    @Volatile private var connectionGeneration = 0
     @Volatile private var currentState = ConnectionState.DISCONNECTED
-    private var lastRecoveryStartedAtMs = 0L
+    private var historyRecoveryCall: Call? = null
+    private var pendingOpenRecovery: ScheduledFuture<*>? = null
+    private var pendingFallbackRecovery: ScheduledFuture<*>? = null
+    @Volatile private var recoveryEpoch = 0
+    @Volatile private var dmdssConfirmedTypes = emptySet<String>()
+    private var lastRecoveryStartedElapsedMillis: Long? = null
+    private var recoveryBackoffUntilElapsedMillis = 0L
     private var recentReportsGeneration = 0
     private var freshRecentReportsLoaded = false
     private var showingRememberedReports = false
@@ -169,9 +193,7 @@ class P2pQuakeProvider(
 
             cancelBuiltInReplay()
             cancelScheduledReconnect()
-            connectionGeneration++
-            socket?.cancel()
-            socket = null
+            cancelSocket("Source mode changed")
             reconnectAttempt = 0
             currentState = ConnectionState.CONNECTING
             clearActiveEew()
@@ -183,7 +205,7 @@ class P2pQuakeProvider(
             sandboxTimelineOffsets.clear()
             eewRevisions.clear()
             pendingEewDetection = null
-            synchronized(seenMessageIds) { seenMessageIds.clear() }
+            clearSeenMessageIds()
             prepareRecentReportRefresh()
 
             emit(
@@ -222,9 +244,7 @@ class P2pQuakeProvider(
             testingMode = true
             cancelBuiltInReplay()
             cancelScheduledReconnect()
-            connectionGeneration++
-            socket?.cancel()
-            socket = null
+            cancelSocket("Built-in EEW replay started")
             reconnectAttempt = 0
             currentState = ConnectionState.CONNECTED
             builtInReplayActive = true
@@ -236,7 +256,7 @@ class P2pQuakeProvider(
             lastEvent = null
             eventHistory.clear()
             sandboxTimelineOffsets.clear()
-            synchronized(seenMessageIds) { seenMessageIds.clear() }
+            clearSeenMessageIds()
 
             emit(
                 waitingSnapshot(
@@ -275,9 +295,7 @@ class P2pQuakeProvider(
             testingMode = true
             cancelBuiltInReplay()
             cancelScheduledReconnect()
-            connectionGeneration++
-            socket?.cancel()
-            socket = null
+            cancelSocket("Built-in tsunami replay started")
             reconnectAttempt = 0
             currentState = ConnectionState.CONNECTED
             builtInReplayActive = true
@@ -289,7 +307,7 @@ class P2pQuakeProvider(
             lastEvent = null
             eventHistory.clear()
             sandboxTimelineOffsets.clear()
-            synchronized(seenMessageIds) { seenMessageIds.clear() }
+            clearSeenMessageIds()
 
             emit(
                 waitingSnapshot(
@@ -329,9 +347,7 @@ class P2pQuakeProvider(
             testingMode = true
             cancelBuiltInReplay()
             cancelScheduledReconnect()
-            connectionGeneration++
-            socket?.cancel()
-            socket = null
+            cancelSocket("Built-in combined replay started")
             reconnectAttempt = 0
             currentState = ConnectionState.CONNECTED
             builtInReplayActive = true
@@ -343,7 +359,7 @@ class P2pQuakeProvider(
             lastEvent = null
             eventHistory.clear()
             sandboxTimelineOffsets.clear()
-            synchronized(seenMessageIds) { seenMessageIds.clear() }
+            clearSeenMessageIds()
 
             emit(
                 waitingSnapshot(
@@ -607,9 +623,7 @@ class P2pQuakeProvider(
         cancelScheduledReconnect()
         clearActiveEew()
         cancelTsunamiCleanup()
-        connectionGeneration++
-        socket?.cancel()
-        socket = null
+        cancelSocket("Provider stopped")
         socketClient.dispatcher.cancelAll()
         socketClient.connectionPool.evictAll()
         httpClient.dispatcher.cancelAll()
@@ -726,11 +740,21 @@ class P2pQuakeProvider(
         archiveReadExecutor.execute {
             val result = runCatching {
                 val candidates = archiveStore.loadCatalogReports()
-                val confirmed = candidates.filter { it.code == 551 && it.eventKey != null }
-                    .groupBy { it.eventKey }
-                    .mapNotNull { (eventKey, records) ->
-                        buildHistoricalSummary(requireNotNull(eventKey), records)
+                val confirmedReports = candidates.filter { it.code == 551 && it.eventKey != null }
+                val jmaKeysByOrigin = confirmedReports.asSequence()
+                    .filter { it.eventKey?.startsWith("jma:") == true && !it.rawJson.optBoolean("cancelled") }
+                    .mapNotNull { record ->
+                        val origin = confirmedOriginMillis(record.rawJson) ?: return@mapNotNull null
+                        origin to requireNotNull(record.eventKey)
                     }
+                    .groupBy({ it.first }, { it.second })
+                    .mapValues { (_, keys) -> keys.distinct().singleOrNull() }
+                val confirmed = confirmedReports.groupBy { report ->
+                    val key = requireNotNull(report.eventKey)
+                    if (key.startsWith("quake:")) {
+                        confirmedOriginMillis(report.rawJson)?.let { jmaKeysByOrigin[it] } ?: key
+                    } else key
+                }.mapNotNull { (eventKey, records) -> buildHistoricalSummary(eventKey, records) }
                 (confirmed + EewHistory.summaries(candidates, confirmed.map { it.event }))
                     .sortedByDescending { EewLifecyclePolicy.sourceMillis(it.event.originTime) ?: Long.MIN_VALUE }
             }
@@ -751,8 +775,18 @@ class P2pQuakeProvider(
         var accumulated: EarthquakeEvent? = null
         var parsedCount = 0
         var hasCorrection = false
+        val seen = HashSet<String>()
+        val withdrawn = records.filter { it.rawJson.optBoolean("cancelled") }
+            .groupBy { it.rawJson.optJSONObject("issue")?.optString("type") }
+            .mapValues { (_, frames) -> frames.mapNotNull { reportSourceInstant(it.rawJson) }.maxOrNull() }
         records.forEach { record ->
             val report = parseQuake(record.rawJson) ?: return@forEach
+            val withdrawnAt = withdrawn[report.reportType]
+            if (withdrawnAt != null && reportSourceInstant(record.rawJson)?.let { it <= withdrawnAt } == true) {
+                return@forEach
+            }
+            val bulletin = confirmedBulletinIdentity(record.rawJson)
+            if (bulletin != null && !seen.add(bulletin)) return@forEach
             accumulated = accumulated?.let { mergeConfirmedEvent(it, report) } ?: report
             parsedCount++
             hasCorrection = hasCorrection || !report.reportCorrection.isNullOrBlank()
@@ -818,10 +852,24 @@ class P2pQuakeProvider(
                         ?: error("No archived EEW revisions found for this event")
                 }
                 val records = archiveStore.loadEarthquakeReportsForEvent(eventKey)
+                val origins = records.asSequence().filterNot { it.rawJson.optBoolean("cancelled") }
+                    .mapNotNull { confirmedOriginMillis(it.rawJson) }.distinct().toList()
+                val aliases = if (eventKey.startsWith("jma:")) {
+                    origins.flatMap { origin ->
+                        val dashed = EewLifecyclePolicy.formatJst(origin).removeSuffix(" JST")
+                        listOf("quake:$dashed", "quake:${dashed.replace('-', '/')}")
+                    }.distinct().flatMap(archiveStore::loadEarthquakeReportsForEvent)
+                } else emptyList()
+                val timeline = (records + aliases).sortedWith(compareBy(
+                    { reportSourceInstant(it.rawJson) ?: Instant.MAX }, { it.receivedAt }
+                ))
+                val associationKey = if (eventKey.startsWith("jma:") && origins.isNotEmpty()) {
+                    "quake:${EewLifecyclePolicy.formatJst(origins.first())}"
+                } else eventKey
                 buildHistoricalIncident(
                     eventKey = eventKey,
-                    records = records,
-                    associatedCandidates = archiveStore.loadAssociatedReportCandidatesForEventDay(eventKey)
+                    records = timeline,
+                    associatedCandidates = archiveStore.loadAssociatedReportCandidatesForEventDay(associationKey)
                 ) ?: error("No archived reports found for this event")
             }
             mainHandler.post { onResult(result) }
@@ -834,8 +882,12 @@ class P2pQuakeProvider(
         associatedCandidates: List<ArchivedReportRecord> = emptyList()
     ): HistoricalIncident? {
         var accumulated: EarthquakeEvent? = null
+        val seen = HashSet<String>()
         val parsedRecords = records.mapNotNull { record ->
-            parseQuake(record.rawJson)?.let { record to it }
+            val report = parseQuake(record.rawJson) ?: return@mapNotNull null
+            val bulletin = confirmedBulletinIdentity(record.rawJson)
+            if (bulletin != null && !seen.add(bulletin)) return@mapNotNull null
+            record to report
         }
         if (parsedRecords.isEmpty()) return null
 
@@ -1280,21 +1332,30 @@ class P2pQuakeProvider(
             }
             return
         }
-        val raw = json.toString()
         archiveExecutor.execute {
-            archiveStore.storeReports(listOf(JSONObject(raw)), source)
-            val stats = archiveStore.stats(reportArchiveEnabled, automaticHistoricalDownload)
-            mainHandler.post {
-                archiveStatus = stats.copy(
-                    isDownloading = historicalDownloadRunning,
-                    downloadedReports = archiveStatus.downloadedReports,
-                    duplicateReports = archiveStatus.duplicateReports,
-                    message = archiveStatus.message,
-                    error = archiveStatus.error
-                )
-                publishArchiveStatus()
-            }
+            archiveStore.storeReports(listOf(json), source)
+            queueArchiveStats()
         }
+    }
+
+    private fun queueArchiveStats() {
+        if (!archiveStatsQueued.compareAndSet(false, true)) return
+        ingressScheduler.schedule({
+            archiveExecutor.execute {
+                archiveStatsQueued.set(false)
+                val stats = archiveStore.stats(reportArchiveEnabled, automaticHistoricalDownload)
+                mainHandler.post {
+                    archiveStatus = stats.copy(
+                        isDownloading = historicalDownloadRunning,
+                        downloadedReports = archiveStatus.downloadedReports,
+                        duplicateReports = archiveStatus.duplicateReports,
+                        message = archiveStatus.message,
+                        error = archiveStatus.error
+                    )
+                    publishArchiveStatus()
+                }
+            }
+        }, 1, TimeUnit.SECONDS)
     }
 
     private fun prepareRecentReportRefresh() {
@@ -1365,7 +1426,7 @@ class P2pQuakeProvider(
         return changed
     }
 
-    private fun scheduleRecentReportCacheWrite() {
+    private fun scheduleRecentReportCacheWrite(allowEmpty: Boolean = false) {
         if (testingMode || builtInReplayActive || stopped) return
         recentCacheWriteRunnable?.let(mainHandler::removeCallbacks)
         val runnable = Runnable {
@@ -1374,7 +1435,7 @@ class P2pQuakeProvider(
             val reports = eventHistory
                 .filter { it.kind == EarthquakeEventKind.CONFIRMED && it.id != "waiting" }
                 .take(30)
-            if (reports.isEmpty()) return@Runnable
+            if (reports.isEmpty() && !allowEmpty) return@Runnable
             recentCacheExecutor.execute { recentReportCache.save(reports) }
         }
         recentCacheWriteRunnable = runnable
@@ -1431,7 +1492,18 @@ class P2pQuakeProvider(
     private fun loadArchivedHistory() {
         if (!reportArchiveEnabled || testingMode) return
         archiveExecutor.execute {
-            val records = archiveStore.loadRecentEarthquakeReportRecords()
+            val archived = archiveStore.loadRecentEarthquakeReportRecords()
+            val withdrawals = archived.asSequence().filter { it.rawJson.optBoolean("cancelled") }
+                .groupBy { it.eventKey to it.rawJson.optJSONObject("issue")?.optString("type") }
+                .mapValues { (_, markers) ->
+                    markers.mapNotNull { reportSourceInstant(it.rawJson) }.maxOrNull()
+                }
+            val records = archived.filterNot { record ->
+                val issueType = record.rawJson.optJSONObject("issue")?.optString("type")
+                val withdrawnAt = withdrawals[record.eventKey to issueType]
+                record.rawJson.optBoolean("cancelled") ||
+                    (withdrawnAt != null && reportSourceInstant(record.rawJson)?.let { it <= withdrawnAt } == true)
+            }
             if (records.isEmpty()) return@execute
             val associations = parseHistoricalCrowdAssociations(
                 archiveStore.loadAssociatedReportCandidates()
@@ -1445,7 +1517,8 @@ class P2pQuakeProvider(
             }
             mainHandler.post {
                 if (stopped || testingMode || !reportArchiveEnabled) return@post
-                records.map(ArchivedEarthquakeReport::rawJson)
+                records.asSequence().map(ArchivedEarthquakeReport::rawJson)
+                    .filter { it.optJSONObject("issue")?.has("telegramType") == true || useP2pConfirmedReport(it) }
                     .sortedWith(reportChronologicalComparator)
                     .forEach { json ->
                         if (!acceptMessage(json)) return@forEach
@@ -1561,7 +1634,7 @@ class P2pQuakeProvider(
                     publishArchiveStatus()
 
                     collected.asSequence()
-                        .filter { it.optInt("code", -1) == 551 }
+                        .filter { it.optInt("code", -1) == 551 && useP2pConfirmedReport(it) }
                         .sortedWith(reportChronologicalComparator)
                         .forEach { json ->
                             if (!acceptMessage(json)) return@forEach
@@ -1669,13 +1742,20 @@ class P2pQuakeProvider(
                 }
                 mainHandler.post {
                     if (stopped || testingMode || generation != recentReportsGeneration) return@post
+                    recentReportsRefreshing = false
+                    val fallbackReports = parsedEvents.filter {
+                        shouldUseP2pConfirmedReport(it.reportType, dmdssConfirmedTypes)
+                    }
+                    if (fallbackReports.isEmpty()) {
+                        emitCurrentRecentState(sourceLabel())
+                        return@post
+                    }
                     freshRecentReportsLoaded = true
                     showingRememberedReports = false
-                    recentReportsRefreshing = false
                     // API order is newest-first. Add oldest-first so addToHistory
                     // leaves the final list newest-first without disturbing any
                     // newer WebSocket event that arrived while this call ran.
-                    parsedEvents.asReversed().forEach { report ->
+                    fallbackReports.asReversed().forEach { report ->
                         val merged = addToHistory(report)
                         if (lastEvent?.id == merged.id && lastEvent?.kind == EarthquakeEventKind.CONFIRMED) {
                             lastEvent = merged
@@ -1702,6 +1782,34 @@ class P2pQuakeProvider(
         })
     }
 
+    private fun recordP2pDiagnostic(
+        type: String,
+        recordedAtMillis: Long = System.currentTimeMillis(),
+        transport: String = "control",
+        details: JSONObject.() -> Unit
+    ) {
+        deliveryDiagnostics.recordPacket(
+            direction = "LOCAL",
+            transport = transport,
+            payload = JSONObject().put("type", type).apply(details).toString(),
+            nowMillis = recordedAtMillis,
+            source = DIAGNOSTIC_SOURCE_P2PQUAKE
+        )
+    }
+
+    private fun cancelSocket(reason: String) {
+        val generation = connectionGeneration++
+        if (stopped || testingMode) cancelHistoryRecovery()
+        synchronized(pendingCrowdPackets) { pendingCrowdPackets.clear() }
+        val previous = socket ?: return
+        socket = null
+        recordP2pDiagnostic("websocket-cancelled") {
+            put("generation", generation)
+            put("reason", reason)
+        }
+        previous.cancel()
+    }
+
     private fun connectWebSocket(extraStatus: String? = null) {
         if (stopped) return
 
@@ -1713,10 +1821,8 @@ class P2pQuakeProvider(
         // Any callbacks from an older socket become stale immediately. This lets
         // us cancel a sleeping/broken socket and reconnect on wake without the
         // old onFailure() scheduling a second connection behind our back.
-        val generation = ++connectionGeneration
-        socketOpenedAtElapsedMillis = 0L
-        socket?.cancel()
-        socket = null
+        cancelSocket("Socket replaced")
+        val generation = connectionGeneration
 
         val event = lastEvent
         if (event != null) {
@@ -1741,13 +1847,49 @@ class P2pQuakeProvider(
             .header("User-Agent", "QuakeDeck/0.9.65 (Android)")
             .build()
 
+        val attemptStartedAt = SystemClock.elapsedRealtime()
+        val attempt = reconnectAttempt
+        recordP2pDiagnostic("websocket-connect") {
+            put("generation", generation)
+            put("retryAttempt", attempt)
+            put("sandbox", sandboxForThisConnection)
+            put("reason", extraStatus ?: if (attempt > 0) "Scheduled retry" else "Provider start")
+        }
         socket = socketClient.newWebSocket(request, object : WebSocketListener() {
+            @Volatile private var openedAtElapsedMillis: Long? = null
+            private var nextLagSampleAtElapsedMillis = 0L
+            @Volatile private var lastTimestampedPacketAtElapsedMillis = attemptStartedAt
+
+            private fun watchQuietStream() {
+                if (stopped || generation != connectionGeneration) return
+                val now = SystemClock.elapsedRealtime()
+                if (now - lastTimestampedPacketAtElapsedMillis >= HISTORY_QUIET_THRESHOLD_MILLIS) {
+                    recoverRecentFeed(generation, "stream-quiet")
+                }
+                ingressScheduler.schedule(::watchQuietStream, 15_000L, TimeUnit.MILLISECONDS)
+            }
+
             override fun onOpen(webSocket: WebSocket, response: Response) {
+                val openedAt = SystemClock.elapsedRealtime()
+                openedAtElapsedMillis = openedAt
+                lastTimestampedPacketAtElapsedMillis = openedAt
+                if (!sandboxForThisConnection && !stopped && generation == connectionGeneration) {
+                    ingressScheduler.execute { recoverRecentFeed(generation, "socket-open") }
+                    ingressScheduler.schedule(::watchQuietStream, HISTORY_QUIET_THRESHOLD_MILLIS,
+                        TimeUnit.MILLISECONDS)
+                }
+                recordP2pDiagnostic("websocket-open") {
+                    put("generation", generation)
+                    put("currentListener", !stopped && generation == connectionGeneration)
+                    put("retryAttempt", attempt)
+                    put("sandbox", sandboxForThisConnection)
+                    put("httpCode", response.code)
+                    put("handshakeMillis", openedAt - attemptStartedAt)
+                }
                 mainHandler.post {
                     if (stopped || generation != connectionGeneration) return@post
                     reconnectAttempt = 0
                     currentState = ConnectionState.CONNECTED
-                    socketOpenedAtElapsedMillis = SystemClock.elapsedRealtime()
                     if (sandboxForThisConnection) {
                         // Every sandbox socket is a new replay session. The service
                         // may reuse historical message IDs after its forced reconnect,
@@ -1758,7 +1900,7 @@ class P2pQuakeProvider(
                         activeTsunami = false
                         lastTsunami = null
                         sandboxTimelineOffsets.clear()
-                        synchronized(seenMessageIds) { seenMessageIds.clear() }
+                        clearSeenMessageIds()
                     }
                     val connectedStatus = if (sandboxForThisConnection) {
                         "P2PQuake SANDBOX connected · waiting for replay"
@@ -1782,40 +1924,76 @@ class P2pQuakeProvider(
                     // disconnect. The sandbox is itself a historical replay and
                     // must not be mixed with the production /history endpoint.
                     if (!sandboxForThisConnection) {
-                        recoverRecentFeed(generation)
-                        recoverLatestTsunami(generation)
+                        recoverLatestTsunami()
                         maybeStartAutomaticHistoricalDownload()
                     }
                 }
             }
 
             override fun onMessage(webSocket: WebSocket, text: String) {
-                receiveP2pLivePacket(text, recordPacket = { payload ->
-                    deliveryDiagnostics.recordPacket(
-                        direction = "IN",
+                if (stopped || generation != connectionGeneration) return
+                val receivedAt = System.currentTimeMillis()
+                receiveP2pLivePacket(text, recordPacket = { payload, decoded ->
+                    deliveryDiagnostics.recordIncomingPacket(
                         transport = "text",
                         payload = payload,
+                        decoded = decoded,
+                        nowMillis = receivedAt,
                         source = DIAGNOSTIC_SOURCE_P2PQUAKE
                     )
+                }, observe = observe@{ json ->
+                    if (sandboxForThisConnection || stopped || generation != connectionGeneration) {
+                        return@observe
+                    }
+                    val now = SystemClock.elapsedRealtime()
+                    if (now < nextLagSampleAtElapsedMillis) return@observe
+                    val lagMillis = p2pPacketLagMillis(json, receivedAt) ?: return@observe
+                    lastTimestampedPacketAtElapsedMillis = now
+                    nextLagSampleAtElapsedMillis = now + HISTORY_LAG_SAMPLE_INTERVAL_MILLIS
+                    if (lagMillis >= HISTORY_RECOVERY_LAG_THRESHOLD_MILLIS) {
+                        ingressScheduler.execute { recoverRecentFeed(generation, "stream-lag", lagMillis) }
+                    }
                 }, dispatch = { json ->
-                    mainHandler.post {
-                        if (stopped || generation != connectionGeneration) return@post
-                        processLiveMessage(json)
+                    if (json.optInt("code") == P2P_CROWD_SIGNAL_CODE) {
+                        if (!sandboxForThisConnection) queueCrowdPacket(json, generation)
+                    } else {
+                        mainHandler.post {
+                            if (stopped || generation != connectionGeneration) return@post
+                            processLiveMessage(json)
+                        }
                     }
                 })
             }
 
             override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
-                if (generation == connectionGeneration) webSocket.close(code, reason)
+                val current = !stopped && generation == connectionGeneration
+                recordP2pDiagnostic("websocket-closing") {
+                    put("generation", generation)
+                    put("currentListener", current)
+                    put("code", code)
+                    put("reason", reason.take(240))
+                }
+                if (current) webSocket.close(code, reason)
             }
 
             override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
+                val lifetime = openedAtElapsedMillis?.let { SystemClock.elapsedRealtime() - it }
+                val plannedRollover =
+                    code == 1000 && lifetime != null && lifetime >= PLANNED_SOCKET_ROLLOVER_MIN_MILLIS
+                recordP2pDiagnostic("websocket-closed") {
+                    put("generation", generation)
+                    put("currentListener", !stopped && generation == connectionGeneration)
+                    put("code", code)
+                    put("reason", reason.take(240))
+                    put("socketLifetimeMillis", lifetime)
+                    put("plannedRollover", plannedRollover)
+                }
+                if (!sandboxForThisConnection && !plannedRollover) {
+                    ingressScheduler.execute { recoverRecentFeed(generation, "socket-loss") }
+                }
                 mainHandler.post {
                     if (!stopped && generation == connectionGeneration) {
-                        val socketLifetimeMillis = SystemClock.elapsedRealtime() -
-                            socketOpenedAtElapsedMillis
-                        val plannedRollover =
-                            code == 1000 && socketLifetimeMillis >= PLANNED_SOCKET_ROLLOVER_MIN_MILLIS
+                        socket = null
                         scheduleReconnect(
                             reason = "Disconnected ($code${if (reason.isNotBlank()) ": $reason" else ""})",
                             plannedRollover = plannedRollover
@@ -1825,11 +2003,25 @@ class P2pQuakeProvider(
             }
 
             override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
+                val httpCode = response?.code
+                val reason = httpCode?.let { "WebSocket HTTP $it" }
+                    ?: t.message?.take(240)
+                    ?: "WebSocket failure"
+                val lifetime = openedAtElapsedMillis?.let { SystemClock.elapsedRealtime() - it }
+                recordP2pDiagnostic("websocket-failure") {
+                    put("generation", generation)
+                    put("currentListener", !stopped && generation == connectionGeneration)
+                    put("httpCode", httpCode)
+                    put("error", t.javaClass.simpleName)
+                    put("reason", reason)
+                    put("socketLifetimeMillis", lifetime)
+                }
+                if (!sandboxForThisConnection) {
+                    ingressScheduler.execute { recoverRecentFeed(generation, "socket-loss") }
+                }
                 mainHandler.post {
                     if (!stopped && generation == connectionGeneration) {
-                        val reason = response?.let { "WebSocket HTTP ${it.code}" }
-                            ?: t.message
-                            ?: "WebSocket failure"
+                        socket = null
                         scheduleReconnect(reason)
                     }
                 }
@@ -1837,41 +2029,186 @@ class P2pQuakeProvider(
         })
     }
 
+    internal fun setDmdssConfirmedTypes(types: Set<String>) {
+        val removed = dmdssConfirmedTypes - types
+        dmdssConfirmedTypes = types
+        if (removed.isNotEmpty() && !stopped && !testingMode) {
+            ingressScheduler.execute { recoverRecentFeed(connectionGeneration, "dmdss-fallback") }
+        }
+    }
+
+    internal fun acceptDmdssConfirmedReport(json: JSONObject, report: EarthquakeEvent?) {
+        if (stopped || testingMode) return
+        val issue = json.optJSONObject("issue") ?: return
+        if (issue.optString("telegramType") !in dmdssConfirmedTypes || !acceptMessage(json)) return
+        archiveReport(json, "dm-dss-live")
+        if (json.optBoolean("cancelled")) {
+            applyConfirmedWithdrawal(json)
+        } else if (report != null) {
+            handleConfirmedQuake(report, emitUpdate = true, recovered = false, fromDmdss = true)
+        }
+    }
+
+    private fun applyConfirmedWithdrawal(json: JSONObject) {
+        val issue = json.optJSONObject("issue") ?: return
+        val eventId = issue.optString("eventId").takeIf(String::isNotBlank) ?: return
+        val reportType = issue.optString("type")
+        val issuedAt = EewLifecyclePolicy.sourceMillis(issue.optString("time")) ?: return
+        val key = eventId to reportType
+        confirmedWithdrawals[key] = maxOf(issuedAt, confirmedWithdrawals[key] ?: Long.MIN_VALUE)
+        while (confirmedWithdrawals.size > 64) confirmedWithdrawals.remove(confirmedWithdrawals.keys.first())
+
+        val incident = eventHistory.firstOrNull { it.jmaReportEventId == eventId } ?: return
+        val components = confirmedComponents[incident.id]
+        val previous = components?.get(reportType) ?: incident.takeIf {
+            it.reportType == reportType && it.contributingReportTypes.all { type -> type == reportType }
+        } ?: return
+        if ((reportIssuedInstant(previous)?.toEpochMilli() ?: Long.MIN_VALUE) > issuedAt) return
+        components?.remove(reportType)
+        val remaining = components?.values?.reduceOrNull(::mergeConfirmedEvent)?.copy(
+            id = incident.id,
+            p2pCrowdSignal = incident.p2pCrowdSignal
+        )
+        val index = eventHistory.indexOf(incident)
+        if (remaining == null) eventHistory.removeAt(index) else eventHistory[index] = remaining
+        if (lastEvent?.id == incident.id) lastEvent = remaining ?: activeEewEvent ?: eventHistory.firstOrNull()
+        scheduleRecentReportCacheWrite(allowEmpty = true)
+        val status = "JMA bulletin withdrawn · DM-D.S.S"
+        val event = lastEvent
+        val update = if (event != null) snapshot(currentState, activeEew, event, status)
+            else waitingSnapshot(sourceMode, currentState, status)
+        emit(update.copy(dmdssReportUpdate = true))
+    }
+
+    private fun useP2pConfirmedReport(json: JSONObject): Boolean =
+        testingMode || shouldUseP2pConfirmedReport(
+            json.optJSONObject("issue")?.optString("type"),
+            dmdssConfirmedTypes
+        )
+
+    internal fun setDmdssTsunamiAvailable(available: Boolean) {
+        if (dmdssTsunamiAvailable == available) return
+        dmdssTsunamiAvailable = available
+        recoverLatestTsunami()
+    }
+
+    internal fun acceptDmdssTsunamiReport(json: JSONObject) {
+        if (stopped || testingMode || !dmdssTsunamiAvailable || !acceptMessage(json)) return
+        archiveReport(json, "dm-dss-live")
+        handleTsunami(json, emitUpdate = true, recovered = false, fromDmdss = true)
+    }
+
     private fun processLiveMessage(json: JSONObject) {
-        archiveReport(json, "live")
+        val code = json.optInt("code", -1)
+        if (code == 551 && !useP2pConfirmedReport(json)) return
+        if (code == 552 && !testingMode && dmdssTsunamiAvailable) return
         if (!acceptMessage(json)) return
-        when (json.optInt("code", -1)) {
+        archiveReport(json, "live")
+        when (code) {
             554 -> handleEewDetection(json)
             551 -> parseQuake(json)?.let { handleConfirmedQuake(it, emitUpdate = true, recovered = false) }
             552 -> handleTsunami(json, emitUpdate = true, recovered = false)
             556 -> handleEew(json, emitUpdate = true, recovered = false)
-            P2P_CROWD_SIGNAL_CODE -> handleCrowdSignal(json)
         }
     }
 
-    private fun handleCrowdSignal(json: JSONObject) {
-        if (!crowdSignalsEnabled || testingMode) return
-        val incoming = parseP2pCrowdSignal(json) ?: return
+    private fun queueCrowdPacket(json: JSONObject, generation: Int) {
+        if (reportArchiveEnabled) synchronized(crowdArchiveQueue) {
+            if (crowdArchiveQueue.size == MAX_PENDING_CROWD_ARCHIVE_PACKETS) {
+                crowdArchiveQueue.removeFirst()
+                crowdArchiveSkipped++
+            }
+            crowdArchiveQueue.addLast(json)
+            if (!crowdArchiveDrainQueued) {
+                crowdArchiveDrainQueued = true
+                ingressScheduler.schedule(::submitCrowdArchiveBatch, 500, TimeUnit.MILLISECONDS)
+            }
+        }
+
+        if (!crowdSignalsEnabled) return
+        val started = json.optString("started_at")
+        if (started.isBlank()) return
+        synchronized(pendingCrowdPackets) {
+            if (generation != connectionGeneration) return
+            val prior = pendingCrowdPackets[started]
+            if (prior != null) {
+                val comparison = json.optInt("count").compareTo(prior.optInt("count"))
+                if (comparison < 0 || comparison == 0 &&
+                    crowdPacketUpdatedAt(json) < crowdPacketUpdatedAt(prior)
+                ) return
+            }
+            pendingCrowdPackets[started] = json
+            if (pendingCrowdPackets.size > MAX_TRACKED_CROWD_CLUSTERS) {
+                pendingCrowdPackets.remove(pendingCrowdPackets.keys.first())
+            }
+            if (!crowdDrainQueued) {
+                crowdDrainQueued = true
+                mainHandler.postDelayed(::applyCrowdPacketBatch, 250L)
+            }
+        }
+    }
+
+    private fun crowdPacketUpdatedAt(json: JSONObject): Long =
+        EewLifecyclePolicy.sourceMillis(json.optString("updated_at").ifBlank { json.optString("time") })
+            ?: Long.MIN_VALUE
+
+    private fun submitCrowdArchiveBatch() {
+        archiveExecutor.execute {
+            val (batch, skipped) = synchronized(crowdArchiveQueue) {
+                crowdArchiveDrainQueued = false
+                val batch = crowdArchiveQueue.toList()
+                crowdArchiveQueue.clear()
+                batch to crowdArchiveSkipped.also { crowdArchiveSkipped = 0 }
+            }
+            if (reportArchiveEnabled && batch.isNotEmpty()) {
+                archiveStore.storeReports(batch, "live")
+                queueArchiveStats()
+            }
+            if (skipped > 0) recordP2pDiagnostic("crowd-archive-overflow") {
+                put("skipped", skipped)
+            }
+        }
+    }
+
+    private fun applyCrowdPacketBatch() {
+        val batch = synchronized(pendingCrowdPackets) {
+            crowdDrainQueued = false
+            pendingCrowdPackets.values.toList().also { pendingCrowdPackets.clear() }
+        }
+        if (stopped || !crowdSignalsEnabled || testingMode) return
+        var latest: Pair<EarthquakeEvent, P2pCrowdSignal>? = null
+        batch.forEach { json ->
+            val incoming = parseP2pCrowdSignal(json) ?: return@forEach
+            val owner = handleCrowdSignal(incoming)
+            if (owner != null) latest = owner
+        }
+        val (owner, signal) = latest ?: return
+        scheduleRecentReportCacheWrite()
+        emit(snapshot(
+            state = currentState,
+            activeEew = activeEew,
+            event = lastEvent ?: owner.copy(p2pCrowdSignal = signal),
+            status = "Felt reports ${signal.reportCount} · ${sourceLabel()}"
+        ))
+    }
+
+    private fun handleCrowdSignal(incoming: P2pCrowdSignal): Pair<EarthquakeEvent, P2pCrowdSignal>? {
         val existing = pendingCrowdSignals[incoming.startedAt]
         val signal = existing?.mergeCumulativeUpdate(incoming) ?: incoming
         pendingCrowdSignals[signal.startedAt] = signal
-        if (signal == existing) return
-        if (!signal.isInformative()) return
+        while (pendingCrowdSignals.size > MAX_TRACKED_CROWD_CLUSTERS) {
+            val oldest = pendingCrowdSignals.keys.first()
+            pendingCrowdSignals.remove(oldest)
+            claimedCrowdEews.remove(oldest)
+        }
+        if (signal == existing || !signal.isInformative()) return null
 
-        val owner = crowdSignalOwner(signal) ?: return
+        val owner = crowdSignalOwner(signal) ?: return null
         if (owner.kind == EarthquakeEventKind.EEW) {
             claimedCrowdEews[signal.startedAt] = owner
         }
         amendCrowdOwner(owner, signal)
-        scheduleRecentReportCacheWrite()
-        emit(
-            snapshot(
-                state = currentState,
-                activeEew = activeEew,
-                event = lastEvent ?: owner.copy(p2pCrowdSignal = signal),
-                status = "Felt reports ${signal.reportCount} · ${sourceLabel()}"
-            )
-        )
+        return owner to signal
     }
 
     private fun crowdSignalOwner(signal: P2pCrowdSignal): EarthquakeEvent? {
@@ -1956,134 +2293,247 @@ class P2pQuakeProvider(
         )
     }
 
-    private fun recoverRecentFeed(generation: Int) {
-        if (testingMode || stopped) return
-        val now = System.currentTimeMillis()
-        if (now - lastRecoveryStartedAtMs < 5_000L) return
-        lastRecoveryStartedAtMs = now
+    private fun p2pPacketLagMillis(json: JSONObject, receivedAtMillis: Long): Long? {
+        val registeredAt = when (json.optInt("code", -1)) {
+            561 -> json.optString("created_at")
+            551, 556 -> json.optJSONObject("timestamp")?.optString("register").orEmpty()
+            P2P_CROWD_SIGNAL_CODE -> ""
+            else -> return null
+        }
+        val publishedAt = sourceInstant(registeredAt) ?: sourceInstant(json.optString("time"))
+            ?: return null
+        return receivedAtMillis - publishedAt.toEpochMilli()
+    }
 
+    private fun cancelHistoryRecovery() {
+        recoveryEpoch++
+        tsunamiRecoveryCall?.cancel()
+        tsunamiRecoveryCall = null
+        ingressScheduler.execute {
+            pendingOpenRecovery?.cancel(false)
+            pendingOpenRecovery = null
+            pendingFallbackRecovery?.cancel(false)
+            pendingFallbackRecovery = null
+            historyRecoveryCall?.cancel()
+            historyRecoveryCall = null
+        }
+    }
+
+    private data class RecoveredReport(val packet: JSONObject, val earthquake: EarthquakeEvent?)
+
+    // Admission, rate limiting and HTTP completion run on ingressScheduler,
+    // independently of report rendering and archive work on the main thread.
+    private fun recoverRecentFeed(generation: Int, trigger: String, lagMillis: Long? = null) {
+        if (testingMode || stopped || generation != connectionGeneration) return
+        val reportsOnly = trigger != "socket-open"
+        val dmdssCoversReports = dmdssConfirmedTypes.containsAll(DmDssFeed.CONFIRMED.types)
+        if (reportsOnly && dmdssCoversReports) return
+
+        val now = SystemClock.elapsedRealtime()
+        val eligibleAt = maxOf(
+            recoveryBackoffUntilElapsedMillis,
+            lastRecoveryStartedElapsedMillis?.plus(HISTORY_LAG_RECOVERY_INTERVAL_MILLIS) ?: 0L
+        )
+        if (historyRecoveryCall != null || now < eligibleAt) {
+            val delay = (eligibleAt - now).coerceAtLeast(1_000L)
+            if (!reportsOnly) {
+                pendingOpenRecovery?.cancel(false)
+                pendingOpenRecovery = ingressScheduler.schedule({
+                    pendingOpenRecovery = null
+                    recoverRecentFeed(generation, trigger)
+                }, delay, TimeUnit.MILLISECONDS)
+            } else if (trigger == "dmdss-fallback") {
+                pendingFallbackRecovery?.cancel(false)
+                pendingFallbackRecovery = ingressScheduler.schedule({
+                    pendingFallbackRecovery = null
+                    recoverRecentFeed(connectionGeneration, trigger)
+                }, delay, TimeUnit.MILLISECONDS)
+            }
+            return
+        }
+
+        val epoch = recoveryEpoch
+        val query = when {
+            reportsOnly -> "codes=551&limit=30"
+            dmdssCoversReports -> "codes=556&limit=100"
+            else -> "codes=551&codes=556&limit=100"
+        }
         val request = Request.Builder()
-            .url(
-                "https://api.p2pquake.net/v2/history" +
-                    "?codes=551&codes=554&codes=556&limit=100"
-            )
+            .url("https://api.p2pquake.net/v2/history?$query")
             .header("User-Agent", "QuakeDeck/0.9.65 (Android)")
             .build()
+        val call = httpClient.newCall(request)
+        historyRecoveryCall = call
+        lastRecoveryStartedElapsedMillis = now
+        recordP2pDiagnostic("history-recovery-started", transport = "http") {
+            put("generation", generation)
+            put("trigger", trigger)
+            put("lagMillis", lagMillis)
+        }
 
-        httpClient.newCall(request).enqueue(object : Callback {
-            override fun onFailure(call: Call, e: IOException) = Unit
+        call.enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                finishHistoryRecovery(call, epoch, generation, trigger, now, Result.failure(e))
+            }
 
             override fun onResponse(call: Call, response: Response) {
-                val messages = response.use {
-                    if (!response.isSuccessful) return
-                    runCatching {
-                        val array = JSONArray(response.body.string())
-                        buildList {
-                            for (i in 0 until array.length()) {
-                                array.optJSONObject(i)?.let(::add)
-                            }
-                        }
-                    }.getOrDefault(emptyList())
-                }
-                if (messages.isEmpty()) return
-
-                mainHandler.post {
-                    if (stopped || generation != connectionGeneration) return@post
-
-                    var changed = false
-                    var recoveredKind = LiveUpdateKind.NONE
-
-                    // /history is newest-first. Apply oldest-first so report
-                    // serials and preliminary/final JMA messages progress forward.
-                    messages.asReversed().forEach { json ->
-                        val code = json.optInt("code", -1)
-                        when (code) {
-                            551 -> {
-                                archiveReport(json, "recovery")
-                                if (!acceptMessage(json)) return@forEach
-                                parseQuake(json)?.let { quake ->
-                                    val kind = handleConfirmedQuake(
-                                        quake,
-                                        emitUpdate = false,
-                                        recovered = true
-                                    )
-                                    changed = true
-                                    if (isRecentMessage(json, 10 * 60L) && kind != LiveUpdateKind.NONE) {
-                                        recoveredKind = kind
-                                    }
-                                }
-                            }
-                            556 -> {
-                                archiveReport(json, "recovery")
-                                // Old warnings must never reopen the app as an
-                                // active EEW. Five minutes is ample for reconnect
-                                // recovery while still avoiding stale alarms.
-                                if (!isRecentMessage(json, 5 * 60L)) return@forEach
-                                if (!acceptMessage(json)) return@forEach
-                                val kind = handleEew(
-                                    json,
-                                    emitUpdate = false,
-                                    recovered = true
-                                )
-                                if (kind != LiveUpdateKind.NONE) {
-                                    changed = true
-                                    recoveredKind = kind
-                                }
-                            }
+                val httpCode = response.code
+                val retryAfter = response.header("Retry-After")
+                val backoff = if (httpCode == 429 || (httpCode == 503 && retryAfter != null)) {
+                    historyRetryAfterMillis(retryAfter)
+                } else null
+                val result = runCatching {
+                    response.use {
+                        if (!it.isSuccessful) throw IOException("HTTP $httpCode")
+                        val array = JSONArray(it.body.string())
+                        (0 until array.length()).mapNotNull(array::optJSONObject).map { packet ->
+                            val earthquake = if (packet.optInt("code") == 551 &&
+                                (!reportsOnly || isRecentMessage(packet, 10 * 60L))
+                            ) parseQuake(packet) else null
+                            RecoveredReport(packet, earthquake)
                         }
                     }
-
-                    val event = lastEvent
-                    if (event != null && recoveredKind != LiveUpdateKind.NONE) {
-                        val status = when (recoveredKind) {
-                            LiveUpdateKind.EEW -> "Recovered missed EEW report · ${sourceLabel()}"
-                            LiveUpdateKind.CANCELLED -> "Recovered EEW cancellation · ${sourceLabel()}"
-                            LiveUpdateKind.CONFIRMED ->
-                                "Recovered ${earthquakeReportStatusText(event).lowercase()} · ${sourceLabel()}"
-                            else -> "${sourceLabel()} recent feed synchronized"
-                        }
-                        emit(
-                            // Recovery fills the interval while QuakeDeck was
-                            // not running. It is deliberately a plain snapshot:
-                            // it refreshes the report card and history, but must
-                            // never be mistaken for a newly received live packet
-                            // by the UI's automatic camera-focus logic.
-                            snapshot(
-                                state = ConnectionState.CONNECTED,
-                                activeEew = activeEew,
-                                event = event,
-                                status = status
-                            )
-                        )
-                    } else if (changed && event != null) {
-                        emit(
-                            snapshot(
-                                state = ConnectionState.CONNECTED,
-                                activeEew = activeEew,
-                                event = event,
-                                status = "${sourceLabel()} connected · recent feed synchronized"
-                            )
-                        )
-                    }
                 }
+                finishHistoryRecovery(call, epoch, generation, trigger, now, result, httpCode, backoff)
             }
         })
     }
 
-    private fun recoverLatestTsunami(generation: Int) {
-        if (testingMode || stopped) return
+    private fun historyRetryAfterMillis(value: String?): Long {
+        val delay = value?.trim()?.toLongOrNull()?.coerceIn(0L, 86_400L)?.times(1_000L)
+            ?: value?.let {
+                runCatching {
+                    OffsetDateTime.parse(it, DateTimeFormatter.RFC_1123_DATE_TIME)
+                        .toInstant().toEpochMilli() - System.currentTimeMillis()
+                }.getOrNull()
+            }
+        return (delay ?: HISTORY_RATE_LIMIT_PAUSE_MS)
+            .coerceIn(HISTORY_RATE_LIMIT_PAUSE_MS, TimeUnit.DAYS.toMillis(1))
+    }
 
+    private fun finishHistoryRecovery(
+        call: Call,
+        epoch: Int,
+        generation: Int,
+        trigger: String,
+        startedAt: Long,
+        result: Result<List<RecoveredReport>>,
+        httpCode: Int? = null,
+        backoffMillis: Long? = null
+    ) {
+        val finishedAt = SystemClock.elapsedRealtime()
+        val recordedAt = System.currentTimeMillis()
+        ingressScheduler.execute {
+            if (historyRecoveryCall !== call) return@execute
+            historyRecoveryCall = null
+            if (backoffMillis != null) {
+                recoveryBackoffUntilElapsedMillis = maxOf(
+                    recoveryBackoffUntilElapsedMillis, finishedAt + backoffMillis
+                )
+            }
+            val messages = result.getOrNull()
+            recordP2pDiagnostic("history-recovery-finished", recordedAt, transport = "http") {
+                put("generation", generation)
+                put("trigger", trigger)
+                put("durationMillis", finishedAt - startedAt)
+                put("httpCode", httpCode)
+                put("backoffMillis", backoffMillis)
+                put("receivedCount", messages?.size ?: 0)
+                put("result", if (result.isSuccess) "Success" else "Failed")
+                result.exceptionOrNull()?.let { put("error", it.javaClass.simpleName) }
+            }
+            if (messages.isNullOrEmpty()) return@execute
+            mainHandler.post {
+                if (stopped || testingMode || epoch != recoveryEpoch) return@post
+                val recovered = applyRecoveredReports(messages, trigger != "socket-open")
+                if (recovered > 0) recordP2pDiagnostic("history-recovery-applied", transport = "http") {
+                    put("generation", generation)
+                    put("trigger", trigger)
+                    put("recoveredCount", recovered)
+                }
+            }
+        }
+    }
+
+    private fun applyRecoveredReports(messages: List<RecoveredReport>, lagRecovery: Boolean): Int {
+        var recovered = 0
+        var recoveredKind = LiveUpdateKind.NONE
+
+        // Apply history in publication order so earlier reports can fill details
+        // without replacing a newer live event.
+        messages.asReversed().forEach { (json, earthquake) ->
+            when (json.optInt("code", -1)) {
+                551 -> {
+                    val recent = isRecentMessage(json, 10 * 60L)
+                    if (!useP2pConfirmedReport(json) || lagRecovery && !recent) return@forEach
+                    if (!acceptMessage(json)) return@forEach
+                    archiveReport(json, "recovery")
+                    earthquake?.let { quake ->
+                        val kind = handleConfirmedQuake(quake, emitUpdate = false, recovered = true)
+                        recovered++
+                        if (recent && kind != LiveUpdateKind.NONE) recoveredKind = kind
+                    }
+                }
+                556 -> {
+                    if (lagRecovery) return@forEach
+                    archiveReport(json, "recovery")
+                    // Older warnings cannot reopen the active EEW presentation.
+                    if (!isRecentMessage(json, 5 * 60L) || !acceptMessage(json)) return@forEach
+                    val kind = handleEew(json, emitUpdate = false, recovered = true)
+                    if (kind != LiveUpdateKind.NONE) {
+                        recovered++
+                        recoveredKind = kind
+                    }
+                }
+            }
+        }
+
+        val event = lastEvent ?: return recovered
+        if (recovered == 0) return recovered
+        val status = when (recoveredKind) {
+            LiveUpdateKind.EEW -> "Recovered missed EEW report · ${sourceLabel()}"
+            LiveUpdateKind.CANCELLED -> "Recovered EEW cancellation · ${sourceLabel()}"
+            LiveUpdateKind.CONFIRMED ->
+                "Recovered ${earthquakeReportStatusText(event).lowercase()} · ${sourceLabel()}"
+            else -> "${sourceLabel()} connected · recent feed synchronized"
+        }
+        // Lag recovery is a live substitute for the delayed confirmed packet.
+        // Publish the merged current report once. Reconnect recovery remains a
+        // quiet snapshot so older catch-up reports do not drive live alerts.
+        val update = if (lagRecovery && recoveredKind == LiveUpdateKind.CONFIRMED) {
+            liveSnapshot(currentState, activeEew, event, status, recoveredKind)
+        } else {
+            snapshot(currentState, activeEew, event, status)
+        }
+        emit(update)
+        return recovered
+    }
+
+    private fun recoverLatestTsunami() {
+        if (testingMode || stopped || tsunamiRecoveryCall != null ||
+            dmdssTsunamiAvailable && lastTsunamiFromDmdss
+        ) return
+
+        val epoch = recoveryEpoch
+        val recoveringDmdssGap = !dmdssTsunamiAvailable && lastTsunamiFromDmdss
+        val issueAtRequest = latestLiveTsunamiIssue
         val request = Request.Builder()
             .url("https://api.p2pquake.net/v2/history?codes=552&limit=10")
             .header("User-Agent", "QuakeDeck/0.9.65 (Android)")
             .build()
 
-        httpClient.newCall(request).enqueue(object : Callback {
-            override fun onFailure(call: Call, e: IOException) = Unit
+        val call = httpClient.newCall(request)
+        tsunamiRecoveryCall = call
+        call.enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                mainHandler.post {
+                    if (tsunamiRecoveryCall === call) tsunamiRecoveryCall = null
+                }
+            }
 
             override fun onResponse(call: Call, response: Response) {
                 val messages = response.use {
-                    if (!response.isSuccessful) return
+                    if (!response.isSuccessful) return@use emptyList()
                     runCatching {
                         val array = JSONArray(response.body.string())
                         buildList {
@@ -2093,11 +2543,15 @@ class P2pQuakeProvider(
                         }
                     }.getOrDefault(emptyList())
                 }
-                if (messages.isEmpty()) return
-
                 mainHandler.post {
-                    if (stopped || testingMode || generation != connectionGeneration) return@post
+                    if (tsunamiRecoveryCall !== call) return@post
+                    tsunamiRecoveryCall = null
+                    if (messages.isEmpty() || stopped || testingMode || epoch != recoveryEpoch) return@post
+                    if (dmdssTsunamiAvailable && lastTsunamiFromDmdss &&
+                        (!recoveringDmdssGap || issueAtRequest != latestLiveTsunamiIssue)
+                    ) return@post
 
+                    val previousReport = lastTsunami
                     var recoveredKind = LiveUpdateKind.NONE
                     messages.asReversed().forEach { json ->
                         archiveReport(json, "recovery")
@@ -2109,14 +2563,14 @@ class P2pQuakeProvider(
 
                     val event = lastEvent ?: waitingSnapshot(
                         mode = sourceMode,
-                        state = ConnectionState.CONNECTED,
+                        state = currentState,
                         status = "${sourceLabel()} connected",
                         testingMode = testingMode
                     ).event
-                    if (recoveredKind != LiveUpdateKind.NONE) {
+                    if (recoveredKind != LiveUpdateKind.NONE && lastTsunami != null) {
                         emit(
                             liveSnapshot(
-                                state = ConnectionState.CONNECTED,
+                                state = currentState,
                                 activeEew = activeEew,
                                 event = event,
                                 status = when (recoveredKind) {
@@ -2127,6 +2581,8 @@ class P2pQuakeProvider(
                                 updateKind = recoveredKind
                             )
                         )
+                    } else if (previousReport != null && lastTsunami == null) {
+                        emit(snapshot(currentState, activeEew, event, "Tsunami information cleared · P2PQuake"))
                     }
                 }
             }
@@ -2154,6 +2610,13 @@ class P2pQuakeProvider(
             if (plannedRollover) 0L else 200L,
             if (plannedRollover) 250L else 900L
         )
+        recordP2pDiagnostic("reconnect-scheduled") {
+            put("generation", connectionGeneration)
+            put("retryAttempt", reconnectAttempt)
+            put("delayMillis", delayMs)
+            put("plannedRollover", plannedRollover)
+            put("reason", reason.take(240))
+        }
 
         val event = lastEvent
         if (event != null) {
@@ -2350,40 +2813,78 @@ class P2pQuakeProvider(
     }
 
     private fun acceptMessage(json: JSONObject): Boolean {
+        val code = json.optInt("code", -1)
         val id = json.optString("id").trim().ifBlank { json.optString("_id").trim() }
-        if (id.isBlank()) return true
+        val bulletin = if (code == 551) confirmedBulletinIdentity(json) else null
+        if (id.isBlank() && bulletin == null) return true
         synchronized(seenMessageIds) {
-            if (!seenMessageIds.add(id)) return false
-            while (seenMessageIds.size > 256) {
-                val first = seenMessageIds.iterator()
-                if (first.hasNext()) {
-                    first.next()
-                    first.remove()
-                }
+            val ids = if (code in OFFICIAL_REPORT_CODES) seenOfficialReportIds else seenMessageIds
+            val wrapperKey = "wrapper:$code:$id"
+            if ((id.isNotBlank() && wrapperKey in ids) || (bulletin != null && bulletin in ids)) {
+                return false
             }
+            if (id.isNotBlank()) ids.add(wrapperKey)
+            if (bulletin != null) ids.add(bulletin)
+            while (ids.size > 512) ids.remove(ids.first())
         }
         return true
+    }
+
+    private fun clearSeenMessageIds() {
+        synchronized(seenMessageIds) {
+            seenMessageIds.clear()
+            seenOfficialReportIds.clear()
+        }
     }
 
     private fun handleTsunami(
         json: JSONObject,
         emitUpdate: Boolean,
-        recovered: Boolean
+        recovered: Boolean,
+        fromDmdss: Boolean = false
     ): LiveUpdateKind {
         val parsed = parseTsunami(json)
+        if (!parsed.cancelled && parsed.areas.isEmpty()) return LiveUpdateKind.NONE
         val current = lastTsunami
-
-        if (!testingMode && current != null) {
-            val incomingInstant = tsunamiIssueInstant(parsed)
-            val currentInstant = tsunamiIssueInstant(current)
-            if (
-                incomingInstant != null &&
-                currentInstant != null &&
-                incomingInstant.isBefore(currentInstant)
-            ) return LiveUpdateKind.NONE
+        val source = if (fromDmdss) "DM-D.S.S" else sourceLabel()
+        val issue = tsunamiIssueInstant(parsed)
+        val sameNotice = !testingMode && current != null && fromDmdss != lastTsunamiFromDmdss &&
+            sameTsunamiNotice(current, parsed)
+        val previous = latestLiveTsunamiIssue
+        if (!testingMode && issue != null && previous != null) {
+            if (issue < previous && !sameNotice) return LiveUpdateKind.NONE
+            if (issue == previous && latestLiveTsunamiEnded && !parsed.cancelled) return LiveUpdateKind.NONE
         }
 
-        val sessionId = current?.takeUnless { it.cancelled }?.id ?: parsed.id
+        if (fromDmdss && parsed.issueType == DmDssTsunamiParser.INFORMATION_TYPE) {
+            // Supplemental observations can fill arrival details. The warning
+            // bulletin alone sets grades, issues a new alert or lifts an alert.
+            if (current == null || !activeTsunami ||
+                tsunamiAlertGrades(current) != tsunamiAlertGrades(parsed)
+            ) return LiveUpdateKind.NONE
+            val areasByName = parsed.areas.associateBy { it.name }
+            val enriched = current.copy(areas = current.areas.map { area ->
+                val update = areasByName[area.name] ?: return@map area
+                if (update.grade != area.grade ||
+                    update.arrivalTime == null && update.arrivalCondition == null
+                ) return@map area
+                area.copy(
+                    immediate = update.immediate,
+                    arrivalTime = update.arrivalTime,
+                    arrivalCondition = update.arrivalCondition
+                )
+            })
+            if (enriched != current) {
+                lastTsunami = enriched
+                val event = lastEvent ?: waitingSnapshot(mode = sourceMode, state = currentState).event
+                emit(snapshot(currentState, activeEew, event, "Tsunami information · DM-D.S.S")
+                    .copy(dmdssReportUpdate = true))
+            }
+            return LiveUpdateKind.NONE
+        }
+
+        if (sameNotice && !fromDmdss) return LiveUpdateKind.NONE
+        val sessionId = current?.takeIf { !it.cancelled || parsed.cancelled && sameNotice }?.id ?: parsed.id
         val merged = parsed.copy(
             id = sessionId,
             areas = if (parsed.cancelled && parsed.areas.isEmpty()) {
@@ -2391,11 +2892,10 @@ class P2pQuakeProvider(
             } else {
                 parsed.areas
             },
-            timelineOffsetMillis = current?.timelineOffsetMillis
-                ?: parsed.timelineOffsetMillis
+            timelineOffsetMillis = current?.timelineOffsetMillis ?: parsed.timelineOffsetMillis
         )
 
-        if (current == merged) return LiveUpdateKind.NONE
+        if (current == merged && !sameNotice) return LiveUpdateKind.NONE
 
         val now = Instant.now()
         val expired = merged.expiresAt
@@ -2405,51 +2905,49 @@ class P2pQuakeProvider(
             ?.isBefore(now)
             ?: false
         val staleRecoveredCancellation = recovered && merged.cancelled &&
-            tsunamiIssueInstant(merged)?.plusSeconds(TSUNAMI_CANCELLATION_RETENTION_SECONDS)
-                ?.isBefore(now) == true
+            issue?.plusSeconds(TSUNAMI_CANCELLATION_RETENTION_SECONDS)?.isBefore(now) == true
 
+        if (!testingMode && issue != null) {
+            latestLiveTsunamiIssue = if (previous == null || issue > previous) issue else previous
+            latestLiveTsunamiEnded = merged.cancelled || expired
+        }
         if (expired || staleRecoveredCancellation) {
             cancelTsunamiCleanup()
             activeTsunami = false
             lastTsunami = null
+            if (emitUpdate && current != null) {
+                val event = lastEvent ?: waitingSnapshot(mode = sourceMode, state = currentState).event
+                emit(snapshot(currentState, activeEew, event, "Tsunami information cleared · $source")
+                    .copy(dmdssReportUpdate = fromDmdss))
+            }
             return LiveUpdateKind.NONE
         }
 
         activeTsunami = !merged.cancelled &&
             merged.areas.any { it.grade.severity >= TsunamiGrade.ADVISORY.severity }
         lastTsunami = merged
+        lastTsunamiFromDmdss = fromDmdss
         scheduleTsunamiCleanup(merged)
 
-        val updateKind = if (merged.cancelled) {
-            LiveUpdateKind.TSUNAMI_CANCELLED
-        } else {
-            LiveUpdateKind.TSUNAMI
+        val updateKind = when {
+            sameNotice -> LiveUpdateKind.NONE
+            merged.cancelled -> LiveUpdateKind.TSUNAMI_CANCELLED
+            else -> LiveUpdateKind.TSUNAMI
         }
-
         if (emitUpdate) {
             val highest = tsunamiGradeLabel(merged.highestGrade)
-            emit(
-                liveSnapshot(
-                    state = ConnectionState.CONNECTED,
-                    activeEew = activeEew,
-                    event = lastEvent ?: waitingSnapshot(
-                        mode = sourceMode,
-                        state = ConnectionState.CONNECTED,
-                        status = "Tsunami information received",
-                        testingMode = testingMode
-                    ).event,
-                    status = when {
-                        merged.cancelled -> if (recovered) {
-                            "Recovered tsunami cancellation · ${sourceLabel()}"
-                        } else {
-                            "Tsunami warnings cancelled · ${sourceLabel()}"
-                        }
-                        recovered -> "Recovered tsunami $highest · ${sourceLabel()}"
-                        else -> "TSUNAMI $highest · ${sourceLabel()}"
-                    },
-                    updateKind = updateKind
-                )
-            )
+            val event = lastEvent ?: waitingSnapshot(mode = sourceMode, state = currentState,
+                testingMode = testingMode).event
+            val status = when {
+                merged.cancelled -> "Tsunami warnings cancelled · $source"
+                else -> "TSUNAMI $highest · $source"
+            }
+            val update = if (updateKind == LiveUpdateKind.NONE) {
+                snapshot(currentState, activeEew, event, status)
+            } else {
+                liveSnapshot(currentState, activeEew, event, status, updateKind)
+            }
+            emit(update.copy(dmdssReportUpdate = fromDmdss))
         }
         return updateKind
     }
@@ -2554,10 +3052,27 @@ class P2pQuakeProvider(
     private fun handleConfirmedQuake(
         incoming: EarthquakeEvent,
         emitUpdate: Boolean,
-        recovered: Boolean
+        recovered: Boolean,
+        fromDmdss: Boolean = false
     ): LiveUpdateKind {
+        val source = if (fromDmdss) "DM-D.S.S" else sourceLabel()
+        val reportType = incoming.reportType
+        val eventId = incoming.jmaReportEventId
+        if (!testingMode && reportType != null && eventId != null) {
+            val withdrawnAt = confirmedWithdrawals[eventId to reportType]
+            val issuedAt = reportIssuedInstant(incoming)?.toEpochMilli() ?: Long.MIN_VALUE
+            if (withdrawnAt != null && issuedAt <= withdrawnAt) return LiveUpdateKind.NONE
+        }
         val quake = addToHistory(incoming)
         if (!testingMode) {
+            if (reportType != null) {
+                val components = confirmedComponents.getOrPut(quake.id) { linkedMapOf() }
+                val previous = components[reportType]
+                if (previous == null || incomingReportIsAuthoritative(previous, incoming)) {
+                    components[reportType] = incoming
+                }
+                while (confirmedComponents.size > 64) confirmedComponents.remove(confirmedComponents.keys.first())
+            }
             showingRememberedReports = false
             scheduleRecentReportCacheWrite()
         }
@@ -2594,11 +3109,11 @@ class P2pQuakeProvider(
             if (emitUpdate) {
                 emit(
                     snapshot(
-                        state = ConnectionState.CONNECTED,
+                        state = currentState,
                         activeEew = true,
                         event = current ?: warning,
-                        status = "EEW active · another earthquake report added"
-                    )
+                        status = "EEW active · another earthquake report added · $source"
+                    ).copy(dmdssReportUpdate = fromDmdss)
                 )
             }
             return LiveUpdateKind.NONE
@@ -2611,18 +3126,18 @@ class P2pQuakeProvider(
         if (emitUpdate) {
             emit(
                 liveSnapshot(
-                    state = ConnectionState.CONNECTED,
+                    state = currentState,
                     activeEew = activeEew,
                     event = quake,
                     status = if (recovered) {
-                        "Recovered ${earthquakeReportStatusText(quake).lowercase()} · ${sourceLabel()}"
+                        "Recovered ${earthquakeReportStatusText(quake).lowercase()} · $source"
                     } else if (activeEew && confirmsActiveEew) {
-                        "${earthquakeReportStatusText(quake)} · EEW wave passage active · ${sourceLabel()}"
+                        "${earthquakeReportStatusText(quake)} · EEW wave passage active · $source"
                     } else {
-                        "${earthquakeReportStatusText(quake)} · ${sourceLabel()}"
+                        "${earthquakeReportStatusText(quake)} · $source"
                     },
                     updateKind = LiveUpdateKind.CONFIRMED
-                )
+                ).copy(dmdssReportUpdate = fromDmdss)
             )
         }
         return LiveUpdateKind.CONFIRMED
@@ -2794,7 +3309,8 @@ class P2pQuakeProvider(
         return LiveUpdateKind.EEW
     }
 
-    private fun parseQuake(json: JSONObject): EarthquakeEvent? {
+    internal fun parseQuake(json: JSONObject): EarthquakeEvent? {
+        if (json.optBoolean("cancelled")) return null
         val earthquake = json.optJSONObject("earthquake") ?: return null
         val issue = json.optJSONObject("issue")
         val issueType = issue?.optString("type").orEmpty()
@@ -2817,11 +3333,20 @@ class P2pQuakeProvider(
                     val point = pointsJson.optJSONObject(i) ?: continue
                     val scale = scaleName(point.optInt("scale", -1))
                     if (scale == "—") continue
-                    val pref = point.optString("pref")
                     val addr = point.optString("addr")
                     val isArea = point.optBoolean("isArea", false) ||
                         issueType.equals("ScalePrompt", ignoreCase = true)
-                    val station = if (!isArea) StationCatalog.lookup(pref, addr) else null
+                    val sourcePrefecture = point.optString("pref")
+                    val station = if (isArea) null else {
+                        StationCatalog.lookupByCode(point.optString("stationCode"))
+                            ?: StationCatalog.lookup(sourcePrefecture, addr)
+                    }
+                    val regionCode = point.optString("regionCode").takeIf(String::isNotBlank)
+                    val pref = sourcePrefecture.ifBlank {
+                        station?.prefectureJa ?: regionCode?.let {
+                            StationCatalog.administrativeMetadata(appContext).reportingAreas[it]?.prefectureJa
+                        }.orEmpty()
+                    }
                     val name = listOf(pref, addr)
                         .filter { it.isNotBlank() }
                         .distinct()
@@ -2835,7 +3360,8 @@ class P2pQuakeProvider(
                                 longitude = station?.longitude,
                                 prefecture = pref,
                                 stationName = addr.takeIf { it.isNotBlank() },
-                                isArea = isArea
+                                isArea = isArea,
+                                regionCode = regionCode
                             )
                         )
                     }
@@ -2846,7 +3372,10 @@ class P2pQuakeProvider(
 
         // All ordinary JMA reports for one incident share the earthquake origin
         // time, even though their message IDs and payload fields differ.
-        val id = "quake:$time"
+        val jmaEventId = issue?.optString("eventId")?.takeIf { it.isNotBlank() && it != "null" }
+        val id = if (jmaEventId != null && issue.optString("telegramType").isNotBlank()) {
+            "quake:jma:$jmaEventId"
+        } else "quake:$time"
         val place = if (hasHypocenter) {
             hypo?.optString("name").orEmpty().ifBlank {
                 if (!JapanMapCoverage.contains(lat, lon)) "Distant earthquake" else "Unknown hypocenter"
@@ -2872,6 +3401,7 @@ class P2pQuakeProvider(
             contributingReportTypes = listOfNotNull(reportType),
             reportCount = 1,
             hasHypocenter = hasHypocenter,
+            jmaReportEventId = jmaEventId,
             reportCorrection = issueCorrection.takeIf {
                 it.isNotBlank() &&
                     !it.equals("None", ignoreCase = true) &&
@@ -3047,7 +3577,8 @@ class P2pQuakeProvider(
             p2pCrowdSignal = incoming.p2pCrowdSignal ?: existing.p2pCrowdSignal,
             // The frame label reflects the newest reliable report, regardless
             // of which asynchronous source happened to deliver it last.
-            reportCorrection = authoritative.reportCorrection
+            reportCorrection = authoritative.reportCorrection,
+            jmaReportEventId = authoritative.jmaReportEventId ?: supplementary.jmaReportEventId
         )
     }
 
@@ -3059,6 +3590,9 @@ class P2pQuakeProvider(
             first.kind != EarthquakeEventKind.CONFIRMED ||
             second.kind != EarthquakeEventKind.CONFIRMED
         ) return false
+        if (first.jmaReportEventId != null && second.jmaReportEventId != null) {
+            return first.jmaReportEventId == second.jmaReportEventId
+        }
         val firstTime = eventInstant(first) ?: return false
         val secondTime = eventInstant(second) ?: return false
         return abs(java.time.Duration.between(firstTime, secondTime).seconds) <= 2L
@@ -3169,14 +3703,11 @@ class P2pQuakeProvider(
             // P2PQuake also uses local JST strings without an offset.
         }
 
-        val normalizedLocalValue = cleaned.replace('T', ' ')
-        return LOCAL_SOURCE_FORMATTERS.firstNotNullOfOrNull { formatter ->
-            runCatching {
-                LocalDateTime.parse(normalizedLocalValue, formatter)
-                    .atZone(JST_ZONE)
-                    .toInstant()
-            }.getOrNull()
-        }
+        // The API can omit trailing zeroes in fractional seconds.
+        val normalizedLocalValue = cleaned.replace('/', '-').replace(' ', 'T')
+        return runCatching {
+            LocalDateTime.parse(normalizedLocalValue).atZone(JST_ZONE).toInstant()
+        }.getOrNull()
     }
 
     private val reportChronologicalComparator = compareBy<JSONObject>(
@@ -3277,21 +3808,8 @@ class P2pQuakeProvider(
     private fun formatJst(value: String): String {
         val cleaned = value.trim()
         if (cleaned.isBlank() || cleaned.equals("null", ignoreCase = true)) return "—"
-
-        return try {
-            OffsetDateTime.parse(cleaned)
-                .atZoneSameInstant(JST_ZONE)
-                .format(JST_DISPLAY_FORMATTER)
-        } catch (_: DateTimeParseException) {
-            val normalizedLocalValue = cleaned.replace('T', ' ')
-            LOCAL_SOURCE_FORMATTERS.firstNotNullOfOrNull { formatter ->
-                runCatching {
-                    LocalDateTime.parse(normalizedLocalValue, formatter)
-                        .atZone(JST_ZONE)
-                        .format(JST_DISPLAY_FORMATTER)
-                }.getOrNull()
-            } ?: normalizedLocalValue
-        }
+        return sourceInstant(cleaned)?.atZone(JST_ZONE)?.format(JST_DISPLAY_FORMATTER)
+            ?: cleaned.replace('T', ' ')
     }
 
     private fun sandboxTimelineOffset(
@@ -3343,19 +3861,20 @@ class P2pQuakeProvider(
     private class HistoricalDownloadCancelledException : Exception()
 
     private companion object {
-        val ARCHIVE_CODES = setOf(551, 552, 554, 556, P2P_CROWD_SIGNAL_CODE)
+        val OFFICIAL_REPORT_CODES = setOf(551, 552, 554, 556)
+        val ARCHIVE_CODES = OFFICIAL_REPORT_CODES + P2P_CROWD_SIGNAL_CODE
         val JST_ZONE: ZoneId = ZoneId.of("Asia/Tokyo")
         val JST_DISPLAY_FORMATTER: DateTimeFormatter =
             DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss 'JST'")
-        val LOCAL_SOURCE_FORMATTERS: List<DateTimeFormatter> = listOf(
-            DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss.SSS"),
-            DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss"),
-            DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS"),
-            DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
-        )
         const val HISTORY_PAGE_SIZE = 100
         const val HISTORY_REQUESTS_PER_WINDOW = 55
         const val HISTORY_RATE_LIMIT_PAUSE_MS = 61_000L
+        const val HISTORY_LAG_SAMPLE_INTERVAL_MILLIS = 5_000L
+        const val HISTORY_RECOVERY_LAG_THRESHOLD_MILLIS = 30_000L
+        const val HISTORY_LAG_RECOVERY_INTERVAL_MILLIS = 30_000L
+        const val HISTORY_QUIET_THRESHOLD_MILLIS = 60_000L
+        const val MAX_PENDING_CROWD_ARCHIVE_PACKETS = 1_024
+        const val MAX_TRACKED_CROWD_CLUSTERS = 64
         const val AUTO_BACKFILL_MIN_INTERVAL_MS = 15L * 60L * 1000L
         const val TSUNAMI_CANCELLATION_RETENTION_SECONDS = 15L * 60L
         const val INJECTED_TEST_DISPLAY_MILLIS = 45_000L
@@ -3373,13 +3892,17 @@ class P2pQuakeProvider(
 /** Keep raw flood evidence, but never enqueue diagnostics-only 561 on the UI thread. */
 internal fun receiveP2pLivePacket(
     text: String,
-    recordPacket: (String) -> Unit,
+    recordPacket: (String, JSONObject?) -> Unit,
+    observe: (JSONObject) -> Unit = {},
     dispatch: (JSONObject) -> Unit
 ) {
     val json = runCatching { JSONObject(text) }.getOrNull()
-    if (shouldRetainP2pDiagnosticPacket(json)) recordPacket(text)
-    if (json == null || json.optInt("code", -1) == 561) return
-    dispatch(json)
+    if (shouldRetainP2pDiagnosticPacket(json)) recordPacket(text, json)
+    if (json == null) return
+    observe(json)
+    when (json.optInt("code", -1)) {
+        551, 552, 554, 556, P2P_CROWD_SIGNAL_CODE -> dispatch(json)
+    }
 }
 
 internal fun shouldRetainP2pDiagnosticPacket(json: JSONObject?): Boolean {
@@ -3403,4 +3926,33 @@ internal data class HistoricalReplayOrderKey(
         )
 }
 
+internal fun sameTsunamiNotice(first: TsunamiReport, second: TsunamiReport): Boolean {
+    val firstIssue = EewLifecyclePolicy.sourceMillis(first.issueTime) ?: return false
+    val secondIssue = EewLifecyclePolicy.sourceMillis(second.issueTime) ?: return false
+    if (firstIssue / 60_000L != secondIssue / 60_000L || first.cancelled != second.cancelled) return false
+    if (first.cancelled) return true
+    val firstAlerts = tsunamiAlertGrades(first)
+    val secondAlerts = tsunamiAlertGrades(second)
+    if (firstAlerts.isNotEmpty() || secondAlerts.isNotEmpty()) return firstAlerts == secondAlerts
+    return first.areas.associate { it.name to it.grade } == second.areas.associate { it.name to it.grade }
+}
+
+private fun tsunamiAlertGrades(report: TsunamiReport): Map<String, TsunamiGrade> =
+    report.areas.filter { it.grade.severity >= TsunamiGrade.ADVISORY.severity }
+        .associate { it.name to it.grade }
+
 internal const val P2P_ROUTINE_PEER_COUNT_CODE = 555
+
+private fun confirmedOriginMillis(json: JSONObject): Long? =
+    EewLifecyclePolicy.sourceMillis(json.optJSONObject("earthquake")?.optString("time"))
+
+/** HTTP and socket wrappers can have different IDs for the same JMA bulletin. */
+internal fun confirmedBulletinIdentity(json: JSONObject): String? {
+    val issue = json.optJSONObject("issue") ?: return null
+    val issuedAt = EewLifecyclePolicy.sourceMillis(issue.optString("time")) ?: return null
+    val origin = confirmedOriginMillis(json) ?: return null
+    val type = issue.optString("type").lowercase().takeIf(String::isNotBlank) ?: return null
+    val correction = issue.optString("correct").lowercase()
+        .takeUnless { it in setOf("", "none", "unknown") }.orEmpty()
+    return listOf("jma", issuedAt / 1_000, origin / 1_000, type, correction).joinToString(":")
+}

@@ -49,8 +49,6 @@ internal class RecentReportCache(context: Context) {
             .distinctBy { it.id }
             .take(MAX_EVENTS)
             .toList()
-        if (confirmed.isEmpty()) return
-
         val root = JSONObject()
             .put("version", CACHE_VERSION)
             .put("savedAtMillis", System.currentTimeMillis())
@@ -93,6 +91,7 @@ internal class RecentReportCache(context: Context) {
         .put("reportCount", event.reportCount)
         .put("hasHypocenter", event.hasHypocenter)
         .putNullable("reportCorrection", event.reportCorrection)
+        .putNullable("jmaReportEventId", event.jmaReportEventId)
         .put("isCancelled", event.isCancelled)
         .putNullable("p2pCrowdSignal", event.p2pCrowdSignal?.let(::crowdSignalToJson))
         .put("points", JSONArray().apply {
@@ -166,6 +165,7 @@ internal class RecentReportCache(context: Context) {
             reportCount = json.optInt("reportCount", 1).coerceAtLeast(1),
             hasHypocenter = json.optBoolean("hasHypocenter", true),
             reportCorrection = json.nullableString("reportCorrection"),
+            jmaReportEventId = json.nullableString("jmaReportEventId"),
             isCancelled = json.optBoolean("isCancelled", false),
             p2pCrowdSignal = json.optJSONObject("p2pCrowdSignal")
                 ?.let(::crowdSignalFromJson),

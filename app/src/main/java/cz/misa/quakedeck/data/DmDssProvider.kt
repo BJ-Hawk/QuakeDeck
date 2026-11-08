@@ -16,16 +16,25 @@ import okhttp3.Response
 import okhttp3.WebSocket
 import okhttp3.WebSocketListener
 import okio.ByteString
+import org.json.JSONArray
 import org.json.JSONObject
 import java.io.IOException
+import java.util.concurrent.ArrayBlockingQueue
 import java.util.concurrent.Executors
+import java.util.concurrent.RejectedExecutionException
+import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.TimeUnit
 import kotlin.math.min
 
-/** Live DM-D.S.S adapter for the deliberately narrow `eew.forecast` slice. */
+/** One live DM-D.S.S connection for the account's authorized feeds. */
 class DmDssProvider(
     context: Context,
-    private val oauth: DmDssOAuthClient
+    private val oauth: DmDssOAuthClient,
+    private val parseConfirmedReport: (JSONObject) -> EarthquakeEvent?,
+    private val onConfirmedReport: (JSONObject, EarthquakeEvent?) -> Unit,
+    private val onConfirmedTypesChanged: (Set<String>) -> Unit,
+    private val onTsunamiReport: (JSONObject) -> Unit,
+    private val onTsunamiAvailabilityChanged: (Boolean) -> Unit
 ) : QuakeDataProvider {
     override val mode = DataSourceMode.DMDSS
 
@@ -46,10 +55,35 @@ class DmDssProvider(
         .build()
     private var callback: ((AppSnapshot) -> Unit)? = null
     @Volatile private var socket: WebSocket? = null
+    private val packetExecutor = ThreadPoolExecutor(
+        1, 1, 0L, TimeUnit.MILLISECONDS, ArrayBlockingQueue(32),
+        { task -> Thread(task, "QuakeDeck-DM-bulletins").apply { isDaemon = true } }
+    )
     private val pongExecutor = Executors.newSingleThreadScheduledExecutor { task ->
         Thread(task, "QuakeDeck-DM-pong").apply { isDaemon = true }
     }
-    private var stopped = true
+    @Volatile private var stopped = true
+    private var requestedFeeds = emptySet<DmDssFeed>()
+    private var liveTypes = emptySet<String>()
+    private var tsunamiAvailable = false
+
+    internal fun connectedFeedStatus(): String {
+        val forecastSource = if (liveTypes.any { it in DmDssFeed.FORECAST.types }) "DM-D.S.S" else "P2PQuake"
+        val reportTypes = liveTypes.intersect(DmDssFeed.CONFIRMED.types)
+        val reportSource = when {
+            reportTypes.isEmpty() -> "P2PQuake"
+            reportTypes == DmDssFeed.CONFIRMED.types -> "DM-D.S.S"
+            else -> "DM-D.S.S + P2PQuake"
+        }
+        val tsunamiSource = if (tsunamiAvailable) "DM-D.S.S" else "P2PQuake"
+        return "EEW: $forecastSource · JMA reports: $reportSource · Tsunami: $tsunamiSource"
+    }
+
+    internal fun configureFeeds(feeds: Set<DmDssFeed>) {
+        if (requestedFeeds == feeds) return
+        requestedFeeds = feeds
+        if (!stopped) reconnect()
+    }
     private var connecting = false
     private var retryAttempt = 0
     private var activeEvent: EarthquakeEvent? = null
@@ -66,10 +100,10 @@ class DmDssProvider(
 
     override fun start(onSnapshot: (AppSnapshot) -> Unit) {
         callback = onSnapshot
-        if (!oauth.isAuthorized) {
+        if (!oauth.isAuthorized || requestedFeeds.isEmpty()) {
             stopped = true
             diagnostics.recordSocket("Not authorized")
-            emit(state = ConnectionState.DISCONNECTED, status = "Connect DM-D.S.S to use EEW forecasts")
+            emit(state = ConnectionState.DISCONNECTED, status = "Connect DM-D.S.S to use its subscribed feeds")
             return
         }
         if (stopped) {
@@ -81,16 +115,19 @@ class DmDssProvider(
     }
 
     override fun stop() {
+        val wasRunning = !stopped
         stopped = true
         connectionGeneration++
         recoveryGeneration++
         connecting = false
         connected = false
+        setLiveTypes(emptySet())
         handler.removeCallbacks(reconnectRunnable)
         socket?.close(1000, "DM-D.S.S source deselected")
         socket = null
         diagnostics.recordSocket("Stopped")
         diagnostics.flushPacketHistoryAsync()
+        if (wasRunning) emit(ConnectionState.DISCONNECTED, "DM-D.S.S stopped")
     }
 
     override fun setReportArchiveEnabled(enabled: Boolean) {
@@ -125,21 +162,25 @@ class DmDssProvider(
         socket?.close(1000, "Reconnect requested")
         socket = null
         connected = false
+        setLiveTypes(emptySet())
         connecting = false
         retryAttempt = 0
         connect()
     }
 
     private fun connect(forceTokenRefresh: Boolean = false) {
-        if (stopped || connecting || connected || !oauth.isAuthorized) return
+        if (stopped || connecting || connected || !oauth.isAuthorized || requestedFeeds.isEmpty()) return
+        val feeds = requestedFeeds
+        val byClassification = feeds.groupBy { it.classification }.values.map { it.toSet() }
+        val candidates = (listOf(feeds) + byClassification).distinct()
         val generation = ++connectionGeneration
         connecting = true
         diagnostics.recordSocket("Connecting")
-        emit(state = ConnectionState.CONNECTING, status = "Connecting DM-D.S.S EEW forecast…")
+        emit(state = ConnectionState.CONNECTING, status = "Connecting DM-D.S.S…")
         oauth.withAccessToken(forceTokenRefresh) { tokenResult ->
             if (generation != connectionGeneration || stopped) return@withAccessToken
             tokenResult.onSuccess { accessToken ->
-                startSocket(accessToken, forceTokenRefresh, generation)
+                startSocket(accessToken, forceTokenRefresh, generation, candidates)
             }.onFailure { failure("DM-D.S.S authorization failed", it, generation) }
         }
     }
@@ -147,12 +188,15 @@ class DmDssProvider(
     private fun startSocket(
         accessToken: String,
         refreshedAfterUnauthorized: Boolean,
-        generation: Long
+        generation: Long,
+        candidates: List<Set<DmDssFeed>>
     ) {
+        val feeds = candidates.first()
+        val requestedTypes = feeds.flatMap { it.types }.toSet()
         val requestJson = JSONObject()
-            .put("classifications", org.json.JSONArray().put("eew.forecast"))
-            .put("types", org.json.JSONArray().put("VXSE44").put("VXSE45"))
-            .put("test", if (settings.receiveSilentTestDrills) "including" else "no")
+            .put("classifications", JSONArray(feeds.map { it.classification }.distinct()))
+            .put("types", JSONArray(requestedTypes.toList()))
+            .put("test", if (DmDssFeed.FORECAST in feeds && settings.receiveSilentTestDrills) "including" else "no")
             .put("appName", "QuakeDeck Android")
             .put("formatMode", "json")
         val request = Request.Builder()
@@ -169,9 +213,11 @@ class DmDssProvider(
             override fun onResponse(call: Call, response: Response) {
                 response.use {
                     if (it.code == 401 && !refreshedAfterUnauthorized) {
-                        if (generation != connectionGeneration || stopped) return
-                        connecting = false
-                        connect(forceTokenRefresh = true)
+                        handler.post {
+                            if (generation != connectionGeneration || stopped) return@post
+                            connecting = false
+                            connect(forceTokenRefresh = true)
+                        }
                         return
                     }
                     val json = runCatching { JSONObject(it.body.string()) }.getOrElse { error ->
@@ -185,7 +231,16 @@ class DmDssProvider(
                     if (!it.isSuccessful || json.optString("status") != "ok") {
                         val detail = json.optJSONObject("error")?.optString("message")
                             .orEmpty().ifBlank { "HTTP ${it.code}" }
-                        failure("DM-D.S.S Socket Start failed: $detail", null, generation)
+                        if (it.code in setOf(402, 403, 409) && candidates.size > 1) {
+                            handler.post {
+                                if (generation == connectionGeneration && !stopped) {
+                                    startSocket(accessToken, refreshedAfterUnauthorized, generation,
+                                        candidates.drop(1))
+                                }
+                            }
+                        } else {
+                            failure("DM-D.S.S Socket Start failed: $detail", null, generation)
+                        }
                         return
                     }
                     val websocket = json.optJSONObject("websocket")
@@ -206,15 +261,16 @@ class DmDssProvider(
                         )
                         return
                     }
-                    openWebSocket(url, socketId, generation)
+                    handler.post { openWebSocket(url, socketId, generation, requestedTypes) }
                 }
             }
         })
     }
 
-    private fun openWebSocket(url: String, socketIdFromStart: String?, generation: Long) {
+    private fun openWebSocket(
+        url: String, socketIdFromStart: String?, generation: Long, requestedTypes: Set<String>
+    ) {
         if (stopped || generation != connectionGeneration) {
-            connecting = false
             recoverAbandonedSocket(
                 socketId = socketIdFromStart,
                 reconnect = false,
@@ -231,6 +287,7 @@ class DmDssProvider(
             private var listenerSocketId: String? = socketIdFromStart
             private val listenerStartedAtElapsedMillis = SystemClock.elapsedRealtime()
             private val pingTracker = LatestDmDssPingTracker()
+            private var nextMalformedDiagnosticAt = 0L
 
             override fun onMessage(webSocket: WebSocket, text: String) {
                 handleSocketMessage(webSocket, text, "text")
@@ -246,18 +303,19 @@ class DmDssProvider(
                 transport: String
             ) {
                 if (generation != connectionGeneration || stopped || socket !== webSocket) return
-                diagnostics.recordSocketActivity()
+                val receivedAt = System.currentTimeMillis()
                 val json = runCatching { JSONObject(text) }.getOrNull()
                 if (json == null) {
-                    diagnostics.recordPacket("IN", transport, text)
-                    diagnostics.recordTransportIssue("WebSocket message was not valid JSON")
-                    handler.post { if (generation == connectionGeneration && !stopped) emitCurrent() }
+                    diagnostics.recordIncomingPacket(transport, text, null, receivedAt)
+                    diagnostics.recordSocketActivity(receivedAt)
+                    val now = SystemClock.elapsedRealtime()
+                    if (now >= nextMalformedDiagnosticAt) {
+                        nextMalformedDiagnosticAt = now + 5_000L
+                        diagnostics.recordIncomingTransportIssue("WebSocket message was not valid JSON", receivedAt)
+                    }
                     return
                 }
                 val packetType = json.optString("type")
-                if (shouldRetainDmDssPacketType(packetType)) {
-                    diagnostics.recordPacket("IN", transport, text)
-                }
                 if (packetType == "ping") {
                     val token = pingTracker.receive(
                         json.optString("pingId").takeIf(String::isNotBlank)
@@ -273,71 +331,152 @@ class DmDssProvider(
                         },
                         PONG_COALESCE_MILLIS, TimeUnit.MILLISECONDS
                     )
+                    diagnostics.recordSocketActivity(receivedAt)
                     return
                 }
-                handler.post {
-                    if (generation != connectionGeneration || stopped || socket !== webSocket) return@post
-                    when (packetType) {
-                        "start" -> {
-                            json.optString("socketId").takeIf(String::isNotBlank)?.let {
-                                listenerSocketId = it
+                diagnostics.recordSocketActivity(receivedAt)
+                if (shouldRetainDmDssPacketType(packetType)) {
+                    diagnostics.recordIncomingPacket(transport, text, json, receivedAt)
+                }
+                if (packetType !in setOf("start", "data", "error")) return
+                val telegramType = json.optJSONObject("head")?.optString("type")
+                try {
+                    packetExecutor.execute {
+                        if (generation != connectionGeneration || stopped || socket !== webSocket) return@execute
+                        val confirmed = if (packetType == "data" && telegramType != null &&
+                            telegramType in DmDssFeed.CONFIRMED.types
+                        ) {
+                            DmDssConfirmedReportParser.parseEnvelope(json)
+                        } else null
+                        val report = confirmed?.let(parseConfirmedReport)
+                        val tsunami = if (packetType == "data" && telegramType != null &&
+                            telegramType in DmDssFeed.TSUNAMI.types
+                        ) DmDssTsunamiParser.parseEnvelope(json) else null
+                        val forecastBody = if (packetType == "data" && telegramType != null &&
+                            telegramType in DmDssFeed.FORECAST.types
+                        ) {
+                            DmDssEewParser.decodeBody(json)
+                        } else null
+                        handler.post {
+                            if (generation == connectionGeneration && !stopped && socket === webSocket) {
+                                dispatchSocketPacket(webSocket, json, packetType, telegramType, confirmed,
+                                    report, forecastBody, tsunami, receivedAt)
                             }
-                            connecting = false
-                            connected = true
-                            retryAttempt = 0
-                            diagnostics.recordSocket("Connected")
-                            diagnostics.recordSocketContext(currentNetworkType(appContext))
-                            emitCurrent()
-                            recoverMissedEew(generation)
                         }
-                        "data" -> {
-                            if (!connected) {
-                                connecting = false
-                                connected = true
-                                retryAttempt = 0
-                                diagnostics.recordSocket("Connected")
-                            }
-                            handleData(json)
-                        }
-                        "error" -> {
-                            val detail = json.optString("error").ifBlank { "WebSocket error" }
-                            val code = json.optInt("code", -1).takeIf { it >= 0 }
-                            val close = json.optBoolean("close", false)
-                            if (code == 4640 || code == 4891) diagnostics.recordPacket("LOCAL", "control",
-                                pingTracker.diagnostic().toString())
-                            val listenerCurrent = socket === webSocket &&
-                                generation == connectionGeneration
-                            diagnostics.recordSocketContext(
-                                networkType = currentNetworkType(appContext),
-                                socketLifetimeMillis = SystemClock.elapsedRealtime() -
-                                    listenerStartedAtElapsedMillis,
-                                callbackCurrent = listenerCurrent
-                            )
-                            diagnostics.recordTransportIssue(
-                                buildString {
-                                    append("DM-D.S.S WebSocket error")
-                                    code?.let { append(" ").append(it) }
-                                    append(": ").append(detail)
-                                    append(
-                                        if (listenerCurrent) {
-                                            " · current listener"
-                                        } else {
-                                            " · stale listener"
-                                        }
-                                    )
-                                    append(" · close=").append(close)
-                                }
-                            )
-                            if (close) webSocket.close(1000, detail)
-                            emitCurrent()
-                        }
-                        "pong" -> Unit
-                        else -> emitCurrent()
+                    }
+                } catch (_: RejectedExecutionException) {
+                    if (webSocket.close(1000, "Bulletin queue overloaded")) {
+                        diagnostics.recordIncomingTransportIssue("DM-D.S.S bulletin queue overloaded", receivedAt)
                     }
                 }
             }
 
+            private fun dispatchSocketPacket(
+                webSocket: WebSocket,
+                json: JSONObject,
+                packetType: String,
+                telegramType: String?,
+                confirmed: JSONObject?,
+                report: EarthquakeEvent?,
+                forecastBody: DmDssBodyDecodeResult?,
+                tsunami: DmDssTsunamiPacket?,
+                receivedAt: Long
+            ) {
+                when (packetType) {
+                    "start" -> {
+                        json.optString("socketId").takeIf(String::isNotBlank)?.let {
+                            listenerSocketId = it
+                        }
+                        val classifications = json.optJSONArray("classifications").strings()
+                        val types = json.optJSONArray("types").strings()
+                        setLiveTypes(requestedTypes.filterTo(linkedSetOf()) { type ->
+                            DmDssFeed.entries.any { type in it.types && it.classification in classifications } &&
+                                (json.isNull("types") || type in types)
+                        })
+                        if (liveTypes.isEmpty()) {
+                            diagnostics.recordTransportIssue("DM-D.S.S did not activate any requested bulletin types")
+                            webSocket.close(1000, "No requested bulletin types")
+                            return
+                        }
+                        connecting = false
+                        connected = true
+                        retryAttempt = 0
+                        diagnostics.recordSocket("Connected")
+                        diagnostics.recordSocketContext(currentNetworkType(appContext))
+                        emitCurrent()
+                        if (liveTypes.any { it in DmDssFeed.FORECAST.types }) {
+                            recoverMissedEew(generation)
+                        }
+                    }
+                    "data" -> {
+                        if (telegramType == null || telegramType !in liveTypes) return
+                        if (telegramType in DmDssFeed.FORECAST.types) {
+                            handleData(json, forecastBody, receivedAt)
+                        }
+                        if (tsunami != null) {
+                            val primary = telegramType == DmDssTsunamiParser.WARNING_TYPE
+                            when (tsunami) {
+                                is DmDssTsunamiPacket.Bulletin -> {
+                                    if (primary && setTsunamiAvailable(true)) emitCurrent()
+                                    if (tsunamiAvailable) {
+                                        diagnostics.recordEnvelope(receivedAt)
+                                        onTsunamiReport(tsunami.packet)
+                                    }
+                                }
+                                DmDssTsunamiPacket.Unreadable -> {
+                                    diagnostics.recordRejected("Unreadable DM-D.S.S tsunami bulletin")
+                                    if (primary && setTsunamiAvailable(false)) emitCurrent()
+                                }
+                                DmDssTsunamiPacket.Ignored -> Unit
+                            }
+                        }
+                        if (telegramType in DmDssFeed.CONFIRMED.types) {
+                            if (confirmed != null) {
+                                diagnostics.recordEnvelope(receivedAt)
+                                onConfirmedReport(confirmed, report)
+                            } else if (json.optJSONObject("head")?.optBoolean("test") != true) {
+                                diagnostics.recordRejected("Unsupported DM-D.S.S confirmed bulletin")
+                            }
+                        }
+                    }
+                    "error" -> {
+                        val detail = json.optString("error").ifBlank { "WebSocket error" }
+                        val code = json.optInt("code", -1).takeIf { it >= 0 }
+                        val close = json.optBoolean("close", false)
+                        if (code == 4640 || code == 4891) diagnostics.recordPacket("LOCAL", "control",
+                            pingTracker.diagnostic().toString())
+                        val listenerCurrent = socket === webSocket &&
+                            generation == connectionGeneration
+                        diagnostics.recordSocketContext(
+                            networkType = currentNetworkType(appContext),
+                            socketLifetimeMillis = SystemClock.elapsedRealtime() -
+                                listenerStartedAtElapsedMillis,
+                            callbackCurrent = listenerCurrent
+                        )
+                        diagnostics.recordTransportIssue(
+                            buildString {
+                                append("DM-D.S.S WebSocket error")
+                                code?.let { append(" ").append(it) }
+                                append(": ").append(detail)
+                                append(
+                                    if (listenerCurrent) {
+                                        " · current listener"
+                                    } else {
+                                        " · stale listener"
+                                    }
+                                )
+                                append(" · close=").append(close)
+                            }
+                        )
+                        if (close) webSocket.close(1000, "DM-D.S.S reported a socket error")
+                        emitCurrent()
+                    }
+                    else -> Unit
+                }
+            }
+
             override fun onClosing(webSocket: WebSocket, code: Int, reason: String) {
+                webSocket.close(code, reason)
                 diagnostics.recordPacket(
                     "IN",
                     "control",
@@ -347,8 +486,13 @@ class DmDssProvider(
                         .put("reason", reason)
                         .toString()
                 )
-                handler.post { if (generation == connectionGeneration && !stopped) emitCurrent() }
-                webSocket.close(code, reason)
+                handler.post {
+                    if (generation == connectionGeneration && !stopped && socket === webSocket) {
+                        connected = false
+                        setLiveTypes(emptySet())
+                        emit(ConnectionState.DISCONNECTED, "DM-D.S.S connection closing")
+                    }
+                }
             }
 
             override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
@@ -379,7 +523,7 @@ class DmDssProvider(
                     connected = false
                     connecting = false
                     diagnostics.recordSocket("Disconnected")
-                    if (!stopped) scheduleReconnect("DM-D.S.S EEW forecast disconnected")
+                    if (!stopped) scheduleReconnect("DM-D.S.S disconnected")
                 }
             }
 
@@ -462,11 +606,14 @@ class DmDssProvider(
         }
     }
 
-    private fun handleData(envelope: JSONObject) {
-        diagnostics.recordEnvelope()
+    private fun handleData(
+        envelope: JSONObject, decoded: DmDssBodyDecodeResult?, receivedAt: Long
+    ) {
+        diagnostics.recordEnvelope(receivedAt)
         val parsed = DmDssEewParser.parseEnvelopeResult(
-            envelope, activeEvent ?: lastEvent,
-            receiveSilentTestDrills = settings.receiveSilentTestDrills
+            envelope, activeEvent ?: lastEvent, receivedAt,
+            receiveSilentTestDrills = settings.receiveSilentTestDrills,
+            decoded = decoded
         )
         if (parsed is DmDssEewParseResult.Rejected) {
             diagnostics.recordRejected(parsed.reason.diagnostic)
@@ -536,6 +683,7 @@ class DmDssProvider(
         }
         val now = System.currentTimeMillis()
         oauth.readRecentEew(now - RECOVERY_LOOKBACK_MILLIS) { result ->
+            val prior = result.getOrNull()?.let { diagnostics.snapshot() }
             handler.post {
                 if (stopped || connection != connectionGeneration || run != recoveryGeneration) {
                     return@post
@@ -544,8 +692,7 @@ class DmDssProvider(
                     diagnostics.recordRecovery("Failed: ${error.diagnosticSummary()}")
                     emitCurrent()
                 }.onSuccess { items ->
-                    val prior = diagnostics.snapshot()
-                    val recovered = DmDssRecoveryPolicy.select(items, prior, System.currentTimeMillis(),
+                    val recovered = DmDssRecoveryPolicy.select(items, requireNotNull(prior), System.currentTimeMillis(),
                         activeEvent ?: lastEvent, activeEvent?.id)
                         .filter { eewRevisions.rejection(it.event) == null }
                     if (recovered.isEmpty()) {
@@ -575,6 +722,7 @@ class DmDssProvider(
                 if (stopped || generation != expiryGeneration || activeEvent?.id != eventId) return@postDelayed
                 activeEvent = null
                 activeEventUntilMillis = null
+                if (!connected || liveTypes.none { it in DmDssFeed.FORECAST.types }) return@postDelayed
                 lastEvent?.let { diagnostics.recordEewDecision(it, "lifecycle", "Bulletin freshness timeout",
                     "DM-D.S.S", LiveUpdateKind.EEW_ENDED, expiresAtMillis) }
                 emit(
@@ -587,13 +735,30 @@ class DmDssProvider(
         )
     }
 
+    private fun JSONArray?.strings(): Set<String> =
+        if (this == null) emptySet() else (0 until length()).mapTo(linkedSetOf()) { optString(it) }
+
+    private fun setLiveTypes(types: Set<String>) {
+        if (liveTypes == types) return
+        liveTypes = types
+        onConfirmedTypesChanged(types.intersect(DmDssFeed.CONFIRMED.types))
+        setTsunamiAvailable(DmDssTsunamiParser.WARNING_TYPE in types)
+    }
+
+    private fun setTsunamiAvailable(available: Boolean): Boolean {
+        if (available == tsunamiAvailable) return false
+        tsunamiAvailable = available
+        onTsunamiAvailabilityChanged(available)
+        return true
+    }
+
     private fun emitCurrent() {
         emit(
             state = if (connected) ConnectionState.CONNECTED else ConnectionState.CONNECTING,
             status = if (connected) {
-                "DM-D.S.S EEW forecast connected"
+                connectedFeedStatus()
             } else {
-                "Connecting DM-D.S.S EEW forecast…"
+                "Connecting DM-D.S.S…"
             }
         )
     }
@@ -611,15 +776,18 @@ class DmDssProvider(
         status: String,
         updateKind: LiveUpdateKind = LiveUpdateKind.NONE
     ) {
-        val event = activeEvent ?: lastEvent ?: waitingSnapshot(mode = mode).event
+        val forecastLive = state == ConnectionState.CONNECTED &&
+            liveTypes.any { it in DmDssFeed.FORECAST.types }
+        val active = activeEvent.takeIf { forecastLive }
+        val event = active ?: lastEvent.takeIf { forecastLive } ?: waitingSnapshot(mode = mode).event
         if (updateKind != LiveUpdateKind.NONE) liveSequence++
         callback?.invoke(
             AppSnapshot(
                 sourceMode = mode,
                 connectionState = state,
-                activeEew = activeEvent != null,
-                activeEewEvent = activeEvent,
-                activeEewUntilMillis = activeEventUntilMillis.takeIf { activeEvent != null },
+                activeEew = active != null,
+                activeEewEvent = active,
+                activeEewUntilMillis = activeEventUntilMillis.takeIf { active != null },
                 event = event,
                 eewUpdateEvent = event.takeIf { updateKind != LiveUpdateKind.NONE },
                 statusText = if (event.isDrill && !status.startsWith("DRILL · ")) {
@@ -627,12 +795,19 @@ class DmDssProvider(
                 } else status,
                 liveUpdateKind = updateKind,
                 liveUpdateSequence = liveSequence,
-                dmdssEewUpdate = updateKind != LiveUpdateKind.NONE
+                dmdssEewUpdate = updateKind != LiveUpdateKind.NONE,
+                dmdssLiveTypes = if (state == ConnectionState.CONNECTED) {
+                    if (tsunamiAvailable) liveTypes else liveTypes - DmDssFeed.TSUNAMI.types
+                } else emptySet()
             )
         )
     }
 
     private fun failure(label: String, error: Throwable?, generation: Long) {
+        if (Looper.myLooper() != handler.looper) {
+            handler.post { failure(label, error, generation) }
+            return
+        }
         if (generation != connectionGeneration) return
         connecting = false
         connected = false
@@ -648,6 +823,7 @@ class DmDssProvider(
     }
 
     private fun scheduleReconnect(status: String) {
+        setLiveTypes(emptySet())
         emit(state = ConnectionState.DISCONNECTED, status = status)
         handler.removeCallbacks(reconnectRunnable)
         val delay = min(60_000L, 2_000L * (1L shl min(retryAttempt, 5)))

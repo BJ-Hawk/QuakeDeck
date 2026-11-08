@@ -505,7 +505,7 @@ private fun QuakeDeckApp(
     var sourceMenuOpen by remember { mutableStateOf(false) }
     var requestedMode by remember { mutableStateOf(runtime.requestedMode) }
     val appClock = remember { AppClockController() }
-    var lastProviderUpdateMillis by remember { mutableLongStateOf(0L) }
+    var lastP2pUpdateMillis by remember { mutableLongStateOf(0L) }
 
     // Keep the visible live JST clock independent from the device wall clock.
     // A successful NICT sample is advanced with elapsedRealtime(), so changing
@@ -528,7 +528,6 @@ private fun QuakeDeckApp(
     }
     var p2pStatusSnapshot by remember { mutableStateOf(runtime.latestP2pSnapshot) }
     var dmdssStatusSnapshot by remember { mutableStateOf(runtime.latestDmdssSnapshot) }
-    var dmdssDiagnostics by remember { mutableStateOf(runtime.dmdssDiagnostics) }
 
     LaunchedEffect(dmdssOAuthCallback) {
         val callbackUri = dmdssOAuthCallback ?: return@LaunchedEffect
@@ -549,8 +548,7 @@ private fun QuakeDeckApp(
             rawSnapshot = nextSnapshot
             p2pStatusSnapshot = runtime.latestP2pSnapshot
             dmdssStatusSnapshot = runtime.latestDmdssSnapshot
-            dmdssDiagnostics = runtime.dmdssDiagnostics
-            lastProviderUpdateMillis = runtime.lastProviderUpdateMillis
+            lastP2pUpdateMillis = runtime.lastP2pUpdateMillis
         }
         onDispose {
             provider.setReportArchiveStatusListener(null)
@@ -1355,7 +1353,7 @@ private fun QuakeDeckApp(
         historicalMode = historicalMode,
         liveWarningActive = historicalMode && (snapshot.activeEew || snapshot.activeTsunami),
         clockController = appClock,
-        lastProviderUpdateMillis = lastProviderUpdateMillis,
+        lastP2pUpdateMillis = lastP2pUpdateMillis,
         onReconnect = { provider.onAppForeground() },
         onSourceMenu = { openSourceMenu(OverlayReturnTarget.MAP) },
         onSettings = ::openMainSettings,
@@ -2240,7 +2238,8 @@ private fun QuakeDeckApp(
             dmdssAuthorized = runtime.isDmdssAuthorized,
             dmdssAuthorizationUpdateRequired = runtime.isDmdssAuthorizationUpdateRequired,
             dmdssContracts = runtime.dmdssContractSummary,
-            dmdssDiagnostics = dmdssDiagnostics,
+            dmdssAvailableClassifications = runtime.dmdssAvailableClassifications,
+            readDmdssDiagnostics = { runtime.dmdssDiagnostics },
             language = placeNameLanguage,
             onSourceSelected = {
                 requestedMode = it
@@ -2384,7 +2383,8 @@ private fun SourceDialog(
     dmdssAuthorized: Boolean,
     dmdssAuthorizationUpdateRequired: Boolean,
     dmdssContracts: DmDssContractSummary?,
-    dmdssDiagnostics: DmDssDiagnosticsSnapshot,
+    dmdssAvailableClassifications: Set<String>,
+    readDmdssDiagnostics: () -> DmDssDiagnosticsSnapshot,
     language: PlaceNameLanguage,
     onSourceSelected: (DataSourceMode) -> Unit,
     onDmdssConnect: () -> Unit,
@@ -2393,6 +2393,14 @@ private fun SourceDialog(
     onDismiss: () -> Unit
 ) {
     val context = LocalContext.current
+    var polledDmdssDiagnostics by remember { mutableStateOf(DmDssDiagnosticsSnapshot()) }
+    LaunchedEffect(Unit) {
+        while (true) {
+            polledDmdssDiagnostics = withContext(Dispatchers.IO) { readDmdssDiagnostics() }
+            delay(2_000L)
+        }
+    }
+    val dmdssDiagnostics = polledDmdssDiagnostics
     val dmdssNoticePreferences = remember(context) {
         context.getSharedPreferences(
             DMDSS_EEW_NOTICE_PREFERENCES,
@@ -2424,7 +2432,7 @@ private fun SourceDialog(
                     val stream = context.contentResolver.openOutputStream(uri, "wt")
                         ?: error("Unable to open the selected diagnostics file")
                     stream.bufferedWriter(Charsets.UTF_8).use { writer ->
-                        writer.write(dmdssDiagnostics.toMachineReadableJson())
+                        writer.write(readDmdssDiagnostics().toMachineReadableJson())
                     }
                 }
             }
@@ -2626,10 +2634,11 @@ private fun SourceDialog(
                                     )
                                     Text(
                                         uiText(
-                                            if (entitlement.classification == "eew.forecast") {
-                                                R.string.dmdss_used_now
-                                            } else {
-                                                R.string.dmdss_available_later
+                                            when (entitlement.classification) {
+                                                in dmdssAvailableClassifications -> R.string.dmdss_used_now
+                                                "eew.forecast", "telegram.earthquake" ->
+                                                    R.string.dmdss_plan_permission_needed
+                                                else -> R.string.dmdss_available_later
                                             },
                                             language
                                         ),

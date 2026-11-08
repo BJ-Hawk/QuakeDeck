@@ -38,8 +38,23 @@ data class DmDssContractEntitlement(
 data class DmDssContractSummary(
     val active: List<DmDssContractEntitlement>
 ) {
-    val eewForecastAvailable: Boolean
-        get() = active.any { it.classification == "eew.forecast" }
+    fun hasPlan(classification: String): Boolean = active.any { it.classification == classification }
+}
+
+internal enum class DmDssFeed(val classification: String, val scope: String, val types: Set<String>) {
+    FORECAST("eew.forecast", "eew.get.forecast", setOf("VXSE44", "VXSE45")),
+    CONFIRMED("telegram.earthquake", "telegram.get.earthquake", setOf("VXSE51", "VXSE52", "VXSE53")),
+    TSUNAMI("telegram.earthquake", "telegram.get.earthquake",
+        setOf(DmDssTsunamiParser.WARNING_TYPE, DmDssTsunamiParser.INFORMATION_TYPE));
+
+    fun isEntitled(summary: DmDssContractSummary): Boolean = summary.hasPlan(classification)
+}
+
+internal fun availableDmDssFeeds(
+    summary: DmDssContractSummary, scopes: Set<String>
+): Set<DmDssFeed> {
+    if (!scopes.containsAll(DmDssOAuthClient.REQUIRED_SCOPES)) return emptySet()
+    return DmDssFeed.entries.filterTo(linkedSetOf()) { it.isEntitled(summary) && it.scope in scopes }
 }
 
 /** Native public-client OAuth for the first DM-D.S.S Android integration. */
@@ -58,8 +73,17 @@ class DmDssOAuthClient(
     val isAuthorized: Boolean
         get() = store.loadCredentials() != null
 
-    val authorizationUpdateRequired: Boolean
-        get() = store.loadCredentials()?.scopes?.containsAll(REQUIRED_SCOPES) == false
+    fun authorizationUpdateRequired(summary: DmDssContractSummary?): Boolean {
+        val scopes = store.loadCredentials()?.scopes ?: return false
+        return !scopes.containsAll(REQUIRED_SCOPES) || "socket.close" !in scopes || DmDssFeed.entries.any {
+            summary != null && it.isEntitled(summary) && it.scope !in scopes
+        } || (summary?.hasPlan(DmDssFeed.FORECAST.classification) == true && "gd.eew" !in scopes)
+    }
+
+    internal fun availableFeeds(summary: DmDssContractSummary): Set<DmDssFeed> {
+        val scopes = store.loadCredentials()?.scopes ?: return emptySet()
+        return availableDmDssFeeds(summary, scopes)
+    }
 
     fun hasGrantedScope(scope: String): Boolean =
         store.loadCredentials()?.scopes?.contains(scope) == true
@@ -73,7 +97,7 @@ class DmDssOAuthClient(
             .appendQueryParameter("response_type", "code")
             .appendQueryParameter("response_mode", "query")
             .appendQueryParameter("redirect_uri", redirectUri)
-            .appendQueryParameter("scope", REQUIRED_SCOPES.joinToString(" "))
+            .appendQueryParameter("scope", REQUESTED_SCOPES.joinToString(" "))
             .appendQueryParameter("state", state)
             .appendQueryParameter("code_challenge", pkceChallenge(verifier))
             .appendQueryParameter("code_challenge_method", "S256")
@@ -160,7 +184,7 @@ class DmDssOAuthClient(
         executeTokenRequest(
             body = body,
             previousRefreshToken = credentials.refreshToken,
-            requiredGrantedScopes = credentials.scopes
+            requiredGrantedScopes = REQUIRED_SCOPES
         ) { result ->
             result.onSuccess(store::saveCredentials)
             val tokenResult = result.map { it.accessToken }
@@ -410,11 +434,10 @@ class DmDssOAuthClient(
         const val GD_EEW_URL = "https://api.dmdata.jp/v2/gd/eew"
         val REQUIRED_SCOPES = setOf(
             "contract.list",
-            "socket.start",
-            "socket.close",
-            "eew.get.forecast",
-            "gd.eew"
+            "socket.start"
         )
+        val REQUESTED_SCOPES = REQUIRED_SCOPES + DmDssFeed.entries.map { it.scope } +
+            setOf("socket.close", "gd.eew")
         private const val PENDING_MAX_AGE_MILLIS = 10 * 60 * 1_000L
         private const val REFRESH_MARGIN_MILLIS = 60 * 1_000L
 

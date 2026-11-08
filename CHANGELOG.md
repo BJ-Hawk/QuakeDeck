@@ -2,7 +2,7 @@
 
 QuakeDeck release history
 
-## v0.10.3-dev.7 (in progress)
+## v0.10.3-dev.9 (in progress)
 
 - Keeps newly issued DM-D.S.S and P2PQuake EEW bulletins eligible by issue-time freshness, independently of the estimated origin and FULL wave-passage cap. A newer public Warning can supersede a connected paid Forecast for the same incident.
 - Applies later cancellations even when their serial is lower, retains terminal ordering after expiry, and prevents an older Warning from the other feed reopening the cancelled incident. EEW termination uses its own identity/settings while confirmed reports can remain visible.
@@ -15,7 +15,14 @@ QuakeDeck release history
 - Loads History from a persistent compact catalogue instead of decoding every archived station/region/felt payload. Existing archives convert once in bounded batches while complete replay payloads remain intact; new reports receive their catalogue projection as they are archived.
 - Separates catalogue/replay reading from the download worker, indexes confirmed-to-EEW catalogue matching by origin minute, and uses indexed day ranges for selected-incident associated reports. Ignores superseded catalogue results after archive clearing/retry.
 - Adds the opt-in “Receive silent test drills” setting for DM-D.S.S EEW exercises, with immediate subscription refresh, DRILL labels in the map, detail cards, destination prediction and phone/watch notifications, and retained labelling on notification taps. Drill notifications require the master notification switch and permission, bypass real-alert location/threshold/quiet-hours filters, and never request sound, vibration, screen wake or full screen. Exercises use separate incident identities, yield to real alerts, stay out of earthquake History, and are cleared when reception is disabled.
-- Advances the cumulative local development hotfix to `0.10.3-dev.7` (`versionCode` 245). Build, unit-test, device and live-drill validation remain pending.
+- Adds rate-limited P2PQuake HTTP catch-up when packet timestamps fall at least 30 seconds behind. Recent confirmed JMA reports can reach the normal alert flow ahead of the stale socket stream. Official report IDs stay in a separate bounded deduplication cache, and the recovery client backs off on HTTP rate limiting.
+- Records P2PQuake connection attempts, opens, closes, failures, scheduled retries, and HTTP recovery outcomes in delivery diagnostics.
+- Receives JMA VXSE51, VXSE52 and VXSE53 from DM-D.S.S with an active earthquake-report plan and the matching permission. Forecasts and confirmed reports select DM-D.S.S or P2PQuake independently, including fallback during a disconnect.
+- Keeps packet encoding and recovery requests off the WebSocket reader and UI threads. Coalesces felt counters and archive work, ignores routine packets in the alert pipeline, and matches P2PQuake HTTP and socket copies by JMA bulletin content.
+- Starts rate-limited confirmed-report recovery after a silent or failed P2PQuake stream as well as measured lag. Records HTTP completion separately from reports applied.
+- Shows confirmed reports under the provider that delivered them and lists the active EEW and JMA report sources in the connection drawer. Applies the same confirmed-report fallback rule to the startup fetch and recent archive imports.
+- Uses DM-D.S.S for live tsunami warnings, advisories, forecasts and releases when its tsunami warning type is available. Supplementary arrival updates enrich active alerts. P2PQuake supplies fallback and reconnect recovery.
+- Advances the cumulative local development hotfix to `0.10.3-dev.9` (`versionCode` 247). Android Studio build, unit-test and device validation remain pending.
 
 ## v0.10.3-dev.4
 

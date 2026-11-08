@@ -276,8 +276,8 @@ android {
         applicationId = "cz.misa.quakedeck"
         minSdk = 26
         targetSdk = 36
-        versionCode = 245
-        versionName = "0.10.3-dev.7"
+        versionCode = 247
+        versionName = "0.10.3-dev.9"
         buildConfigField("boolean", "SANDBOX_ENABLED", sandboxEnabled.toString())
         buildConfigField(
             "String",
@@ -303,6 +303,13 @@ android {
                 "proguard-rules.pro"
             )
         }
+    }
+
+    packaging {
+        // These dependency binaries already ship without debug symbols.
+        jniLibs.keepDebugSymbols.addAll(
+            listOf("**/libandroidx.graphics.path.so", "**/libtranslate_jni.so")
+        )
     }
 
     compileOptions {

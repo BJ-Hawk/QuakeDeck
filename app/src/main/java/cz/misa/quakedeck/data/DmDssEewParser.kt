@@ -67,7 +67,8 @@ internal object DmDssEewParser {
         envelope: JSONObject,
         previous: EarthquakeEvent?,
         receivedAtMillis: Long = System.currentTimeMillis(),
-        receiveSilentTestDrills: Boolean = false
+        receiveSilentTestDrills: Boolean = false,
+        decoded: DmDssBodyDecodeResult? = null
     ): DmDssEewParseResult {
         if (envelope.optString("type") != "data") return rejected(DmDssEewRejection.NOT_DATA)
         if (envelope.optString("classification") != "eew.forecast") {
@@ -85,11 +86,9 @@ internal object DmDssEewParser {
         if (type !in setOf("VXSE44", "VXSE45")) {
             return rejected(DmDssEewRejection.WRONG_TYPE)
         }
-        val bodyText = envelope.optString("body")
-        if (bodyText.isBlank()) return rejected(DmDssEewRejection.MISSING_BODY)
-        val decodedBody = when (val decoded = decodeBody(envelope, bodyText)) {
-            is DmDssBodyDecodeResult.Decoded -> decoded.text
-            is DmDssBodyDecodeResult.Rejected -> return rejected(decoded.reason)
+        val decodedBody = when (val body = decoded ?: decodeBody(envelope)) {
+            is DmDssBodyDecodeResult.Decoded -> body.text
+            is DmDssBodyDecodeResult.Rejected -> return rejected(body.reason)
         }
         val report = runCatching { JSONObject(decodedBody) }.getOrNull()
             ?: return rejected(DmDssEewRejection.UNREADABLE_BODY)
@@ -248,12 +247,14 @@ internal object DmDssEewParser {
 
     private fun rejected(reason: DmDssEewRejection) = DmDssEewParseResult.Rejected(reason)
 
-    private fun decodeBody(envelope: JSONObject, bodyText: String): DmDssBodyDecodeResult {
+    internal fun decodeBody(envelope: JSONObject): DmDssBodyDecodeResult {
+        val bodyText = envelope.optString("body")
+        if (bodyText.isBlank()) return DmDssBodyDecodeResult.Rejected(DmDssEewRejection.MISSING_BODY)
         if (bodyText.length > MAX_ENCODED_BODY_CHARS) {
             return DmDssBodyDecodeResult.Rejected(DmDssEewRejection.BODY_TOO_LARGE)
         }
         val encodedBytes = when (envelope.optString("encoding").lowercase()) {
-            "" -> bodyText.toByteArray(StandardCharsets.UTF_8)
+            "", "utf-8" -> bodyText.toByteArray(StandardCharsets.UTF_8)
             "base64" -> runCatching { Base64.getDecoder().decode(bodyText) }.getOrElse {
                 return DmDssBodyDecodeResult.Rejected(DmDssEewRejection.INVALID_BASE64_BODY)
             }
@@ -406,7 +407,7 @@ internal object DmDssEewParser {
 private fun JSONObject.optIntOrNull(name: String): Int? =
     if (has(name) && !isNull(name)) optInt(name) else null
 
-private sealed interface DmDssBodyDecodeResult {
+internal sealed interface DmDssBodyDecodeResult {
     data class Decoded(val text: String) : DmDssBodyDecodeResult
     data class Rejected(val reason: DmDssEewRejection) : DmDssBodyDecodeResult
 }

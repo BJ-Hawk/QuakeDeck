@@ -8,6 +8,7 @@ import org.json.JSONObject
 import java.nio.charset.StandardCharsets
 import java.time.Instant
 import java.util.concurrent.Executors
+import java.util.concurrent.atomic.AtomicLong
 
 /**
  * Bounded app-private audit trail for the DM-D.S.S delivery path.
@@ -89,11 +90,83 @@ class DmDssDiagnosticsStore(context: Context) {
         )
     }
 
+    private val queuedPackets = ArrayDeque<IncomingDiagnosticPacket>()
+    private var queuedChars = 0
+    private var skippedPackets = 0
+    private var drainScheduled = false
+
+    private data class IncomingDiagnosticPacket(
+        val packet: DmDssPacketDiagnostic,
+        val crowdTraffic: Boolean
+    )
+
+    fun recordIncomingPacket(
+        transport: String,
+        payload: String,
+        decoded: JSONObject?,
+        nowMillis: Long,
+        source: String = DIAGNOSTIC_SOURCE_DMDSS
+    ) {
+        val type = decoded?.optString("type").orEmpty()
+            .ifBlank { if (decoded == null) "invalid-json" else "json" }
+        val code = decoded?.optInt("code")
+        val crowd = source == DIAGNOSTIC_SOURCE_P2PQUAKE && (code == 561 || code == P2P_CROWD_SIGNAL_CODE)
+        val packet = IncomingDiagnosticPacket(
+            DmDssPacketDiagnostic(nowMillis, "IN", transport, type, payload, source), crowd
+        )
+        synchronized(queuedPackets) {
+            while (!crowd && queuedPackets.isNotEmpty() &&
+                (queuedPackets.size >= MAX_QUEUED_PACKETS || queuedChars + payload.length > MAX_QUEUED_CHARS)
+            ) {
+                val victim = queuedPackets.indexOfFirst { it.crowdTraffic }
+                if (victim < 0) break
+                queuedChars -= queuedPackets.removeAt(victim).packet.payload.length
+                skippedPackets++
+            }
+            if (queuedPackets.size >= MAX_QUEUED_PACKETS || queuedChars + payload.length > MAX_QUEUED_CHARS) {
+                skippedPackets++
+            } else {
+                queuedPackets.addLast(packet)
+                queuedChars += payload.length
+            }
+            if (!drainScheduled) {
+                drainScheduled = true
+                PACKET_ENCODER.execute(::drainIncomingPackets)
+            }
+        }
+    }
+
+    private fun drainIncomingPackets() {
+        val (batch, skipped) = synchronized(queuedPackets) {
+            val batch = buildList {
+                repeat(minOf(32, queuedPackets.size)) {
+                    val packet = queuedPackets.removeFirst().packet
+                    queuedChars -= packet.payload.length
+                    add(packet)
+                }
+            }
+            batch to skippedPackets.also { skippedPackets = 0 }
+        }
+        batch.forEach { packet ->
+            packetHistory.append(packet.copy(payload = sanitizeDmDssPacket(packet.payload)))
+        }
+        if (skipped > 0) {
+            recordPacket("LOCAL", "diagnostics", JSONObject()
+                .put("type", "diagnostic-packet-overflow").put("skipped", skipped).toString())
+        }
+        synchronized(queuedPackets) {
+            drainScheduled = queuedPackets.isNotEmpty() || skippedPackets > 0
+            if (drainScheduled) PACKET_ENCODER.execute(::drainIncomingPackets)
+        }
+    }
+
     fun snapshot(): DmDssDiagnosticsSnapshot = DmDssDiagnosticsSnapshot(
         socketState = prefs.getString(KEY_SOCKET_STATE, null),
         socketStateChangedAtMillis = prefs.optionalLong(KEY_SOCKET_STATE_CHANGED),
         connectedAtMillis = prefs.optionalLong(KEY_CONNECTED_AT),
-        lastSocketActivityAtMillis = prefs.optionalLong(KEY_SOCKET_ACTIVITY),
+        lastSocketActivityAtMillis = maxOf(
+            lastSocketActivity.get(), prefs.getLong(KEY_SOCKET_ACTIVITY, 0L)
+        ).takeIf { it > 0L },
         lastEnvelopeAtMillis = prefs.optionalLong(KEY_ENVELOPE_AT),
         lastAcceptedAtMillis = prefs.optionalLong(KEY_ACCEPTED_AT),
         lastAcceptedEventId = prefs.getString(KEY_ACCEPTED_EVENT, null),
@@ -115,7 +188,7 @@ class DmDssDiagnosticsStore(context: Context) {
         lastNotificationAtMillis = prefs.optionalLong(KEY_NOTIFICATION_AT),
         lastNotificationEventId = prefs.getString(KEY_NOTIFICATION_EVENT, null),
         lastNotificationResult = prefs.getString(KEY_NOTIFICATION_RESULT, null),
-        packetHistory = packetHistory.snapshot()
+        packetHistory = packetHistory.snapshot().sortedBy { it.recordedAtMillis }
     )
 
     fun recordSocket(state: String, nowMillis: Long = System.currentTimeMillis()) {
@@ -127,7 +200,13 @@ class DmDssDiagnosticsStore(context: Context) {
     }
 
     fun recordSocketActivity(nowMillis: Long = System.currentTimeMillis()) {
-        prefs.edit { putLong(KEY_SOCKET_ACTIVITY, nowMillis) }
+        lastSocketActivity.accumulateAndGet(nowMillis) { previous, incoming -> maxOf(previous, incoming) }
+        val persistedAt = lastQueuedActivityWrite.get()
+        if (nowMillis - persistedAt >= 5_000L &&
+            lastQueuedActivityWrite.compareAndSet(persistedAt, nowMillis)
+        ) {
+            PACKET_ENCODER.execute { prefs.edit { putLong(KEY_SOCKET_ACTIVITY, lastSocketActivity.get()) } }
+        }
     }
 
     fun recordEnvelope(nowMillis: Long = System.currentTimeMillis()) {
@@ -156,6 +235,10 @@ class DmDssDiagnosticsStore(context: Context) {
             putLong(KEY_REJECTED_AT, nowMillis)
             putString(KEY_REJECTED_REASON, reason)
         }
+    }
+
+    internal fun recordIncomingTransportIssue(reason: String, nowMillis: Long) {
+        PACKET_ENCODER.execute { recordTransportIssue(reason, nowMillis) }
     }
 
     fun recordTransportIssue(reason: String, nowMillis: Long = System.currentTimeMillis()) {
@@ -206,10 +289,9 @@ class DmDssDiagnosticsStore(context: Context) {
         source: String = DIAGNOSTIC_SOURCE_DMDSS
     ) {
         val sanitizedPayload = sanitizeDmDssPacket(payload)
-        val type = runCatching { JSONObject(sanitizedPayload).optString("type") }
-            .getOrNull()
-            .orEmpty()
-            .ifBlank { if (runCatching { JSONObject(sanitizedPayload) }.isSuccess) "json" else "invalid-json" }
+        val decoded = runCatching { JSONObject(sanitizedPayload) }.getOrNull()
+        val type = decoded?.optString("type").orEmpty()
+            .ifBlank { if (decoded == null) "invalid-json" else "json" }
         val entry = DmDssPacketDiagnostic(
             recordedAtMillis = nowMillis,
             direction = direction,
@@ -229,7 +311,13 @@ class DmDssDiagnosticsStore(context: Context) {
         event, stage, result, kind, deadlineMillis, nowMillis
     ).toString(), nowMillis, source)
 
-    fun flushPacketHistoryAsync() = packetHistory.flushAsync()
+    fun flushPacketHistoryAsync() {
+        PACKET_ENCODER.execute {
+            // Drain batches yield between turns on the shared encoder.
+            if (synchronized(queuedPackets) { drainScheduled }) flushPacketHistoryAsync()
+            else packetHistory.flushAsync()
+        }
+    }
 
     private fun readPersistedPacketHistory(): List<DmDssPacketDiagnostic> = runCatching {
         // openRead also recovers AtomicFile's backup after an interrupted write.
@@ -287,6 +375,13 @@ class DmDssDiagnosticsStore(context: Context) {
         const val KEY_NOTIFICATION_AT = "notification_at"
         const val KEY_NOTIFICATION_EVENT = "notification_event"
         const val KEY_NOTIFICATION_RESULT = "notification_result"
+        const val MAX_QUEUED_PACKETS = 512
+        const val MAX_QUEUED_CHARS = 4 * 1024 * 1024
+        val lastSocketActivity = AtomicLong()
+        val lastQueuedActivityWrite = AtomicLong()
+        val PACKET_ENCODER = Executors.newSingleThreadExecutor { task ->
+            Thread(task, "QuakeDeck-packet-encoder").apply { isDaemon = true }
+        }
         val HISTORIES = DiagnosticPacketHistoryRegistry()
         val HISTORY_WRITER = Executors.newSingleThreadScheduledExecutor { runnable ->
             Thread(runnable, "QuakeDeck-packet-history").apply { isDaemon = true }
@@ -496,6 +591,22 @@ private fun summarizeDmDssPacket(
 private fun summarizeP2pPacket(packet: DmDssPacketDiagnostic): HumanReadablePacketDiagnostic {
     val json = runCatching { JSONObject(packet.payload) }.getOrNull()
         ?: return HumanReadablePacketDiagnostic(packet, "Unreadable WebSocket packet")
+    val transportLabel = when (packet.type) {
+        "websocket-connect" -> "WebSocket Connecting"
+        "websocket-open" -> "WebSocket Connected"
+        "websocket-closing", "websocket-closed", "websocket-cancelled" -> "WebSocket Close"
+        "websocket-failure" -> "WebSocket Failure"
+        "reconnect-scheduled" -> "Reconnect Scheduled"
+        "history-recovery-started" -> "History Recovery Started"
+        "history-recovery-finished" -> "History Recovery Finished"
+        "history-recovery-applied" -> "Recovered Reports Applied"
+        "diagnostic-packet-overflow" -> "Diagnostic Packet Overflow"
+        "crowd-archive-overflow" -> "Crowd Archive Overflow"
+        else -> null
+    }
+    if (transportLabel != null) {
+        return HumanReadablePacketDiagnostic(packet, transportLabel)
+    }
     val code = json.optInt("code", -1)
     return when (code) {
         551 -> {

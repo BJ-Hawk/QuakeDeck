@@ -109,6 +109,7 @@ object StationCatalog {
 
     @Volatile private var stations: List<SeismicStation> = emptyList()
     @Volatile private var byPrefAndName: Map<String, SeismicStation> = emptyMap()
+    @Volatile private var byCode: Map<String, SeismicStation> = emptyMap()
     @Volatile private var byName: Map<String, SeismicStation> = emptyMap()
     @Volatile private var loaded = false
     @Volatile private var englishNames: Map<String, String>? = null
@@ -148,6 +149,8 @@ object StationCatalog {
 
     fun administrativeMetadata(context: Context): StationAdministrativeMetadata =
         stationRuntimeMetadata(context).administrative
+
+    fun lookupByCode(code: String): SeismicStation? = byCode[code]
 
     fun lookup(prefectureJa: String, stationNameJa: String): SeismicStation? {
         if (!loaded || stationNameJa.isBlank()) return null
@@ -343,6 +346,7 @@ object StationCatalog {
         require(parsed.size >= 3_000) { "Incomplete station catalogue: ${parsed.size}" }
         stations = parsed
         byPrefAndName = parsed.associateBy { key(it.prefectureJa, it.nameJa) }
+        byCode = parsed.associateBy { it.code }
         byName = parsed.associateBy { normalize(it.nameJa) }
         loaded = true
     }

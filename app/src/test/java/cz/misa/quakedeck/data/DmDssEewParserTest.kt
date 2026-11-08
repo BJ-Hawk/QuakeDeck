@@ -84,10 +84,11 @@ class DmDssEewParserTest {
     }
 
     @Test
-    fun requiredScopesIncludeRemoteCleanupAndWarningFlagIsPreserved() {
+    fun authorizationRequestsRemoteCleanupAndWarningFlagIsPreserved() {
         assertEquals(
-            setOf("contract.list", "socket.start", "socket.close", "eew.get.forecast", "gd.eew"),
-            DmDssOAuthClient.REQUIRED_SCOPES
+            setOf("contract.list", "socket.start", "socket.close", "eew.get.forecast", "gd.eew",
+                "telegram.get.earthquake"),
+            DmDssOAuthClient.REQUESTED_SCOPES
         )
         val warning = forecastEnvelope()
         val report = JSONObject(warning.getString("body"))
@@ -213,16 +214,26 @@ class DmDssEewParserTest {
     }
 
     @Test
-    fun contractSummaryRequiresAnActiveForecastClassification() {
-        val warningOnly = DmDssContractSummary(
-            listOf(DmDssContractEntitlement("eew.warning", "EEW warning", 1))
-        )
-        val forecast = DmDssContractSummary(
-            listOf(DmDssContractEntitlement("eew.forecast", "EEW forecast", 1))
-        )
+    fun forecastAndConfirmedReportPlansAndScopesAreIndependent() {
+        val forecast = DmDssContractEntitlement("eew.forecast", "EEW forecast", 1)
+        val reports = DmDssContractEntitlement("telegram.earthquake", "Earthquake reports", 1)
+        val both = DmDssContractSummary(listOf(forecast, reports))
+        val shared = DmDssOAuthClient.REQUIRED_SCOPES
+        val forecastScopes = shared + "eew.get.forecast"
+        val reportScopes = shared + "telegram.get.earthquake"
+        val allScopes = forecastScopes + reportScopes
+        val warningOnly = DmDssContractSummary(listOf(DmDssContractEntitlement("eew.warning", null, 1)))
 
-        assertFalse(warningOnly.eewForecastAvailable)
-        assertTrue(forecast.eewForecastAvailable)
+        assertEquals(emptySet<DmDssFeed>(), availableDmDssFeeds(warningOnly, allScopes))
+        assertEquals(emptySet<DmDssFeed>(), availableDmDssFeeds(both, shared))
+        assertEquals(setOf(DmDssFeed.FORECAST), availableDmDssFeeds(both, forecastScopes))
+        assertEquals(setOf(DmDssFeed.CONFIRMED, DmDssFeed.TSUNAMI), availableDmDssFeeds(both, reportScopes))
+        assertEquals(setOf(DmDssFeed.FORECAST), availableDmDssFeeds(
+            DmDssContractSummary(listOf(forecast)), allScopes))
+        assertEquals(setOf(DmDssFeed.CONFIRMED, DmDssFeed.TSUNAMI), availableDmDssFeeds(
+            DmDssContractSummary(listOf(reports)), allScopes))
+        assertEquals(setOf(DmDssFeed.FORECAST, DmDssFeed.CONFIRMED, DmDssFeed.TSUNAMI),
+            availableDmDssFeeds(both, allScopes))
     }
 
     @Test

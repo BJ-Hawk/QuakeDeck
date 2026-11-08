@@ -1,6 +1,18 @@
 # P2PQuake felt-flood ingress mitigation
 
-## Status — implemented locally; build/unit-validated; pending device/live approval
+## November 7 follow-up
+
+Local version `0.10.3-dev.8` / 246 adds HTTP recovery for a live P2PQuake stream that falls behind. The user requested this numeric bump, connection and reconnect diagnostics, local edits only, and validation in Android Studio.
+
+The western Shizuoka Shindo 5+ export recorded the first confirmed JMA report 242.6 seconds after P2PQuake registration, while crowd packets continued arriving with progressively older timestamps. That evidence establishes a backlog between registration and the receive callback. The location of the queue remains unresolved.
+
+- The socket samples valid server timestamps at most once per five seconds. A sample at least 30 seconds old can start one code `551` history request. Lag requests start at least 30 seconds apart and share an in-flight slot with the existing socket-open recovery. HTTP 429 backs off for at least 61 seconds and follows a longer `Retry-After` up to one day.
+- Lag recovery considers recent confirmed reports from the latest 30 results and publishes the applicable merged current report through the existing confirmed alert flow. Socket-open recovery retains its quiet snapshot behavior. Official IDs have a separate bounded cache so felt traffic cannot displace a recovered report before its WebSocket copy arrives.
+- Exported P2PQuake diagnostics correlate attempts, opens, closes, failures, retries, and recovery results by generation. The earlier 561 ingress and asynchronous diagnostic persistence rules still apply.
+
+Next in Android Studio: build and run the existing suite, including P2P ingress, delivery routing, and diagnostics. Reproduce a stale live stream and verify a confirmed report can arrive via HTTP before its socket copy, the copy does not alert twice, an HTTP 429 delays retries, and connection and history records correlate in the export. Build, tests, and live validation are pending. The work is local on `main` based on `73d950df5b7dcd70e647c719adce238ac9a7ad2b`, with no new commit.
+
+## September implementation and validation
 
 On 17 September 2026 the user authorized implementation of this scoped mitigation
 and advancement to the next dev version. Local metadata is now `0.10.2-dev.5`
@@ -203,3 +215,10 @@ editing because it contains unrelated user work.
   meaningful `9611` aggregation.
 - Do not attribute this incident conclusively to P2PQuake bandwidth. The
   evidence supports a local backlog caused by QuakeDeck's own callback work.
+
+## 0.10.3-dev.9 flood-lock follow-up
+
+- Raw packet encoding, redaction and persistence leave both WebSocket readers. Diagnostic ingress prefers official/control evidence on overflow and records skipped counts. The source dialog refreshes diagnostics on demand rather than copying the trace on each live snapshot.
+- P2PQuake routes only operational codes to live handlers. It coalesces felt updates by cluster for display and writes raw crowd frames in bounded batches. Archive counts refresh separately at most once per second during live activity.
+- A dedicated worker starts and admits history requests after stale timestamps, an unexpected disconnect or a silent stream (60-second threshold checked every 15 seconds). Recovery permits one call at a time with a 30-second minimum interval and retains Retry-After backoff. Startup/reconnect synchronization stays quiet, while lag and fallback can alert for a fresh recovered bulletin.
+- Live delivery deduplicates transport copies using the issue time, origin, bulletin type and correction as well as wrapper ID. Log entries distinguish HTTP completion from the application of recovered reports. Build, tests and device/live verification remain pending in Android Studio.

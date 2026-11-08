@@ -147,7 +147,8 @@ data class EarthquakeEvent(
      * time behaves like "now" while the displayed source timestamps remain
      * historically accurate.
      */
-    val timelineOffsetMillis: Long = 0L
+    val timelineOffsetMillis: Long = 0L,
+    val jmaReportEventId: String? = null
 )
 
 fun EarthquakeEvent.eewAttentionIdentity(): String = "$eewAlertLevel:$id"
@@ -249,7 +250,9 @@ data class AppSnapshot(
     val testingMode: Boolean = false,
     val builtInReplayActive: Boolean = false,
     val showingRememberedReports: Boolean = false,
-    val recentReportsRefreshing: Boolean = false
+    val recentReportsRefreshing: Boolean = false,
+    val dmdssReportUpdate: Boolean = false,
+    val dmdssLiveTypes: Set<String> = emptySet()
 )
 
 fun waitingSnapshot(
