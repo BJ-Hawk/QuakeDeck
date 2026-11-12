@@ -54,9 +54,9 @@
     <string name="dmdss_diagnostic_packet_history">Live packet history</string>
     <string name="dmdss_diagnostic_show_packets">Show newest 20</string>
     <string name="dmdss_diagnostic_hide_packets">Hide</string>
-    <string name="dmdss_diagnostic_reporting_area">Reporting area: %1$s</string>
-    <string name="dmdss_diagnostic_location">Location: %1$s</string>
-    <string name="dmdss_diagnostic_forecast_area">Forecast area: %1$s</string>
+    <string name="dmdss_diagnostic_reporting_area" translatable="false">Reporting area: %1$s</string>
+    <string name="dmdss_diagnostic_location" translatable="false">Location: %1$s</string>
+    <string name="dmdss_diagnostic_forecast_area" translatable="false">Forecast area: %1$s</string>
     <string name="dmdss_diagnostic_export_json">Export diagnostic</string>
     <string name="dmdss_export_last_event">Export last event</string>
     <string name="dmdss_export_last_hour">Export last hour</string>
@@ -138,7 +138,7 @@
     <string name="enable_translate_with_google">Enable Translate with Google</string>
     <string name="google_translate_attribution_description">Powered by Google Translate</string>
     <string name="google_translate_link">Open Google Translate</string>
-    <string name="google_translation_disclaimer">THIS SERVICE MAY CONTAIN TRANSLATIONS POWERED BY GOOGLE. GOOGLE DISCLAIMS ALL WARRANTIES RELATED TO THE TRANSLATIONS, EXPRESS OR IMPLIED, INCLUDING ANY WARRANTIES OF ACCURACY, RELIABILITY, AND ANY IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.</string>
+    <string name="google_translation_disclaimer" translatable="false">THIS SERVICE MAY CONTAIN TRANSLATIONS POWERED BY GOOGLE. GOOGLE DISCLAIMS ALL WARRANTIES RELATED TO THE TRANSLATIONS, EXPRESS OR IMPLIED, INCLUDING ANY WARRANTIES OF ACCURACY, RELIABILITY, AND ANY IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.</string>
     <string name="p2pquake_testing_mode">P2PQuake testing mode</string>
     <string name="sandbox_explanation">Use the official sandbox replay feed. It sends historical EEW, earthquake and tsunami samples about every 30 seconds; do not treat them as current events.</string>
     <string name="replay_noto_eew">Replay 5 May 2023 Noto EEW</string>

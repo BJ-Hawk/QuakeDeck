@@ -28,7 +28,9 @@ import cz.misa.quakedeck.data.LiveUpdateKind
 import cz.misa.quakedeck.data.LocalEewForecasts
 import cz.misa.quakedeck.data.valueOrNull
 import cz.misa.quakedeck.data.P2pQuakeProvider
-import cz.misa.quakedeck.data.mergeCumulativeUpdate
+import cz.misa.quakedeck.data.matchesLiveEewReport
+import cz.misa.quakedeck.data.preferredActiveEew
+import cz.misa.quakedeck.data.withAssociatedCrowdUpdate
 import cz.misa.quakedeck.data.PublicHolidayCalendar
 import cz.misa.quakedeck.data.QuakeDataProvider
 import cz.misa.quakedeck.data.ReportArchiveStatus
@@ -39,8 +41,6 @@ import cz.misa.quakedeck.sandbox.SandboxFeature
 import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
-import java.time.temporal.ChronoUnit
-import kotlin.math.abs
 
 /**
  * Process-scoped owner of QuakeDeck's live provider and notification policy.
@@ -183,6 +183,7 @@ class QuakeDeckRuntime(context: Context) : QuakeDataProvider {
             lastP2pUpdateMillis = System.currentTimeMillis()
         }
         dmdssSnapshot = dmdssSnapshot.withAssociatedP2pCrowdSignal()
+        p2pProvider.setExternalEewForCrowdAssociation(dmdssSnapshot.activeEewEvent?.takeUnless { it.isDrill })
         publishCombined(origin = DataSourceMode.FREE)
     }
 
@@ -208,8 +209,8 @@ class QuakeDeckRuntime(context: Context) : QuakeDataProvider {
     private fun handleDmdssSnapshot(snapshot: AppSnapshot) {
         val previousSignal = dmdssSnapshot.activeEewEvent?.p2pCrowdSignal
             ?: dmdssSnapshot.event.p2pCrowdSignal
-        p2pProvider.setExternalEewForCrowdAssociation(snapshot.activeEewEvent?.takeUnless { it.isDrill })
         dmdssSnapshot = snapshot.withAssociatedP2pCrowdSignal(previousSignal)
+        p2pProvider.setExternalEewForCrowdAssociation(dmdssSnapshot.activeEewEvent?.takeUnless { it.isDrill })
         publishCombined(origin = DataSourceMode.DMDSS)
     }
 
@@ -219,15 +220,21 @@ class QuakeDeckRuntime(context: Context) : QuakeDataProvider {
         val active = activeEewEvent
         val target = active ?: event.takeIf { it.kind == EarthquakeEventKind.EEW } ?: return this
         if (target.isDrill) return this
-        val signal = p2pProvider.crowdSignalFor(target)
-            ?: retainedSignal?.takeIf { previous ->
-                previous.startedAt.isNotBlank() && target.id == dmdssSnapshot.event.id
-            }
+        val established = target.p2pCrowdSignal ?: retainedSignal?.takeIf {
+            it.startedAt.isNotBlank() && target.id == dmdssSnapshot.event.id
+        }
+        if (active == null && established == null) return this
+        val signal = established.withAssociatedCrowdUpdate(p2pProvider.crowdSignalFor(target))
             ?: return this
+        val warningUpdate = eewUpdateEvent?.takeIf {
+            it.id == target.id && it.p2pCrowdSignal != signal
+        }
+        if (signal == target.p2pCrowdSignal && warningUpdate == null) return this
         val enriched = target.copy(p2pCrowdSignal = signal)
         return copy(
             activeEewEvent = active?.let { enriched },
-            event = if (event.id == target.id) enriched else event
+            event = if (event.id == target.id) enriched else event,
+            eewUpdateEvent = warningUpdate?.copy(p2pCrowdSignal = signal) ?: eewUpdateEvent
         )
     }
 
@@ -327,18 +334,9 @@ class QuakeDeckRuntime(context: Context) : QuakeDataProvider {
             )
         }
 
-        val dmdssEew = dmdssSnapshot.activeEewEvent
-        val preferred = cz.misa.quakedeck.data.preferredActiveEew(dmdssEew, p2pSnapshot.activeEewEvent)
-        val usingDmdss = preferred != null && preferred === dmdssEew
-        val selectedEew = if (usingDmdss) preferred.amendedByMatchingOfficialReport(p2pSnapshot.event) else preferred
-        val selectedEvent = selectedEew ?: if (
-            origin == DataSourceMode.DMDSS &&
-            dmdssSnapshot.liveUpdateKind == LiveUpdateKind.EEW_ENDED
-        ) {
-            dmdssSnapshot.event
-        } else {
-            p2pSnapshot.event
-        }
+        val presentation = selectLiveEewPresentation(dmdssSnapshot, p2pSnapshot, origin)
+        val usingDmdss = presentation.usesPaidWarning
+        val selectedEew = presentation.activeWarning
         val updateKind = when (origin) {
             DataSourceMode.DMDSS -> if (
                 !usingDmdss && selectedEew != null && dmdssSnapshot.liveUpdateKind == LiveUpdateKind.EEW
@@ -371,15 +369,11 @@ class QuakeDeckRuntime(context: Context) : QuakeDataProvider {
                 } else {
                     p2pSnapshot.activeEewUntilMillis
                 },
-                event = selectedEvent,
-                // The P2PQuake baseline retains its own source event for
-                // archive/recovery purposes. Do not expose that as a second
-                // live incident while its official bulletin is amending the
-                // visible DM-D.S.S EEW.
-                history = if (dmdssEew != null) {
-                    p2pSnapshot.history.filterNot { sameLiveIncident(dmdssEew, it) }
+                event = presentation.latestEvent,
+                eewUpdateEvent = if (origin == DataSourceMode.DMDSS) {
+                    dmdssSnapshot.eewUpdateEvent
                 } else {
-                    p2pSnapshot.history
+                    p2pSnapshot.eewUpdateEvent
                 },
                 statusText = if (usingDmdss) {
                     dmdssSnapshot.statusText
@@ -401,56 +395,6 @@ class QuakeDeckRuntime(context: Context) : QuakeDataProvider {
         }
         return snapshot.copy(liveUpdateSequence = sequence)
     }
-
-    /**
-     * DM-D.S.S owns the active forecast presentation, while P2PQuake carries
-     * the JMA confirmation. They are two reports about one earthquake, not two
-     * cards. Keep the EEW identity and forecast state, then layer the official
-     * report fields and its cumulative felt signal onto that same incident.
-     */
-    private fun EarthquakeEvent.amendedByMatchingOfficialReport(
-        official: EarthquakeEvent
-    ): EarthquakeEvent {
-        if (official.kind != EarthquakeEventKind.CONFIRMED || !sameLiveIncident(this, official)) {
-            return this
-        }
-        val crowd = listOfNotNull(p2pCrowdSignal, official.p2pCrowdSignal)
-            .reduceOrNull(cz.misa.quakedeck.data.P2pCrowdSignal::mergeCumulativeUpdate)
-        val officialHasHypocenter = official.hasHypocenter
-        return official.copy(
-            id = id,
-            kind = EarthquakeEventKind.EEW,
-            // A ScalePrompt deliberately carries no hypocentre. It can amend
-            // official report data, but it must never erase the valid DM-D.S.S
-            // EEW origin that drives waves, local estimates and map focus.
-            place = if (officialHasHypocenter) official.place else place,
-            magnitude = if (officialHasHypocenter) official.magnitude else magnitude,
-            depthKm = if (officialHasHypocenter) official.depthKm else depthKm,
-            latitude = if (officialHasHypocenter) official.latitude else latitude,
-            longitude = if (officialHasHypocenter) official.longitude else longitude,
-            hasHypocenter = hasHypocenter || officialHasHypocenter,
-            eewAlertLevel = eewAlertLevel,
-            eewHypocenterCondition = eewHypocenterCondition,
-            eewMagnitudeUnit = eewMagnitudeUnit,
-            eewSourceAccuracy = eewSourceAccuracy,
-            localIntensityForecast = localIntensityForecast,
-            p2pCrowdSignal = crowd
-        )
-    }
-
-    private fun sameLiveIncident(first: EarthquakeEvent, second: EarthquakeEvent): Boolean {
-        if (first.isDrill != second.isDrill) return false
-        val firstTime = eventOriginMinute(first) ?: return false
-        val secondTime = eventOriginMinute(second) ?: return false
-        if (firstTime != secondTime) return false
-        if (!first.hasHypocenter || !second.hasHypocenter) return true
-        return abs(first.latitude - second.latitude) <= 3.0 &&
-            abs(first.longitude - second.longitude) <= 3.0
-    }
-
-    private fun eventOriginMinute(event: EarthquakeEvent): LocalDateTime? = runCatching {
-        LocalDateTime.parse(event.originTime, JST_DISPLAY_FORMATTER).truncatedTo(ChronoUnit.MINUTES)
-    }.getOrNull()
 
     /** Attach the visible UI to the already-running process-scoped provider. */
     override fun start(onSnapshot: (AppSnapshot) -> Unit) {
@@ -489,8 +433,9 @@ class QuakeDeckRuntime(context: Context) : QuakeDataProvider {
 
     fun completeDmdssAuthorization(uri: Uri, callback: (Result<Unit>) -> Unit) {
         val wasAuthorized = dmdssOAuth.isAuthorized
-        dmdssOAuth.completeAuthorization(uri) { result ->
+        dmdssOAuth.completeAuthorization(uri) { generation, result ->
             mainHandler.post {
+                if (generation != dmdssOAuth.sessionGeneration()) return@post
                 result.onSuccess {
                     dmdssProvider.stop()
                     setDataSourceMode(DataSourceMode.DMDSS)
@@ -537,9 +482,14 @@ class QuakeDeckRuntime(context: Context) : QuakeDataProvider {
             )
             publishCombined(origin = DataSourceMode.DMDSS)
         }
+        val generation = dmdssOAuth.sessionGeneration()
         dmdssOAuth.readContracts { result ->
             mainHandler.post {
                 dmdssContractCheckInFlight = false
+                if (generation != dmdssOAuth.sessionGeneration()) {
+                    refreshDmdssContractsAndConnect()
+                    return@post
+                }
                 if (requestedMode != DataSourceMode.DMDSS || !dmdssOAuth.isAuthorized ||
                     p2pSnapshot.testingMode
                 ) return@post
@@ -756,12 +706,34 @@ class QuakeDeckRuntime(context: Context) : QuakeDataProvider {
     }
 }
 
-/**
- * Keep notification data tied to the provider callback that produced the live
- * update. The combined snapshot is presentation state: while a paid Forecast
- * is active it intentionally keeps that EEW selected for the map even if the
- * baseline P2PQuake feed publishes a regular report for the same incident.
- */
+internal data class LiveEewPresentation(
+    val activeWarning: EarthquakeEvent?,
+    val usesPaidWarning: Boolean,
+    val latestEvent: EarthquakeEvent
+)
+
+internal fun selectLiveEewPresentation(
+    paid: AppSnapshot,
+    baseline: AppSnapshot,
+    origin: DataSourceMode
+): LiveEewPresentation {
+    val warning = preferredActiveEew(paid.activeEewEvent, baseline.activeEewEvent)
+    val terminalWarning = if (origin == DataSourceMode.DMDSS && paid.liveUpdateKind == LiveUpdateKind.EEW_ENDED) {
+        paid.eewUpdateEvent ?: paid.event
+    } else null
+    val latest = (warning ?: terminalWarning)?.let { eew ->
+        val candidates = listOf(baseline.event) + baseline.history
+        val confirmed = candidates.firstOrNull { it.jmaReportEventId == eew.id && matchesLiveEewReport(eew, it) }
+            ?: candidates.firstOrNull { matchesLiveEewReport(eew, it) }
+            ?: return@let eew
+        val reportSignal = confirmed.p2pCrowdSignal
+        val crowd = eew.p2pCrowdSignal.withAssociatedCrowdUpdate(reportSignal)
+        if (crowd == reportSignal) confirmed else confirmed.copy(p2pCrowdSignal = crowd)
+    } ?: baseline.event
+    return LiveEewPresentation(warning, warning != null && warning === paid.activeEewEvent, latest)
+}
+
+/** Keep notification content tied to the provider callback that produced the update. */
 internal fun notificationSnapshotForProviderUpdate(
     combined: AppSnapshot,
     origin: DataSourceMode,

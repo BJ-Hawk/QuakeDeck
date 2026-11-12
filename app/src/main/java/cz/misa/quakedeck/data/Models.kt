@@ -252,7 +252,9 @@ data class AppSnapshot(
     val showingRememberedReports: Boolean = false,
     val recentReportsRefreshing: Boolean = false,
     val dmdssReportUpdate: Boolean = false,
-    val dmdssLiveTypes: Set<String> = emptySet()
+    val dmdssLiveTypes: Set<String> = emptySet(),
+    /** A provider has established tsunami state, including an expiry/cancellation with no active report. */
+    val tsunamiStateKnown: Boolean = false
 )
 
 fun waitingSnapshot(

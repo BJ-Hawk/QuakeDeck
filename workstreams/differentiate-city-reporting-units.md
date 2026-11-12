@@ -153,16 +153,237 @@ The complete audited 4,360-station English map and the first station-information
 card are active in the app. Placement research is underway in
 `outputs/station-name-audit/station_metadata_sources.json` only:
 
-- 3,693 stations have recorded exact published Japanese addresses. The
+- 3,710 stations have recorded exact published Japanese addresses. The
   Yamanashi source-recovery qualification below still requires follow-up;
   this count is not a fresh recertification of earlier sources.
-- 667 retain municipality-or-ward precision. Six of those also have a
-  source-supported facility identity but no verified published address; the
-  remaining 661 still require facility/address research.
-- The latest research address/precision validation reported zero mismatches;
-  this documentation-only update did not rerun a whole-dataset validation.
+- 650 retain municipality-or-ward precision. Seven of those also have a
+  source-supported facility identity but no verified published address. The
+  remaining 643 still need a facility or exact address. Shimotsuma Kinu
+  returned to the open queue, reducing the previous exact-address count by one.
 
-### Latest continuation checkpoint — 17 October 2026
+### Latest placement research checkpoint — 8 November 2026
+
+- **Shimotsuma Kinu `0821034`.** JMA's published address at Chiyokawa
+  Community Center, Kinu 230, applies to predecessor `0821032`. JMA's
+  historical catalogue dates the reporting change to 17 September 2024.
+  The current meter's facility and address remain open.
+- **Numata Tone `1020634`.** JMA dates the reporting change to 29 January
+  2025, after the Tone District Community Center opened. The municipal
+  construction and opening records leave the receiving meter site open.
+- **Karatsu Ōchi `4120243`.** JMA dates the reporting change to 12 July 2024,
+  before the documented office move to the Ōchi Civic Center annex. The
+  meter's receiving site remains open.
+
+[JMA historical catalogue](https://www.data.jma.go.jp/eqev/data/bulletin/data/shindo/code_p.zip)
+
+### Earlier continuation checkpoint — 8 November 2026
+
+- **Aizuwakamatsu Higashisakaemachi `0720234`.** The city's site plan shows
+  the meter on the main City Hall grounds. The completion bulletin gives
+  the facility address as Higashisakaemachi 3-46. JMA's historical catalogue
+  records the reporting switch from temporary Otemachi to Higashisakaemachi
+  on 30 April 2025.
+  [City site plan](https://www.city.aizuwakamatsu.fukushima.jp/docs/2018052500025/file_contents/R4jissisekkeisetumei.pdf),
+  [City completion bulletin](https://www.city.aizuwakamatsu.fukushima.jp/docs/2016062800043/file_contents/02gbkurashikenko.pdf),
+  [JMA station change notice](https://xml.kishou.go.jp/20250624_jmaxml_info.pdf)
+- **Futtsu Shimoiino `1222631`.** A city works notice confirms the existing
+  address, Futtsu City Hall Main Building, Shimoiino 2443, and records the
+  replacement meter entering service on 18 September 2026.
+  [City works notice](https://www.city.futtsu.lg.jp/0000008657.html)
+- **Date Maekawara `0721336` and Nichinan Kitagō Gōnohara `4520437`.** The
+  JSON now records Maekawara's 10 September 2024 changeover during the
+  municipal relocation contract and Gōnohara's 10 January 2024 reporting
+  start after a gap of more than three years. Both receiving sites remain
+  open. Seek Maekawara's completed relocation record and an installation
+  record for Gōnohara's 2024 reporting point.
+  [JMA Maekawara change notice](https://xml.kishou.go.jp/20241021_jmaxml_info.pdf),
+  [JMA Gōnohara change notice](https://xml.kishou.go.jp/20231201_jmaxml_info.pdf),
+  [JMA historical catalogue](https://www.data.jma.go.jp/eqev/data/bulletin/data/shindo/code_p.zip)
+- **Nikkō Ashio Tsudo `0920635`.** The JSON now identifies the shared Ashio
+  Administrative Center and Fire Substation site. JMA's historical catalogue
+  dates the reporting change to the same day the city moved both offices to
+  the site. The city lists Tsudo 8-2 for the administrative center and Tsudo
+  8-1 for the fire substation. The meter's street number remains unverified.
+  [JMA historical catalogue](https://www.data.jma.go.jp/eqev/data/bulletin/data/shindo/code_p.zip),
+  [City relocation notice](https://www.city.nikko.lg.jp/material/files/group/3/201308p022-035.pdf),
+  [Administrative center facility card](https://www.city.nikko.lg.jp/material/files/group/7/01shisetsukarute.pdf),
+  [Fire substation facility card](https://www.city.nikko.lg.jp/material/files/group/7/16shisetsukarute.pdf)
+- **Nikkō Miyukicho `0920637`, Shioya Tamanyu `0938431`, and Nagahama
+  Yahatahigashicho `2520340`.** Saved the JMA reporting changes and municipal
+  office relocation dates in the JSON. The records do not identify the
+  receiving meter sites, so all three remain open.
+- **Asakura Amagi `4022833`.** Added independent JMA confirmation of the
+  already-recorded Asakura City Hall address, Amagi 232-1. The exact-address
+  count is unchanged.
+  [JMA station change notice](https://www.jma.go.jp/bosai/oshirase/dokujioshirase_pdf/JPSP/20260217061734_0_Z__J_JPSP_20260217061600_MET_INF_Jdokujioshirase32_NJ000n00_image.pdf)
+- **Iga Shijūkumachi `2421637`.** JMA's historical catalogue dates the
+  reporting change to 12 March 2019. The city opened its new hall on
+  4 January 2019. The meter's receiving facility remains open.
+  [JMA historical catalogue](https://www.data.jma.go.jp/eqev/data/bulletin/data/shindo/code_p.zip),
+  [Iga City bulletin](https://www.city.iga.lg.jp/cmsfiles/contents/0000006/6232/001-009.pdf)
+- **Saga network.** The FY2026 maintenance appendix identifies a measuring
+  sensor at the already-addressed Morodomi station. It distinguishes other
+  network equipment from measuring sensors, so the listed equipment sites
+  did not resolve additional placements.
+  [Saga maintenance appendix](https://www.pref.saga.lg.jp/kiji003118535/3_118535_up_31abmgvh.pdf)
+
+### Kisarazu, Tochigi and Kōfu checkpoint — 8 November 2026
+
+- **Kisarazu Fujimi `1220631`.** The JSON records the Kisarazu City Hall
+  Ekimae Office at `千葉県木更津市富士見1丁目2番1号`.
+- **Tochigi and Sano.** Four saved placements are Tochigi City Hall
+  (`0920335`, `万町9番25号`), its Tsuga General Branch (`0920337`,
+  `都賀町原宿573番地`), Sano City Hall (`0920435`, `高砂町1番地`), and
+  Sano’s Tanuma Administrative Center (`0920436`, `田沼町974-3`).
+  Kuzuu (`0920434`) remains open. The station’s 2013 reporting change falls
+  between the city office’s move to temporary premises and the opening of
+  its permanent replacement.
+- **Kōfu.** The city’s bid results identify the seismometer relocation as
+  part of construction of the Kamikuishiki Office (`1920133`,
+  `山梨県甲府市古関町1158番地`). For the Nakamichi Branch (`1920134`,
+  `山梨県甲府市下曽根町1070番地3`), the historical prefectural network diagram
+  names the branch and the city’s documented move to the community center
+  aligns with JMA’s reporting change the following day. The diagram text
+  was available through a search index, and recovery of the original PDF
+  remains open.
+  [Kōfu bid results](https://www.city.kofu.yamanashi.jp/keyaku/business/nyusatsu/koji/documents/h213k.pdf),
+  [city implementation plan](https://www.city.kofu.yamanashi.jp/zaise/shise/shisaku/sogo/documents/10_12_zentai.pdf),
+  [JMA historical catalogue](https://www.data.jma.go.jp/eqev/data/bulletin/data/shindo/code_p.zip)
+- Since the preceding documentation checkpoint, exact-address coverage rose
+  by nine, facility-only coverage rose by one, and the remaining queue fell
+  by ten. The totals were carried forward from saved progress.
+
+### Kakamigahara and Shizuoka checkpoint — 8 November 2026
+
+- **Kakamigahara Naka Sakuramachi `2121333`.** City accounts document meter
+  reinstallation with wiring for the rebuilt Kakamigahara City Hall. The
+  city guide gives the address as `岐阜県各務原市那加桜町1丁目69番地`, and JMA’s
+  catalogue dates the current reporting point to 10 January 2024.
+  [City accounts](https://www.city.kakamigahara.lg.jp/_res/projects/default_project/_page_/001/008/054/r5_kessannninntei.pdf),
+  [City Hall guide](https://www.city.kakamigahara.lg.jp/_res/projects/default_project/_page_/001/017/371/okuyamibook202510.pdf)
+- **Shinjō Sumiyoshimachi `0620531`.** Corrected the address to Shinjō City
+  Hall’s Second Building at `山形県新庄市住吉町3番1号`. The 2018 council record
+  identifies the receiving grounds, and JMA records the reporting change on
+  21 November 2018.
+  [Council record](https://www.city.shinjo.yamagata.jp/s015/030/010/030/h30_09teireikai.pdf),
+  [City Hall address](https://www.city.shinjo.yamagata.jp/s013/020/080/20150225184126.html)
+- **Bandō Yama `0822835`.** The city’s final accounts and JMA reporting history
+  establish the move within Yama in March 2025. The former Sashima office at
+  `山2730` is recorded as historical, and the receiving facility and address
+  are open.
+  [City accounts](https://www.city.bando.lg.jp/data/doc/1758090097_doc_14_0.pdf),
+  [JMA station-code notice](https://xml.kishou.go.jp/20250624_jmaxml_info.pdf)
+- **Yaese Gushikami `4736232` and Kochinda `4736233`.** Added provenance for
+  the March 2016 reporting changes and a town budget item for one meter move.
+  The budget gives neither the meter identity nor the destination. Both hosts
+  remain open.
+  [Town budget](https://www.town.yaese.lg.jp/docs/2014030300014/file_contents/H27-5hosei2.pdf),
+  [prefectural specification](https://www.pref.okinawa.jp/_res/projects/default_project/_page_/001/041/409/03shiyousyo.pdf)
+- **Shizuoka follow-up.** The saved corrections include Shimizu Town Fire
+  Station at `堂庭212番地1`, Subashiri Community Center at `須走267番地6`, and
+  the current address for the Yaizu Ishizu host at `石津一丁目6番1号`.
+  [Prefectural station table](https://www.pref.shizuoka.jp/_res/projects/default_project/_page_/001/073/519/kikikanri-r7-2.pdf),
+  [prefectural land-use register](https://www.pref.shizuoka.jp/_res/projects/default_project/_page_/001/029/862/5.pdf)
+- Coverage is unchanged from the preceding checkpoint. The Kakamigahara
+  addition offsets the Bandō downgrade. The Shizuoka follow-up restored an
+  already-counted address and corrected existing records.
+- **Next lead.** Miyakojima council proceedings name the Shimojishima Airport
+  management office grounds as a proposed meter destination. Seek a completion
+  record or installation inventory that ties the site to station `4721439`.
+  [Council proceedings](https://www.city.miyakojima.lg.jp/gyosei/gikai/files/syuuseui.pdf)
+
+### Yoro and Okinawa continuation checkpoint — 8 November 2026
+
+- **Yoro Island `4652534`.** The prefecture’s FY2024 maintenance schedule
+  places the meter on the Yoro Assembly Hall grounds. Municipal facility
+  records and the public-phone listing connect the hall to Setouchi Town Yoro
+  Island Community Center. The town ordinance gives its address as
+  `鹿児島県大島郡瀬戸内町大字与路字村内原383番地`.
+  [Maintenance schedule](https://www.kkj.go.jp/d/?A=a2Fnb3NoaW1hL2thZ29zaGltYV9wcmVmLzIwMjQvMjAyNDAzMDhfMDA2MjVfMDMucGRmCg%3D%3D&L=ja),
+  [town ordinance](https://www.town.setouchi.lg.jp/reiki/reiki_honbun/q787RG00000258.html)
+- **Okinawa.** Table 10-1 of the prefecture’s September 2026 network upgrade
+  specification and supporting local records establish five host sites:
+  Uruma City Hall Ishikawa Branch (`4721333`, 石川石崎1-1), Yokatsu Fire
+  Station (`4721336`, 勝連平安名1435), the former Sashiki Town Hall site
+  (`4721533`, 佐敷字佐敷56), the former Osato Branch (`4721534`, 大里字仲間807),
+  and the former Shimoji Branch (`4721435`, 下地字上地472番地39). JMA and Uruma
+  relocation records resolve the conflicting legacy labels for Katsuren
+  Henna. Yonashiro Henza (`4721334`) remains without a verified host.
+  [Prefectural specification](https://www.pref.okinawa.jp/_res/projects/default_project/_page_/001/041/409/03shiyousyo.pdf),
+  [JMA relocation notice](https://xml.kishou.go.jp/20191015_jmaxml_info.pdf),
+  [Uruma fire service report](https://www.city.uruma.lg.jp/documents/2391/2025syoubounenpou02.pdf)
+- **Source notes.** The JSON also records the latest evidence for Shishijima
+  and Ikarajima’s former community center grounds and the two Yoshinogari
+  reporting points. Their placement classifications stay as recorded. Seek
+  Okinawa’s FY2026 maintenance attachment `07_bessi1_kasyoitiran_R8dshindo.pdf`
+  for sites missing from the September specification. The tender index lists
+  the filename, and the prefecture’s two original bundles returned 404.
+- Yoro moved from facility-only to exact address, and the five Okinawa sites
+  moved from needing a facility or address to exact address. Coverage rose
+  from 3,695 to 3,701 exact addresses, facility-only fell from six to five, and
+  stations needing a facility or address fell from 659 to 654.
+
+### Previous continuation checkpoint — 8 November 2026
+
+- **Tsuchiura Fujisawa `0820333`.** The JSON records Tsuchiura City Health
+  Center, Niihari Branch (`土浦市保健センター新治分室`), at `茨城県土浦市藤沢990番地`.
+  The city’s fiscal 2017 project results record the completed meter move onto
+  the branch grounds. The facility directory publishes the address. The
+  December 2025 facilities plan discusses future service changes and identifies
+  no completed meter move. [Project results](https://www.city.tsuchiura.lg.jp/data/doc/1553822969_doc_5_4.pdf),
+  [facility directory](https://www.city.tsuchiura.lg.jp/kurashi-tetsuzuki/kokyoshisetsu/kenko-fukushi-shisetsu/page001210.html)
+- **Yonabaru Ueyonabaru `4734833`.** The JSON records Yonabaru Town Hall
+  (`与那原町役場`) at `沖縄県島尻郡与那原町字上与那原16番地`. The town’s fiscal
+  2021 budget specifies the meter move to the new hall, the final accounts
+  record spending on the relocation project, and JMA’s September 2021 table
+  records the station-code change. [Town budget](https://www.town.yonabaru.okinawa.jp/uploaded/attachment/263.pdf),
+  [budget summary](https://www.town.yonabaru.okinawa.jp/uploaded/attachment/195.pdf),
+  [JMA relocation table](https://xml.kishou.go.jp/20210928_jmaxml_info.pdf),
+  [town hall address](https://www.town.yonabaru.okinawa.jp/map/map3.html)
+- **Ōkawa Sakemi `4021230`.** Saved provenance from the original field report,
+  the national report, the research table identifying the point as `OSM`, and
+  the 2025 prefectural maintenance award. Figure 7 locates the historical
+  observation point at map scale. The reports give no facility or parcel
+  identifier, and the award contains no installation schedule. Seek the
+  prefectural site inventory or maintenance specification.
+  [National report](https://www.jma.go.jp/jma/kishou/books/saigaiji/saigaiji_2016/saigaiji_201601.pdf),
+  [maintenance award](https://www.pref.fukuoka.lg.jp/uploaded/life/795674_62712686_misc.pdf)
+- **Tsuchiura Tanaka `0820332`.** JMA’s historical bulletin catalogue dates the
+  end of the Shimotakatsu entry and start of the Tanaka entry to noon on
+  22 February 2016. The city records its Fire Headquarters move to Tanaka-machi
+  in March 2016. The reviewed records leave the meter host unverified. This
+  search made no JSON placement change. [JMA historical catalogue](https://www.data.jma.go.jp/eqev/data/bulletin/data/shindo/code_p.zip),
+  [city fire service profile](https://www.city.tsuchiura.lg.jp/data/doc/1641974583_doc_49_0.pdf)
+- Coverage advances by two saved placements. Exact addresses rise from 3,693 to
+  3,695, municipality/ward records fall from 667 to 665, and records still
+  needing a facility or exact address fall from 661 to 659. Six remain
+  facility-only. Cumulative promotions rise from 225 to 227. The guarded script
+  total stays at 97 (82 placement and 15 provenance-only). Totals were carried
+  forward by arithmetic.
+
+### Earlier continuation checkpoint — 8 November 2026
+
+- **Hashima `2120932`.** The JSON now records the completed March 2024 relocation
+  and the gap in evidence for its destination. The city notice records restored
+  reporting on 27 March. The FY2023 administrative report records the relocation
+  expenditure. Neither source identifies the completed installation site. The
+  applied `record_hashima_completed_move_destination_gap.mjs` saved provenance
+  only. This adds one script (96 + 1 = 97), for 82 placement and 15 provenance-only
+  scripts. Coverage and the 225 cumulative promotions carry forward without a
+  recount. [City relocation notice](https://www.city.hashima.lg.jp/5434.html)
+- **Kitakyushu.** Visually inspected the April 2026 appendix contents and chapter 3
+  PDF pages 8–21 (printed pages 100–113). Printed pages 100–112 cover earthquake
+  and tsunami warnings and contain no station placement inventory. Printed page
+  113 begins wired communications. The review covered these pages only and yielded
+  no placement changes. [Appendix contents](https://www.city.kitakyushu.lg.jp/files/001220478.pdf),
+  [chapter 3](https://www.city.kitakyushu.lg.jp/files/001223703.pdf)
+- **Fukuoka.** The original 2016 JMA field report and national disaster report
+  identify Ōkawa Sakemi (`4021230`) as a survey site. The later map and caption
+  findings are recorded above.
+  [Fukuoka field report](https://www.jma-net.go.jp/fukuoka/gyomu/osirase/houdou20160506_houkoku.pdf),
+  [national disaster report](https://www.jma.go.jp/jma/kishou/books/saigaiji/saigaiji_2016/saigaiji_201601.pdf)
+
+### Previous continuation checkpoint — 17 October 2026
 
 Two hundred and twenty-five completed JSON-only promotions against the previously
 compared HEAD baseline. Since the previous documentation checkpoint, two guarded
@@ -1435,15 +1656,14 @@ The separate `record_shinonsen_yu_placement_conflict.mjs`,
 `record_oita_maizuru_fire_bureau_continuity_gap.mjs`, and
 `record_tokai_completed_meter_move_without_destination.mjs`, and
 `record_three_miyazaki_historical_host_address_gaps.mjs` were also dry-run and applied
-once. They change only notes and source URLs, not placement coverage; there are
-  96 applied guarded scripts, comprising 82 placement scripts and 14 provenance-only
-scripts.
+once. They change only notes and source URLs, not placement coverage. With the
+subsequent Hashima provenance update, there are 97 applied guarded scripts,
+comprising 82 placement and 15 provenance-only scripts.
 
 The last full research JSON comparison against HEAD confirmed the preceding
-98 changed station records. The 127 subsequent additions were individually
-guarded and validated during research, giving 225 cumulative promotions by
-arithmetic; no new full comparison or coverage recount is claimed here. Changes
-are limited to placement/provenance fields; English and Japanese station names,
+98 changed station records. The 127 subsequent promotions and the two latest
+individually verified placements give 227 cumulative promotions by arithmetic.
+Changes are limited to placement and provenance fields. English and Japanese station names,
 coordinates, record order and all existing source URLs are preserved. The latest
 research address/precision validation reported zero mismatches. The
 earlier documentation update checked the 16 newly saved placement records, their three
@@ -2093,7 +2313,8 @@ Unfinished research to resume, not completed placements:
   searches, not visual inspection of every page; do not redownload them as new
   leads or infer branch-office hosts from generic network diagrams.
 - Okinawa's [September 2026 upgrade specification](https://www.pref.okinawa.lg.jp/_res/projects/default_project/_page_/001/041/409/03shiyousyo.pdf)
-  describes server work and network totals, not individual placement addresses.
+  covers server work and network totals. Table 10-1 also identifies selected
+  meter sites, including the five placements in the latest checkpoint.
   The [Q&A appendix](https://www.pref.okinawa.lg.jp/_res/projects/default_project/_page_/001/041/409/06shitumonkaitour8dshindo.pdf)
   has image-only diagrams on PDF pages 3–7; all five have now been visually
   inspected and show server-room/rack information, not station-host addresses.
@@ -2582,7 +2803,13 @@ and the former Takanabe Town Hall parcel differs from its current office.
 
 ## Exact next steps
 
-1. Follow Hashima `2120932`'s actual completed meter-move destination, not its
+1. Seek the prefecture’s site schedule or design specifications for Fukushima’s
+   2024 seismic-intensity network renewal tender `24-05010-0002`. Check whether
+   it names the physical meter installations, including Date Maekawara
+   `0721336`. For Ōkawa Sakemi `4021230`, seek a prefectural site inventory or
+   the 2025 maintenance specifications. For Tsuchiura Tanaka `0820332`, seek
+   an installation or transfer record that identifies the host. Follow Hashima
+   `2120932`'s actual completed meter-move destination, not its
    current City Hall footer or undated Panasonic case. Resume Gifu's official
    login-free procurement route during published weekday hours for tender
    `21111111520250001`'s individual site inventory; do not retry the third-party
@@ -2689,23 +2916,23 @@ and the former Takanabe Town Hall parcel differs from its current office.
   seismic-network stations, after the 21 Fukui Prefecture stations and `2520431`
   at Azuchi Community Center. This continuation update is coordination-only: it
   does not alter release metadata or the changelog.
-- The latest saved research adds Ohtawara Honcho's main-hall host-site address
+- An earlier research checkpoint added Ohtawara Honcho's main-hall host-site address
   and Yuzukami's qualified provenance in one placement script, plus Fujisato's
   recovered-plan provenance-only script. The preceding Senju address, Akabane
   facility-only identity, and Mimasaka/Onojo/Yamanakako provenance remain saved.
   Hommachi's and Kawasato's addresses and the three Miyazaki
   historical/current-address qualifications remain saved; the latter leave all
-  placement fields unchanged. Script totals are 96 (82 placement and
-  14 provenance-only), and cumulative promotions are 225, by arithmetic only.
+  placement fields unchanged. With Hashima's saved relocation provenance, script
+   totals reached 97 (82 placement and 15 provenance-only). Tsuchiura Fujisawa
+   and Yonabaru Ueyonabaru brought cumulative promotions to 227 at that checkpoint.
   Oita's current-host continuity gap and Tokai's completed move without a named
   destination remain provenance-only. The preceding 16 exact-address
   additions in three placement scripts remain saved. Mimasaka's
   provenance-only relocation/planned-host note, Fujiwara's
   ambiguity evidence, Mihama Town Hall's exact
   placement, Iga Shijukucho's relocation-only note, the four Kanagawa exact
-  placements and Nihonodori's facility-only record are preserved. Coverage
-  is 3,693 exact addresses, six facility-only records and 661 still
-  needing facility/address research; these are not unresolved English names.
+  placements and Nihonodori's facility-only record are preserved. The latest
+  placement coverage is listed under Current unfinished point above.
   The formerly pending ten-station fire-host script is applied and included;
   Arakawa's and Yashio's provenance-only scripts leave their placements blank.
   Previously unsaved Saitama town/fire/branch leads are now saved as listed above;
@@ -2717,4 +2944,4 @@ and the former Takanabe Town Hall parcel differs from its current office.
   no workbook, runtime resource, release metadata, changelog, or unrelated file
   was changed.
   The station JSON SHA-256 before and after this documentation update is
-  `3C81D688ACDBC30D91A117BD4273002BDA27FEA8AE5DAA4E78D5636D37D6ED86`.
+  `672E468B100DE75DA4626C9205AADEBE2916C1E0F2804E788D36E4F382C44E90`.

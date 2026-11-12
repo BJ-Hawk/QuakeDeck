@@ -2,7 +2,7 @@
 
 QuakeDeck release history
 
-## v0.10.4-dev.1 (in progress)
+## v0.10.4-dev.3 (in progress)
 
 - Keeps the History loading bar visible at the bottom while scrolling and gives the replay header fixed rows. Opening an incident focuses its earliest mappable earthquake or EEW frame.
 - Skips P2PQuake felt updates when stepping through replay. Associated reports still lists distinct cumulative updates, including real changes to count, confidence or area.
@@ -10,7 +10,14 @@ QuakeDeck release history
 - Focuses selected past reports and lets users close the focused latest report. Moves the map legend below the live EEW and tsunami badges, makes each badge focus or refocus its alert, and lets users close active alert details while retaining P/S waves and affected coastlines.
 - Aligns rows and clickable text in Data Sources. Renames the active P2PQuake setting to describe its felt-report counters.
 - Simplifies Delivery diagnostics to connection status and the last transport issue. Diagnostic export offers the last event, hour, 24 hours, week or all retained data, with a choice to include connection packets.
-- Android Studio build, unit tests and device validation are pending.
+- Keeps matching confirmed JMA reports available as the latest earthquake during and after an active EEW. The warning retains its own forecast data, wave timing, and end-notification identity. Uses the JMA event ID when present, with origin-minute and location matching for reports without an ID.
+- Keeps the associated P2PQuake felt-report cluster through confirmation, report revisions, and EEW expiry. Later cumulative updates from that cluster can increase the count.
+- Repairs the November 12 northeastern Chiba felt count in Recent Earthquakes using the verified P2PQuake aggregate of 103 from the diagnostic export. Preserves any newer count from the original cluster.
+- Authenticates notification restoration and wake flags across process death, provides the Android 8.0 window-flag fallback, and gives live tsunami cancellation/expiry precedence over retained notification data.
+- Makes OAuth disconnect and account replacement invalidate deferred work, preserves authorization on temporary refresh failures, and validates pending transactions before consuming them.
+- Streams historical backfill one page at a time with one report per main-thread turn; keeps its network waits separate from live archive writes and notification processing off the UI thread.
+- Closes the offline translator with its UI owner and excludes OAuth, signing keys and private reference-location settings from backups while preserving ordinary preferences and migrating current-device choices.
+- Preserves UI layout and displayed resource text. FULL/LITE compilation and all 203 unit tests pass; Android lint passes with non-blocking warnings. Device/live, backup migration, heap and responsiveness measurements remain pending.
 
 ## v0.10.3
 

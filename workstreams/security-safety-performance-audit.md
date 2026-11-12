@@ -1,22 +1,17 @@
 # Code security, safety and performance audit remediation
 
-## Status — prepared; not implemented
+## Status — November Android remediation implemented locally; approval pending
 
-Prepared on **17 September 2026** from the read-only audit of the current local
-QuakeDeck checkout. **All nine findings remain open.** This workstream records
-the evidence, remediation scope and validation needed for a later implementation;
-creating this document does not implement or validate the fixes.
+The ten findings from the **12 November 2026** conversation are implemented in
+**0.10.4-dev.3 / versionCode 252**, with FULL/LITE compilation, 203 passing tests
+in each edition, and default-build Android lint passing. Device/live/security
+and performance validation remain pending; the compound hotfix is not finalized.
 
-The user requested a comprehensive repository workstream for the nine findings.
-This preparation changes only this file and its entry in `WORKSTREAMS.md`.
-It does not authorize an APK build, installation, live alert injection, release,
-staging, commit, push or fetch. Work uses local source, not a GitHub checkout.
-
-The inspected baseline is `0.10.2-dev.5` / `versionCode` 238. The checkout already
-contains staged, unstaged, untracked and ignored work. Preserve all of it.
-No version, changelog, README or `.gitmessage` update belongs to this
-documentation-only preparation. Recheck the current baseline before implementing;
-the version recorded here is an audit reference, not a future version assignment.
+The sections below retain the original **17 September 2026** nine-item audit and
+its historical evidence/plans. The dated November continuation at the end is the
+current handoff and explains the exact scope, decisions, changes, validation and
+remaining steps. Older developer-tool findings are not silently included in the
+new Android implementation authorization. Preserve unrelated local work.
 
 ## Required outcome
 
@@ -73,15 +68,15 @@ scoped fix. These are engineering priorities, not CVSS scores.
 
 | ID | Original audit item | Priority | Area | Finding | Status |
 | --- | --- | --- | --- | --- | --- |
-| A01 | 1 | P1 | Security / safety | Exported activity trusts notification content and full-screen extras | Open |
-| A02 | 2 | P1 | Safety | Retained tsunami payload overrides cancellation or expiry | Open |
-| A03 | 3 | P2 | Reliability | Temporary refresh-response failure clears authorization | Open |
+| A01 | 1 | P1 | Security / safety | Exported activity trusts notification content and full-screen extras | Implemented locally in 0.10.4-dev.3; device acceptance pending |
+| A02 | 2 | P1 | Safety | Retained tsunami payload overrides cancellation or expiry | Implemented locally in 0.10.4-dev.3; device acceptance pending |
+| A03 | 3 | P2 | Reliability | Temporary refresh-response failure clears authorization | Implemented locally in 0.10.4-dev.3; device acceptance pending |
 | A04 | 4 | P2 | Safety / lifecycle | Obsolete DM-D.S.S socket messages mutate current state | Open |
-| A05 | 5 | P2 | Security / lifecycle | In-flight authorization work can restore credentials after disconnect | Open |
+| A05 | 5 | P2 | Security / lifecycle | In-flight authorization work can restore credentials after disconnect | Implemented locally in 0.10.4-dev.3; device acceptance pending |
 | A06 | 6 | P2 | Developer-tool security | Map editor accepts unauthenticated repository writes | Open |
 | A07 | 7 | P2 | UI performance | Authorization getters decrypt credentials during rendering | Open |
 | A08 | 8 | P2 | Archive performance | Live archive writes repeatedly scan the whole archive for statistics | Open |
-| A09 | 9 | P2 | UI / ingress performance | Historical backfill merges an unbounded result set on the main handler | Open |
+| A09 | 9 | P2 | UI / ingress performance | Historical backfill merges an unbounded result set on the main handler | Implemented locally in 0.10.4-dev.3; device acceptance pending |
 
 ## Fixed boundaries and related work
 
@@ -562,7 +557,170 @@ limitations under the relevant finding or a dated continuation entry. Distinguis
 implemented, build/unit-validated and device/live-validated states. Do not mark
 the whole workstream complete while any finding or required validation is open.
 
-**Current handoff:** documentation prepared; A01–A09 unimplemented. The earlier
+**September preparation handoff (historical):** A01–A09 were unimplemented. The earlier
 diagnostics batching fix remains a separate implemented workstream. No source,
 tests, map data, private engine/resources or release metadata were changed by
 this preparation; no build, APK, install, staging, commit, push or fetch was run.
+
+
+## 12 November 2026 — authorized local remediation, 0.10.4-dev.3 / 252
+
+### Objective and authoritative user decisions
+
+Implement the ten findings from the November 12 conversation in the single
+permanent Android Studio project on main. Preserve functionality to the highest
+necessary degree; do not change app UI. Keep the existing compound hotfix open,
+increment the numeric development version once, preserve other workstreams,
+and do not stage, commit, push, deploy, or finalize without approval.
+
+This entry supersedes the old preparation-only handoff for the November scope.
+The older map-editor finding A06 is a separate developer-tool task and was not
+silently added to the ten authorized Android findings. Older A04/A08 plans are
+historical: later source already has socket generation checks and coalesced
+archive statistics. No map editor, geographic resources, station research,
+forecast formulas, ignored engine, or private forecast inputs were changed.
+
+### Git and coordination state
+
+- Permanent project: C:/Users/bjsit/Documents/GitHub/QuakeDeck, main.
+- Before editing, local HEAD and GitHub connector main both resolved to
+  da4f6a30dadae2dd3cab70c4a3cfc6744f703809.
+- Existing uncommitted Miyagi/Chiba report association, felt-cluster retention,
+  Chiba cache repair, station research and other workstream changes were retained.
+- Current compound entry advances from 0.10.4-dev.2 / 251 to
+  **0.10.4-dev.3 / 252 (in progress)**. README and the additive local commit
+  template describe the same cumulative work. No remote file was edited.
+- All implementation remains local and unstaged; no new commit or push.
+
+### Best Practices and Security Alignment Update
+
+**Areas:** notification launch authentication, authoritative alert restoration,
+OAuth transaction/session ownership, API compatibility, backup isolation, and
+resource/thread lifecycle. **Priority:** P1 for forged/obsolete active alerts
+and API 26 launch failure; P2 for the remaining lifecycle and responsiveness
+fixes. No dependency or permission expansion was required.
+
+| November finding | Original register | Implementation and reason |
+| --- | --- | --- |
+| API 26 launch crash | A10 (new) | Gate API 27 window calls and use legacy window flags on API 26. |
+| Forged notification commands | A01 | HMAC-SHA256 authenticates report ID, bounded event payload, and full-screen flag using an installation-private random key. Reject before decode/window attention. |
+| Retained tsunami cancellation/expiry | A02 | Provider state wins, including a terminal-state marker after report removal. Validate expiry and timeline offsets, clear superseded retained state, and expire it while visible. |
+| Backfill memory/main-thread work | A09 | One page in flight; parse on a separate download worker; apply at most one report per main-handler turn using existing merge/dedup ownership. Short database writes still use the shared archive writer. Apply-time withdrawal checks protect live cancellations, and clear completion cannot replace a newer download's status. |
+| Disconnect/late OAuth completion | A05 | Credential generation check and persistence share one monitor. Disconnect/replacement invalidate refresh waiters and callbacks; runtime checks completion/contract generations before changing source state. |
+| Temporary refresh failure deletes login | A03 | Only HTTP 400/401 invalid_grant clears the matching session. Transport, malformed response, server/rate-limit and scope failures preserve credentials, with retry throttling. |
+| Bogus OAuth callback consumes pending state | A11 (new) | Validate exact redirect, state, and transaction age before consuming the pending authorization. |
+| Translator resource lifetime | A12 (new) | Close the ML Kit translator on composition disposal, clear pending callbacks, and suppress callbacks to the disposed owner. |
+| Cold notification geometry blocks UI | A13 (new) | Serial notification worker owns notification processing, location geometry initialization, drill cancellation and test posts; attached UI remains on the main thread. |
+| Sensitive preferences included in backup | A14 (new) | Old/new Android backup rules exclude OAuth, signing key and private location settings. Migrate location/filter keys before deleting legacy copies; keep ordinary preferences backed up. |
+
+**Compatibility decisions:** existing unsigned notifications still open the app
+but cannot restore their untrusted payload or wake flags. New signed
+notifications preserve cold-start restoration. A tsunami with no explicit
+expiry does not become live solely from retained notification data; live provider
+state decides its activity, without an invented universal warning lifetime.
+After device restore, sign-in and reference-location selection are local to the
+new device; ordinary appearance and alert preferences can still restore.
+The current device retains its location and filter choice through migration.
+
+**Scope of code changes:**
+
+- MainActivity.kt: trusted launch boundary, API 26 fallback, retained-state
+  cleanup/expiry, translator disposal. No layout, controls, colours, or displayed
+  resource text changed.
+- notifications/NotificationCoordinator.kt: signature creation and serial worker.
+- data/NotificationLaunchAuthentication.kt: bounded authenticated commands;
+  constant-time signature comparison. Persist signing key before posting.
+- data/NotificationEventPayload.kt and Models.kt: decode bound, live-warning
+  precedence, tsunami expiry and terminal-state marker.
+- data/DmDssOAuthClient.kt and OAuthSessionState.kt: serialized session
+  persistence, generation ownership, pending transaction validation, classified
+  invalid-grant handling and retry throttling. Credential values stay out of
+  Compose state, diagnostic payloads and logs; status reads reuse session state.
+- QuakeDeckRuntime.kt: generation checks on deferred authorization and contract
+  callbacks, preserving P2P fallback.
+- data/P2pQuakeProvider.kt and BackfillPageDispatcher.kt: streamed page processing,
+  dedicated network worker, cancellable download generation, shared short DB
+  writes, main-owned merging, and tsunami terminal-state propagation.
+- data/OfflineStationTranslator.kt: explicit resource disposal.
+- data/AppSettings.kt and PrivateAlertLocationPreferences.kt: private preference
+  migration, preserving current-device settings and non-sensitive backup.
+- AndroidManifest.xml, res/xml/backup_rules.xml, and data_extraction_rules.xml:
+  backup exclusions.
+- res/values/strings.xml: translation metadata only for three unused diagnostic
+  strings and the verbatim Google disclaimer. Text remains byte-for-byte the same;
+  resolves the four pre-existing translation lint errors without changing UI.
+
+**Implementation diff — manifest backup boundary:**
+
+```diff
+--- a/app/src/main/AndroidManifest.xml
++++ b/app/src/main/AndroidManifest.xml
+@@ -26,6 +26,8 @@
+     <application
+         android:name=".QuakeDeckApplication"
+         android:allowBackup="true"
++        android:fullBackupContent="@xml/backup_rules"
++        android:dataExtractionRules="@xml/data_extraction_rules"
+         android:icon="@mipmap/ic_launcher"
+         android:roundIcon="@mipmap/ic_launcher_round"
+         android:label="@string/app_name"
+```
+
+The same validation runs for both onCreate and onNewIntent. The actual
+notification signature covers all privileged fields; an action, report ID,
+referrer, or immutable PendingIntent alone is not treated as authentication.
+Complete implementation remains reviewable in the local working-tree diff.
+
+### Completed local verification
+
+- Android Studio MCP Gradle build: compileDebugKotlin, testDebugUnitTest and
+  lintDebug passed in the default **FULL** configuration.
+- Forced LITE compilation and testDebugUnitTest passed.
+- **203 tests passed, zero skipped/failed in each edition**, including 21 new
+  regression cases in NotificationCommandSignatureTest, OAuthSessionStateTest,
+  BackfillPageDispatcherTest and NotificationRestorationSafetyTest.
+- New tests cover command tampering/key isolation/size bounds, generation races,
+  atomic persistence versus disconnect, retryable versus invalid-grant policy,
+  invalid callback eligibility, one-report scheduling/live interleaving,
+  cancellation/failure completion, authoritative tsunami cancellation/removal,
+  expiry/missing expiry, timeline offsets, and different live EEW precedence.
+- Android lint has no errors. Existing non-blocking warnings remain, including
+  an incompatible lifecycle lint registry that skips UnsafeLifecycleWhenUsage
+  and RepeatOnLifecycleWrongUsage.
+- Whitespace validation passed. The default FULL output is restored after the
+  forced-LITE check; no APK assembly, installation or live alert injection.
+- Two shell validation launch requests returned no session/result and were not
+  counted as evidence. The successful checks above used Android Studio's direct
+  Gradle build tool.
+
+### Remaining state, exact next steps, and things not to redo
+
+Implementation of the ten November findings is complete locally, but the hotfix
+and workstream are **not finalized or approved**. Do not redesign the notification
+UI, replace HMAC with a public marker, relax pending-state validation, revert to
+whole-window backfill accumulation, move shared incident merging onto a worker,
+or restore sensitive keys to the ordinary backup preferences.
+
+1. On an authorized test device/emulator, verify external-UID launches with all
+   notification extras cannot restore fabricated alerts or request lock-screen
+   attention; exercise both cold launch and onNewIntent.
+2. Check signed earthquake/EEW/tsunami notification taps after process death;
+   cancellation, expiry while visible, missing expiry, a newer different alert,
+   API 26 launch, full-screen/wake settings, and silent drills.
+3. Exercise real/fake token-service interleavings around refresh, authorization,
+   disconnect/reconnect and account replacement, including response-read errors,
+   429/5xx, invalid_grant, scope failure and revocation failure. Pure session
+   regressions are not an end-to-end HTTP/Keystore test.
+4. Verify old location/filter preferences migrate intact and are removed only
+   after persistence; test cloud/device-transfer exclusions while ordinary
+   settings restore. Observe translator memory over repeated recreation.
+5. Profile a specified large backfill fixture on a named handset/Android edition,
+   recording peak memory and live dispatch/main-thread timing. Also check archive
+   clear/disable and Sandbox changes during download. No millisecond/FPS or
+   measured leak reduction is claimed from these structural tests.
+6. Review the preserved compound hotfix with the user. Finalize, commit, publish,
+   or update historical workstream closure only after explicit approval.
+
+The older A06 developer map-editor security task remains open and outside this
+November Android remediation. Previous workstream evidence remains historical;
+this entry does not label any unobserved handset/live behavior verified.

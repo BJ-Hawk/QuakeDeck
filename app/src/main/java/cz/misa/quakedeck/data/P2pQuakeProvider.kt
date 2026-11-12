@@ -36,6 +36,11 @@ class P2pQuakeProvider(
     private val archiveStore = ReportArchiveStore(appContext)
     private val deliveryDiagnostics = DmDssDiagnosticsStore(appContext)
     private val archiveExecutor = Executors.newSingleThreadExecutor()
+    private val backfillExecutor = Executors.newSingleThreadExecutor { task ->
+        Thread(task, "QuakeDeck-backfill").apply { isDaemon = true }
+    }
+    private val backfillGeneration = java.util.concurrent.atomic.AtomicLong()
+    @Volatile private var historicalDownloadCall: Call? = null
     private val ingressScheduler = Executors.newSingleThreadScheduledExecutor { task ->
         Thread(task, "QuakeDeck-P2P-ingress").apply { isDaemon = true }
     }
@@ -178,6 +183,7 @@ class P2pQuakeProvider(
         val permittedEnabled = SandboxFeature.permitted(enabled)
         if (testingMode == permittedEnabled) return
         testingMode = permittedEnabled
+        cancelHistoricalDownload()
         recentReportsGeneration++
         freshRecentReportsLoaded = false
         showingRememberedReports = false
@@ -674,16 +680,18 @@ class P2pQuakeProvider(
      */
     fun setExternalEewForCrowdAssociation(event: EarthquakeEvent?) {
         externalEewForCrowdAssociation = event?.takeIf {
-            it.kind == EarthquakeEventKind.EEW && !it.isCancelled
+            it.kind == EarthquakeEventKind.EEW && !it.isCancelled && !it.isDrill
+        }?.also { warning ->
+            warning.p2pCrowdSignal?.let { recordCrowdEewClaim(warning, it) }
         }
     }
 
     fun crowdSignalFor(event: EarthquakeEvent): P2pCrowdSignal? =
-        listOfNotNull(event.p2pCrowdSignal, pendingCrowdSignalFor(event))
-            .reduceOrNull(P2pCrowdSignal::mergeCumulativeUpdate)
+        event.p2pCrowdSignal.withAssociatedCrowdUpdate(pendingCrowdSignalFor(event))
 
     override fun setReportArchiveEnabled(enabled: Boolean) {
         reportArchiveEnabled = enabled
+        if (!enabled) cancelHistoricalDownload()
         persistentSettings.reportArchiveEnabled = enabled
         if (!enabled && automaticHistoricalDownload) {
             automaticHistoricalDownload = false
@@ -716,10 +724,17 @@ class P2pQuakeProvider(
     }
 
     override fun clearReportArchive() {
+        cancelHistoricalDownload()
+        val clearingGeneration = backfillGeneration.get()
         archiveExecutor.execute {
             archiveStore.clear()
             mainHandler.post {
+                if (clearingGeneration != backfillGeneration.get()) {
+                    refreshArchiveStatus()
+                    return@post
+                }
                 archiveStatus = archiveStatus.copy(
+                    isDownloading = false,
                     reportCount = 0,
                     incidentCount = 0,
                     payloadBytes = 0,
@@ -1403,7 +1418,9 @@ class P2pQuakeProvider(
                     return@post
                 }
 
+                val repairedCache = remembered.any { it.repairChibaFeltReports() != it }
                 remembered.asReversed().forEach(::addToHistory)
+                if (repairedCache) scheduleRecentReportCacheWrite()
                 lastEvent = eventHistory.firstOrNull()
                 showingRememberedReports = lastEvent != null
                 lastEvent?.let { event ->
@@ -1423,19 +1440,26 @@ class P2pQuakeProvider(
     private fun restoreRememberedCrowdSignals(remembered: List<EarthquakeEvent>): Boolean {
         var changed = false
         remembered.forEach { cachedEvent ->
-            val cachedSignal = cachedEvent.p2pCrowdSignal ?: return@forEach
-            val currentSignal = pendingCrowdSignals[cachedSignal.startedAt]
-            val mergedSignal = currentSignal?.mergeCumulativeUpdate(cachedSignal) ?: cachedSignal
-            pendingCrowdSignals[mergedSignal.startedAt] = mergedSignal
-
+            val repaired = cachedEvent.repairChibaFeltReports()
+            val cachedSignal = repaired.p2pCrowdSignal ?: return@forEach
             val owner = sequenceOf(lastEvent, *eventHistory.toTypedArray())
                 .filterNotNull()
                 .firstOrNull { current ->
                     current.id == cachedEvent.id || sameConfirmedIncident(current, cachedEvent)
-                } ?: return@forEach
+                }
+            // Restore the corrected cluster only on its own confirmed report.
+            if (owner == null && repaired != cachedEvent) return@forEach
+            val currentSignal = pendingCrowdSignals[cachedSignal.startedAt]
+            val mergedSignal = currentSignal?.mergeCumulativeUpdate(cachedSignal) ?: cachedSignal
+            pendingCrowdSignals[mergedSignal.startedAt] = mergedSignal
+            if (owner == null) return@forEach
+            val claimedEew = claimedCrowdEews[mergedSignal.startedAt]
+            if (claimedEew != null && !owner.sameCrowdIncident(claimedEew)) return@forEach
+            val claimedKey = owner.claimedCrowdKey()
+            if (claimedKey != null && claimedKey != mergedSignal.startedAt) return@forEach
             val previous = owner.p2pCrowdSignal
-            val restored = previous?.mergeCumulativeUpdate(mergedSignal) ?: mergedSignal
-            if (restored != previous) {
+            val restored = previous.withAssociatedCrowdUpdate(mergedSignal)
+            if (restored != null && restored != previous) {
                 amendCrowdOwner(owner, restored)
                 changed = true
             }
@@ -1566,22 +1590,35 @@ class P2pQuakeProvider(
         val now = System.currentTimeMillis()
         val lastSuccess = archiveMetaPrefs.getLong("last_historical_download_success_ms", 0L)
         if (!force && now - lastSuccess < AUTO_BACKFILL_MIN_INTERVAL_MS) return
-
+        val generation = backfillGeneration.incrementAndGet()
+        fun isCurrent() = generation == backfillGeneration.get() && reportArchiveEnabled && !testingMode
         historicalDownloadRunning = true
         archiveStatus = archiveStatus.copy(
-            enabled = true,
-            automaticHistoricalDownload = automaticHistoricalDownload,
-            isDownloading = true,
-            downloadedReports = 0,
-            duplicateReports = 0,
+            enabled = true, automaticHistoricalDownload = automaticHistoricalDownload,
+            isDownloading = true, downloadedReports = 0, duplicateReports = 0,
             message = if (automatic) "Downloading missing historical reports…" else "Downloading past reports…",
             error = null
         )
         publishArchiveStatus()
-
-        archiveExecutor.execute {
+        val dispatcher = BackfillPageDispatcher<Pair<JSONObject, EarthquakeEvent>>(
+            post = { mainHandler.post(it) },
+            isCurrent = ::isCurrent,
+            apply = { (json, report) ->
+                val withdrawnAt = report.jmaReportEventId?.let { id ->
+                    report.reportType?.let { type -> confirmedWithdrawals[id to type] }
+                }
+                val wasWithdrawn = withdrawnAt != null &&
+                    (reportIssuedInstant(report)?.toEpochMilli() ?: Long.MIN_VALUE) <= withdrawnAt
+                if (!wasWithdrawn && useP2pConfirmedReport(json) && acceptMessage(json)) {
+                    val merged = addToHistory(report)
+                    if (lastEvent?.id == merged.id && lastEvent?.kind == EarthquakeEventKind.CONFIRMED) {
+                        lastEvent = merged
+                    }
+                }
+            }
+        )
+        backfillExecutor.execute {
             try {
-                val collected = mutableListOf<JSONObject>()
                 val codeQuery = ARCHIVE_CODES.joinToString("&") { "codes=$it" }
                 val archiveSource = if (automatic) "automatic-backfill" else "manual-backfill"
                 var offset = 0
@@ -1589,107 +1626,97 @@ class P2pQuakeProvider(
                 var addedTotal = 0
                 var duplicateTotal = 0
                 while (true) {
-                    if (!reportArchiveEnabled || testingMode) {
-                        throw HistoricalDownloadCancelledException()
-                    }
+                    if (!isCurrent()) throw HistoricalDownloadCancelledException()
                     val request = Request.Builder()
-                        .url(
-                            "https://api.p2pquake.net/v2/history" +
-                                "?$codeQuery&limit=$HISTORY_PAGE_SIZE&offset=$offset"
-                        )
+                        .url("https://api.p2pquake.net/v2/history" +
+                            "?$codeQuery&limit=$HISTORY_PAGE_SIZE&offset=$offset")
                         .header("User-Agent", "QuakeDeck/0.9.65 (Android)")
                         .build()
-                    val page = httpClient.newCall(request).execute().use { response ->
-                        if (!response.isSuccessful) {
-                            throw IOException("History download failed: HTTP ${response.code}")
+                    val call = httpClient.newCall(request)
+                    historicalDownloadCall = call
+                    if (!isCurrent()) {
+                        call.cancel()
+                        throw HistoricalDownloadCancelledException()
+                    }
+                    val page = try {
+                        call.execute().use { response ->
+                            if (!response.isSuccessful) throw IOException("History download failed: HTTP ${response.code}")
+                            JSONArray(response.body.string())
                         }
-                        JSONArray(response.body.string())
+                    } finally {
+                        if (historicalDownloadCall === call) historicalDownloadCall = null
                     }
                     val pageReports = buildList {
-                        for (i in 0 until page.length()) {
-                            page.optJSONObject(i)?.let(::add)
-                        }
+                        for (i in 0 until page.length()) page.optJSONObject(i)?.let(::add)
                     }
-                    collected.addAll(pageReports)
-                    val pageResult = archiveStore.storeReports(pageReports, archiveSource)
+                    // Only short database tasks share the live writer. HTTP/rate-limit
+                    // waits and page parsing never occupy that executor or the UI.
+                    val pageResult = archiveExecutor.submit<ArchiveWriteResult> {
+                        if (!isCurrent()) throw HistoricalDownloadCancelledException()
+                        archiveStore.storeReports(pageReports, archiveSource)
+                    }.get()
                     addedTotal += pageResult.added
                     duplicateTotal += pageResult.duplicates
+                    val parsed = pageReports.asSequence()
+                        .filter { it.optInt("code", -1) == 551 }
+                        .sortedWith(reportChronologicalComparator)
+                        .mapNotNull { json -> parseQuake(json)?.let { json to it } }
+                        .toList()
+                    // One page in flight and one report per main-handler turn.
+                    // Existing state-owner merge/dedup rules protect newer live revisions.
+                    dispatcher.dispatch(parsed).get()
                     requestCount++
                     offset += page.length()
-
-                    // Automatic runs overlap the newest page and stop as soon as
-                    // they reach a page already present locally. Manual Download
-                    // past intentionally walks the complete retained window.
                     val reachedKnownArchive = automatic && pageReports.isNotEmpty() && pageResult.added == 0
                     if (page.length() < HISTORY_PAGE_SIZE || reachedKnownArchive) break
-
-                    // The official /history limit is 60 requests/minute. This
-                    // should almost never be reached for event-only codes, but
-                    // pause rather than risk hammering the public service.
                     if (requestCount % HISTORY_REQUESTS_PER_WINDOW == 0) {
-                        Thread.sleep(HISTORY_RATE_LIMIT_PAUSE_MS)
+                        var remaining = HISTORY_RATE_LIMIT_PAUSE_MS
+                        while (remaining > 0L) {
+                            if (!isCurrent()) throw HistoricalDownloadCancelledException()
+                            val pause = minOf(remaining, 1_000L)
+                            Thread.sleep(pause)
+                            remaining -= pause
+                        }
                     }
                 }
-
-                if (!reportArchiveEnabled || testingMode) {
-                    throw HistoricalDownloadCancelledException()
-                }
-                val result = ArchiveWriteResult(addedTotal, duplicateTotal)
-                archiveMetaPrefs.edit {
-                    putLong("last_historical_download_success_ms", System.currentTimeMillis())
-                }
-                val stats = archiveStore.stats(reportArchiveEnabled, automaticHistoricalDownload)
+                if (!isCurrent()) throw HistoricalDownloadCancelledException()
+                archiveMetaPrefs.edit { putLong("last_historical_download_success_ms", System.currentTimeMillis()) }
+                val stats = archiveExecutor.submit<ReportArchiveStatus> {
+                    archiveStore.stats(reportArchiveEnabled, automaticHistoricalDownload)
+                }.get()
                 mainHandler.post {
+                    if (!isCurrent()) return@post
                     historicalDownloadRunning = false
                     archiveStatus = stats.copy(
-                        isDownloading = false,
-                        downloadedReports = result.added,
-                        duplicateReports = result.duplicates,
-                        message = "Added ${result.added} reports · ${result.duplicates} duplicates skipped",
-                        error = null
+                        isDownloading = false, downloadedReports = addedTotal,
+                        duplicateReports = duplicateTotal,
+                        message = "Added $addedTotal reports · $duplicateTotal duplicates skipped", error = null
                     )
                     publishArchiveStatus()
-
-                    collected.asSequence()
-                        .filter { it.optInt("code", -1) == 551 && useP2pConfirmedReport(it) }
-                        .sortedWith(reportChronologicalComparator)
-                        .forEach { json ->
-                            if (!acceptMessage(json)) return@forEach
-                            parseQuake(json)?.let { report ->
-                                val merged = addToHistory(report)
-                                if (lastEvent?.id == merged.id && lastEvent?.kind == EarthquakeEventKind.CONFIRMED) {
-                                    lastEvent = merged
-                                }
-                            }
-                        }
                     scheduleRecentReportCacheWrite()
                     if (lastEvent == null) lastEvent = eventHistory.firstOrNull()
-                    lastEvent?.let { event ->
-                        emit(snapshot(currentState, activeEew, event, "Historical reports archived"))
-                    }
+                    lastEvent?.let { emit(snapshot(currentState, activeEew, it, "Historical reports archived")) }
                 }
-            } catch (_: HistoricalDownloadCancelledException) {
+            } catch (error: Exception) {
                 mainHandler.post {
+                    if (generation != backfillGeneration.get()) return@post
                     historicalDownloadRunning = false
                     archiveStatus = archiveStatus.copy(
-                        isDownloading = false,
-                        message = null,
-                        error = null
-                    )
-                    publishArchiveStatus()
-                }
-            } catch (error: Throwable) {
-                mainHandler.post {
-                    historicalDownloadRunning = false
-                    archiveStatus = archiveStatus.copy(
-                        isDownloading = false,
-                        message = null,
-                        error = error.message ?: "Historical download failed"
+                        isDownloading = false, message = null,
+                        error = if (!isCurrent() || error is HistoricalDownloadCancelledException) null
+                            else error.cause?.message ?: error.message ?: "Historical download failed"
                     )
                     publishArchiveStatus()
                 }
             }
         }
+    }
+
+    private fun cancelHistoricalDownload() {
+        backfillGeneration.incrementAndGet()
+        historicalDownloadCall?.cancel()
+        historicalDownloadCall = null
+        historicalDownloadRunning = false
     }
 
     private fun emitCurrentRecentState(status: String) {
@@ -2221,24 +2248,51 @@ class P2pQuakeProvider(
         if (signal == existing || !signal.isInformative()) return null
 
         val owner = crowdSignalOwner(signal) ?: return null
-        if (owner.kind == EarthquakeEventKind.EEW) {
-            claimedCrowdEews[signal.startedAt] = owner
-        }
+        recordCrowdEewClaim(owner, signal)
         amendCrowdOwner(owner, signal)
         return owner to signal
     }
 
+    private fun liveCrowdCandidates(): Sequence<EarthquakeEvent> = sequenceOf(
+        activeEewEvent,
+        externalEewForCrowdAssociation,
+        lastEvent,
+        *eventHistory.toTypedArray()
+    ).filterNotNull().filterNot { it.isDrill || it.isCancelled }
+
+    private fun recordCrowdEewClaim(event: EarthquakeEvent, signal: P2pCrowdSignal) {
+        if (event.kind == EarthquakeEventKind.EEW && !event.isDrill && !event.isCancelled &&
+            signal.startedAt in pendingCrowdSignals
+        ) {
+            claimedCrowdEews.putIfAbsent(signal.startedAt, event)
+        }
+    }
+
+    private fun EarthquakeEvent.sameCrowdIncident(other: EarthquakeEvent): Boolean = when {
+        kind == other.kind -> id == other.id
+        kind == EarthquakeEventKind.EEW -> matchesLiveEewReport(this, other)
+        else -> matchesLiveEewReport(other, this)
+    }
+
+    private fun EarthquakeEvent.claimedCrowdKey(): String? =
+        claimedCrowdEews.entries.firstOrNull { (_, eew) -> sameCrowdIncident(eew) }?.key
+
     private fun crowdSignalOwner(signal: P2pCrowdSignal): EarthquakeEvent? {
-        val candidates = sequenceOf(
-            activeEewEvent,
-            externalEewForCrowdAssociation,
-            lastEvent,
-            *eventHistory.toTypedArray()
-        ).filterNotNull().distinctBy { it.id }.toList()
+        val claim = claimedCrowdEews[signal.startedAt]
+        val candidates = liveCrowdCandidates()
+            .filter { claim == null || it.sameCrowdIncident(claim) }
+            .filter { event ->
+                val attachedKey = event.p2pCrowdSignal?.startedAt
+                if (attachedKey != null) attachedKey == signal.startedAt
+                else claim != null || event.claimedCrowdKey() == null
+            }
+            .distinctBy { it.kind to it.id }
+            .toList()
 
         candidates.firstOrNull {
             it.p2pCrowdSignal?.startedAt == signal.startedAt
         }?.let { return it }
+        if (claim != null) return candidates.firstOrNull()
         candidates.asSequence()
             .filter { it.kind == EarthquakeEventKind.EEW && signal.canBelongToEew(it) }
             .mapNotNull { event ->
@@ -2256,40 +2310,34 @@ class P2pQuakeProvider(
     }
 
     private fun amendCrowdOwner(owner: EarthquakeEvent, signal: P2pCrowdSignal) {
-        val nearestConfirmedId = sequenceOf(lastEvent, *eventHistory.toTypedArray())
-            .filterNotNull()
-            .distinctBy { it.id }
-            .mapNotNull { event ->
-                signal.confirmedAssociationDelaySeconds(event)?.let { delay -> event.id to delay }
-            }
-            .minByOrNull { (_, delay) -> kotlin.math.abs(delay) }
-            ?.first
-
-        fun EarthquakeEvent.matchesOwner(): Boolean =
-            id == owner.id ||
-                id == nearestConfirmedId ||
-                p2pCrowdSignal?.startedAt == signal.startedAt ||
-                likelySameEarthquake(this, owner)
-
-        fun EarthquakeEvent.withLatestSignal(): EarthquakeEvent = copy(
-            p2pCrowdSignal = p2pCrowdSignal?.mergeCumulativeUpdate(signal) ?: signal
-        )
-
-        activeEewEvent = activeEewEvent?.let { event ->
-            if (event.matchesOwner()) event.withLatestSignal() else event
+        fun EarthquakeEvent.withLatestSignal(): EarthquakeEvent {
+            if (isDrill || isCancelled ||
+                (!sameCrowdIncident(owner) && p2pCrowdSignal?.startedAt != signal.startedAt)
+            ) return this
+            return copy(p2pCrowdSignal = p2pCrowdSignal.withAssociatedCrowdUpdate(signal))
         }
-        lastEvent = lastEvent?.let { event ->
-            if (event.matchesOwner()) event.withLatestSignal() else event
-        }
+
+        activeEewEvent = activeEewEvent?.withLatestSignal()
+        lastEvent = lastEvent?.withLatestSignal()
         eventHistory.indices.forEach { index ->
-            val event = eventHistory[index]
-            if (event.matchesOwner()) eventHistory[index] = event.withLatestSignal()
+            eventHistory[index] = eventHistory[index].withLatestSignal()
         }
     }
 
     private fun pendingCrowdSignalFor(event: EarthquakeEvent): P2pCrowdSignal? {
+        if (event.isDrill || event.isCancelled) return null
+        val attachedKey = event.p2pCrowdSignal?.startedAt ?: event.claimedCrowdKey()
+        if (attachedKey != null) return pendingCrowdSignals[attachedKey]
+
+        val otherOwnedKeys = liveCrowdCandidates()
+            .filterNot { it.sameCrowdIncident(event) }
+            .mapNotNull { it.p2pCrowdSignal?.startedAt }
+            .toSet()
+        val unclaimedSignals = pendingCrowdSignals.values.filter { signal ->
+            signal.startedAt !in claimedCrowdEews && signal.startedAt !in otherOwnedKeys
+        }
         if (event.kind != EarthquakeEventKind.CONFIRMED) {
-            return pendingCrowdSignals.values
+            return unclaimedSignals
                 .mapNotNull { signal ->
                     if (!signal.isInformative()) return@mapNotNull null
                     val delay = signal.associationDelaySeconds(event)
@@ -2300,13 +2348,9 @@ class P2pQuakeProvider(
                 .minByOrNull { (_, delay) -> delay }
                 ?.first
         }
-        val matchingClaims = claimedCrowdEews.filterValues { eew ->
-            historicalEewMatches(event, eew)
-        }
         return selectP2pCrowdSignalForConfirmedEvent(
             event = event,
-            signals = pendingCrowdSignals.values,
-            claimedEewsByStartedAt = matchingClaims
+            signals = unclaimedSignals
         )
     }
 
@@ -3301,6 +3345,7 @@ class P2pQuakeProvider(
             // is useful as history, but must not flash as a new active alert.
             return LiveUpdateKind.NONE
         }
+        eew.p2pCrowdSignal?.let { recordCrowdEewClaim(eew, it) }
         eewRevisions.record(eew)
 
         val visibleEvent = current.takeIf { matchesConfirmed }
@@ -3467,10 +3512,10 @@ class P2pQuakeProvider(
                 it.kind == EarthquakeEventKind.EEW && likelySameEarthquake(it, event)
             }
             ?: eventHistory.firstOrNull {
-                it.p2pCrowdSignal?.coincidesWith(event) == true
+                it.isP2pCrowdOnly() && it.p2pCrowdSignal?.coincidesWith(event) == true
             }
             ?: lastEvent?.takeIf {
-                it.p2pCrowdSignal?.coincidesWith(event) == true
+                it.isP2pCrowdOnly() && it.p2pCrowdSignal?.coincidesWith(event) == true
             }
             // P2PQuake normally repeats the exact origin timestamp in every
             // bulletin, but a follow-up can occasionally use another valid
@@ -3478,7 +3523,7 @@ class P2pQuakeProvider(
             // transport variation create a second live incident card.
             ?: eventHistory.firstOrNull { sameConfirmedIncident(it, event) }
             ?: lastEvent?.takeIf { sameConfirmedIncident(it, event) }
-        val merged = when {
+        val report = when {
             existing != null &&
                 existing.kind == EarthquakeEventKind.CONFIRMED &&
                 event.kind == EarthquakeEventKind.CONFIRMED -> mergeConfirmedEvent(existing, event)
@@ -3488,14 +3533,16 @@ class P2pQuakeProvider(
                     // A regular report amends the EEW incident. Keeping this
                     // identity also keeps a pre-confirmation felt counter on it.
                     id = existing.id,
-                    p2pCrowdSignal = event.p2pCrowdSignal
-                        ?: existing.p2pCrowdSignal
-                        ?: pendingCrowdSignalFor(event)
+                    p2pCrowdSignal = existing.p2pCrowdSignal.withAssociatedCrowdUpdate(event.p2pCrowdSignal)
                 )
-            else -> event.copy(
-                p2pCrowdSignal = event.p2pCrowdSignal ?: pendingCrowdSignalFor(event)
-            )
+            else -> event
         }
+        val repaired = if (testingMode) report else {
+            report.repairChibaFeltReports(attachIfMissing = crowdSignalsEnabled)
+        }
+        val merged = repaired.copy(
+            p2pCrowdSignal = repaired.p2pCrowdSignal.withAssociatedCrowdUpdate(pendingCrowdSignalFor(repaired))
+        )
 
         // Remove a previously split representation as well as the normal
         // exact-ID match. The surviving event keeps the established ID, which
@@ -3591,7 +3638,7 @@ class P2pQuakeProvider(
             contributingReportTypes = contributingTypes,
             reportCount = existing.reportCount + if (incoming.reportType != null) 1 else 0,
             hasHypocenter = effectiveHasHypocenter,
-            p2pCrowdSignal = incoming.p2pCrowdSignal ?: existing.p2pCrowdSignal,
+            p2pCrowdSignal = existing.p2pCrowdSignal.withAssociatedCrowdUpdate(incoming.p2pCrowdSignal),
             // The frame label reflects the newest reliable report, regardless
             // of which asynchronous source happened to deliver it last.
             reportCorrection = authoritative.reportCorrection,
@@ -3773,6 +3820,7 @@ class P2pQuakeProvider(
         activeEewUntilMillis = activeEewUntilMillis.takeIf { activeEew },
         activeTsunami = activeTsunami,
         tsunami = lastTsunami,
+        tsunamiStateKnown = latestLiveTsunamiIssue != null,
         event = event,
         history = eventHistory.toList(),
         statusText = status,
@@ -3802,6 +3850,7 @@ class P2pQuakeProvider(
             activeEewUntilMillis = activeEewUntilMillis.takeIf { activeEew },
             activeTsunami = activeTsunami,
             tsunami = lastTsunami,
+            tsunamiStateKnown = latestLiveTsunamiIssue != null,
             event = event,
             history = eventHistory.toList(),
             statusText = status,
@@ -3819,7 +3868,13 @@ class P2pQuakeProvider(
     }
 
     private fun emit(snapshot: AppSnapshot) {
-        mainHandler.post { if (!stopped) callback?.invoke(snapshot) }
+        mainHandler.post {
+            if (!stopped) callback?.invoke(snapshot.copy(
+                // Connection-only/waiting snapshots must not erase an
+                // authoritative cancellation after its report was removed.
+                tsunamiStateKnown = snapshot.tsunamiStateKnown || latestLiveTsunamiIssue != null
+            ))
+        }
     }
 
     private fun formatJst(value: String): String {

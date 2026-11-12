@@ -2,7 +2,9 @@
 
 QuakeDeck is an Android earthquake-monitoring prototype focused on Japan. It uses Kotlin and Jetpack Compose to combine live P2PQuake/JMA reports, EEW visualization, observed intensity mapping, tsunami information, historical report browsing, and deterministic Sandbox testing in one map-first interface.
 
-Current version: **0.10.4-dev.1**. QuakeDeck is still pre-1.0 and should not be treated as an official emergency-warning application.
+Current version: **0.10.4-dev.3**. QuakeDeck is still pre-1.0 and should not be treated as an official emergency-warning application.
+
+The current compound hotfix includes notification authentication, authoritative tsunami restoration, OAuth session safeguards, streamed backfill, notification-worker/resource cleanup and private backup settings. FULL/LITE compilation and all 203 unit tests pass; Android lint passes. Device/live and performance checks remain pending. See [the remediation continuation](workstreams/security-safety-performance-audit.md#12-november-2026--authorized-local-remediation-0104-dev3--252).
 
 The local October 16 EEW hotfix keeps fresh official bulletins eligible independently of origin/wave-passage estimates, handles later lower-serial cancellations, isolates generic detections from previous earthquake reports, reconciles newer recovered revisions, and exposes EEW-only History incidents. Exact incident regressions cover both FULL and LITE. Device notification and background-network validation remain pending; see [the incident workstream](workstreams/eew-october-16-delivery-fixes.md).
 

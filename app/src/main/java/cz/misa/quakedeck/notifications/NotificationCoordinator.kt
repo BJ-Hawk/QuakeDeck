@@ -86,6 +86,9 @@ class NotificationCoordinator(
     private val context: Context,
     private val settings: AppSettings
 ) {
+    private val notificationWorker = java.util.concurrent.Executors.newSingleThreadExecutor { task ->
+        Thread(task, "QuakeDeck-notifications").apply { isDaemon = true }
+    }
     private val manager = NotificationManagerCompat.from(context)
     private val dmdssDiagnostics = DmDssDiagnosticsStore(context)
     private val locationPolicy by lazy(LazyThreadSafetyMode.SYNCHRONIZED) {
@@ -204,6 +207,10 @@ class NotificationCoordinator(
 
     fun onDrillPreferenceChanged(enabled: Boolean) {
         if (enabled) return
+        notificationWorker.execute { clearDrillNotifications() }
+    }
+
+    private fun clearDrillNotifications() {
         drillNotificationTags.forEach { manager.cancel(it, ID_EARTHQUAKE) }
         drillNotificationTags.clear()
         // Android may still hold a drill notification from an earlier app process.
@@ -213,6 +220,14 @@ class NotificationCoordinator(
     }
 
     fun process(snapshot: AppSnapshot) {
+        notificationWorker.execute {
+            runCatching { processSnapshot(snapshot) }.onFailure {
+                dmdssDiagnostics.recordTransportIssue("Notification processing failed: ${it.javaClass.simpleName}")
+            }
+        }
+    }
+
+    private fun processSnapshot(snapshot: AppSnapshot) {
         // The official P2PQuake sandbox must exercise the exact same notification
         // path and appearance as production data. Only QuakeDeck's deterministic,
         // user-started replay fixtures are muted to prevent intentional replay loops
@@ -588,6 +603,10 @@ class NotificationCoordinator(
     }
 
     fun sendTestNotification() {
+        notificationWorker.execute { sendTestNotificationNow() }
+    }
+
+    private fun sendTestNotificationNow() {
         createChannels()
         if (!hasPermission()) return
         post(
@@ -1008,6 +1027,7 @@ class NotificationCoordinator(
                 putExtra(MainActivity.EXTRA_FULL_SCREEN_EEW, true)
             }
         }
+        cz.misa.quakedeck.data.NotificationLaunchAuthentication(context).sign(intent)
         val contentIntent = PendingIntent.getActivity(
             context,
             tag.hashCode(),

@@ -82,6 +82,7 @@ enum class MinimumNotificationIntensity(val rank: Int) {
  */
 class AppSettings(context: Context) {
     private val prefs = context.getSharedPreferences("quakedeck_settings", Context.MODE_PRIVATE)
+    private val locationPrefs = PrivateAlertLocationPreferences.open(context, prefs)
 
     var dataSourceMode: DataSourceMode
         get() = runCatching {
@@ -259,29 +260,29 @@ class AppSettings(context: Context) {
 
     var alertLocation: AlertLocation
         get() {
-            if (!prefs.getBoolean("alert_location_set", false)) {
+            if (!locationPrefs.getBoolean("alert_location_set", false)) {
                 return AlertLocation.DEFAULT_TOKYO
             }
             val fallback = AlertLocation.DEFAULT_TOKYO
             return AlertLocation(
-                displayName = prefs.getString("alert_location_display_name", fallback.displayName)
+                displayName = locationPrefs.getString("alert_location_display_name", fallback.displayName)
                     ?: fallback.displayName,
-                city = prefs.getString("alert_location_city", fallback.city) ?: fallback.city,
-                prefecture = prefs.getString("alert_location_prefecture", fallback.prefecture)
+                city = locationPrefs.getString("alert_location_city", fallback.city) ?: fallback.city,
+                prefecture = locationPrefs.getString("alert_location_prefecture", fallback.prefecture)
                     ?: fallback.prefecture,
-                prefectureJa = prefs.getString("alert_location_prefecture_ja", fallback.prefectureJa)
+                prefectureJa = locationPrefs.getString("alert_location_prefecture_ja", fallback.prefectureJa)
                     ?: fallback.prefectureJa,
-                postalCode = prefs.getString("alert_location_postal_code", null),
-                latitude = prefs.getString("alert_location_latitude", null)
+                postalCode = locationPrefs.getString("alert_location_postal_code", null),
+                latitude = locationPrefs.getString("alert_location_latitude", null)
                     ?.toDoubleOrNull() ?: fallback.latitude,
-                longitude = prefs.getString("alert_location_longitude", null)
+                longitude = locationPrefs.getString("alert_location_longitude", null)
                     ?.toDoubleOrNull() ?: fallback.longitude,
-                eewAreaNameJa = prefs.getString("alert_location_eew_area_ja", null),
-                quakeAreaCode = prefs.getString("alert_location_quake_area_code", null),
-                quakeAreaNameJa = prefs.getString("alert_location_quake_area_ja", null),
+                eewAreaNameJa = locationPrefs.getString("alert_location_eew_area_ja", null),
+                quakeAreaCode = locationPrefs.getString("alert_location_quake_area_code", null),
+                quakeAreaNameJa = locationPrefs.getString("alert_location_quake_area_ja", null),
                 resolutionKind = runCatching {
                     AlertLocationResolutionKind.valueOf(
-                        prefs.getString(
+                        locationPrefs.getString(
                             "alert_location_resolution_kind",
                             AlertLocationResolutionKind.CITY.name
                         )!!
@@ -290,7 +291,7 @@ class AppSettings(context: Context) {
             )
         }
         set(value) {
-            prefs.edit {
+            locationPrefs.edit {
                 putBoolean("alert_location_set", true)
                 putString("alert_location_display_name", value.displayName)
                 putString("alert_location_city", value.city)
@@ -307,9 +308,9 @@ class AppSettings(context: Context) {
         }
 
     var locationBasedNotificationsEnabled: Boolean
-        get() = prefs.getBoolean("location_based_notifications_enabled", false)
+        get() = locationPrefs.getBoolean("location_based_notifications_enabled", false)
         set(value) {
-            prefs.edit { putBoolean("location_based_notifications_enabled", value) }
+            locationPrefs.edit { putBoolean("location_based_notifications_enabled", value) }
         }
 
     var silentReportsBelowSelectedIntensity: Boolean

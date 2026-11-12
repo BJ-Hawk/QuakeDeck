@@ -37,7 +37,8 @@ object NotificationEventPayload {
     fun decode(payload: String?): EarthquakeEvent? = decodeLaunch(payload)?.event
 
     fun decodeLaunch(payload: String?): NotificationLaunchPayload? = runCatching {
-        val json = JSONObject(payload ?: return null)
+        if (payload == null || payload.length > MAX_PAYLOAD_CHARS) return null
+        val json = JSONObject(payload)
         val event = decodeEvent(json)
         val tsunami = json.optJSONObject("tsunami")?.let(::decodeTsunamiReport)
         val launchKind = enumValueOrDefault(
@@ -303,7 +304,7 @@ fun AppSnapshot.withNotificationLaunch(
             if (notificationEvent.isDrill && activeEewEvent?.isDrill == false && activeEew) return this
             if (payload.activeUntilMillis?.let { nowEpochMillis >= it } == true) return this
             if (hasEndedEew(notificationEvent.id)) return this
-            if (activeEew && activeEewEvent?.id == notificationEvent.id) {
+            if (activeEew && activeEewEvent != null) {
                 this
             } else {
                 copy(
@@ -317,11 +318,9 @@ fun AppSnapshot.withNotificationLaunch(
         }
         NotificationLaunchKind.TSUNAMI -> {
             val notificationTsunami = payload.tsunami ?: return this
-            if (
-                activeTsunami &&
-                tsunami?.id == notificationTsunami.id &&
-                !notificationTsunami.cancelled
-            ) {
+            if (!canRestoreTsunami(notificationTsunami, nowEpochMillis)) return this
+            if (tsunamiStateKnown || activeTsunami || tsunami?.cancelled == true ||
+                liveUpdateKind == LiveUpdateKind.TSUNAMI_CANCELLED) {
                 this
             } else {
                 copy(
@@ -332,6 +331,13 @@ fun AppSnapshot.withNotificationLaunch(
             }
         }
     }
+}
+
+/** Missing expiry is not permission to invent an indefinitely live warning. */
+internal fun canRestoreTsunami(report: TsunamiReport, nowEpochMillis: Long): Boolean {
+    if (report.cancelled) return false
+    val expiry = EewLifecyclePolicy.sourceMillis(report.expiresAt) ?: return false
+    return nowEpochMillis - report.timelineOffsetMillis < expiry
 }
 
 /** Termination refers to its own EEW, even when another report is selected. */

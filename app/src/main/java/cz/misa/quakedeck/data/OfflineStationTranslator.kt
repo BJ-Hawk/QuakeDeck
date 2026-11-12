@@ -25,7 +25,7 @@ enum class OfflineStationTranslationStatus {
  * Small, persistent Japanese-to-English place-name cache backed by ML Kit's
  * on-device model. Nothing is sent to a translation server.
  */
-class OfflineStationTranslator(context: Context) {
+class OfflineStationTranslator(context: Context) : AutoCloseable {
     private companion object {
         const val MODEL_READY_KEY = "japanese_to_english_model_ready"
     }
@@ -43,6 +43,17 @@ class OfflineStationTranslator(context: Context) {
             .build()
     )
     private val pendingCallbacks = mutableMapOf<String, MutableList<(String?) -> Unit>>()
+    @Volatile private var closed = false
+
+    override fun close() {
+        synchronized(pendingCallbacks) {
+            if (closed) return
+            closed = true
+            pendingCallbacks.clear()
+        }
+        mainHandler.removeCallbacksAndMessages(null)
+        translator.close()
+    }
 
     @Volatile
     var status: OfflineStationTranslationStatus = OfflineStationTranslationStatus.CHECKING
@@ -105,17 +116,18 @@ class OfflineStationTranslator(context: Context) {
     }
 
     fun translate(japanese: String, onResult: (String?) -> Unit) {
-        if (japanese.isBlank() || status != OfflineStationTranslationStatus.READY) {
+        if (closed || japanese.isBlank() || status != OfflineStationTranslationStatus.READY) {
             onResult(null)
             return
         }
         cache.getString(japanese, null)?.let(onResult)
             ?: synchronized(pendingCallbacks) {
+                if (closed) return
                 pendingCallbacks[japanese]?.add(onResult) ?: run {
                     pendingCallbacks[japanese] = mutableListOf(onResult)
                     translator.translate(japanese)
                         .addOnSuccessListener { translated ->
-                            cache.edit { putString(japanese, translated) }
+                            if (!closed) cache.edit { putString(japanese, translated) }
                             complete(japanese, translated)
                         }
                         .addOnFailureListener { complete(japanese, null) }
@@ -127,14 +139,15 @@ class OfflineStationTranslator(context: Context) {
         val callbacks = synchronized(pendingCallbacks) {
             pendingCallbacks.remove(japanese).orEmpty()
         }
-        mainHandler.post { callbacks.forEach { it(translated) } }
+        mainHandler.post { if (!closed) callbacks.forEach { it(translated) } }
     }
 
     private fun publish(
         newStatus: OfflineStationTranslationStatus,
         onStatusChanged: (OfflineStationTranslationStatus) -> Unit
     ) {
+        if (closed) return
         status = newStatus
-        mainHandler.post { onStatusChanged(newStatus) }
+        mainHandler.post { if (!closed) onStatusChanged(newStatus) }
     }
 }

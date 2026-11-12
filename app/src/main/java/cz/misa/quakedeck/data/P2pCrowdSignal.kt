@@ -45,6 +45,15 @@ internal fun P2pCrowdSignal.mergeCumulativeUpdate(
     }
 }
 
+/** Keep the cluster already associated with an earthquake across report revisions. */
+internal fun P2pCrowdSignal?.withAssociatedCrowdUpdate(
+    incoming: P2pCrowdSignal?
+): P2pCrowdSignal? = when {
+    this == null -> incoming
+    incoming == null || startedAt != incoming.startedAt -> this
+    else -> mergeCumulativeUpdate(incoming)
+}
+
 internal fun parseP2pCrowdSignal(json: JSONObject): P2pCrowdSignal? {
     if (json.optInt("code", -1) != P2P_CROWD_SIGNAL_CODE) return null
     val startedAt = json.optString("started_at").trim()

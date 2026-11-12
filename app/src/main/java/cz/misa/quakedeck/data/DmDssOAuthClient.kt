@@ -66,32 +66,41 @@ class DmDssOAuthClient(
 ) {
     private val store = CredentialStore(context.applicationContext)
     private val random = SecureRandom()
-    private val refreshLock = Any()
-    private var refreshInFlight = false
-    private val refreshCallbacks = mutableListOf<(Result<String>) -> Unit>()
+    private val session = OAuthSessionState(store::loadCredentials, store::saveCredentials, store::clearAll)
+    private class RefreshBatch(val generation: Long, val callbacks: MutableList<(Result<String>) -> Unit>)
+    private var refreshBatch: RefreshBatch? = null
+    private var refreshNotBeforeElapsed = 0L
+    private class RetryableOAuthException(val retryAfterMillis: Long) :
+        IOException("DM-D.S.S authorization service is temporarily unavailable.")
 
     val isAuthorized: Boolean
-        get() = store.loadCredentials() != null
+        get() = session.snapshot().second != null
 
     fun authorizationUpdateRequired(summary: DmDssContractSummary?): Boolean {
-        val scopes = store.loadCredentials()?.scopes ?: return false
+        val scopes = session.snapshot().second?.scopes ?: return false
         return !scopes.containsAll(REQUIRED_SCOPES) || "socket.close" !in scopes || DmDssFeed.entries.any {
             summary != null && it.isEntitled(summary) && it.scope !in scopes
         } || (summary?.hasPlan(DmDssFeed.FORECAST.classification) == true && "gd.eew" !in scopes)
     }
 
     internal fun availableFeeds(summary: DmDssContractSummary): Set<DmDssFeed> {
-        val scopes = store.loadCredentials()?.scopes ?: return emptySet()
+        val scopes = session.snapshot().second?.scopes ?: return emptySet()
         return availableDmDssFeeds(summary, scopes)
     }
 
     fun hasGrantedScope(scope: String): Boolean =
-        store.loadCredentials()?.scopes?.contains(scope) == true
+        session.snapshot().second?.scopes?.contains(scope) == true
 
     fun beginAuthorization(): Uri {
         val state = randomBase64Url(32)
         val verifier = randomBase64Url(64)
-        store.savePending(state, verifier, System.currentTimeMillis())
+        val cancelled = synchronized(session) {
+            session.advance()
+            refreshNotBeforeElapsed = 0L
+            store.savePending(state, verifier, System.currentTimeMillis())
+            invalidateRefreshWaiters()
+        }
+        cancelled.forEach { it(Result.failure(IllegalStateException("DM-D.S.S sign-in was restarted."))) }
         return Uri.parse(AUTH_URL).buildUpon()
             .appendQueryParameter("client_id", clientId)
             .appendQueryParameter("response_type", "code")
@@ -104,96 +113,137 @@ class DmDssOAuthClient(
             .build()
     }
 
-    fun completeAuthorization(callbackUri: Uri, callback: (Result<Unit>) -> Unit) {
-        val previousCredentials = store.loadCredentials()
-        val pending = store.loadPending()
-        store.clearPending()
-        val failure = when {
-            callbackUri.toString().substringBefore('?') != redirectUri ->
-                "DM-D.S.S returned an unexpected OAuth redirect."
-            pending == null -> "The DM-D.S.S sign-in request has expired."
-            System.currentTimeMillis() - pending.createdAtMillis > PENDING_MAX_AGE_MILLIS ->
-                "The DM-D.S.S sign-in request has expired."
-            callbackUri.getQueryParameter("state") != pending.state ->
-                "DM-D.S.S sign-in state did not match."
-            callbackUri.getQueryParameter("error") != null ->
-                callbackUri.getQueryParameter("error_description")
-                    ?: "DM-D.S.S sign-in was not completed."
-            callbackUri.getQueryParameter("code").isNullOrBlank() ->
-                "DM-D.S.S did not return an authorization code."
-            else -> null
-        }
-        if (failure != null) {
-            callback(Result.failure(IllegalStateException(failure)))
-            return
-        }
+    internal fun sessionGeneration(): Long = session.currentGeneration()
 
+    fun completeAuthorization(callbackUri: Uri, callback: (Long, Result<Unit>) -> Unit) {
+        val pending: PendingAuthorization
+        val generation: Long
+        val cancelled: List<(Result<String>) -> Unit>
+        synchronized(session) {
+            val candidate = store.loadPending()
+            if (!validOAuthCallback(
+                    callbackUri.toString().substringBefore('?'), redirectUri,
+                    callbackUri.getQueryParameter("state"), candidate?.state,
+                    candidate?.let { System.currentTimeMillis() - it.createdAtMillis } ?: -1L,
+                    PENDING_MAX_AGE_MILLIS
+                )) {
+                callback(session.currentGeneration(), Result.failure(
+                    IllegalStateException("The DM-D.S.S sign-in request is invalid or has expired.")))
+                return
+            }
+            pending = requireNotNull(candidate)
+            store.clearPending()
+            if (callbackUri.getQueryParameter("error") != null ||
+                callbackUri.getQueryParameter("code").isNullOrBlank()) {
+                callback(session.currentGeneration(), Result.failure(
+                    IllegalStateException("DM-D.S.S sign-in was not completed.")))
+                return
+            }
+            generation = session.advance()
+            cancelled = invalidateRefreshWaiters()
+        }
+        cancelled.forEach { it(Result.failure(IllegalStateException("DM-D.S.S authorization is being replaced."))) }
         val body = FormBody.Builder()
             .add("client_id", clientId)
             .add("grant_type", "authorization_code")
             .add("code", callbackUri.getQueryParameter("code")!!)
             .add("redirect_uri", redirectUri)
-            .add("code_verifier", pending!!.verifier)
+            .add("code_verifier", pending.verifier)
             .build()
-        executeTokenRequest(
-            body = body,
-            previousRefreshToken = null,
-            requiredGrantedScopes = REQUIRED_SCOPES
-        ) { result ->
-            result.onSuccess { credentials ->
-                store.saveCredentials(credentials)
-                previousCredentials?.let { previous ->
-                    val replacedTokens = listOf(previous.accessToken, previous.refreshToken)
-                        .filterNot { it == credentials.accessToken || it == credentials.refreshToken }
-                        .distinct()
-                    if (replacedTokens.isNotEmpty()) {
-                        revokeSequentially(replacedTokens, 0, true) { }
-                    }
+        executeTokenRequest(body, null, REQUIRED_SCOPES) { result ->
+            var completionGeneration = generation
+            var replaced: Credentials? = null
+            var waiters = emptyList<(Result<String>) -> Unit>()
+            val saved = synchronized(session) {
+                if (session.currentGeneration() != generation) {
+                    Result.failure(IllegalStateException("DM-D.S.S sign-in was superseded."))
+                } else result.mapCatching { credentials ->
+                    replaced = session.snapshot().second
+                    check(session.save(generation, credentials))
+                    completionGeneration = session.advance()
+                    refreshNotBeforeElapsed = 0L
+                    waiters = invalidateRefreshWaiters()
+                    Unit
                 }
             }
-            callback(result.map { Unit })
+            waiters.forEach { it(Result.failure(IllegalStateException("DM-D.S.S authorization was replaced."))) }
+            if (saved.isSuccess) {
+                replaced?.let { revokeUnusedTokens(listOf(it.accessToken, it.refreshToken)) }
+            } else {
+                result.getOrNull()?.let { revokeUnusedTokens(listOf(it.accessToken, it.refreshToken)) }
+            }
+            callback(completionGeneration, saved)
         }
     }
 
-    fun withAccessToken(
-        forceRefresh: Boolean = false,
-        callback: (Result<String>) -> Unit
-    ) {
-        val credentials = store.loadCredentials()
-        if (credentials == null) {
-            callback(Result.failure(IllegalStateException("DM-D.S.S is not connected.")))
-            return
-        }
-        if (!forceRefresh &&
-            credentials.expiresAtMillis > System.currentTimeMillis() + REFRESH_MARGIN_MILLIS
-        ) {
-            callback(Result.success(credentials.accessToken))
-            return
-        }
-
-        synchronized(refreshLock) {
-            refreshCallbacks += callback
-            if (refreshInFlight) return
-            refreshInFlight = true
+    fun withAccessToken(forceRefresh: Boolean = false, callback: (Result<String>) -> Unit) {
+        val batch: RefreshBatch
+        val credentials: Credentials
+        synchronized(session) {
+            val (generation, current) = session.snapshot()
+            if (current == null) {
+                callback(Result.failure(IllegalStateException("DM-D.S.S is not connected.")))
+                return
+            }
+            credentials = current
+            if (!forceRefresh && credentials.expiresAtMillis >
+                System.currentTimeMillis() + REFRESH_MARGIN_MILLIS) {
+                callback(Result.success(credentials.accessToken))
+                return
+            }
+            refreshBatch?.takeIf { it.generation == generation }?.let {
+                it.callbacks += callback
+                return
+            }
+            if (android.os.SystemClock.elapsedRealtime() < refreshNotBeforeElapsed) {
+                callback(Result.failure(IOException("DM-D.S.S authorization refresh will be retried shortly.")))
+                return
+            }
+            batch = RefreshBatch(generation, mutableListOf(callback))
+            refreshBatch = batch
         }
         val body = FormBody.Builder()
             .add("client_id", clientId)
             .add("grant_type", "refresh_token")
             .add("refresh_token", credentials.refreshToken)
             .build()
-        executeTokenRequest(
-            body = body,
-            previousRefreshToken = credentials.refreshToken,
-            requiredGrantedScopes = REQUIRED_SCOPES
-        ) { result ->
-            result.onSuccess(store::saveCredentials)
-            val tokenResult = result.map { it.accessToken }
-            val callbacks = synchronized(refreshLock) {
-                refreshInFlight = false
-                refreshCallbacks.toList().also { refreshCallbacks.clear() }
+        executeTokenRequest(body, credentials.refreshToken, REQUIRED_SCOPES) { result ->
+            val callbacks: List<(Result<String>) -> Unit>
+            val tokenResult: Result<String>
+            synchronized(session) {
+                if (refreshBatch !== batch) {
+                    result.getOrNull()?.let { revokeUnusedTokens(listOf(it.accessToken, it.refreshToken)) }
+                    return@executeTokenRequest
+                }
+                refreshBatch = null
+                tokenResult = result.mapCatching {
+                    check(session.save(batch.generation, it)) { "DM-D.S.S authorization was superseded." }
+                    it.accessToken
+                }
+                if (result.exceptionOrNull() is InvalidOAuthGrantException) {
+                    session.invalidate(batch.generation)
+                }
+                refreshNotBeforeElapsed = if (result.isFailure) {
+                    android.os.SystemClock.elapsedRealtime() +
+                        ((result.exceptionOrNull() as? RetryableOAuthException)?.retryAfterMillis ?: 15_000L)
+                } else 0L
+                callbacks = batch.callbacks.toList()
+                batch.callbacks.clear()
             }
             callbacks.forEach { it(tokenResult) }
         }
+    }
+
+    private fun invalidateRefreshWaiters(): List<(Result<String>) -> Unit> {
+        val batch = refreshBatch
+        refreshBatch = null
+        return batch?.callbacks?.toList().orEmpty().also { batch?.callbacks?.clear() }
+    }
+
+    private fun revokeUnusedTokens(tokens: List<String>) {
+        val current = session.snapshot().second
+        val unused = tokens.distinct().filterNot { it == current?.accessToken || it == current?.refreshToken }
+        if (unused.isNotEmpty()) revokeSequentially(unused, 0, true) { }
     }
 
     fun readContracts(callback: (Result<DmDssContractSummary>) -> Unit) {
@@ -338,14 +388,18 @@ class DmDssOAuthClient(
     }
 
     fun disconnect(callback: (Boolean) -> Unit = {}) {
-        val credentials = store.loadCredentials()
-        store.clearAll()
-        val tokens = listOfNotNull(credentials?.accessToken, credentials?.refreshToken).distinct()
-        if (tokens.isEmpty()) {
-            callback(true)
-            return
+        val credentials: Credentials?
+        val cancelled: List<(Result<String>) -> Unit>
+        synchronized(session) {
+            credentials = session.snapshot().second
+            session.invalidate()
+            refreshNotBeforeElapsed = 0L
+            cancelled = invalidateRefreshWaiters()
         }
-        revokeSequentially(tokens, 0, true, callback)
+        cancelled.forEach { it(Result.failure(IllegalStateException("DM-D.S.S disconnected."))) }
+        val tokens = listOfNotNull(credentials?.accessToken, credentials?.refreshToken).distinct()
+        if (tokens.isEmpty()) callback(true)
+        else revokeSequentially(tokens, 0, true, callback)
     }
 
     private fun revokeSequentially(
@@ -356,6 +410,13 @@ class DmDssOAuthClient(
     ) {
         if (index >= tokens.size) {
             callback(succeeded)
+            return
+        }
+        // Re-check every serial revocation: a later authorization may have
+        // adopted a token while an earlier revocation response was in flight.
+        val current = session.snapshot().second
+        if (tokens[index] == current?.accessToken || tokens[index] == current?.refreshToken) {
+            revokeSequentially(tokens, index + 1, succeeded, callback)
             return
         }
         val request = Request.Builder()
@@ -392,10 +453,12 @@ class DmDssOAuthClient(
                     response.use {
                         val json = JSONObject(it.body.string())
                         if (!it.isSuccessful || json.has("error")) {
-                            val detail = json.optString("error_description")
-                                .ifBlank { json.optString("error") }
-                                .ifBlank { "HTTP ${it.code}" }
-                            error("DM-D.S.S sign-in failed: $detail")
+                            if (isDefinitiveOAuthGrantFailure(it.code, json.optString("error"))) {
+                                throw InvalidOAuthGrantException()
+                            }
+                            val retryAfter = it.header("Retry-After")?.toLongOrNull()
+                                ?.coerceIn(1L, 3_600L)?.times(1_000L) ?: 15_000L
+                            throw RetryableOAuthException(retryAfter)
                         }
                         val accessToken = json.optString("access_token")
                             .takeIf(String::isNotBlank) ?: error("Missing DM-D.S.S access token")
@@ -415,7 +478,6 @@ class DmDssOAuthClient(
                         )
                     }
                 }
-                if (result.isFailure && previousRefreshToken != null) store.clearAll()
                 callback(result)
             }
         })
