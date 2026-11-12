@@ -1418,9 +1418,7 @@ class P2pQuakeProvider(
                     return@post
                 }
 
-                val repairedCache = remembered.any { it.repairChibaFeltReports() != it }
                 remembered.asReversed().forEach(::addToHistory)
-                if (repairedCache) scheduleRecentReportCacheWrite()
                 lastEvent = eventHistory.firstOrNull()
                 showingRememberedReports = lastEvent != null
                 lastEvent?.let { event ->
@@ -1440,15 +1438,12 @@ class P2pQuakeProvider(
     private fun restoreRememberedCrowdSignals(remembered: List<EarthquakeEvent>): Boolean {
         var changed = false
         remembered.forEach { cachedEvent ->
-            val repaired = cachedEvent.repairChibaFeltReports()
-            val cachedSignal = repaired.p2pCrowdSignal ?: return@forEach
+            val cachedSignal = cachedEvent.p2pCrowdSignal ?: return@forEach
             val owner = sequenceOf(lastEvent, *eventHistory.toTypedArray())
                 .filterNotNull()
                 .firstOrNull { current ->
                     current.id == cachedEvent.id || sameConfirmedIncident(current, cachedEvent)
                 }
-            // Restore the corrected cluster only on its own confirmed report.
-            if (owner == null && repaired != cachedEvent) return@forEach
             val currentSignal = pendingCrowdSignals[cachedSignal.startedAt]
             val mergedSignal = currentSignal?.mergeCumulativeUpdate(cachedSignal) ?: cachedSignal
             pendingCrowdSignals[mergedSignal.startedAt] = mergedSignal
@@ -3537,11 +3532,8 @@ class P2pQuakeProvider(
                 )
             else -> event
         }
-        val repaired = if (testingMode) report else {
-            report.repairChibaFeltReports(attachIfMissing = crowdSignalsEnabled)
-        }
-        val merged = repaired.copy(
-            p2pCrowdSignal = repaired.p2pCrowdSignal.withAssociatedCrowdUpdate(pendingCrowdSignalFor(repaired))
+        val merged = report.copy(
+            p2pCrowdSignal = report.p2pCrowdSignal.withAssociatedCrowdUpdate(pendingCrowdSignalFor(report))
         )
 
         // Remove a previously split representation as well as the normal

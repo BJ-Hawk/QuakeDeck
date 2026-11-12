@@ -39,4 +39,42 @@ Both clusters met the existing time window. The second supplied area data, so it
 
 The live fix includes a Chiba regression for the paid-warning handoff. Verify on a device that the count reaches 103, remains there after the competing cluster reaches four, and stays visible on the confirmed report after the warning expires.
 
-The user requested repair of the existing Recent Earthquakes entry and numeric development versions. Local `0.10.4-dev.2` / 251 carries the original 103-report aggregate and all 19 area entries verified against the export. QuakeDeck applies it to the matching confirmed report when loading Recent Earthquakes and writes the corrected cache through the normal save path. It preserves higher cumulative counts from the original cluster. The repair needs a matching confirmed report already on the device or received from a report source. Android Studio build, regression execution and device checks are pending.
+The temporary incident-specific saved-report correction introduced in `0.10.4-dev.2` / 251 was removed at the user's request in `0.10.4-dev.4` / 253. Its source, dedicated tests and runtime/cache hooks are gone. The general cluster-retention and live-association changes above remain in place.
+
+## November 12 removal — 0.10.4-dev.4 / 253
+
+**Objective and user decision:** remove the incident-specific saved-report
+correction and all implementation residue. Do not reintroduce it. The general
+live cluster-ownership/retention fix remains required.
+
+**Completed:** removed the dedicated source and five-test fixture; removed all
+three runtime calls, the repair-only dirty-cache flag/write, the temporary
+repaired-event alias, and the corrected-cluster-only cache guard. Cache restore
+and report merging now use only received or cached signals through the ordinary
+association and cumulative-merge rules. Generic cluster retention/regression
+tests remain. No app UI, map data, private forecast engine, or station research
+was changed.
+
+**Why:** the user explicitly withdrew the incident-specific correction. General
+felt-count ownership and restoration must continue independently of it.
+
+**Git and version:** based on committed main 7d7d18ce71bb195c623531d715ee66eb6f8812b1,
+also verified through the GitHub connector. Current compound hotfix is
+0.10.4-dev.4 / 253, still in progress. No commit or push was performed.
+An indexed source-file deletion was observed during removal; preserve its
+existing staging and do not stage the remaining edits automatically.
+
+**Validation / unfinished state:** forced FULL compilation with incremental
+compilation and the build cache disabled, and all requested tasks rerun, passed.
+FULL and forced LITE each compile and pass all 198 remaining tests, zero skipped
+or failed. Android lint completes without errors; existing warnings remain.
+The default FULL build is restored and its generated engine marker is true.
+Source/test searches find no removed helper symbols or runtime calls; the
+provider inspection reports no errors. Gradle's module clean could not delete
+the app/build directory on Windows; the subsequent forced rebuild passed.
+No device cache or historical archive was rewritten. Handset/live validation
+and approval of the compound hotfix remain open.
+
+**Next steps:** review the completed removal and continue the unrelated
+menu/address/device checks above. Do not recreate the removed correction.
+Finalize or publish only after explicit user approval.

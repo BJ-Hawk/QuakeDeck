@@ -2,10 +2,14 @@
 
 ## Status — November Android remediation implemented locally; approval pending
 
-The ten findings from the **12 November 2026** conversation are implemented in
+The ten findings from the **12 November 2026** conversation were implemented in
 **0.10.4-dev.3 / versionCode 252**, with FULL/LITE compilation, 203 passing tests
-in each edition, and default-build Android lint passing. Device/live/security
-and performance validation remain pending; the compound hotfix is not finalized.
+in each edition, and default-build Android lint passing. The follow-up
+**0.10.4-dev.4 / versionCode 253** removes the temporary incident-specific
+saved-report correction at the user's request; the audit fixes and general
+felt-cluster retention remain intact. See the removal follow-up below for its
+validation. Device/live/security and performance validation remain pending;
+the compound hotfix is not finalized.
 
 The sections below retain the original **17 September 2026** nine-item audit and
 its historical evidence/plans. The dated November continuation at the end is the
@@ -724,3 +728,26 @@ or restore sensitive keys to the ordinary backup preferences.
 The older A06 developer map-editor security task remains open and outside this
 November Android remediation. Previous workstream evidence remains historical;
 this entry does not label any unobserved handset/live behavior verified.
+
+## 12 November 2026 — removal follow-up, 0.10.4-dev.4 / 253
+
+The user requested removal of the temporary incident-specific saved-report
+correction. The dedicated helper and its five tests, all runtime calls,
+repair-only cache write and corrected-cluster-only restoration guard are gone.
+Ordinary received/cached signals and general cluster association/retention are
+preserved. No notification, OAuth, backfill, backup, translator, UI, station or
+private forecast implementation was changed by this follow-up.
+
+The earlier dev.3 implementation/203-test handoff above is historical; the
+current suite contains 198 tests after removing the five dedicated cases.
+Forced FULL recompilation with incremental compilation/build cache disabled
+passed, as did FULL/LITE compilation and all 198 tests in each edition. Android
+lint completes without errors; existing warnings remain. Source/test residue
+searches are clear and the provider inspection reports no errors. The default
+FULL configuration is restored. The module clean could not delete app/build
+on Windows, so this is forced-rebuild evidence rather than a successful clean
+task. The exact removal decisions, Git state and next steps are recorded in
+[the replay/alert continuation](replay-and-alert-ui.md#november-12-removal--0104-dev4--253).
+
+The compound hotfix remains in progress. Do not reintroduce the incident-specific
+correction or finalize/publish the hotfix without explicit approval.
