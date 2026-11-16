@@ -92,7 +92,9 @@ class DmDssProvider(
     private val eewRevisions = EewRevisionTracker()
     private var connected = false
     private var liveSequence = 0L
-    private var expiryGeneration = 0L
+    private val eewExpiries = EewIncidentExpiryScheduler(
+        appContext, handler, "DMDSS", keepCpuAwake = { true }, onExpired = ::expireEew
+    )
     private var recoveryGeneration = 0L
     @Volatile
     private var connectionGeneration = 0L
@@ -123,6 +125,9 @@ class DmDssProvider(
         connected = false
         setLiveTypes(emptySet())
         handler.removeCallbacks(reconnectRunnable)
+        eewExpiries.clear()
+        activeEvent = null
+        activeEventUntilMillis = null
         socket?.close(1000, "DM-D.S.S source deselected")
         socket = null
         diagnostics.recordSocket("Stopped")
@@ -135,6 +140,7 @@ class DmDssProvider(
     }
 
     override fun onAppForeground() {
+        eewExpiries.expireIfDue()
         if (!stopped && !connected) {
             handler.removeCallbacks(reconnectRunnable)
             connect()
@@ -143,8 +149,8 @@ class DmDssProvider(
 
     fun onDrillPreferenceChanged() {
         if (!settings.receiveSilentTestDrills) {
+            eewExpiries.removeDrills()
             if (activeEvent?.isDrill == true) {
-                expiryGeneration++
                 activeEvent = null
                 activeEventUntilMillis = null
             }
@@ -382,6 +388,7 @@ class DmDssProvider(
                 tsunami: DmDssTsunamiPacket?,
                 receivedAt: Long
             ) {
+                if (telegramType !in DmDssFeed.FORECAST.types) eewExpiries.expireIfDue()
                 when (packetType) {
                     "start" -> {
                         json.optString("socketId").takeIf(String::isNotBlank)?.let {
@@ -613,21 +620,25 @@ class DmDssProvider(
         val parsed = DmDssEewParser.parseEnvelopeResult(
             envelope, activeEvent ?: lastEvent, receivedAt,
             receiveSilentTestDrills = settings.receiveSilentTestDrills,
-            decoded = decoded
+            decoded = decoded,
+            previousForId = { id -> eewExpiries.incident(id)?.event ?: eewRevisions.current(id) }
         )
         if (parsed is DmDssEewParseResult.Rejected) {
+            eewExpiries.expireIfDue()
             diagnostics.recordRejected(parsed.reason.diagnostic)
             emitCurrent()
             return
         }
         val update = (parsed as DmDssEewParseResult.Accepted).update
         if (!canPresentEewUpdate(update.event, activeEvent)) {
+            eewExpiries.expireIfDue()
             diagnostics.recordRejected("DRILL ignored while a real EEW is active")
             emitCurrent()
             return
         }
         val rejection = eewRevisions.rejection(update.event)
         if (rejection != null) {
+            eewExpiries.expireIfDue()
             diagnostics.recordRejected(rejection)
             diagnostics.recordEewDecision(update.event, "ingest", rejection, "DM-D.S.S", update.kind,
                 update.expiresAtMillis)
@@ -641,36 +652,42 @@ class DmDssProvider(
     }
 
     private fun applyUpdate(update: DmDssEewUpdate) {
-        val event = if (update.active) {
+        val now = System.currentTimeMillis()
+        val deadline = update.expiresAtMillis ?: (now + DEFAULT_ACTIVE_MILLIS)
+        val active = update.active && now < deadline
+        if (update.event.isCancelled) eewExpiries.remove(update.event.id)
+        if (!active || activeEvent?.id != update.event.id) eewExpiries.expireIfDue()
+        val event = if (active) {
             val localForecast = LocalEewForecasts.intensityForecast(update.event).valueOrNull()
             update.event.copy(localIntensityForecast = localForecast)
         } else {
             update.event
         }
-        lastEvent = event
         eewRevisions.record(event)
-        activeEvent = event.takeIf { update.active }
-        activeEventUntilMillis = if (update.active) {
-            update.expiresAtMillis ?: (System.currentTimeMillis() + DEFAULT_ACTIVE_MILLIS)
-        } else {
-            null
-        }
-        if (update.active) {
-            scheduleExpiry(event.id, activeEventUntilMillis)
-        } else {
-            expiryGeneration++
+        if (active) {
+            if (activeEvent == null || activeEvent?.id == event.id || eewExpiries.incident(event.id) == null) {
+                lastEvent = event
+                activeEvent = event
+                activeEventUntilMillis = deadline
+            }
+            eewExpiries.schedule(event, deadline)
+        } else if (event.isCancelled) {
+            if (activeEvent?.id == event.id) promoteRemainingEew()
+            if (activeEvent == null && (lastEvent == null || lastEvent?.id == event.id)) {
+                lastEvent = event
+            }
         }
         diagnostics.recordEewDecision(event, "lifecycle",
-            if (event.isCancelled) "Cancellation applied" else if (update.active) "Active bulletin applied" else "Stale bulletin archived without activation",
-            "DM-D.S.S", update.kind, activeEventUntilMillis)
+            if (event.isCancelled) "Cancellation applied" else if (active) "Active bulletin applied" else "Stale bulletin archived without activation",
+            "DM-D.S.S", update.kind, deadline.takeIf { active })
+        val kind = if (active || update.kind == LiveUpdateKind.EEW_ENDED) {
+            update.kind
+        } else LiveUpdateKind.NONE
         emit(
             state = ConnectionState.CONNECTED,
             status = update.status,
-            updateKind = if (update.active || update.kind == LiveUpdateKind.EEW_ENDED) {
-                update.kind
-            } else {
-                LiveUpdateKind.NONE
-            }
+            updateKind = kind,
+            eewUpdateEvent = event.takeIf { kind != LiveUpdateKind.NONE }
         )
     }
 
@@ -713,26 +730,31 @@ class DmDssProvider(
         }
     }
 
-    private fun scheduleExpiry(eventId: String, expiresAtMillis: Long?) {
-        val generation = ++expiryGeneration
-        val delay = ((expiresAtMillis ?: (System.currentTimeMillis() + DEFAULT_ACTIVE_MILLIS)) -
-            System.currentTimeMillis()).coerceAtLeast(1_000L)
-        handler.postDelayed(
-            {
-                if (stopped || generation != expiryGeneration || activeEvent?.id != eventId) return@postDelayed
-                activeEvent = null
-                activeEventUntilMillis = null
-                if (!connected || liveTypes.none { it in DmDssFeed.FORECAST.types }) return@postDelayed
-                lastEvent?.let { diagnostics.recordEewDecision(it, "lifecycle", "Bulletin freshness timeout",
-                    "DM-D.S.S", LiveUpdateKind.EEW_ENDED, expiresAtMillis) }
-                emit(
-                    state = ConnectionState.CONNECTED,
-                    status = "DM-D.S.S EEW forecast connected",
-                    updateKind = LiveUpdateKind.EEW_ENDED
-                )
-            },
-            delay
+    private fun expireEew(expiry: PendingEewExpiry) {
+        if (stopped) return
+        val event = expiry.event
+        if (activeEvent?.id == event.id) {
+            promoteRemainingEew()
+        }
+        diagnostics.recordEewDecision(event, "lifecycle", "Bulletin freshness timeout",
+            "DM-D.S.S", LiveUpdateKind.EEW_ENDED, expiry.deadlineMillis)
+        val state = when {
+            connected -> ConnectionState.CONNECTED
+            connecting -> ConnectionState.CONNECTING
+            else -> ConnectionState.DISCONNECTED
+        }
+        emit(
+            state = state,
+            status = connectedFeedStatus().takeIf { connected } ?: "DM-D.S.S reconnecting…",
+            updateKind = LiveUpdateKind.EEW_ENDED,
+            eewUpdateEvent = event
         )
+    }
+
+    private fun promoteRemainingEew() {
+        val remaining = eewExpiries.newestIncident()
+        activeEvent = remaining?.event
+        activeEventUntilMillis = remaining?.deadlineMillis
     }
 
     private fun JSONArray?.strings(): Set<String> =
@@ -774,11 +796,12 @@ class DmDssProvider(
     private fun emit(
         state: ConnectionState,
         status: String,
-        updateKind: LiveUpdateKind = LiveUpdateKind.NONE
+        updateKind: LiveUpdateKind = LiveUpdateKind.NONE,
+        eewUpdateEvent: EarthquakeEvent? = null
     ) {
         val forecastLive = state == ConnectionState.CONNECTED &&
             liveTypes.any { it in DmDssFeed.FORECAST.types }
-        val active = activeEvent.takeIf { forecastLive }
+        val active = activeEvent
         val event = active ?: lastEvent.takeIf { forecastLive } ?: waitingSnapshot(mode = mode).event
         if (updateKind != LiveUpdateKind.NONE) liveSequence++
         callback?.invoke(
@@ -788,8 +811,9 @@ class DmDssProvider(
                 activeEew = active != null,
                 activeEewEvent = active,
                 activeEewUntilMillis = activeEventUntilMillis.takeIf { active != null },
+                activeEews = eewExpiries.incidents(active),
                 event = event,
-                eewUpdateEvent = event.takeIf { updateKind != LiveUpdateKind.NONE },
+                eewUpdateEvent = eewUpdateEvent,
                 statusText = if (event.isDrill && !status.startsWith("DRILL · ")) {
                     "DRILL · $status"
                 } else status,

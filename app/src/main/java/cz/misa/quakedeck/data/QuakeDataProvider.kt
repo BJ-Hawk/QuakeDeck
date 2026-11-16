@@ -16,6 +16,9 @@ interface QuakeDataProvider {
         startDelayMillis: Long = BuiltInEewReplay.DEFAULT_START_DELAY_MILLIS
     ) = Unit
 
+    /** Run two overlapping synthetic EEWs through the Sandbox feed. */
+    fun startBuiltInOverlappingEewReplay(startDelayMillis: Long) = Unit
+
     /** Run QuakeDeck's deterministic offline tsunami fixture. */
     fun startBuiltInTsunamiReplay(
         startDelayMillis: Long = BuiltInTsunamiReplay.DEFAULT_START_DELAY_MILLIS

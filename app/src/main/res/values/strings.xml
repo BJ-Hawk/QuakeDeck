@@ -147,6 +147,8 @@
     <string name="replay_noto_tsunami_explanation">Starts after five seconds. Replays the M7.6 earthquake, major tsunami warning, arrival update, downgrade and final cancellation through the normal live parsers.</string>
     <string name="replay_noto_combined">Replay combined 2024 Noto EEW + tsunami</string>
     <string name="replay_noto_combined_explanation">Starts after five seconds and deliberately overlaps an active EEW with tsunami bulletins, then confirms the earthquake, downgrades the warning and cancels it.</string>
+    <string name="replay_overlapping_eew">Overlapping EEWs</string>
+    <string name="replay_overlapping_eew_explanation">Starts after five seconds. The simulated eastern Shizuoka warning follows Noto after 12 seconds. Both stay active together for 63 seconds with separate map badges. FULL also shows P/S wavefronts for each event.</string>
     <string name="text_size">Text size</string>
     <string name="marker_size_explanation">Marker size is fixed in screen space and does not shrink when the map is zoomed.</string>
 <string name="tsunami_warning">Tsunami warning</string>

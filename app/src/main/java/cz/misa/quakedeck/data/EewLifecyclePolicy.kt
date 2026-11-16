@@ -90,17 +90,40 @@ internal class EewCancellationTracker {
         while (terminal.size > 64) terminal.remove(terminal.keys.first())
     }
     fun reconcile(snapshot: AppSnapshot): AppSnapshot {
-        val eew = snapshot.activeEewEvent ?: snapshot.eewUpdateEvent ?: snapshot.event
-        if (eew.kind != EarthquakeEventKind.EEW || eew.isCancelled) return snapshot
-        val cancelled = terminal[eew.id] ?: return snapshot
-        val cancelledAt = EewLifecyclePolicy.sourceMillis(cancelled.reportIssuedAt) ?: return snapshot
+        val incidents = snapshot.activeEewIncidents()
+        val remaining = incidents.filter { authoritativeCancellation(it.event) == null }
+        val current = snapshot.event
+        val correctedEvent = authoritativeCancellation(current) ?: current
+        val emitted = snapshot.eewUpdateEvent ?: snapshot.activeEewEvent ?: current
+        val cancellation = authoritativeCancellation(emitted)
+        val isActiveUpdate = snapshot.liveUpdateKind in setOf(LiveUpdateKind.EEW, LiveUpdateKind.EEW_DETECTED)
+        val updateKind = if (cancellation != null && isActiveUpdate) {
+            LiveUpdateKind.NONE
+        } else snapshot.liveUpdateKind
+        if (remaining == incidents && correctedEvent === current && cancellation == null) return snapshot
+
+        val primary = remaining.firstOrNull()
+        return snapshot.copy(
+            activeEew = if (incidents.isEmpty()) snapshot.activeEew && correctedEvent === current else primary != null,
+            activeEewEvent = primary?.event,
+            activeEewUntilMillis = primary?.deadlineMillis,
+            activeEews = remaining,
+            event = if (correctedEvent !== current && primary != null) primary.event else correctedEvent,
+            liveUpdateKind = updateKind,
+            eewUpdateEvent = when {
+                updateKind == LiveUpdateKind.NONE -> null
+                updateKind == LiveUpdateKind.EEW_ENDED -> cancellation ?: emitted
+                else -> snapshot.eewUpdateEvent
+            }
+        )
+    }
+
+    private fun authoritativeCancellation(eew: EarthquakeEvent): EarthquakeEvent? {
+        if (eew.kind != EarthquakeEventKind.EEW || eew.isCancelled) return null
+        val cancelled = terminal[eew.id] ?: return null
+        val cancelledAt = EewLifecyclePolicy.sourceMillis(cancelled.reportIssuedAt) ?: return null
         val issuedAt = EewLifecyclePolicy.sourceMillis(eew.reportIssuedAt) ?: Long.MIN_VALUE
-        if (cancelledAt < issuedAt) return snapshot
-        return snapshot.copy(activeEew = false, activeEewEvent = null, activeEewUntilMillis = null,
-            event = if (snapshot.event.kind == EarthquakeEventKind.EEW && snapshot.event.id == eew.id) cancelled else snapshot.event,
-            liveUpdateKind = if (snapshot.liveUpdateKind in setOf(LiveUpdateKind.EEW, LiveUpdateKind.EEW_DETECTED))
-                LiveUpdateKind.NONE else snapshot.liveUpdateKind,
-            eewUpdateEvent = if (snapshot.liveUpdateKind == LiveUpdateKind.EEW_ENDED) cancelled else null)
+        return cancelled.takeIf { cancelledAt >= issuedAt }
     }
 }
 

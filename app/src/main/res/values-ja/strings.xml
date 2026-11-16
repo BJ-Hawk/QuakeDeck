@@ -143,6 +143,8 @@
     <string name="replay_noto_tsunami_explanation">5秒後に開始し、通常のライブ解析経路でM7.6地震、大津波警報、到達更新、格下げ、解除を再生します。</string>
     <string name="replay_noto_combined">2024年 能登EEW + 津波を同時再生</string>
     <string name="replay_noto_combined_explanation">5秒後に開始し、EEW発表中に津波情報を重ね、地震確定後に警報を格下げして解除します。</string>
+    <string name="replay_overlapping_eew">重複する緊急地震速報</string>
+    <string name="replay_overlapping_eew_explanation">5秒後に開始します。能登の模擬速報から12秒後に、静岡県東部の模擬速報が続きます。2件は63秒間重なり、それぞれのバッジが地図に表示されます。FULL版では各地震のP波とS波の波面も表示されます。</string>
     <string name="text_size">文字サイズ</string>
     <string name="marker_size_explanation">マーカーサイズは画面上で固定され、地図を拡大しても小さくなりません。</string>
 <string name="tsunami_warning">津波警報</string>

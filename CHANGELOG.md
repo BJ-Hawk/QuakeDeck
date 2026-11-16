@@ -2,7 +2,7 @@
 
 QuakeDeck release history
 
-## v0.10.4-dev.4 (in progress)
+## v0.10.4-dev.5 (in progress)
 
 - Keeps the History loading bar visible at the bottom while scrolling and gives the replay header fixed rows. Opening an incident focuses its earliest mappable earthquake or EEW frame.
 - Skips P2PQuake felt updates when stepping through replay. Associated reports still lists distinct cumulative updates, including real changes to count, confidence or area.
@@ -18,6 +18,9 @@ QuakeDeck release history
 - Streams historical backfill one page at a time with one report per main-thread turn; keeps its network waits separate from live archive writes and notification processing off the UI thread.
 - Closes the offline translator with its UI owner and excludes OAuth, signing keys and private reference-location settings from backups while preserving ordinary preferences and migrating current-device choices.
 - Preserves UI layout and displayed resource text. FULL/LITE compilation and all 198 remaining unit tests pass in each edition; Android lint has no errors. Device/live, backup migration, heap and responsiveness measurements remain pending.
+- Tracks simultaneous early warnings separately. The map gives each warning a selectable badge and renders its own P/S wave rings where local forecasting is available.
+- Ends each live warning three minutes after its latest accepted bulletin. A time-limited CPU wake lock supports expiry with the screen off, and a newer earthquake leaves the earlier warning's Ended notification eligible.
+- Adds an Overlapping EEWs Sandbox replay with two synthetic warnings, 63 seconds of overlap, and staggered cancellations for checking each map badge and P/S ring pair.
 
 ## v0.10.3
 

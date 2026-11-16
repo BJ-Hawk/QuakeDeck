@@ -207,6 +207,7 @@ fun QuakeDeckSettings(
     onBuiltInReplayRequested: () -> Unit,
     onBuiltInTsunamiReplayRequested: () -> Unit,
     onBuiltInCombinedReplayRequested: () -> Unit,
+    onBuiltInOverlappingEewReplayRequested: () -> Unit,
     testInjectionDelaySeconds: Int,
     onTestInjectionDelaySecondsChanged: (Int) -> Unit,
     onInjectEarthquakeReportRequested: (Long) -> Unit,
@@ -447,6 +448,10 @@ fun QuakeDeckSettings(
                                 onCombinedReplay = {
                                     commitTextScale()
                                     onBuiltInCombinedReplayRequested()
+                                },
+                                onOverlappingEewReplay = {
+                                    commitTextScale()
+                                    onBuiltInOverlappingEewReplayRequested()
                                 },
                                 testInjectionDelaySeconds = testInjectionDelaySeconds,
                                 onTestInjectionDelaySecondsChanged = onTestInjectionDelaySecondsChanged,

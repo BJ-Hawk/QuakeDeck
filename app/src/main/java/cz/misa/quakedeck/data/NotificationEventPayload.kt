@@ -289,8 +289,8 @@ data class NotificationLaunchPayload(
 
 /**
  * Rehydrates the transient incident state that Android outlived when it retained
- * a notification after the QuakeDeck process was removed. A matching live
- * runtime incident always wins once it has been recovered.
+ * a notification after the QuakeDeck process was removed. The live collection
+ * stays authoritative, including when a notification opens a secondary warning.
  */
 fun AppSnapshot.withNotificationLaunch(
     payload: NotificationLaunchPayload?,
@@ -301,20 +301,18 @@ fun AppSnapshot.withNotificationLaunch(
         NotificationLaunchKind.EARTHQUAKE -> this
         NotificationLaunchKind.EEW -> {
             val notificationEvent = payload.event ?: return this
-            if (notificationEvent.isDrill && activeEewEvent?.isDrill == false && activeEew) return this
             if (payload.activeUntilMillis?.let { nowEpochMillis >= it } == true) return this
             if (hasEndedEew(notificationEvent.id)) return this
-            if (activeEew && activeEewEvent != null) {
-                this
-            } else {
-                copy(
-                    activeEew = !notificationEvent.isCancelled,
-                    activeEewEvent = notificationEvent.takeUnless { it.isCancelled },
-                    activeEewUntilMillis = payload.activeUntilMillis,
-                    event = notificationEvent,
-                    liveUpdateKind = LiveUpdateKind.NONE
-                )
-            }
+            if (activeEewIncidents().isNotEmpty()) return this
+            val activeWarning = notificationEvent.takeUnless { it.isCancelled }
+            copy(
+                activeEew = activeWarning != null,
+                activeEewEvent = activeWarning,
+                activeEewUntilMillis = payload.activeUntilMillis,
+                activeEews = listOfNotNull(activeWarning?.let { ActiveEewIncident(it, payload.activeUntilMillis) }),
+                event = notificationEvent,
+                liveUpdateKind = LiveUpdateKind.NONE
+            )
         }
         NotificationLaunchKind.TSUNAMI -> {
             val notificationTsunami = payload.tsunami ?: return this
@@ -342,10 +340,11 @@ internal fun canRestoreTsunami(report: TsunamiReport, nowEpochMillis: Long): Boo
 
 /** Termination refers to its own EEW, even when another report is selected. */
 fun AppSnapshot.hasEndedEew(eventId: String): Boolean {
-    val ended = eewUpdateEvent?.takeIf { it.id == eventId }
-    if (ended != null && (ended.isCancelled || liveUpdateKind == LiveUpdateKind.EEW_ENDED ||
-            liveUpdateKind == LiveUpdateKind.CANCELLED)) return true
-    return !activeEew && event.id == eventId &&
-        (liveUpdateKind == LiveUpdateKind.EEW_ENDED || liveUpdateKind == LiveUpdateKind.CANCELLED ||
-            event.kind != EarthquakeEventKind.EEW || event.isCancelled)
+    val terminalUpdate = liveUpdateKind == LiveUpdateKind.EEW_ENDED ||
+        liveUpdateKind == LiveUpdateKind.CANCELLED
+    val update = eewUpdateEvent
+    if (update?.id == eventId && (update.isCancelled || terminalUpdate)) return true
+    if (event.id != eventId || activeEewIncidents().any { it.event.id == eventId }) return false
+    return event.kind != EarthquakeEventKind.EEW || event.isCancelled ||
+        (update == null && terminalUpdate)
 }

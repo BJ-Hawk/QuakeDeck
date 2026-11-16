@@ -59,6 +59,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.CompositingStrategy
@@ -74,6 +75,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.positionChange
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.Placeable
+import androidx.compose.ui.layout.boundsInParent
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.layout.positionInRoot
@@ -90,6 +92,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.em
@@ -626,12 +629,21 @@ private fun QuakeDeckApp(
             restored.copy(event = officialReportForNotification)
         } else restored
     }
+    val liveIncidents = snapshot.activeEewIncidents()
+    val liveEews = remember(liveIncidents) {
+        liveIncidents.map { it.event }.filterNot { it.isCancelled }
+    }
+    val activeEewReports = liveEews.ifEmpty {
+        listOfNotNull(snapshot.event.takeIf {
+            snapshot.activeEew && it.kind == EarthquakeEventKind.EEW && !it.isCancelled
+        })
+    }
 
     LaunchedEffect(
         rawSnapshot.liveUpdateSequence,
         rawSnapshot.liveUpdateKind,
         rawSnapshot.event.id,
-        rawSnapshot.activeEew
+        rawSnapshot.activeEewIncidents()
     ) {
         val retained = retainedNotificationLaunch
             ?.takeIf { it.kind == NotificationLaunchKind.EEW }
@@ -776,7 +788,7 @@ private fun QuakeDeckApp(
     // though their issue time were happening now.
     var eewTimelineNowMillis by remember { mutableLongStateOf(System.currentTimeMillis()) }
     LaunchedEffect(
-        snapshot.activeEew,
+        activeEewReports.isNotEmpty(),
         snapshot.activeTsunami,
         snapshot.event.id,
         snapshot.activeEewEvent?.id,
@@ -784,7 +796,7 @@ private fun QuakeDeckApp(
         snapshot.tsunami?.id
     ) {
         eewTimelineNowMillis = System.currentTimeMillis()
-        while (snapshot.activeEew || snapshot.activeTsunami) {
+        while (activeEewReports.isNotEmpty() || snapshot.activeTsunami) {
             delay(250.milliseconds)
             eewTimelineNowMillis = System.currentTimeMillis()
         }
@@ -890,60 +902,65 @@ private fun QuakeDeckApp(
         ?.getOrNull(historicalReportIndex)
     val historicalMode = historicalFrame != null
     val notificationFallbackEvent = notificationLaunch?.event
-    val currentWarningId = snapshot.activeEewEvent?.id
-        ?: snapshot.eewUpdateEvent?.takeIf {
-            snapshot.liveUpdateKind == LiveUpdateKind.EEW_ENDED &&
-                matchesLiveEewReport(it, snapshot.event)
-        }?.id
-        ?: notificationFallbackEvent?.id?.takeIf { officialReportForNotification != null }
-    val regularSelectedEvent = remember(
-        snapshot.event,
-        currentWarningId,
-        snapshot.history,
-        selectedEventId,
-        notificationFallbackEvent
-    ) {
-        selectedEventId?.let { id ->
-            snapshot.event.takeIf { it.id == id || currentWarningId == id }
+    val recentReports = remember(snapshot.event, snapshot.history) {
+        listOf(snapshot.event) + snapshot.history
+    }
+
+    fun warningForReport(report: EarthquakeEvent): EarthquakeEvent? =
+        activeEewReports.firstOrNull { it.id == report.id || it.id == report.jmaReportEventId }
+            ?: activeEewReports.singleOrNull { matchesLiveEewReport(it, report) }
+
+    fun reportForWarning(warning: EarthquakeEvent): EarthquakeEvent =
+        recentReports.firstOrNull {
+            it.kind == EarthquakeEventKind.CONFIRMED && warningForReport(it)?.id == warning.id
+        } ?: warning
+
+    val explicitlySelectedWarning = activeEewReports.firstOrNull { it.id == selectedEventId }
+    val latestWarning = warningForReport(snapshot.event)
+    val terminalWarning = snapshot.eewUpdateEvent?.takeIf {
+        snapshot.liveUpdateKind == LiveUpdateKind.EEW_ENDED ||
+            (snapshot.liveUpdateKind == LiveUpdateKind.CANCELLED && it.kind == EarthquakeEventKind.EEW)
+    }
+    val terminalReport = terminalWarning?.let { warning ->
+        recentReports.firstOrNull { matchesLiveEewReport(warning, it) }
+    }
+    val regularSelectedEvent = explicitlySelectedWarning?.let(::reportForWarning)
+        ?: selectedEventId?.let { id ->
+            snapshot.event.takeIf { it.id == id }
                 ?: snapshot.history.firstOrNull { it.id == id }
+                ?: terminalReport?.takeIf { terminalWarning?.id == id }
                 ?: notificationFallbackEvent?.takeIf { it.id == id }
         } ?: snapshot.event
-    }
     val selectedEvent = historicalFrame?.event ?: regularSelectedEvent
     val browsingHistory = historicalMode || selectedEvent.id != snapshot.event.id
-    val activeEewReport = (snapshot.activeEewEvent ?: snapshot.event)
-        .takeIf { snapshot.activeEew && !it.isCancelled }
-    var dismissedEewId by remember(testingMode) {
-        mutableStateOf<String?>(null)
+    val selectedWarning = if (historicalMode) null else warningForReport(selectedEvent)
+    var dismissedEewIds by remember(testingMode) {
+        mutableStateOf(emptySet<String>())
     }
-    val eewDetailsDismissed = activeEewReport != null && dismissedEewId == activeEewReport.id
+    val eewDetailsDismissed = selectedWarning?.id?.let(dismissedEewIds::contains) == true
     // The tsunami report ID identifies a bulletin, not the whole active warning.
     var tsunamiDetailsDismissed by remember(snapshot.activeTsunami, testingMode) {
         mutableStateOf(false)
     }
-    val liveWaveEvent = snapshot.activeEewEvent?.takeIf {
-        !historicalMode && snapshot.activeEew && !it.isCancelled
-    }
-    val selectedEventIsActiveEew = !historicalMode && activeEewReport != null &&
-        selectedEvent.id == snapshot.event.id
     fun canMapReport(target: EarthquakeEvent): Boolean =
         target.hasJapanMapContent() ||
-            (!historicalMode && target.id == snapshot.event.id &&
-                activeEewReport != null && dismissedEewId != activeEewReport.id &&
-                activeEewReport.hasJapanMapContent())
+            (!historicalMode && warningForReport(target)?.let {
+                it.id !in dismissedEewIds && it.hasJapanMapContent()
+            } == true)
 
     // The official report may replace the warning as the current card while
     // the active warning still owns the map. Keep it visible during the handoff.
+    val mappedWarningId = selectedWarning?.id
+        ?: terminalWarning?.id?.takeIf { terminalReport?.id == selectedEvent.id && !historicalMode }
     val eventMapped =
         (mappedEventId == selectedEvent.id ||
-            (!historicalMode && selectedEvent.id == snapshot.event.id &&
-                currentWarningId != null && mappedEventId == currentWarningId)) &&
+            (mappedWarningId != null && mappedEventId == mappedWarningId)) &&
             selectedEvent.id != "waiting" &&
             canMapReport(selectedEvent)
     val cleanMapEvent = remember { waitingSnapshot().event }
     val mapEvent = if (eventMapped || focusedStation != null) selectedEvent else cleanMapEvent
-    val focusedEewForMap = liveWaveEvent.takeIf {
-        eventMapped && selectedEventIsActiveEew && !eewDetailsDismissed
+    val focusedEewForMap = selectedWarning?.takeIf {
+        eventMapped && !eewDetailsDismissed
     }
     var alertPanelFocusRequest by remember { mutableIntStateOf(0) }
 
@@ -1094,11 +1111,11 @@ private fun QuakeDeckApp(
 
     fun closeLiveReport() {
         if (selectedEvent.id == snapshot.event.id) {
-            lastAutoOpenedLiveEventId = activeEewReport?.id ?: selectedEvent.id
+            lastAutoOpenedLiveEventId = latestWarning?.id ?: selectedEvent.id
             lastAutoFitHadFootprint = true
         }
-        if (selectedEventIsActiveEew) {
-            dismissedEewId = activeEewReport?.id
+        if (selectedWarning != null) {
+            dismissedEewIds = dismissedEewIds + selectedWarning.id
         } else if (retainedNotificationLaunch?.kind != NotificationLaunchKind.TSUNAMI) {
             retainedNotificationLaunch = null
         }
@@ -1129,7 +1146,7 @@ private fun QuakeDeckApp(
         notificationReportId,
         notificationLaunch,
         snapshot.event,
-        snapshot.activeEewEvent,
+        activeEewReports,
         snapshot.tsunami,
         snapshot.history,
         snapshot.recentReportsRefreshing
@@ -1155,10 +1172,11 @@ private fun QuakeDeckApp(
             onNotificationReportHandled(requestedId)
             return@LaunchedEffect
         }
-        val opensActiveEew = activeEewReport?.id == requestedId &&
-            notificationLaunch?.kind != NotificationLaunchKind.EARTHQUAKE
+        val requestedWarning = activeEewReports.firstOrNull { it.id == requestedId }
+            ?.takeUnless { notificationLaunch?.kind == NotificationLaunchKind.EARTHQUAKE }
         val target = when {
-            snapshot.event.id == requestedId || opensActiveEew -> snapshot.event
+            requestedWarning != null -> reportForWarning(requestedWarning)
+            snapshot.event.id == requestedId -> snapshot.event
             notificationFallbackEvent?.id == requestedId && officialReportForNotification != null ->
                 officialReportForNotification
             else -> snapshot.history.firstOrNull { it.id == requestedId }
@@ -1177,8 +1195,10 @@ private fun QuakeDeckApp(
                 event = target
             )
             if (target.id != selectedEvent.id) clearObservedIntensityExpansion()
-            if (opensActiveEew) dismissedEewId = null
-            selectedEventId = target.id.takeUnless { opensActiveEew }
+            if (requestedWarning != null) {
+                dismissedEewIds = dismissedEewIds - requestedWarning.id
+            }
+            selectedEventId = requestedWarning?.id ?: target.id
             // Cold launch can receive the same live snapshot after this effect.
             // Its automatic camera policy must not override the explicit user
             // choice to open this particular notification.
@@ -1307,8 +1327,8 @@ private fun QuakeDeckApp(
     // user manually closes stays closed for later serials of that same event.
     LaunchedEffect(
         snapshot.liveUpdateSequence,
-        snapshot.event.id,
-        currentWarningId,
+        selectedEvent.id,
+        mappedWarningId,
         historicalMode
     ) {
         val sequence = snapshot.liveUpdateSequence
@@ -1321,13 +1341,12 @@ private fun QuakeDeckApp(
             return@LaunchedEffect
         }
         val liveId = snapshot.event.id
-        val warningId = currentWarningId
-        if (warningId != null && warningId != liveId) {
-            if (mappedEventId == warningId) mappedEventId = liveId
-            if (autoFocusExpiryEventId == warningId) autoFocusExpiryEventId = liveId
-            if (selectedEventId == warningId) selectedEventId = liveId
-            if (notificationFocusAfterLayoutId == warningId) {
-                notificationFocusAfterLayoutId = liveId
+        if (mappedWarningId != null && mappedWarningId != selectedEvent.id) {
+            if (mappedEventId == mappedWarningId) mappedEventId = selectedEvent.id
+            if (focusEventTargetId == mappedWarningId) focusEventTargetId = selectedEvent.id
+            if (autoFocusExpiryEventId == mappedWarningId) autoFocusExpiryEventId = selectedEvent.id
+            if (notificationFocusAfterLayoutId == mappedWarningId) {
+                notificationFocusAfterLayoutId = selectedEvent.id
             }
         }
         if (sequence <= 0L || sequence <= lastCameraHandledLiveSequence) {
@@ -1342,11 +1361,21 @@ private fun QuakeDeckApp(
 
             LiveUpdateKind.EEW,
             LiveUpdateKind.CONFIRMED -> {
-                val attentionId = activeEewReport?.id ?: liveId
+                // A revision for a secondary warning should update its own
+                // badge and rings without taking over the current camera.
+                val updatedWarningId = snapshot.eewUpdateEvent?.id
+                if (snapshot.liveUpdateKind == LiveUpdateKind.EEW &&
+                    updatedWarningId != null && updatedWarningId != latestWarning?.id
+                ) return@LaunchedEffect
+                if (explicitlySelectedWarning != null &&
+                    (!explicitlySelectedWarning.isDrill || latestWarning?.isDrill != false)
+                ) return@LaunchedEffect
+
+                val attentionId = latestWarning?.id ?: liveId
                 val hasFootprint = snapshot.event.points.isNotEmpty()
                 val canMap = canMapReport(snapshot.event)
 
-                if (eewDetailsDismissed) {
+                if (latestWarning != null && latestWarning.id in dismissedEewIds) {
                     // Leave this warning's display closed even if its next
                     // bulletin adds a mappable footprint or a matching report.
                     lastAutoOpenedLiveEventId = attentionId
@@ -1419,25 +1448,28 @@ private fun QuakeDeckApp(
                 }
             }
 
-            LiveUpdateKind.EEW_ENDED -> {
-                // The official report keeps its map focus as the warning ends.
-                // Treat later revisions of it as the same attention window.
-                val endedId = snapshot.eewUpdateEvent?.id
-                if (endedId != null && lastAutoOpenedLiveEventId == endedId) {
+            LiveUpdateKind.EEW_ENDED,
+            LiveUpdateKind.CANCELLED -> {
+                val endedId = terminalWarning?.id
+                if (endedId != null) {
+                    dismissedEewIds = dismissedEewIds - endedId
+                    if (selectedEventId == endedId) {
+                        selectedEventId = terminalReport?.id
+                    }
+                }
+                // Give a confirmed report continuity through its own warning's
+                // expiry. Another warning's terminal update leaves it alone.
+                if (endedId != null && lastAutoOpenedLiveEventId == endedId &&
+                    (terminalReport?.id == liveId || endedId == liveId)
+                ) {
                     lastAutoOpenedLiveEventId = liveId
                     lastAutoFitHadFootprint =
                         lastAutoFitHadFootprint || snapshot.event.points.isNotEmpty()
                 }
-            }
-
-            LiveUpdateKind.CANCELLED -> {
-                selectedEventId = null
-                if (mappedEventId == snapshot.event.id) mappedEventId = null
-                focusEventTargetId = null
-                focusNeedsRefocusRequested = false
-                focusedFootprintSignature = null
-                autoFocusExpiryEventId = null
-                autoFocusExpiryToken++
+                val cancelledId = endedId ?: liveId
+                if (snapshot.liveUpdateKind == LiveUpdateKind.CANCELLED &&
+                    mappedEventId == cancelledId
+                ) clearEventMapFocus()
             }
 
             LiveUpdateKind.TSUNAMI -> {
@@ -1465,8 +1497,8 @@ private fun QuakeDeckApp(
     // Keep an automatically focused live event on screen for 15 quiet seconds.
     // A newer EEW/earthquake packet changes the token and cancels/restarts this
     // coroutine. Tsunami-only updates deliberately do not extend the timer.
-    LaunchedEffect(autoFocusExpiryToken, snapshot.activeEew, historicalMode) {
-        if (historicalMode || snapshot.activeEew) return@LaunchedEffect
+    LaunchedEffect(autoFocusExpiryToken, selectedWarning?.id, historicalMode) {
+        if (historicalMode || selectedWarning != null) return@LaunchedEffect
         val targetId = autoFocusExpiryEventId ?: return@LaunchedEffect
         delay(15.seconds)
         if (autoFocusExpiryEventId == targetId && mappedEventId == targetId) {
@@ -1495,7 +1527,7 @@ private fun QuakeDeckApp(
         language = placeNameLanguage,
         sandbox = sandboxState,
         historicalMode = historicalMode,
-        liveWarningActive = historicalMode && (snapshot.activeEew || snapshot.activeTsunami),
+        liveWarningActive = historicalMode && (activeEewReports.isNotEmpty() || snapshot.activeTsunami),
         clockController = appClock,
         lastP2pUpdateMillis = lastP2pUpdateMillis,
         onReconnect = { provider.onAppForeground() },
@@ -1616,22 +1648,23 @@ private fun QuakeDeckApp(
             alertPanelFocusRequest++
         }
 
-        val mapAlerts: @Composable () -> Unit = {
+        val mapAlerts: @Composable (Dp) -> Unit = { maximumHeight ->
             if (!historicalMode) {
                 MapAlertIndicators(
-                    snapshot = snapshot,
+                    activeEews = activeEewReports,
+                    activeTsunami = snapshot.activeTsunami,
+                    maximumHeight = maximumHeight,
                     language = placeNameLanguage,
-                    onFocusEew = {
-                        if (activeEewReport != null) {
-                            dismissedEewId = null
-                            clearStationFocus(restoreCamera = false)
-                            clearObservedIntensityExpansion()
-                            administrativeFocusTarget = null
-                            selectedEventId = null
-                            requestEventMapFocus(snapshot.event, manual = true)
-                            notificationFocusAfterLayoutId = snapshot.event.id
-                            openAlertPanel()
-                        }
+                    onFocusEew = { warning ->
+                        val report = reportForWarning(warning)
+                        dismissedEewIds = dismissedEewIds - warning.id
+                        clearStationFocus(restoreCamera = false)
+                        clearObservedIntensityExpansion()
+                        administrativeFocusTarget = null
+                        selectedEventId = warning.id
+                        requestEventMapFocus(report, manual = true)
+                        notificationFocusAfterLayoutId = report.id
+                        openAlertPanel()
                     },
                     onFocusTsunami = {
                         snapshot.tsunami?.let { report ->
@@ -1706,7 +1739,7 @@ private fun QuakeDeckApp(
                         JapanMap(
                             event = mapEvent,
                             activeEewEvent = focusedEewForMap,
-                            liveWaveEvent = liveWaveEvent,
+                            liveWaveEvents = if (historicalMode) emptyList() else liveEews,
                             tsunami = snapshot.tsunami.takeUnless { historicalMode },
                             activeTsunami = snapshot.activeTsunami && !historicalMode,
                             fitJapanRequest = fitJapanRequest,
@@ -1796,6 +1829,7 @@ private fun QuakeDeckApp(
                             timelineNowMillis = eewTimelineNowMillis,
                             eventMapped = eventMapped,
                             focusNeedsRefocus = focusNeedsRefocus,
+                            activeWarning = selectedWarning,
                             activeEewDismissed = eewDetailsDismissed,
                             showTsunamiReport = !tsunamiDetailsDismissed,
                             alertPanelFocusRequest = alertPanelFocusRequest,
@@ -1827,7 +1861,7 @@ private fun QuakeDeckApp(
                         JapanMap(
                             event = mapEvent,
                             activeEewEvent = focusedEewForMap,
-                            liveWaveEvent = liveWaveEvent,
+                            liveWaveEvents = if (historicalMode) emptyList() else liveEews,
                             tsunami = snapshot.tsunami.takeUnless { historicalMode },
                             activeTsunami = snapshot.activeTsunami && !historicalMode,
                             fitJapanRequest = fitJapanRequest,
@@ -1947,6 +1981,7 @@ private fun QuakeDeckApp(
                         timelineNowMillis = eewTimelineNowMillis,
                         eventMapped = eventMapped,
                         focusNeedsRefocus = focusNeedsRefocus,
+                        activeWarning = selectedWarning,
                         activeEewDismissed = eewDetailsDismissed,
                         showTsunamiReport = !tsunamiDetailsDismissed,
                         alertPanelFocusRequest = alertPanelFocusRequest,
@@ -2292,6 +2327,20 @@ private fun QuakeDeckApp(
                     settingsOpenSandboxPage = false
                 }
             },
+            onBuiltInOverlappingEewReplayRequested = {
+                if (SandboxFeature.ENABLED) {
+                    val startDelay = BuiltInOverlappingEewReplay.DEFAULT_START_DELAY_MILLIS
+                    setSandboxMode(true)
+                    SandboxClockBridge.startBuiltInScenario(
+                        appClock,
+                        BuiltInSandboxScenario.OVERLAPPING_EEWS,
+                        startDelay
+                    )
+                    provider.startBuiltInOverlappingEewReplay(startDelay)
+                    settingsOpen = false
+                    settingsOpenSandboxPage = false
+                }
+            },
             testInjectionDelaySeconds = sandboxTestInjectionDelaySeconds,
             onTestInjectionDelaySecondsChanged = { value ->
                 sandboxTestInjectionDelaySeconds = value
@@ -2459,36 +2508,55 @@ private fun QuakeDeckApp(
 
 @Composable
 private fun MapAlertIndicators(
-    snapshot: AppSnapshot,
+    activeEews: List<EarthquakeEvent>,
+    activeTsunami: Boolean,
+    maximumHeight: Dp,
     language: PlaceNameLanguage,
-    onFocusEew: () -> Unit,
+    onFocusEew: (EarthquakeEvent) -> Unit,
     onFocusTsunami: () -> Unit
 ) {
-    if (snapshot.activeTsunami) {
-        MapAlertBadge(
-            label = uiText(R.string.tsunami_warning, language),
-            warning = true,
-            onClick = onFocusTsunami
-        )
-    }
-    if (snapshot.activeEew) {
-        val forecast = snapshot.activeEewEvent?.eewAlertLevel == EewAlertLevel.FORECAST
-        MapAlertBadge(
-            label = (if (snapshot.activeEewEvent?.isDrill == true) {
-                uiText(R.string.drill_label, language) + " · "
-            } else "") + uiText(
-                if (forecast) R.string.eew_forecast else R.string.eew_warning,
-                language
-            ),
-            warning = !forecast,
-            onClick = onFocusEew
-        )
+    if (activeEews.isEmpty() && !activeTsunami) return
+    val context = LocalContext.current
+    Column(
+        modifier = Modifier.heightIn(max = maximumHeight).verticalScroll(rememberScrollState()),
+        horizontalAlignment = Alignment.End,
+        verticalArrangement = Arrangement.spacedBy(5.dp)
+    ) {
+        if (activeTsunami) {
+            MapAlertBadge(
+                label = uiText(R.string.tsunami_warning, language),
+                warning = true,
+                onClick = onFocusTsunami
+            )
+        }
+        activeEews.forEach { warning ->
+            key(warning.id) {
+                val forecast = warning.eewAlertLevel == EewAlertLevel.FORECAST
+                val alertLabel = uiText(
+                    if (forecast) R.string.eew_forecast else R.string.eew_warning,
+                    language
+                )
+                val drillLabel = if (warning.isDrill) uiText(R.string.drill_label, language) + " · " else ""
+                val placeAndTime = if (activeEews.size > 1) {
+                    val place = PlaceNameTranslator.epicenter(context, warning.place, language)
+                    val time = warning.originTime.substringAfter(' ').removeSuffix(" JST")
+                    listOf(place, time).filter { it.isNotBlank() && it != "—" }.joinToString(" · ")
+                } else ""
+                MapAlertBadge(
+                    label = drillLabel + alertLabel,
+                    detail = placeAndTime,
+                    warning = !forecast,
+                    onClick = { onFocusEew(warning) }
+                )
+            }
+        }
     }
 }
 
 @Composable
 private fun MapAlertBadge(
     label: String,
+    detail: String = "",
     warning: Boolean,
     onClick: () -> Unit
 ) {
@@ -2516,13 +2584,18 @@ private fun MapAlertBadge(
             outline.copy(alpha = 0.8f)
         )
     ) {
-        Text(
-            label,
-            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-            color = foreground,
-            fontSize = 10.sp,
-            fontWeight = FontWeight.Black
-        )
+        Column(Modifier.widthIn(max = 220.dp).padding(horizontal = 8.dp, vertical = 4.dp)) {
+            Text(label, color = foreground, fontSize = 10.sp, fontWeight = FontWeight.Black)
+            if (detail.isNotEmpty()) {
+                Text(
+                    detail,
+                    color = foreground,
+                    fontSize = 9.sp,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+        }
     }
 }
 
@@ -4114,6 +4187,7 @@ private fun EventPanel(
     timelineNowMillis: Long,
     eventMapped: Boolean,
     focusNeedsRefocus: Boolean,
+    activeWarning: EarthquakeEvent?,
     activeEewDismissed: Boolean,
     showTsunamiReport: Boolean,
     alertPanelFocusRequest: Int,
@@ -4165,14 +4239,10 @@ private fun EventPanel(
     } else {
         selectedEvent.points
     }
-    val isCurrentActiveEew =
-        snapshot.activeEew &&
-            selectedEvent.id == snapshot.event.id &&
-            !selectedEvent.isCancelled
-    val showActiveEewDetails = isCurrentActiveEew && !activeEewDismissed
-    val showSelectedReport = !isEew || !isCurrentActiveEew || showActiveEewDetails
-    val activeEewForSelected = snapshot.activeEewEvent?.takeIf {
-        showActiveEewDetails && !it.isCancelled
+    val showActiveEewDetails = activeWarning != null && !activeEewDismissed
+    val showSelectedReport = !isEew || activeWarning == null || showActiveEewDetails
+    val activeEewForSelected = activeWarning?.takeIf {
+        showActiveEewDetails && (it.hasHypocenter || it.points.isNotEmpty())
     }
     val canFocusEvent = selectedEvent.hasJapanMapContent() ||
         activeEewForSelected?.hasJapanMapContent() == true
@@ -4210,7 +4280,7 @@ private fun EventPanel(
     val localForecastUnavailable =
         destinationForecastResult is LocalEewForecastResult.Unavailable
     val eewReportLabel = uiText(R.string.eew_report, placeNameLanguage)
-    val eewReportEvent = activeEewForSelected ?: selectedEvent.takeIf { isEew }
+    val eewReportEvent = activeWarning ?: selectedEvent.takeIf { isEew }
     val eewReportSummary = eewReportEvent?.reportSerial?.let { serial ->
         buildString {
             append(eewReportLabel)
@@ -7212,7 +7282,7 @@ private fun buildResizeMapRaster(
 private fun JapanMap(
     event: EarthquakeEvent,
     activeEewEvent: EarthquakeEvent?,
-    liveWaveEvent: EarthquakeEvent?,
+    liveWaveEvents: List<EarthquakeEvent>,
     tsunami: TsunamiReport?,
     activeTsunami: Boolean,
     fitJapanRequest: Int,
@@ -7238,7 +7308,7 @@ private fun JapanMap(
     onCameraSettled: (MainMapCameraState) -> Unit,
     onUserCameraChanged: () -> Unit,
     onFitJapan: () -> Unit,
-    mapAlerts: @Composable () -> Unit,
+    mapAlerts: @Composable (Dp) -> Unit,
     alertLocation: AlertLocation,
     language: PlaceNameLanguage
 ) {
@@ -7355,7 +7425,7 @@ private fun JapanMap(
                 horizontalAlignment = Alignment.End,
                 verticalArrangement = Arrangement.spacedBy(5.dp)
             ) {
-                mapAlerts()
+                mapAlerts(120.dp)
             }
         }
         return
@@ -7690,6 +7760,7 @@ private fun JapanMap(
     )
 
     val density = LocalDensity.current
+    var alertAndLegendBounds by remember { mutableStateOf<Rect?>(null) }
 
     BoxWithConstraints(
         Modifier
@@ -7780,7 +7851,6 @@ private fun JapanMap(
                 // turn a slightly imperfect tap into a map drag underneath it.
                 val controlPaddingPx = with(density) { 8.dp.toPx() }
                 val controlButtonSizePx = with(density) { 38.dp.toPx() }
-                val borderHelpButtonSizePx = with(density) { 30.dp.toPx() }
                 // Reserve the union of the normal vertical controls and the
                 // compact horizontal layout. This avoids a map drag stealing a
                 // slightly imperfect tap while the viewport is resizing.
@@ -7807,18 +7877,15 @@ private fun JapanMap(
                             down.position.x <= controlPaddingPx + verticalZoomWidthPx &&
                             down.position.y >= size.height - controlPaddingPx - verticalZoomHeightPx &&
                             down.position.y <= size.height - controlPaddingPx
-                    val startsOnBorderHelpButton =
-                        down.position.x >= size.width - controlPaddingPx - borderHelpButtonSizePx &&
-                            down.position.x <= size.width - controlPaddingPx &&
-                            down.position.y >= controlPaddingPx &&
-                            down.position.y <= controlPaddingPx + borderHelpButtonSizePx
+                    val startsOnAlertOrLegend =
+                        alertAndLegendBounds?.contains(down.position) == true
                     val startsOnZoomControls =
                         startsOnCompactZoomControls || startsOnVerticalZoomControls
 
                     if (
                         startsOnFitButton ||
                         startsOnZoomControls ||
-                        startsOnBorderHelpButton
+                        startsOnAlertOrLegend
                     ) {
                         settleRenderJob?.cancel()
                         settleRenderJob = null
@@ -9429,7 +9496,7 @@ private fun JapanMap(
                 }
             }
 
-            liveWaveEvent?.let { warning ->
+            liveWaveEvents.forEach { warning ->
                 EewWaveModel.wavefrontState(warning, timelineNowMillis)
                     .valueOrNull()
                     ?.let { waves ->
@@ -9460,7 +9527,7 @@ private fun JapanMap(
                         drawWavefront(waves.pWaveRadiusKm, Color(0xFF51C9FF))
                         drawWavefront(waves.sWaveRadiusKm, Color(0xFFFFA640))
 
-                        if (activeEewEvent != null) {
+                        if (activeEewEvent?.id == warning.id) {
                             val destination = committedGeo(
                                 alertLocation.latitude,
                                 alertLocation.longitude
@@ -9519,11 +9586,14 @@ private fun JapanMap(
         }
 
         Column(
-            Modifier.align(Alignment.TopEnd).padding(8.dp),
+            Modifier
+                .align(Alignment.TopEnd)
+                .padding(8.dp)
+                .onGloballyPositioned { alertAndLegendBounds = it.boundsInParent() },
             horizontalAlignment = Alignment.End,
             verticalArrangement = Arrangement.spacedBy(5.dp)
         ) {
-            mapAlerts()
+            mapAlerts(minOf(144f, viewportHeightDp * 0.45f).dp)
             if (activeVectorLayer != MapVectorLayer.JMA_PREFECTURES) {
                 Box(
                     Modifier

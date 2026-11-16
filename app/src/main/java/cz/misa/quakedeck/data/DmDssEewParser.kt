@@ -68,7 +68,8 @@ internal object DmDssEewParser {
         previous: EarthquakeEvent?,
         receivedAtMillis: Long = System.currentTimeMillis(),
         receiveSilentTestDrills: Boolean = false,
-        decoded: DmDssBodyDecodeResult? = null
+        decoded: DmDssBodyDecodeResult? = null,
+        previousForId: (String) -> EarthquakeEvent? = { null }
     ): DmDssEewParseResult {
         if (envelope.optString("type") != "data") return rejected(DmDssEewRejection.NOT_DATA)
         if (envelope.optString("classification") != "eew.forecast") {
@@ -111,7 +112,7 @@ internal object DmDssEewParser {
             type,
             previous,
             if (isDrill) "DRILL · DM-D.S.S EEW forecast" else "DM-D.S.S EEW forecast",
-            envelope.optString("id"), receivedAtMillis, isDrill
+            envelope.optString("id"), receivedAtMillis, isDrill, previousForId
         )
     }
 
@@ -141,7 +142,8 @@ internal object DmDssEewParser {
         statusPrefix: String,
         fallbackEventId: String,
         receivedAtMillis: Long,
-        isDrill: Boolean = false
+        isDrill: Boolean = false,
+        previousForId: (String) -> EarthquakeEvent? = { null }
     ): DmDssEewParseResult {
 
         // Exercise IDs must never share cancellation/revision state with real incidents.
@@ -156,7 +158,7 @@ internal object DmDssEewParser {
         val issuedAtMillis = parseMillis(issuedAtRaw)
         val cancelled = payload.optBoolean("isCanceled", false) || report.optString("infoType") == "取消"
         if (cancelled) {
-            val active = previous?.takeIf {
+            val active = (previousForId(eventId) ?: previous)?.takeIf {
                 it.isDrill == isDrill && (eventId.isBlank() || it.id == eventId)
             }
                 ?: return rejected(DmDssEewRejection.CANCELLATION_WITHOUT_EVENT)

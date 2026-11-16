@@ -150,18 +150,144 @@ will keep list and map labels consistent.
 ## Current unfinished point
 
 The complete audited 4,360-station English map and the first station-information
-card are active in the app. Placement research is underway in
+card are active in the app. Placement research is paused. Results are recorded in
 `outputs/station-name-audit/station_metadata_sources.json` only:
 
-- 3,710 stations have recorded exact published Japanese addresses. The
+- 3,734 stations have recorded exact published Japanese addresses. The
   Yamanashi source-recovery qualification below still requires follow-up;
   this count is not a fresh recertification of earlier sources.
-- 650 retain municipality-or-ward precision. Seven of those also have a
+- 626 retain municipality-or-ward precision. Six of those also have a
   source-supported facility identity but no verified published address. The
-  remaining 643 still need a facility or exact address. Shimotsuma Kinu
-  returned to the open queue, reducing the previous exact-address count by one.
+  remaining 620 still need a facility or exact address.
 
-### Latest placement research checkpoint — 8 November 2026
+### Latest placement research checkpoint — 14 November 2026
+
+- **Ōita Prefecture.** Table 3.3.4-1 of the FY2015 Beppu–Haneyama fault-zone
+  report gives installation sites and reporting labels. The JMA historical
+  catalogue and independently published facility addresses support 21 new
+  exact-address records. Examples include Nakatsu City Hall (`4420334`,
+  `大分県中津市豊田町14番地3`), Saganoseki Civic Center (`4420133`,
+  `大分県大分市大字佐賀関1407番地の27`), and Kitsuki City Hall (`4421032`,
+  `大分県杵築市大字杵築377番地1`). Tsukumi Miyamotochō (`4420732`) records the
+  operating City Hall in Miyamotochō. Recheck the meter after the new hall's
+  scheduled opening on 4 January 2027.
+  [Installation inventory](https://www.jishin.go.jp/main/chousakenkyuu/beppu_haneyama/h27/27Report_Chap3_3.pdf) · [JMA historical catalogue](https://www.data.jma.go.jp/eqev/data/bulletin/data/shindo/code_p.zip) · [Tsukumi construction updates](https://www.city.tsukumi.oita.jp/site/tyousyakennsetsu/)
+- **Source notes for 13 open Ōita stations.** The JSON records the historical
+  installation sites and where the address or reporting record changed. At
+  Yufuin Kawakami (`4421336`), JMA's reporting handover coincided with the
+  office's temporary move to Kawakami 3758-1 on 12 February 2019. Office
+  functions returned to the original site at 3738-1 in 2021. The current meter
+  site still needs confirmation.
+  [2019 city newsletter](https://www.city.yufu.oita.jp/wp-content/uploads/2019/02/vol161.pdf) · [2021 office relocation notice](https://www.city.yufu.oita.jp/newly/yufuintyousyaiten)
+
+This checkpoint adds 21 exact addresses and reduces the open queue from 641 to
+620. Six stations still have a documented facility without a verified address.
+
+### Previous placement research checkpoint — 14 November 2026
+
+- **Yashio Chuo `1123431`.** The University of Tokyo Earthquake Research
+  Institute's SK-net inventory names Yashio City Hall as the installation site
+  for `SIT.034`. Yashio City's newsletter announced the meter transfer, and
+  JMA's December 2023 notice lists the relocation from `1123430` to `1123431`,
+  effective 10 January 2024. JMA reported an observation under the Yashio Chuo
+  label on 28 January 2024. The city's access guide publishes the hall address
+  as `埼玉県八潮市中央一丁目2番地1`, now recorded in the JSON. The meter's position
+  within the grounds remains unverified.
+  [SK-net inventory](http://www.sknet.eri.u-tokyo.ac.jp/OBS/obs_saitama.html) · [City newsletter](https://www.city.yashio.lg.jp/shisei/koho_kocho/kohoyashio/r5/kohoyashio0512.files/yashio_12P1-P6.pdf) · [JMA relocation notice](https://xml.kishou.go.jp/20231201_jmaxml_info.pdf) · [City Hall access guide](https://www.city.yashio.lg.jp/kurashi/shisetsuguide/shisetsuannai/access.html)
+
+This checkpoint adds one exact address and reduces the open queue from 642 to
+641. The facility-only count remains six.
+
+### Previous placement research checkpoint — 14 November 2026
+
+- **Kobe Tarumi Oiden `2810831`.** Kobe Shimbun identified the prefectural meter
+  at Higashitarumi Elementary School as the sole station to record intensity 1
+  during the 3 May 2023 Osaka Bay earthquake. The Kobe Local Meteorological
+  Office's earthquake table names Oiden as the sole intensity-1 station for
+  that event. Kobe's facility directory gives the school address as
+  `兵庫県神戸市垂水区王居殿2丁目5番25号`. The exact address is recorded in the
+  JSON. The meter's position within the school grounds remains unverified.
+  [Kobe Shimbun](https://www.kobe-np.co.jp/news/sougou/202305/0016343297.shtml) · [Earthquake table](https://www.data.jma.go.jp/kobe-c/observation-results/kankoubutsu/jishin-pdf/2023_12.pdf) · [Kobe facility directory](https://www.city.kobe.lg.jp/documents/7632/20251024153713.pdf)
+- **Himeji Kōdera-chō Nakaya `2820136`, Minamiawaji Hirota `2822430`, and Awaji
+  Iwaya `2822634`.** The JSON records the March 2012 Nakaya relocation, the
+  2013 Hirota field inspection map near the Hatsuo River, and the Iwaya Office
+  move to the Iwaya Health Center shortly before the December 2013 station
+  handover. The host facilities for these three stations remain unverified.
+
+This checkpoint adds one exact address and reduces the open queue from 643 to
+642. The facility-only count remains six.
+
+### Previous placement research checkpoint — 14 November 2026
+
+- **Katō Tenjin `2822833`.** Katō City explicitly identifies the Katō Fire
+  Station Tojo Branch as the meter site. The city's 2025 disaster-plan appendix,
+  the fire authority's 2025 annual report and building records, and the
+  prefecture's FY2024 annual report agree on `兵庫県加東市天神123番地`. The
+  city's December 2021 general directory lists 129 for the same branch. The
+  confirmed host address moves one station from facility-only to exact address
+  and leaves the open queue at 643. The meter's position within the site remains
+  unverified. [City meter list](https://www.city.kato.lg.jp/kakukanogoannai/soumuzaiseibu/bosaika/bosai001/14915.html) · [City disaster-plan appendix](https://www.city.kato.lg.jp/material/files/group/16/shiryou6.pdf) · [Fire authority annual report](https://kitaharima119.net/home/content/files/nenpo/r07_nenpo.pdf)
+- **Ōyamazaki Enmyōji `2630331` and Kyōtamba Komo `2640733`.** The Ōyamazaki
+  hazard map from 2026 marks the town hall. JMA dates the same-name reporting
+  handover to 4 August 2025, and the replacement meter site remains open. The
+  Kyōtamba town hall plans mark a provisional meter position in the disaster
+  prevention plaza. Council minutes record the building inspection, and JMA
+  dates the same-name handover to 1 December 2021. A completed installation
+  record is still needed. [Ōyamazaki hazard map](https://www.town.oyamazaki.kyoto.jp/material/files/group/32/haza-domap32-33.pdf) · [Kyōtamba electrical drawing](https://www.town.kyotamba.kyoto.jp/material/files/group/3/zumen9.pdf) · [Kyōtamba council minutes](https://www.town.kyotamba.kyoto.jp/material/files/group/18/R030831kaigi.pdf) · [JMA historical catalogue](https://www.data.jma.go.jp/eqev/data/bulletin/data/shindo/code_p.zip)
+- **Itami Senzō `2820731` and Inagawa Yuda `2830130`.** Itami records place
+  the 1999 meter in the City Hall basement and specify reinstatement at the
+  same spot during the rebuild. The installation serving the reporting code
+  introduced on 25 January 2023 remains unverified. JMA locates Inagawa's
+  predecessor at the site now listed as Fire Headquarters, and the fire service
+  records a separate town-owned meter moving to the North Branch in 1996. The
+  placement serving the local-government code introduced on 15 October 1998
+  remains open. [Itami fire chronology](https://www.city.itami.lg.jp/material/files/group/79/R6hazimeni.pdf) · [Itami design](https://www.city.itami.lg.jp/material/files/group/119/shiryo6-8.pdf) · [JMA site list](https://www.data.jma.go.jp/eqev/data/kyoshin/jma-shindo.html) · [Inagawa fire chronology](https://www.town.inagawa.lg.jp/material/files/group/41/reiwa6nennban.pdf) · [JMA historical catalogue](https://www.data.jma.go.jp/eqev/data/bulletin/data/shindo/code_p.zip)
+
+### Earlier placement research checkpoint — 14 November 2026
+
+- Shimotsuma Kinu returned to the open queue, reducing the exact-address count
+  by one at this checkpoint.
+- **Date Ryōzen `0721337`.** Date City’s meter relocation drawings (PDF pages
+  38–40) identify Ryōzen Central Exchange Hall grounds as the receiving site.
+  The plans place the meter beside the new branch building. The city publishes
+  Nishiura 17 for the hall grounds and Nishiura 17-4 for the branch building.
+  The JSON now names the hall grounds and retains JMA’s published Nishiura 17
+  address. JMA’s historical catalogue records the reporting handover on
+  18 December 2025. [Relocation drawings](https://www.city.fukushima-date.lg.jp/uploaded/attachment/72771.pdf) · [JMA address table](https://xml.kishou.go.jp/20260212_jmaxml_info.pdf)
+- **Scheduled JMA code changes.** JMA’s 19 October notice lists a code-table
+  change at noon JST on 19 November 2026. Seven existing JSON rows now record
+  their successor codes: Tokyo Fuchū Kotobukichō `1320631` → Miyanishichō
+  `1320632`, Nanto Inami `1621034` → Kitagawa `1621038`, Karatsu Ōchi
+  `4120243` → `4120244`, Ureshino Shimojuku Otsu `4120933` → `4120934`,
+  Yoshinogari Mitagawa `4132732` → `4132734` and Higashisefuri `4132733` →
+  `4132735`, and Hyūga Yamage `4520631` → `4520632`. The recorded Fuchū and
+  Nanto addresses apply to the existing codes. The notice identifies the
+  successor codes and reporting localities. It gives no receiving addresses
+  for these seven moves. [JMA notice, PDF pages 1 and 3](https://xml.kishou.go.jp/20261019_jmaxml_info.pdf)
+- **Fukushima leads.** The 2011 field survey places the earlier Iwaki Taira
+  Umemoto `0720433` meter at City Hall. The latest same-name reporting handover
+  was 20 June 2017, and the site after that handover remains open. Ōkuma
+  Ōgawara `0754531` began reporting on 27 May 2019, 20 days after the new Town
+  Hall opened. Fukushima Gorōuchimachi `0720132` began reporting on 27 December
+  2010, around the time of the City Hall rebuild. Both municipal hall leads still
+  need meter installation evidence. The published Fukushima network renewal
+  notice covers 85 sites. The site schedule is still to be recovered.
+  [Iwaki field survey](https://www.nilim.go.jp/lab/bcg/siryou/tnn/tnn0674pdf/ks067408.pdf) · [JMA historical catalogue](https://www.data.jma.go.jp/eqev/data/bulletin/data/shindo/code_p.zip) · [Fukushima tender notice](https://www.pref.fukushima.lg.jp/uploaded/attachment/646499.pdf)
+- **Other leads saved in the JSON.** Dōshi Kamano-mae `1942232` is used to
+  trigger inspections at Dōshi Dam, whose operator confirms there is no meter
+  on the dam site. Fujikawaguchiko Katsuyama `1943034` was reporting by 2001,
+  and town records distinguish the former village hall from Katsuyama Fureai
+  Center. Kyōtamba Komo `2640733` has a new-town-hall drawing showing a planned
+  meter. Gojō Okaguchi `2920734` followed a station at the former City Hall,
+  and its reporting handover preceded the new hall opening by five days. All
+  four still need a record confirming the meter’s physical placement.
+- **Next sources.** Recover station-address tables for the JMA November
+  change, and check Nagasaki’s FY2026 inspection specifications, Kagoshima’s
+  maintenance site appendix, and Okinawa’s FY2026 procurement attachments for
+  station-by-station installation lists.
+  [Nagasaki procurement](https://www.pref.nagasaki.jp/nyusatsu-docs/50709.html) · [Kagoshima FY2024 specifications](https://www.kkj.go.jp/d/?A=a2Fnb3NoaW1hL2thZ29zaGltYV9wcmVmLzIwMjQvMjAyNDAzMDhfMDA2MjVfMDMucGRmCg%3D%3D&L=ja) · [Okinawa procurement](https://www.pref.okinawa.jp/shigoto/nyusatsukeiyaku/1015342/1025066/1037591/1041409.html)
+
+### Placement research checkpoint — 8 November 2026
 
 - **Shimotsuma Kinu `0821034`.** JMA's published address at Chiyokawa
   Community Center, Kinu 230, applies to predecessor `0821032`. JMA's
@@ -689,16 +815,17 @@ addresses. The inventory date remains provenance, not a fresh sensor inspection.
   describes steel-frame work, not a completed replacement office. No future
   building, sensor enclosure, floor or room is assigned; recheck continuity
   when the replacement office opens. The unrecovered mechanical drawing was not used.
-- `record_yashio_planned_meter_transfer_evidence.mjs` was applied once as
-  provenance only. `1123431` retains blank facility/address fields. The
+- `record_yashio_planned_meter_transfer_evidence.mjs` initially recorded the
+  planned transfer for `1123431`. The 14 November checkpoint above records the
+  confirmed facility and address. The
   [10 December 2023 newsletter](https://www.city.yashio.lg.jp/shisei/koho_kocho/kohoyashio/r5/kohoyashio0512.files/yashio_12P1-P6.pdf),
   complete printed/PDF page 2, was text-read and visually inspected: it plans
   meter-transfer work and an observation interruption from 27 December 2023
   to 10 January 2024. The [new-hall completion guide](https://www.city.yashio.lg.jp/shisei/assetmanagement/tyousyataishinka/shinchosya-kouji/shinchoshakansei.html)
   confirms building completion and office opening, not completed meter transfer.
   The [current hall guide](https://www.city.yashio.lg.jp/kurashi/shisetsuguide/shisetsuannai/shiyakusyo/index.html)
-  publishes 中央一丁目2番地1, but this is not by itself proof of the meter's
-  destination. Seek completed-transfer or explicit current meter-host evidence.
+  publishes 中央一丁目2番地1. The SK-net inventory and JMA records in the latest
+  checkpoint supply the installation evidence.
 
 ### Latest saved address and Miyazaki provenance
 
@@ -761,9 +888,9 @@ remain unchanged. The three historical-host qualifications add no placements.
 - Shiraoka `1124630`: the previously inspected 31 July 2026 meter-restoration
   notice does not name the host. The 2025 hall fire and subsequent temporary
   office arrangements do not establish the sensor's current site.
-- Yashio remains pending as qualified above. For Saitama Omiya Daimoncho (`1110331`), do not
-substitute the inventory's Omiya Elementary School in Miyacho or a proposed
-new-ward-hall destination without direct completed-placement evidence.
+- Saitama Omiya Daimoncho (`1110331`) still needs direct evidence of the meter's
+  installation site. The inventory names Omiya Elementary School in Miyacho,
+  and other records identify a proposed destination at the new ward hall.
 
 ### Preceding saved provenance — no placement promotions
 
@@ -1195,7 +1322,7 @@ The latest seven saved records, added after those four, are:
 | `2634431` | Ujitawara Town Hall | 京都府綴喜郡宇治田原町大字立川小字坂口18番地の1 |
 | `2610142` | Kyoto City Kita Fire Station | 京都府京都市北区大宮西脇台町17番地の2 |
 | `2822832` | Takino General Park Gymnasium (Skypia) | 兵庫県加東市河高4007番地 |
-| `2822833` | Kato Fire Station Tojo Branch | Withheld: conflicting official parcel numbers, 123 and 129 |
+| `2822833` | Kato Fire Station Tojo Branch | 兵庫県加東市天神123番地 (confirmed 14 November 2026) |
 | `2821633` | Takasago City Hall | 兵庫県高砂市荒井町千鳥1丁目1番1号 |
 
 Their evidence and qualifications are retained in the JSON:
@@ -1242,9 +1369,9 @@ Their evidence and qualifications are retained in the JSON:
   and its [15 June 2023 work-site notice](https://kitaharima119.net/home/gyousei/nyuusatu/230615-1.html)
   publish Tenjin 123, while the still-published municipal directory dated
   28 December 2021 gives Tenjin 129 for the same branch and phone number.
-  The facility identity is recorded, but `publishedAddressJa` remains null and
-  precision remains `municipality_or_ward`. The 2023 work concerns radio-base
-  relocation supervision, not meter relocation. No parcel was guessed.
+  The 14 November checkpoint records Tenjin 123 after checking the newer city
+  disaster-plan appendix and fire-authority building records. The 2023 work
+  concerns radio-base relocation supervision.
 - Takasago: the city's [6 January 2026 disaster-network message](https://bosai.net/announce/detail?info=149634)
   explicitly reports the City Hall meter's intensity-two observation that
   morning. The full original municipal message was retrieved and read; the city
@@ -2118,10 +2245,8 @@ Unfinished research to resume, not completed placements:
   historical observations; December supplies no additional host. The August
   report's Kamigori caption was already applied to `2848131`; do not reapply it
   or repeat these adjacent-report checks as unfinished leads.
-- Kato Tojo `2822833`: the host is completed above, but official Tenjin parcel
-  123/129 disagreement remains open. Seek authoritative clarification before
-  filling its address; this facility-only record is not one of the 762 stations
-  still lacking both a verified facility and an exact address.
+- Kato Tojo `2822833`: the 14 November checkpoint resolves the published host
+  address to Tenjin 123. The meter's position within the site remains unverified.
 - Completed Yoshioka follow-up: all four current appendix volumes were checked;
   the volume-1 agreement now supports the saved placement above. No separate
   equipment schedule was recovered. Do not repeat the former uninspected-draft
@@ -2840,8 +2965,7 @@ and the former Takanabe Town Hall parcel differs from its current office.
    saved and must not be treated as an outstanding address gap. First check
    the relevant JSON records before researching already-addressed stations.
    Inspect complete installation statements and independent current facility
-   addresses before saving. Alternatively, seek Yashio's completed meter-transfer
-   evidence, Shiraoka's current meter host or
+    addresses before saving. Alternatively, seek Shiraoka's current meter host or
    Omiya Daimoncho's actual placement. Tokigawa's direct main-building guide is
    recovered and its address saved. All listed Saitama and Tokyo placement
    scripts are already applied: do not rerun them. Continue the remaining public Tokyo inventory rows with
@@ -2934,7 +3058,8 @@ and the former Takanabe Town Hall parcel differs from its current office.
   placements and Nihonodori's facility-only record are preserved. The latest
   placement coverage is listed under Current unfinished point above.
   The formerly pending ten-station fire-host script is applied and included;
-  Arakawa's and Yashio's provenance-only scripts leave their placements blank.
+   Arakawa's provenance-only script leaves its placement blank. Yashio's
+   facility and address are recorded in the latest checkpoint above.
   Previously unsaved Saitama town/fire/branch leads are now saved as listed above;
   remaining relocation cases and latest search-only leads are excluded from totals.
   Completed searches, source-age qualifications and the
@@ -2943,5 +3068,5 @@ and the former Takanabe Town Hall parcel differs from its current office.
   index only;
   no workbook, runtime resource, release metadata, changelog, or unrelated file
   was changed.
-  The station JSON SHA-256 before and after this documentation update is
-  `672E468B100DE75DA4626C9205AADEBE2916C1E0F2804E788D36E4F382C44E90`.
+  The station JSON SHA-256 at the earlier 14 November documentation checkpoint was
+  `0F2B22FF7B1BBE7049F7460164C80E151568F3CE91DE8E7569F124DFD809F60A`.

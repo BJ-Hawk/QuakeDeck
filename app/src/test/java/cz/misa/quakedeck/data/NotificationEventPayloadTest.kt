@@ -3,6 +3,7 @@ package cz.misa.quakedeck.data
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertSame
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -43,6 +44,7 @@ class NotificationEventPayloadTest {
         assertTrue(restored.activeEew)
         assertEquals(event, restored.event)
         assertEquals(event, restored.activeEewEvent)
+        assertEquals(listOf(ActiveEewIncident(event, null)), restored.activeEewIncidents())
         assertEquals(LiveUpdateKind.NONE, restored.liveUpdateKind)
     }
 
@@ -150,6 +152,45 @@ class NotificationEventPayloadTest {
             ended,
             ended.withNotificationLaunch(payload = launch, nowEpochMillis = 5_000L)
         )
+    }
+
+    @Test
+    fun secondaryWarningLaunchKeepsTheLiveCollectionAndItsCurrentRevision() {
+        val retained = testEvent(kind = EarthquakeEventKind.EEW)
+        val currentSecondary = retained.copy(reportSerial = "4")
+        val primary = retained.copy(id = "newer-earthquake")
+        val active = listOf(ActiveEewIncident(primary, 9_000L), ActiveEewIncident(currentSecondary, 8_000L))
+        val live = waitingSnapshot().copy(event = primary, activeEews = active)
+        val payload = NotificationLaunchPayload(
+            kind = NotificationLaunchKind.EEW,
+            event = retained,
+            activeUntilMillis = 7_000L
+        )
+
+        assertSame(live, live.withNotificationLaunch(payload, nowEpochMillis = 5_000L))
+        assertEquals(active, live.activeEewIncidents())
+    }
+
+    @Test
+    fun explicitEndOnlyTerminatesTheNamedWarning() {
+        val ended = testEvent(kind = EarthquakeEventKind.EEW)
+        val primary = ended.copy(id = "newer-earthquake")
+        val state = waitingSnapshot().copy(
+            event = primary,
+            activeEews = listOf(ActiveEewIncident(primary, 9_000L)),
+            eewUpdateEvent = ended,
+            liveUpdateKind = LiveUpdateKind.EEW_ENDED
+        )
+        val endedLaunch = NotificationLaunchPayload(
+            kind = NotificationLaunchKind.EEW,
+            event = ended,
+            activeUntilMillis = 7_000L
+        )
+
+        assertTrue(state.hasEndedEew(ended.id))
+        assertFalse(state.hasEndedEew(primary.id))
+        assertFalse(state.copy(activeEews = emptyList()).hasEndedEew(primary.id))
+        assertSame(state, state.withNotificationLaunch(endedLaunch, nowEpochMillis = 5_000L))
     }
 
     private fun testEvent(kind: EarthquakeEventKind): EarthquakeEvent = EarthquakeEvent(

@@ -31089,9 +31089,12 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://www.data.jma.go.jp/eqev/data/intens-st/",
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.data.jma.go.jp/eqev/data/bulletin/data/shindo/code_p.zip",
+        "https://www.city.fukushima.fukushima.jp/material/files/group/2/fukushimashitiikibousaikeikakushiryouhen1pen2hen.pdf",
+        "https://www.city.fukushima.fukushima.jp/soshiki/7/1032/3/3/3/3561.html"
       ],
-      "note": "The official observation-point label identifies the locality 福島市五老内町; it does not publish a host facility or street address.",
+      "note": "The official observation-point label identifies the locality 福島市五老内町; it does not publish a host facility or street address. The city’s disaster-plan appendix and JMA’s historical catalogue place the start of the current Goroūchimachi reporting entry, domestic code 2500032, on 27 December 2010. The municipal archive dates the replacement of the second City Hall building to the same period. The city’s station list and the building history leave the current meter site open.",
       "placementLocalityJa": "福島市五老内町",
       "placementPrecision": "municipality_or_ward"
     },
@@ -32212,9 +32215,9 @@
       "municipalityCode": "0721300",
       "gsiLocalityJa": "霊山町掛田",
       "publishedAddressJa": "福島県伊達市霊山町掛田西裏17",
-      "facilityNameJa": "伊達市役所霊山総合支所",
-      "facilityNameEn": null,
-      "metadataStatus": "Official JMA current station-code notice and published address",
+      "facilityNameJa": "霊山中央交流館敷地",
+      "facilityNameEn": "Ryōzen Central Exchange Hall grounds",
+      "metadataStatus": "Official JMA station address and municipal meter relocation plan",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -32223,9 +32226,16 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
-        "https://www.jma.go.jp/bosai/oshirase/dokujioshirase_pdf/JPSP/20260217061734_0_Z__J_JPSP_20260217061600_MET_INF_Jdokujioshirase32_NJ000n00_image.pdf"
+        "https://www.jma.go.jp/bosai/oshirase/dokujioshirase_pdf/JPSP/20260217061734_0_Z__J_JPSP_20260217061600_MET_INF_Jdokujioshirase32_NJ000n00_image.pdf",
+        "https://xml.kishou.go.jp/20260212_jmaxml_info.pdf",
+        "https://www.data.jma.go.jp/eqev/data/bulletin/data/shindo/code_p.zip",
+        "https://www.city.fukushima-date.lg.jp/uploaded/attachment/72771.pdf",
+        "https://www.city.fukushima-date.lg.jp/uploaded/attachment/72770.pdf",
+        "https://www.city.fukushima-date.lg.jp/soshiki/32/877.html",
+        "https://www.city.fukushima-date.lg.jp/soshiki/32/81607.html",
+        "https://www.city.fukushima-date.lg.jp/uploaded/attachment/65041.pdf"
       ],
-      "note": "JMA’s March 2026 current station-code notice directly pairs this station name with the published host facility and Japanese address.",
+      "note": "The JMA parameter notice, PDF page 3, gives Nishiura 17 for the current station and labels it Ryozen General Branch. The city’s relocation documents for contract 2025000143, PDF pages 38–40, explicitly name Ryōzen Central Exchange Hall as the receiving site and show the meter’s outdoor foundation next to the new branch building. The city’s October 2025 procurement committee minutes confirm the work moves the measuring unit and recorder. The city publishes Nishiura 17 for the Exchange Hall grounds and Nishiura 17-4 for the adjacent branch building. Its English hazard map lists Ryōzen Central Exchange Hall. JMA pairs XML codes 0721333 and 0721337, and the historical catalogue dates the handover from domestic code 2504833 to 2504837 to noon on 18 December 2025, four days before the new branch opened. The municipal meter relocation plan and the JMA reporting change identify the site. The JMA station address is retained.",
       "placementPrecision": "exact_address"
     },
     {
@@ -33648,9 +33658,13 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://www.data.jma.go.jp/eqev/data/intens-st/",
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.nilim.go.jp/lab/bcg/siryou/tnn/tnn0674pdf/ks067408.pdf",
+        "https://www.jma.go.jp/jma/press/1106/23b/201106231400.pdf",
+        "https://www.data.jma.go.jp/eqev/data/bulletin/data/shindo/code_p.zip",
+        "https://www.city.iwaki.lg.jp/www/contents/1001000001643/index.html"
       ],
-      "note": "The official observation-point label identifies the locality いわき市平梅本; it does not publish a host facility or street address.",
+      "note": "The official observation-point label identifies the locality いわき市平梅本; it does not publish a host facility or street address. The national 2011 field study identifies the prefectural meter on the south side of Iwaki City Hall, and JMA records ground subsidence and a tilted meter base after the earthquake. The city publishes the hall address as Taira Aza Umemoto 21. JMA’s historical catalogue dates the last same-name reporting handover, from domestic code 2510032 to 2510033, to noon on 20 June 2017. Evidence that the current meter remains on the City Hall grounds is still needed.",
       "placementLocalityJa": "いわき市平梅本",
       "placementPrecision": "municipality_or_ward"
     },
@@ -34316,9 +34330,12 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://www.data.jma.go.jp/eqev/data/intens-st/",
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.data.jma.go.jp/eqev/data/bulletin/data/shindo/code_p.zip",
+        "https://www.town.okuma.fukushima.jp/soshiki/somu/11165.html",
+        "https://www.town.okuma.fukushima.jp/site/fukkou/6807.html"
       ],
-      "note": "The official observation-point label identifies the locality 大熊町大川原; it does not publish a host facility or street address.",
+      "note": "The official observation-point label identifies the locality 大熊町大川原; it does not publish a host facility or street address. JMA’s historical catalogue dates the start of domestic code 2510731 to noon on 27 May 2019. The town opened the new Okuma Town Hall in Ogawara on 7 May 2019, at 福島県双葉郡大熊町大字大川原字南平1717. The town’s public opening and facility records identify a candidate site. The meter installation remains open.",
       "placementLocalityJa": "大熊町大川原",
       "placementPrecision": "municipality_or_ward"
     },
@@ -48678,9 +48695,13 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://www.data.jma.go.jp/eqev/data/intens-st/",
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://xml.kishou.go.jp/20191015_jmaxml_info.pdf",
+        "https://www.data.jma.go.jp/eqev/data/bulletin/data/shindo/code_p.zip",
+        "https://www.nikoukei.co.jp/documents/outlook/11/2018/2018.04.02%E3%80%80%E3%81%95%E3%81%84%E3%81%9F%E3%81%BE%E5%B8%82.pdf?1636966327=",
+        "https://www.city.saitama.lg.jp/006/003/003/010/011/p064701_d/fil/gidai1setumei.pdf"
       ],
-      "note": "The official observation-point label identifies the locality さいたま大宮区大門; it does not publish a host facility or street address.",
+      "note": "The official observation-point label identifies the locality さいたま大宮区大門; it does not publish a host facility or street address. JMA’s October 2019 XML notice records the same-name relocation from 1110330 to 1110331. The historical catalogue dates the handover between domestic codes 3314730 and 3314731 to noon on 3 September 2019. Saitama’s FY2018 procurement forecast (disaster-management row 7) specifies moving the Ōmiya Ward Office intensity-meter equipment in the offices and on the grounds to the new ward hall. The municipality records that the new hall opened on 7 May 2019 at Kishikichō 1-124-1, a different locality from the retained Daimon reporting label. A completed installation record connecting the new hall meter to this reporting point is still needed.",
       "placementLocalityJa": "さいたま大宮区大門",
       "placementPrecision": "municipality_or_ward"
     },
@@ -50228,10 +50249,10 @@
       "areaNameJa": "埼玉県南部",
       "municipalityCode": "1123400",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
-      "facilityNameEn": null,
-      "metadataStatus": "Official observation-locality label",
+      "publishedAddressJa": "埼玉県八潮市中央一丁目2番地1",
+      "facilityNameJa": "八潮市役所",
+      "facilityNameEn": "Yashio City Hall",
+      "metadataStatus": "Municipal relocation notice, JMA station-code and observation records, and official facility address",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -50244,11 +50265,15 @@
         "http://www.sknet.eri.u-tokyo.ac.jp/OBS/obs_saitama.html",
         "https://www.city.yashio.lg.jp/shisei/koho_kocho/kohoyashio/r5/kohoyashio0512.files/yashio_12P1-P6.pdf",
         "https://www.city.yashio.lg.jp/shisei/assetmanagement/tyousyataishinka/shinchosya-kouji/shinchoshakansei.html",
-        "https://www.city.yashio.lg.jp/kurashi/shisetsuguide/shisetsuannai/shiyakusyo/index.html"
+        "https://www.city.yashio.lg.jp/kurashi/shisetsuguide/shisetsuannai/shiyakusyo/index.html",
+        "https://xml.kishou.go.jp/20231201_jmaxml_info.pdf",
+        "https://www.jma-net.go.jp/kumagaya/shosai/shiryo/kishoujishin/202401_eq.pdf",
+        "https://www.data.jma.go.jp/eqev/data/gaikyo/weekly/zenkoku/zenkoku20261106_45.pdf",
+        "https://www.city.yashio.lg.jp/kurashi/shisetsuguide/shisetsuannai/access.html"
       ],
-      "note": "The official observation-point label identifies the locality 八潮市中央; it does not publish a host facility or street address. Yashio new-hall meter-transfer evidence checked on 17 October 2026: the public University of Tokyo Earthquake Research Institute SK-net Saitama inventory, heading last updated 16 May 2026, explicitly names 八潮市役所 as the installation facility for SIT.034; its complete selected row and column headings were read. Yashio City newsletter No.877 dated 10 December 2023, complete printed/PDF page 2, was text-read, rendered and visually inspected. Its 防災設備の移設 notice explicitly describes disaster-equipment relocation to the new hall and a planned interruption of JMA-published local intensity observations for meter-transfer work from 27 December 2023 at 09:00 to 10 January 2024 at noon. The notice expressly labels that interval planned; it does not certify completed meter transfer or its actual destination parcel/position. The official new-hall completion guide, updated 20 August 2024, separately records building completion on 31 October 2023 and office opening on 4 January 2024, neither of which is an instrument-transfer completion date. The current official City Hall guide independently publishes 埼玉県八潮市中央一丁目2番地1, but that general facility address is not by itself proof that the reporting instrument moved there. The inventory page's 2026 date is not treated as an individual post-transfer physical inspection or a statement distinguishing the former instrument position from the new one. Facility/address fields remain blank pending a completed-transfer record or explicit current meter-host/site statement. No coordinates, proximity, proposed floor-plan position, physical visit or source-printed seven-digit JMA-code crosswalk is used. Approved names, coordinates and earlier provenance remain unchanged.",
+      "note": "The University of Tokyo Earthquake Research Institute SK-net Saitama inventory names Yashio City Hall as the installation facility for SIT.034; its page heading was dated 16 May 2026. Yashio City’s December 2023 newsletter (printed page 2) announces the move of disaster equipment to the new hall and a pause in JMA-published local intensity data from 27 December at 09:00 to 10 January 2024 at noon for the meter transfer. JMA’s December 2023 XML notice lists the relocation of Yashio Chuo from 1123430 to 1123431, with the code-table change taking effect at the same 10 January noon deadline. The Kumagaya Local Meteorological Office reports intensity 3 at Yashio Chuo on 28 January 2024, and JMA still lists the station in its November 2026 weekly observations. Together these sources support the new City Hall as the host for the post-move reporting station. The city records building completion on 31 October 2023 and opening on 4 January 2024. The city’s facility access directory gives the published site address. The precise position within the grounds and the physical installation date remain unverified.",
       "placementLocalityJa": "八潮市中央",
-      "placementPrecision": "municipality_or_ward"
+      "placementPrecision": "exact_address"
     },
     {
       "code": "1123530",
@@ -50725,9 +50750,12 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://www.data.jma.go.jp/eqev/data/intens-st/",
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.city.shiraoka.lg.jp/soshiki/soumubu/anshinanzenka/10/4/9896.html",
+        "https://www.city.shiraoka.lg.jp/material/files/group/28/R803-giangaiyou.pdf",
+        "https://www.data.jma.go.jp/eqev/data/gaikyo/weekly/zenkoku/zenkoku20261106_45.pdf"
       ],
-      "note": "The official observation-point label identifies the locality 白岡市千駄野; it does not publish a host facility or street address.",
+      "note": "The official observation-point label identifies the locality 白岡市千駄野; it does not publish a host facility or street address. Shiraoka City says the 6 May 2025 city hall fire interrupted its prefectural seismic-intensity network and that meter restoration was completed on 31 July 2026. The city’s March 2026 council budget summary provides for relocating the meter following the fire. JMA’s 6 November 2026 weekly report again lists Shiraoka Sendano. The restoration notice gives the city’s contact address but does not specify the meter’s receiving facility.",
       "placementLocalityJa": "白岡市千駄野",
       "placementPrecision": "municipality_or_ward"
     },
@@ -59701,9 +59729,10 @@
         "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
         "http://www.sknet.eri.u-tokyo.ac.jp/OBS/obs_tocho.html",
         "https://www.city.fuchu.tokyo.jp/cp_fuchu/shisetu/chosha/thuobosaisenta.html",
-        "https://www.city.fuchu.tokyo.jp/shisetu/chosha/index.html"
+        "https://www.city.fuchu.tokyo.jp/shisetu/chosha/index.html",
+        "https://xml.kishou.go.jp/20261019_jmaxml_info.pdf"
       ],
-      "note": "The official observation-point label identifies the locality 東京府中市寿町; it does not publish a host facility or street address. Placement evidence checked on 17 October 2026: the University of Tokyo Earthquake Research Institute public SK-net Tokyo metropolitan observation inventory explicitly names 府中市中央防災センター in the installation-facility column for TKY.2060. Its heading states last updated 2 January 2021; the link to old observation information is a separate page, not the selected inventory. The complete selected row and column headings were read without logging in or obtaining restricted waveform data. The official Central Disaster Prevention Center guide independently publishes Kotobukicho 1-5 and describes co-location with Fuchu Fire Station. The current municipal office-directory table independently repeats that center address. The host is the explicitly inventoried municipal center, not an inferred fire-station sensor and not the main City Hall in Miyanishicho. The published host-site address is recorded as 東京都府中市寿町1丁目5番地. The instrument host comes from the installation inventory, not the facility address alone, generic municipal policy, rounded coordinates or proximity. Matching this reporting record uses the explicit host identity and independently published locality, not a claimed source-printed seven-digit JMA-code crosswalk. The dated inventory is retained as a source-age qualification, not a fresh 2026 instrument inspection or full operational-continuity recertification. No exact sensor position, room, floor, installation date or physical visit is asserted. Facility English is descriptive, not claimed as an official English title; approved Japanese and English station names, coordinates and existing provenance remain unchanged.",
+      "note": "The official observation-point label identifies the locality 東京府中市寿町; it does not publish a host facility or street address. Placement evidence checked on 17 October 2026: the University of Tokyo Earthquake Research Institute public SK-net Tokyo metropolitan observation inventory explicitly names 府中市中央防災センター in the installation-facility column for TKY.2060. Its heading states last updated 2 January 2021; the link to old observation information is a separate page, not the selected inventory. The complete selected row and column headings were read without logging in or obtaining restricted waveform data. The official Central Disaster Prevention Center guide independently publishes Kotobukicho 1-5 and describes co-location with Fuchu Fire Station. The current municipal office-directory table independently repeats that center address. The host is the explicitly inventoried municipal center, not an inferred fire-station sensor and not the main City Hall in Miyanishicho. The published host-site address is recorded as 東京都府中市寿町1丁目5番地. The instrument host comes from the installation inventory, not the facility address alone, generic municipal policy, rounded coordinates or proximity. Matching this reporting record uses the explicit host identity and independently published locality, not a claimed source-printed seven-digit JMA-code crosswalk. The dated inventory is retained as a source-age qualification, not a fresh 2026 instrument inspection or full operational-continuity recertification. No exact sensor position, room, floor, installation date or physical visit is asserted. Facility English is descriptive, not claimed as an official English title; approved Japanese and English station names, coordinates and existing provenance remain unchanged. JMA’s 19 October 2026 notice, PDF page 3, lists the move from Tokyo Fuchū Kotobukichō 1320631 to Miyanishichō 1320632, with the code table scheduled to change at noon on 19 November 2026. This row records the Kotobukichō station. The notice gives the successor’s locality.",
       "placementLocalityJa": "東京都府中市寿町1丁目5番地",
       "placementPrecision": "exact_address"
     },
@@ -73457,9 +73486,10 @@
       "sourceUrls": [
         "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
         "https://www.pref.toyama.jp/documents/25269/02.pdf",
-        "https://www.city.nanto.toyama.jp/johoosagasu/kakuka-shisetsuichiran/1/4657.html"
+        "https://www.city.nanto.toyama.jp/johoosagasu/kakuka-shisetsuichiran/1/4657.html",
+        "https://xml.kishou.go.jp/20261019_jmaxml_info.pdf"
       ],
-      "note": "富山県 Prefecture's official seismic-network table identifies 井波庁舎 as the host site; the municipality publishes the facility address.",
+      "note": "富山県 Prefecture's official seismic-network table identifies 井波庁舎 as the host site; the municipality publishes the facility address. JMA’s 19 October 2026 notice, PDF page 3, lists the move from Nanto Inami 1621034 to Kitagawa 1621038, with the code table scheduled to change at noon on 19 November 2026. This row records the Inami station. The notice gives the successor’s locality.",
       "placementLocalityJa": "南砺市",
       "placementPrecision": "exact_address"
     },
@@ -80409,9 +80439,11 @@
       "sourceUrls": [
         "https://www.data.jma.go.jp/eqev/data/intens-st/",
         "https://www.jma.go.jp/jma/kishou/books/saigaiji/saigaiji_202101/denbun/202101/17/VP20210117013000_3.html",
-        "https://xml.kishou.go.jp/20210217_jmaxml_info_1.pdf"
+        "https://xml.kishou.go.jp/20210217_jmaxml_info_1.pdf",
+        "https://www.data.jma.go.jp/eqev/data/bulletin/data/shindo/code_p.zip",
+        "https://www.kanagawa-dam.jp/qinfo/index.html"
       ],
-      "note": "The official observation-point label identifies the locality 道志村釜之前; it does not publish a host facility or street address. JMA notice dated 17 February 2021, 20210217_jmaxml_info_1.pdf, cover and complete PDF page 3, explicitly pairs old 1942231 道志村役場 with new 1942232 道志村釜之前 under section 2 移設観測点. The cover says the code-table change takes effect at 12:00 on 17 March 2021; this is a parameter effective time, not an independently proven physical transfer date. The complete relevant table page and cover were extracted and read from the official PDF and rendered for visual review. The table supplies codes and names but no destination facility or parcel address. A search-index preview of the village fiscal-2012 disaster plan mentions a meter at Village Hall; direct retrieval timed out and the full older plan was not inspected. That earlier hall statement predates this documented relocation and is not carried forward as the current host. Obtain a current installation inventory or explicit destination/continuity evidence before assigning any facility or address. This provenance-only update leaves the existing locality precision and approved station name unchanged.",
+      "note": "The official observation-point label identifies the locality 道志村釜之前; it does not publish a host facility or street address. JMA notice dated 17 February 2021, 20210217_jmaxml_info_1.pdf, cover and complete PDF page 3, explicitly pairs old 1942231 道志村役場 with new 1942232 道志村釜之前 under section 2 移設観測点. The cover says the code-table change takes effect at 12:00 on 17 March 2021; this is a parameter effective time, not an independently proven physical transfer date. The complete relevant table page and cover were extracted and read from the official PDF and rendered for visual review. The table supplies codes and names but no destination facility or parcel address. A search-index preview of the village fiscal-2012 disaster plan mentions a meter at Village Hall; direct retrieval timed out and the full older plan was not inspected. That earlier hall statement predates this documented relocation and is not carried forward as the current host. Obtain a current installation inventory or explicit destination/continuity evidence before assigning any facility or address. This provenance-only update leaves the existing locality precision and approved station name unchanged. JMA’s historical catalogue dates the reporting handover from domestic code 4120430 to 4120431 to noon on 18 December 2020. The Kanagawa Prefectural Enterprise Bureau lists this station among the nearby reporting points that trigger inspections at Dōshi Dam and explicitly states that the dam has no installed seismometer. The receiving facility in Kamano-mae remains open.",
       "placementLocalityJa": "道志村釜之前",
       "placementPrecision": "municipality_or_ward"
     },
@@ -80708,9 +80740,13 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://www.data.jma.go.jp/eqev/data/intens-st/",
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.data.jma.go.jp/eqev/data/bulletin/data/shindo/code_p.zip",
+        "https://www.data.jma.go.jp/eqev/data/kyoshin/jishin/110315_sizuokaken-tobu/index2.html",
+        "https://www.town.fujikawaguchiko.lg.jp/upload/file/soumu/R4kanzai/kobetusisetukeikaku.pdf",
+        "https://www.town.fujikawaguchiko.lg.jp/kouhou/pdf/202308.pdf"
       ],
-      "note": "The official observation-point label identifies the locality 富士河口湖町勝山; it does not publish a host facility or street address.",
+      "note": "The official observation-point label identifies the locality 富士河口湖町勝山; it does not publish a host facility or street address. JMA’s historical catalogue places the start of domestic code 4120930 at noon on 10 May 2001. Its 2011 waveform table identifies this reporting point in Katsuyama. The town’s facility plan and August 2023 bulletin distinguish the former Katsuyama Village Hall from Katsuyama Fureai Center. The old hall and the community center are separate facilities, and the public records reviewed leave the meter host open.",
       "placementLocalityJa": "富士河口湖町勝山",
       "placementPrecision": "municipality_or_ward"
     },
@@ -110212,9 +110248,11 @@
         "https://www.data.jma.go.jp/eqev/data/intens-st/",
         "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
         "https://xml.kishou.go.jp/20250624_jmaxml_info.pdf",
-        "https://www.data.jma.go.jp/eqev/data/bulletin/data/shindo/code_p.zip"
+        "https://www.data.jma.go.jp/eqev/data/bulletin/data/shindo/code_p.zip",
+        "https://www.town.oyamazaki.kyoto.jp/material/files/group/32/oyamazaki_p24_25web.pdf",
+        "https://www.town.oyamazaki.kyoto.jp/material/files/group/32/haza-domap32-33.pdf"
       ],
-      "note": "The official observation-point label identifies the locality 大山崎町円明寺; it does not publish a host facility or street address. JMA’s June 2025 XML notice pairs 2630330 with replacement 2630331 under the same Enmyōji label. The historical bulletin dates the reporting change to noon on 4 August 2025. The replacement facility and street address are still unverified.",
+      "note": "The official observation-point label identifies the locality 大山崎町円明寺; it does not publish a host facility or street address. JMA’s June 2025 XML notice pairs 2630330 with replacement 2630331 under the same Enmyōji label. The historical bulletin dates the reporting change to noon on 4 August 2025. The replacement facility and street address are still unverified. The indexed text of the 2019 municipal hazard-map spread includes a seismic-intensity-meter legend, but the original 2019 spread was unavailable for visual inspection and predates the reporting handover. The complete 2026 replacement spread (pages 32–33) was visually inspected. Its red double-circle symbol identifies the town hall, and its legend has no meter symbol. The 2026 map does not locate the replacement instrument.",
       "placementLocalityJa": "大山崎町円明寺",
       "placementPrecision": "municipality_or_ward"
     },
@@ -110682,9 +110720,16 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://www.data.jma.go.jp/eqev/data/intens-st/",
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.town.kyotamba.kyoto.jp/material/files/group/3/zumen9.pdf",
+        "https://www.town.kyotamba.kyoto.jp/kakukakarasagasu/somuka/gyomuannai/20/821.html",
+        "https://www.town.kyotamba.kyoto.jp/material/files/group/2/9-191_55909124.pdf",
+        "https://yuryo-mokuzou.mlit.go.jp/04/case/download/jirei76.pdf",
+        "https://xml.kishou.go.jp/20210928_jmaxml_info.pdf",
+        "https://www.data.jma.go.jp/eqev/data/bulletin/data/shindo/code_p.zip",
+        "https://www.town.kyotamba.kyoto.jp/material/files/group/18/R030831kaigi.pdf"
       ],
-      "note": "The official observation-point label identifies the locality 京丹波町蒲生; it does not publish a host facility or street address.",
+      "note": "The official observation-point label identifies the locality 京丹波町蒲生. Visual inspection of the town’s original new-hall electrical drawing KT-E 309 (PDF page 23, December 2019) shows a proposed outdoor intensity-meter position in the disaster-prevention plaza alongside the hall and two underground conduit entries from the building to the meter. The map labels the meter position as provisional (想定). MLIT records the building as completed. At the 31 August 2021 council meeting (PDF page 9), the town reported that the new hall had passed its completion inspection on 24 August, with exterior work and interior furnishing still pending. Its directory publishes the main hall address as 京都府船井郡京丹波町蒲生蒲生野487番地1. The town scheduled opening on 1 November 2021. JMA’s relocation notice pairs Komo 2640730 with Komo 2640733, and the historical catalogue dates the same-name reporting handover to noon on 1 December 2021. A completed instrument installation or a current inventory is still needed to confirm that 2640733 uses the proposed site.",
       "placementLocalityJa": "京丹波町蒲生",
       "placementPrecision": "municipality_or_ward"
     },
@@ -114769,9 +114814,12 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://www.data.jma.go.jp/eqev/data/intens-st/",
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://xml.kishou.go.jp/20131206_jmaxml_info.pdf",
+        "https://www.data.jma.go.jp/eqev/data/bulletin/data/shindo/code_p.zip",
+        "https://www.city.toyooka.lg.jp/_res/projects/default_project/_page_/001/018/913/1_2024.pdf"
       ],
-      "note": "The official observation-point label identifies the locality 豊岡市中央町; it does not publish a host facility or street address.",
+      "note": "The official observation-point label identifies the locality 豊岡市中央町; it does not publish a host facility or street address. JMA’s December 2013 notice identifies 2820938 as a new observation point. The historical catalogue closes the older Chūōchō record 5300030 on 6 January 2011 and opens 5300038 at noon on 7 January 2014. The city facility sheet dates the current main hall at Chūōchō 2-4 to 25 July 2013. The hall remains a candidate pending a station-specific installation record.",
       "placementLocalityJa": "豊岡市中央町",
       "placementPrecision": "municipality_or_ward"
     },
@@ -114936,9 +114984,12 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://www.data.jma.go.jp/eqev/data/intens-st/",
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://xml.kishou.go.jp/20210217_jmaxml_info_1.pdf",
+        "https://www.data.jma.go.jp/eqev/data/bulletin/data/shindo/code_p.zip",
+        "https://www.city.yabu.hyogo.jp/soshiki/shiminseikatsu/sekinomiyachiisanakyotenseibi/13132.html"
       ],
-      "note": "The official observation-point label identifies the locality 養父市関宮; it does not publish a host facility or street address.",
+      "note": "The official observation-point label identifies the locality 養父市関宮; it does not publish a host facility or street address. JMA’s February 2021 notice records the same-name relocation from 2822232 to 2822233. The historical catalogue puts the change from domestic code 5301932 to 5301933 at noon on 26 November 2020. The city records demolition of Aid Hall during 2020; the record supplies redevelopment chronology without identifying the relocated instrument. The receiving site remains open.",
       "placementLocalityJa": "養父市関宮",
       "placementPrecision": "municipality_or_ward"
     },
@@ -115679,10 +115730,10 @@
       "areaNameJa": "兵庫県南東部",
       "municipalityCode": "2810800",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
-      "facilityNameEn": null,
-      "metadataStatus": "Official observation-locality label",
+      "publishedAddressJa": "兵庫県神戸市垂水区王居殿2丁目5番25号",
+      "facilityNameJa": "神戸市立東垂水小学校",
+      "facilityNameEn": "Higashitarumi Elementary School",
+      "metadataStatus": "Official earthquake record corroborating a reported prefectural meter site and official municipal facility address",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -115691,11 +115742,17 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://www.data.jma.go.jp/eqev/data/intens-st/",
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.kobe-np.co.jp/news/sougou/202305/0016343297.shtml",
+        "https://www.data.jma.go.jp/kobe-c/observation-results/kankoubutsu/jishin-pdf/2023_12.pdf",
+        "https://www.data.jma.go.jp/eqev/data/bulletin/data/shindo/code_p.zip",
+        "https://web.pref.hyogo.lg.jp/kk37/documents/yobou4-1.pdf",
+        "https://www.city.kobe.lg.jp/documents/7632/20251024153713.pdf",
+        "https://www1.g-reiki.net/city.kobe/reiki_honbun/k302RG00000898.html?id=j3"
       ],
-      "note": "The official observation-point label identifies the locality 神戸垂水区王居殿; it does not publish a host facility or street address.",
+      "note": "Kobe Shimbun’s first-hand reporting with Hyōgo Prefecture and the Kobe Local Meteorological Office identifies the prefectural intensity meter at Higashitarumi Elementary School as the only intensity meter to record the 3 May 2023 Osaka Bay event at intensity 1. The Kobe Local Meteorological Office’s official year-end earthquake table lists the 21:58 event as entry 2 and identifies the sole intensity-1 observation as 神戸垂水区王居殿. That match links the named facility to this reporting point. JMA’s historical catalogue records the change from the predecessor Tarumi Hyūga (5310530) to Tarumi Oiden (5310531) at noon on 29 January 2021, with no end date for Oiden. Hyōgo’s February 2026 inventory still lists Oiden. Kobe’s facility directory gives 王居殿2-5-25 for the school, consistent with the municipal school ordinance. The exact meter position within the school grounds is unverified.",
       "placementLocalityJa": "神戸垂水区王居殿",
-      "placementPrecision": "municipality_or_ward"
+      "placementPrecision": "exact_address"
     },
     {
       "code": "2810930",
@@ -116192,9 +116249,15 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://www.data.jma.go.jp/eqev/data/intens-st/",
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.city.itami.lg.jp/material/files/group/79/R6hazimeni.pdf",
+        "https://www.city.itami.lg.jp/material/files/group/119/shiryo6-8.pdf",
+        "https://www.city.itami.lg.jp/material/files/group/119/nyuusatusetumeisyonokaitouhosoku.pdf",
+        "https://www.city.itami.lg.jp/material/files/group/12/R6_kessan_3.pdf",
+        "https://www.city.itami.lg.jp/shiseijoho/shiyakusho/1550109791255.html",
+        "https://www.data.jma.go.jp/eqev/data/bulletin/data/shindo/code_p.zip"
       ],
-      "note": "The official observation-point label identifies the locality 伊丹市千僧; it does not publish a host facility or street address.",
+      "note": "The official observation-point label identifies the locality 伊丹市千僧; it does not publish a host facility or street address. The Itami Fire Bureau chronology records a measuring intensity meter being installed in the City Hall basement on 1 March 1999 and the separate Fire Bureau meter being removed. The new-hall basic design (PDF page 21) specifies removing the existing basement instrument during renovation and reinstalling it at the same spot with testing. The supplemental procurement answer (PDF page 3) identifies the instrument near the B1 entrance as an N-Seis Model 2611. The city publishes Senzō 1-1 for the hall and confirms that the replacement building opened in November 2022, with work on the old site continuing afterward. JMA’s historical catalogue dates the change to the current Senzō reporting record from domestic code 5311330 to 5311331 at noon on 25 January 2023. These records identify the older installation and the intended reinstatement. A record of the actual installation serving 5311331 is still needed.",
       "placementLocalityJa": "伊丹市千僧",
       "placementPrecision": "municipality_or_ward"
     },
@@ -117359,10 +117422,10 @@
       "areaNameJa": "兵庫県南東部",
       "municipalityCode": "2822800",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
+      "publishedAddressJa": "兵庫県加東市天神123番地",
       "facilityNameJa": "北はりま消防組合加東消防署東条出張所",
       "facilityNameEn": "Kato Fire Station Tojo Branch",
-      "metadataStatus": "Direct municipal instrument-host identification; conflicting official facility addresses withheld",
+      "metadataStatus": "Official municipal instrument host and corroborated fire-station address",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -117375,11 +117438,15 @@
         "https://www.city.kato.lg.jp/kakukanogoannai/soumuzaiseibu/bosaika/bosai001/14915.html",
         "https://kitaharima119.net/home/sisetu/sisetu.html",
         "https://kitaharima119.net/home/gyousei/nyuusatu/230615-1.html",
-        "https://www.city.kato.lg.jp/kakukanogoannai/hisyo/hisho/kohokochokakari/homepage/1454057474610.html"
+        "https://www.city.kato.lg.jp/kakukanogoannai/hisyo/hisho/kohokochokakari/homepage/1454057474610.html",
+        "https://www.city.kato.lg.jp/material/files/group/16/shiryou6.pdf",
+        "https://kitaharima119.net/home/content/files/nenpo/r07_nenpo.pdf",
+        "https://web.pref.hyogo.lg.jp/kk43/documents/r6_annual_report_of_fire_and_disaster_management.pdf",
+        "https://kitaharima119.net/home/gyousei/nyuusatu/210915-2.html"
       ],
-      "note": "Kato City official disaster-prevention article 市内への影響が見込まれる断層, updated 29 March 2024, explicitly identifies 北はりま消防組合加東消防署東条出張所 as one of the city's three intensity-meter hosts. The full article body was read. The fire authority's current facility guide independently names this branch at 加東市天神123, while its 15 June 2023 procurement notice 230615-1 explicitly identifies the branch work site as 兵庫県加東市天神123番地. However, Kato's official major-public-facilities directory, dated 28 December 2021 and still published, identifies the same named branch and telephone number at 加東市天神129番地. All relevant body/table entries were retrieved and read. The branch identity and Tenjin locality are supported, but the competing official parcel numbers are retained here as unresolved evidence; publishedAddressJa is deliberately null and exact_address is not assigned. The 2023 procurement concerns radio base-station relocation supervision, not intensity-meter relocation, and is used only as a published facility-address source. No claim is made that 123 or 129 is a verified current sensor parcel. Matching uses the explicit municipal host statement and branch/locality identity, not coordinates or proximity. No seven-digit-code publication, room/floor, precise within-site sensor location, installation/transfer date or fresh 2026 sensor inspection is asserted. English facility label is descriptive; approved station names remain unchanged.",
+      "note": "Katō City’s disaster-prevention article explicitly names the Tojo Branch of Katō Fire Station as one of the city’s three seismic intensity meter sites. Katō City’s 2025 disaster-plan appendix, the fire authority’s 2025 annual report and facility guide, and Hyōgo Prefecture’s FY2024 fire and disaster annual report all identify the same branch at Tenjin 123. The fire authority’s September 2021 building-repair tender and June 2023 work-site notice also give Tenjin 123. The city’s December 2021 general directory lists Tenjin 129 for the same branch and telephone number. Its newer disaster-plan appendix and the operator’s building records establish Tenjin 123 as the published host-facility address. The position of the meter within the facility is unverified.",
       "placementLocalityJa": "加東市天神",
-      "placementPrecision": "municipality_or_ward"
+      "placementPrecision": "exact_address"
     },
     {
       "code": "2830130",
@@ -117417,9 +117484,13 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://www.data.jma.go.jp/eqev/data/intens-st/",
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.data.jma.go.jp/eqev/data/kyoshin/jma-shindo.html",
+        "https://www.data.jma.go.jp/eqev/data/bulletin/data/shindo/code_p.zip",
+        "https://www.town.inagawa.lg.jp/material/files/group/41/reiwa6nennban.pdf",
+        "https://www.town.inagawa.lg.jp/material/files/group/41/shoboshisetsukeikaku.pdf"
       ],
-      "note": "The official observation-point label identifies the locality 猪名川町紫合; it does not publish a host facility or street address.",
+      "note": "The official observation-point label identifies the locality 猪名川町紫合; it does not publish a host facility or street address. JMA’s published address table puts its predecessor 猪名川町紫合２ at Yuda Aza Kotsugawayama 4-10, the site the town’s 2025 facility plan identifies as Fire Headquarters. The JMA historical catalogue dates the handover from domestic code 5312310 to local-government code 5312330 at noon on 15 October 1998. The town’s fire-service chronology also records a separately described town-owned meter moving to the North Branch on 21 June 1996, when two-site monitoring began. The predecessor address and two-site history narrow the search. A source placing the current reporting instrument at Fire Headquarters or another site is still needed.",
       "placementLocalityJa": "猪名川町紫合",
       "placementPrecision": "municipality_or_ward"
     },
@@ -117835,9 +117906,13 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://www.data.jma.go.jp/eqev/data/intens-st/",
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://xml.kishou.go.jp/20120224_jmaxml_info.pdf",
+        "https://web.pref.hyogo.lg.jp/kk37/documents/yobou4-1.pdf",
+        "https://www.city.himeji.lg.jp/shisei/0000007116.html",
+        "https://www.data.jma.go.jp/eqev/data/bulletin/data/shindo/code_p.zip"
       ],
-      "note": "The official observation-point label identifies the locality 姫路市香寺町中屋; it does not publish a host facility or street address.",
+      "note": "The official observation-point label identifies the locality 姫路市香寺町中屋; it does not publish a host facility or street address. JMA’s 24 February 2012 notice explicitly marks the change from XML code 2820132 to 2820136 as a relocation under the same Kōdera-chō Nakaya reporting label. JMA’s historical catalogue dates the handover to noon on 27 March 2012, from domestic code 5320032 to 5320036. Hyōgo’s February 2026 inventory still lists the station. Himeji’s office directory publishes Kōdera-chō Nakaya 14 for Kōdera Office. A document linking the relocated instrument to that office or another facility is still needed.",
       "placementLocalityJa": "姫路市香寺町中屋",
       "placementPrecision": "municipality_or_ward"
     },
@@ -118550,9 +118625,13 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://www.data.jma.go.jp/eqev/data/intens-st/",
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://xml.kishou.go.jp/20210928_jmaxml_info.pdf",
+        "https://www.data.jma.go.jp/eqev/data/bulletin/data/shindo/code_p.zip",
+        "https://www.city.tatsuno.lg.jp/gyouseikaikakusuishin/documents/shiryou.pdf",
+        "https://www1.g-reiki.net/city.tatsuno/reiki_honbun/r397RG00000832.html"
       ],
-      "note": "The official observation-point label identifies the locality たつの市御津町; it does not publish a host facility or street address.",
+      "note": "The official observation-point label identifies the locality たつの市御津町; it does not publish a host facility or street address. JMA’s September 2021 notice records the same-name relocation from 2822932 to 2822933. The historical catalogue puts the switch from domestic code 5322632 to 5322633 at noon on 22 December 2021. Municipal records establish the Mitsu Branch’s consolidation and replacement at Karuya 356-1 in 2021 and the scheduled removal of the predecessor building. The replacement branch remains a candidate pending evidence linking its parcel to the meter.",
       "placementLocalityJa": "たつの市御津町",
       "placementPrecision": "municipality_or_ward"
     },
@@ -119219,9 +119298,13 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://www.data.jma.go.jp/eqev/data/intens-st/",
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.data.jma.go.jp/eqev/data/oshirase/2013/20130413jma_mot_kobe.pdf",
+        "https://www.data.jma.go.jp/eqev/data/bulletin/data/shindo/code_p.zip",
+        "https://web.pref.hyogo.lg.jp/kk37/documents/yobou4-1.pdf",
+        "https://www.city.minamiawaji.hyogo.jp/uploaded/attachment/4481.pdf"
       ],
-      "note": "The official observation-point label identifies the locality 南あわじ市広田; it does not publish a host facility or street address.",
+      "note": "The official observation-point label identifies the locality 南あわじ市広田; it does not publish a host facility or street address. The Kobe Marine Meteorological Observatory inspected the Hyōgo Prefecture meter on 13 April 2013. Page 11 of its field report includes a map of the installed meter and photographs of its instrument cabinet. The map marks the meter near the 初尾川 river in the area labelled 広田広田 and gives no facility name or parcel number. JMA’s historical catalogue has one Hirota reporting entry (domestic code 5351130, active since noon on 15 October 1998), and the February 2026 prefectural inventory still lists Minamiawaji Hirota. The municipal facility sheet publishes Hirotahirota 1064 for the former Midori municipal building. Page 4 records interviews with Midori municipal building staff and a nearby resident. The field team did not identify the building as the meter host. The facility and address remain unverified.",
       "placementLocalityJa": "南あわじ市広田",
       "placementPrecision": "municipality_or_ward"
     },
@@ -119564,9 +119647,16 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://www.data.jma.go.jp/eqev/data/intens-st/",
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.data.jma.go.jp/eqev/data/bulletin/data/shindo/code_p.zip",
+        "https://www.data.jma.go.jp/eqev/data/kyoshin/jma-shindo.html",
+        "https://www.city.awaji.lg.jp/soshiki/koushitsu/h25siseihousin.html",
+        "https://www.city.awaji.lg.jp/uploaded/life/52438_173461_misc.pdf",
+        "https://www.city.awaji.lg.jp/site/bosai/50668.html",
+        "https://xml.kishou.go.jp/20190618_jmaxml_info.pdf",
+        "https://web.pref.hyogo.lg.jp/kk37/documents/yobou4-1.pdf"
       ],
-      "note": "The official observation-point label identifies the locality 淡路市岩屋; it does not publish a host facility or street address.",
+      "note": "The official observation-point label identifies the locality 淡路市岩屋; it does not publish a host facility or street address. JMA’s historical catalogue dates the handover from the older local-government reporting record 5351231 to the current 5351234 to noon on 18 December 2013. The separate, discontinued JMA station at Iwaya 1000 stopped reporting on 7 January 1999. Awaji City’s facility plan records Iwaya Office moving on 15 October 2013, after its FY2013 policy statement identified Iwaya Health Center as the destination. The official shelter directory lists the office and health center at Iwaya 1514-18. JMA’s June 2019 notice lists a parameter correction for XML code 2822634 without publishing the corrected address. The municipal move and reporting handover make the health center a lead. The receiving meter site remains unverified.",
       "placementLocalityJa": "淡路市岩屋",
       "placementPrecision": "municipality_or_ward"
     },
@@ -120116,9 +120206,13 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://www.data.jma.go.jp/eqev/data/intens-st/",
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://xml.kishou.go.jp/20210928_jmaxml_info.pdf",
+        "https://www.data.jma.go.jp/eqev/data/bulletin/data/shindo/code_p.zip",
+        "https://www.city.ikoma.lg.jp/cmsfiles/contents/0000005/5554/03siryoushuu.pdf",
+        "https://www.city.gojo.lg.jp/material/files/group/3/newhall_10.pdf"
       ],
-      "note": "The official observation-point label identifies the locality 五條市岡口; it does not publish a host facility or street address.",
+      "note": "The official observation-point label identifies the locality 五條市岡口; it does not publish a host facility or street address. JMA’s September 2021 notice pairs Honmachi 2920730 with Okaguchi 2920734 under relocated stations, and the historical catalogue dates the reporting handover to noon on 5 November 2021. Ikoma’s disaster-plan appendix lists the predecessor at the former Gojō City Hall, Honmachi 1-1-1. Gojō’s relocation bulletin gives 10 November 2021 as the opening date of the new hall at Okaguchi 1-3-1. The new hall is a candidate for the meter installation. The municipal opening notice gives no meter placement.",
       "placementLocalityJa": "五條市岡口",
       "placementPrecision": "municipality_or_ward"
     },
@@ -157440,9 +157534,10 @@
         "https://www.city.karatsu.lg.jp/uploaded/attachment/17317.pdf",
         "https://www.city.karatsu.lg.jp/uploaded/attachment/23390.pdf",
         "https://www.city.karatsu.lg.jp/uploaded/attachment/8040.pdf",
-        "https://www.city.karatsu.lg.jp/page/3292.html"
+        "https://www.city.karatsu.lg.jp/page/3292.html",
+        "https://xml.kishou.go.jp/20261019_jmaxml_info.pdf"
       ],
-      "note": "The official observation-point label identifies the locality 唐津市相知; it does not publish a host facility or street address. The October 2024 JMA XML notice lists a relocation from 4120238 to 4120243 under the same reporting name. JMA’s historical catalogue records the actual changeover at noon on 12 July 2024. Karatsu’s FY2024 procurement schedule lists separate electrical works for the Ōchi Civic Center annex conversion. Its FY2025 budget describes the office transfer to the annex, and its FY2026 budget records that transfer as complete and funds demolition of the main building. The city formerly listed the center at Ōchi 2055-1 and currently lists it at Ōchi 2055-5. The reporting change preceded the documented office transfer. The public construction and address records do not establish where the instrument was installed.",
+      "note": "The official observation-point label identifies the locality 唐津市相知; it does not publish a host facility or street address. The October 2024 JMA XML notice lists a relocation from 4120238 to 4120243 under the same reporting name. JMA’s historical catalogue records the actual changeover at noon on 12 July 2024. Karatsu’s FY2024 procurement schedule lists separate electrical works for the Ōchi Civic Center annex conversion. Its FY2025 budget describes the office transfer to the annex, and its FY2026 budget records that transfer as complete and funds demolition of the main building. The city formerly listed the center at Ōchi 2055-1 and currently lists it at Ōchi 2055-5. The reporting change preceded the documented office transfer. The public construction and address records do not establish where the instrument was installed. JMA’s 19 October 2026 notice, PDF page 3, lists a further same-name relocation from 4120243 to 4120244 and schedules the code-table change for noon on 19 November 2026. The new notice leaves the receiving site open and does not establish the installation of 4120243 during the preceding 2024 move.",
       "placementLocalityJa": "唐津市相知",
       "placementPrecision": "municipality_or_ward"
     },
@@ -158565,9 +158660,11 @@
       "providerLatitude": null,
       "providerLongitude": null,
       "sourceUrls": [
-        "https://www.data.jma.go.jp/eqev/data/intens-st/"
+        "https://www.data.jma.go.jp/eqev/data/intens-st/",
+        "https://xml.kishou.go.jp/20261019_jmaxml_info.pdf",
+        "https://www.data.jma.go.jp/eqev/data/bulletin/data/shindo/code_p.zip"
       ],
-      "note": "The official observation-point label identifies the locality 嬉野市下宿乙; it does not publish a host facility or street address.",
+      "note": "The official observation-point label identifies the locality 嬉野市下宿乙; it does not publish a host facility or street address. JMA’s historical catalogue dates the same-name reporting handover to domestic code 7213833 to noon on 1 July 2010. Its 19 October 2026 notice, PDF page 3, lists this station as the predecessor to same-name code 4120934, with the code table scheduled to change at noon on 19 November 2026. The reviewed notices identify the reporting codes and locality. The facilities for both codes remain open.",
       "placementLocalityJa": "嬉野市下宿乙",
       "placementPrecision": "municipality_or_ward"
     },
@@ -158738,9 +158835,11 @@
       "sourceUrls": [
         "https://www.data.jma.go.jp/eqev/data/intens-st/",
         "https://www.town.yoshinogari.lg.jp/material/files/group/6/R080100.pdf",
-        "https://www.town.yoshinogari.lg.jp/lifeinfo/soshiki/somu/4/2/5567.html"
+        "https://www.town.yoshinogari.lg.jp/lifeinfo/soshiki/somu/4/2/5567.html",
+        "https://xml.kishou.go.jp/20261019_jmaxml_info.pdf",
+        "https://www.data.jma.go.jp/eqev/data/bulletin/data/shindo/code_p.zip"
       ],
-      "note": "Yoshinogari Town's fiscal 2026 budget funds an intensity-meter relocation. The new consolidated town hall opened at Yoshida 1262-2 on 24 September 2026. The budget and opening notice do not identify which of the town's two reporting stations was affected or establish a completed meter transfer to the new hall. A station-specific installation or completion record is needed before assigning a host or address.",
+      "note": "Yoshinogari Town's fiscal 2026 budget funds an intensity-meter relocation. The new consolidated town hall opened at Yoshida 1262-2 on 24 September 2026. The budget and opening notice do not identify which of the town's two reporting stations was affected or establish a completed meter transfer to the new hall. A station-specific installation or completion record is needed before assigning a host or address. JMA’s historical catalogue dates the same-name changeover to domestic code 7213932 to noon on 1 July 2010. Its 19 October 2026 notice, PDF page 3, lists Mitagawa 4132732 to 4132734 and Higashisefuri 4132733 to 4132735 as two separate relocations, with the code table scheduled to change at noon on 19 November 2026. JMA’s table gives both reporting labels without addresses. The individual meter destinations and the link to the town’s budgeted work remain open.",
       "placementLocalityJa": "吉野ヶ里町三田川",
       "placementPrecision": "municipality_or_ward"
     },
@@ -158781,9 +158880,11 @@
       "sourceUrls": [
         "https://www.data.jma.go.jp/eqev/data/intens-st/",
         "https://www.town.yoshinogari.lg.jp/material/files/group/6/R080100.pdf",
-        "https://www.town.yoshinogari.lg.jp/lifeinfo/soshiki/somu/4/2/5567.html"
+        "https://www.town.yoshinogari.lg.jp/lifeinfo/soshiki/somu/4/2/5567.html",
+        "https://xml.kishou.go.jp/20261019_jmaxml_info.pdf",
+        "https://www.data.jma.go.jp/eqev/data/bulletin/data/shindo/code_p.zip"
       ],
-      "note": "Yoshinogari Town's fiscal 2026 budget funds an intensity-meter relocation. The new consolidated town hall opened at Yoshida 1262-2 on 24 September 2026. The budget and opening notice do not identify which of the town's two reporting stations was affected or establish a completed meter transfer to the new hall. A station-specific installation or completion record is needed before assigning a host or address.",
+      "note": "Yoshinogari Town's fiscal 2026 budget funds an intensity-meter relocation. The new consolidated town hall opened at Yoshida 1262-2 on 24 September 2026. The budget and opening notice do not identify which of the town's two reporting stations was affected or establish a completed meter transfer to the new hall. A station-specific installation or completion record is needed before assigning a host or address. JMA’s historical catalogue dates the same-name changeover to domestic code 7213933 to noon on 1 July 2010. Its 19 October 2026 notice, PDF page 3, lists Higashisefuri 4132733 to 4132735 and Mitagawa 4132732 to 4132734 as two separate relocations, with the code table scheduled to change at noon on 19 November 2026. JMA’s table gives both reporting labels without addresses. The individual meter destinations and the link to the town’s budgeted work remain open.",
       "placementLocalityJa": "吉野ヶ里町東脊振",
       "placementPrecision": "municipality_or_ward"
     },
@@ -167714,10 +167815,10 @@
       "areaNameJa": "大分県北部",
       "municipalityCode": "4420300",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
-      "facilityNameEn": null,
-      "metadataStatus": "Official observation-locality label",
+      "publishedAddressJa": "大分県中津市豊田町14番地3",
+      "facilityNameJa": "中津市役所",
+      "facilityNameEn": "Nakatsu City Hall",
+      "metadataStatus": "Ōita Prefecture seismic-intensity network inventory, JMA station history, and published facility address",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -167726,11 +167827,15 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://www.data.jma.go.jp/eqev/data/intens-st/",
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.jishin.go.jp/main/chousakenkyuu/beppu_haneyama/h27/27Report_Chap3_3.pdf",
+        "https://www.data.jma.go.jp/eqev/data/bulletin/data/shindo/code_p.zip",
+        "https://www.city-nakatsu.jp/doc/2015080600109/file_contents/01_kobetsu2020.pdf",
+        "https://cms.city-nakatsu.jp/doc/2022031600019/"
       ],
-      "note": "The official observation-point label identifies the locality 中津市豊田町; it does not publish a host facility or street address.",
+      "note": "Table 3.3.4-1 of the FY2015 Beppu–Haneyama fault-zone research report explicitly lists the Ōita Prefecture network instrument 01TA0005 under the JMA reporting label 中津市豊田町 at 中津市豊田町14-3（中津市役所）. The report describes data collected from the operating network. The JMA historical catalogue lists the active local-government record 7500034 under the same name, in force since 2011-05-12 at 13:00 JST, with no later same-name handover in the catalogue. The municipal source corroborates the facility address. The position of the instrument within the site remains unverified.",
       "placementLocalityJa": "中津市豊田町",
-      "placementPrecision": "municipality_or_ward"
+      "placementPrecision": "exact_address"
     },
     {
       "code": "4420335",
@@ -167756,10 +167861,10 @@
       "areaNameJa": "大分県北部",
       "municipalityCode": "4420300",
       "gsiLocalityJa": "大字永添",
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
-      "facilityNameEn": null,
-      "metadataStatus": "Official observation-locality label",
+      "publishedAddressJa": "大分県中津市三光原口644番地7",
+      "facilityNameJa": "中津市役所三光支所",
+      "facilityNameEn": "Nakatsu City Hall Sanko Branch Office",
+      "metadataStatus": "Ōita Prefecture seismic-intensity network inventory, JMA station history, and published facility address",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -167768,11 +167873,15 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://www.data.jma.go.jp/eqev/data/intens-st/",
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.jishin.go.jp/main/chousakenkyuu/beppu_haneyama/h27/27Report_Chap3_3.pdf",
+        "https://www.data.jma.go.jp/eqev/data/bulletin/data/shindo/code_p.zip",
+        "https://www.city-nakatsu.jp/doc/2015080600109/file_contents/01_kobetsu2020.pdf",
+        "https://cms.city-nakatsu.jp/doc/2022031600019/"
       ],
-      "note": "The official observation-point label identifies the locality 中津市三光; it does not publish a host facility or street address.",
+      "note": "Table 3.3.4-1 of the FY2015 Beppu–Haneyama fault-zone research report explicitly lists the Ōita Prefecture network instrument 01TA0006 under the JMA reporting label 中津市三光 at 中津市三光原口644-7（三光支所）. The report describes data collected from the operating network. The JMA historical catalogue lists the active local-government record 7500035 under the same name, in force since 2011-05-12 at 13:00 JST, with no later same-name handover in the catalogue. The municipal source corroborates the facility address. The position of the instrument within the site remains unverified.",
       "placementLocalityJa": "中津市三光",
-      "placementPrecision": "municipality_or_ward"
+      "placementPrecision": "exact_address"
     },
     {
       "code": "4420336",
@@ -167798,10 +167907,10 @@
       "areaNameJa": "大分県北部",
       "municipalityCode": "4420300",
       "gsiLocalityJa": "本耶馬渓町曽木",
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
-      "facilityNameEn": null,
-      "metadataStatus": "Official observation-locality label",
+      "publishedAddressJa": "大分県中津市本耶馬渓町曽木1800番地",
+      "facilityNameJa": "中津市役所本耶馬渓支所",
+      "facilityNameEn": "Nakatsu City Hall Honyabakei Branch Office",
+      "metadataStatus": "Ōita Prefecture seismic-intensity network inventory, JMA station history, and published facility address",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -167810,11 +167919,15 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://www.data.jma.go.jp/eqev/data/intens-st/",
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.jishin.go.jp/main/chousakenkyuu/beppu_haneyama/h27/27Report_Chap3_3.pdf",
+        "https://www.data.jma.go.jp/eqev/data/bulletin/data/shindo/code_p.zip",
+        "https://www.city-nakatsu.jp/doc/2015080600109/file_contents/01_kobetsu2020.pdf",
+        "https://cms.city-nakatsu.jp/doc/2022031600019/"
       ],
-      "note": "The official observation-point label identifies the locality 中津市本耶馬渓町; it does not publish a host facility or street address.",
+      "note": "Table 3.3.4-1 of the FY2015 Beppu–Haneyama fault-zone research report explicitly lists the Ōita Prefecture network instrument 01TA0007 under the JMA reporting label 中津市本耶馬渓町 at 中津市本耶馬渓町曽木1800（本耶馬渓支所）. The report describes data collected from the operating network. The JMA historical catalogue lists the active local-government record 7500036 under the same name, in force since 2011-05-12 at 13:00 JST, with no later same-name handover in the catalogue. The municipal source corroborates the facility address. The position of the instrument within the site remains unverified.",
       "placementLocalityJa": "中津市本耶馬渓町",
-      "placementPrecision": "municipality_or_ward"
+      "placementPrecision": "exact_address"
     },
     {
       "code": "4420337",
@@ -167840,10 +167953,10 @@
       "areaNameJa": "大分県北部",
       "municipalityCode": "4420300",
       "gsiLocalityJa": "山国町守実",
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
-      "facilityNameEn": null,
-      "metadataStatus": "Official observation-locality label",
+      "publishedAddressJa": "大分県中津市山国町守実130番地",
+      "facilityNameJa": "中津市役所山国支所",
+      "facilityNameEn": "Nakatsu City Hall Yamakuni Branch Office",
+      "metadataStatus": "Ōita Prefecture seismic-intensity network inventory, JMA station history, and published facility address",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -167852,11 +167965,15 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://www.data.jma.go.jp/eqev/data/intens-st/",
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.jishin.go.jp/main/chousakenkyuu/beppu_haneyama/h27/27Report_Chap3_3.pdf",
+        "https://www.data.jma.go.jp/eqev/data/bulletin/data/shindo/code_p.zip",
+        "https://www.city-nakatsu.jp/doc/2015080600109/file_contents/01_kobetsu2020.pdf",
+        "https://cms.city-nakatsu.jp/doc/2022031600019/"
       ],
-      "note": "The official observation-point label identifies the locality 中津市山国町; it does not publish a host facility or street address.",
+      "note": "Table 3.3.4-1 of the FY2015 Beppu–Haneyama fault-zone research report explicitly lists the Ōita Prefecture network instrument 01TA0009 under the JMA reporting label 中津市山国町 at 中津市山国町守実130（山国支所）. The report describes data collected from the operating network. The JMA historical catalogue lists the active local-government record 7500037 under the same name, in force since 2011-05-12 at 13:00 JST, with no later same-name handover in the catalogue. The municipal source corroborates the facility address. The position of the instrument within the site remains unverified.",
       "placementLocalityJa": "中津市山国町",
-      "placementPrecision": "municipality_or_ward"
+      "placementPrecision": "exact_address"
     },
     {
       "code": "4420921",
@@ -167935,9 +168052,12 @@
       "providerLatitude": null,
       "providerLongitude": null,
       "sourceUrls": [
-        "https://www.data.jma.go.jp/eqev/data/intens-st/"
+        "https://www.data.jma.go.jp/eqev/data/intens-st/",
+        "https://www.jishin.go.jp/main/chousakenkyuu/beppu_haneyama/h27/27Report_Chap3_3.pdf",
+        "https://www.data.jma.go.jp/eqev/data/bulletin/data/shindo/code_p.zip",
+        "https://www.city.bungotakada.oita.jp/uploaded/attachment/7731.pdf"
       ],
-      "note": "The official observation-point label identifies the locality 豊後高田市真玉; it does not publish a host facility or street address.",
+      "note": "The official observation-point label identifies the locality 豊後高田市真玉; it does not publish a host facility or street address. Table 3.3.4-1 of the FY2015 Beppu–Haneyama fault-zone research report lists the Ōita Prefecture network instrument 01TA0033 under the same reporting name at 豊後高田市真玉204-142（真玉庁舎）. JMA's historical catalogue dates the active domestic code 7500130 to 2000-07-18 at 12:00 JST. The city directory instead lists the Matama Office at Naka-Matama 2144-12. The historical catalogue has no later same-name handover. An address history or installation record is needed to reconcile the two sites.",
       "placementLocalityJa": "豊後高田市真玉",
       "placementPrecision": "municipality_or_ward"
     },
@@ -167977,9 +168097,13 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://www.data.jma.go.jp/eqev/data/intens-st/",
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.jishin.go.jp/main/chousakenkyuu/beppu_haneyama/h27/27Report_Chap3_3.pdf",
+        "https://www.data.jma.go.jp/eqev/data/bulletin/data/shindo/code_p.zip",
+        "https://www.city.bungotakada.oita.jp/uploaded/attachment/7731.pdf",
+        "https://www.city.bungotakada.oita.jp/soshiki/2/1907.html"
       ],
-      "note": "The official observation-point label identifies the locality 豊後高田市香々地; it does not publish a host facility or street address.",
+      "note": "The official observation-point label identifies the locality 豊後高田市香々地; it does not publish a host facility or street address. Table 3.3.4-1 of the FY2015 Beppu–Haneyama fault-zone research report lists the Ōita Prefecture network instrument 01TA0034 under the same reporting name at 豊後高田市見目118（香々地庁舎）. JMA's historical catalogue dates the active domestic code 7500132 to 2011-05-12 at 13:00 JST. The city directory lists the Kakaji Office at Mime 110, while the surveyed lot is Mime 118. The historical catalogue has no later same-name handover. Follow up on the instrument parcel and any branch relocation.",
       "placementLocalityJa": "豊後高田市香々地",
       "placementPrecision": "municipality_or_ward"
     },
@@ -168300,10 +168424,10 @@
       "areaNameJa": "大分県北部",
       "municipalityCode": "4421400",
       "gsiLocalityJa": "安岐町成久",
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
-      "facilityNameEn": null,
-      "metadataStatus": "Official observation-locality label",
+      "publishedAddressJa": "大分県国東市安岐町中園100番地",
+      "facilityNameJa": "国東市役所安岐総合支所",
+      "facilityNameEn": "Kunisaki City Hall Aki General Branch Office",
+      "metadataStatus": "Ōita Prefecture seismic-intensity network inventory, JMA station history, and published facility address",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -168312,11 +168436,14 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://www.data.jma.go.jp/eqev/data/intens-st/",
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.jishin.go.jp/main/chousakenkyuu/beppu_haneyama/h27/27Report_Chap3_3.pdf",
+        "https://www.data.jma.go.jp/eqev/data/bulletin/data/shindo/code_p.zip",
+        "https://www.city.kunisaki.oita.jp/soshiki/zaisei/koukyoushisetsu.html"
       ],
-      "note": "The official observation-point label identifies the locality 国東市安岐町; it does not publish a host facility or street address.",
+      "note": "Table 3.3.4-1 of the FY2015 Beppu–Haneyama fault-zone research report explicitly lists the Ōita Prefecture network instrument 01TA0054 under the JMA reporting label 国東市安岐町 at 国東市安岐町中園100（安岐総合支所）. The report describes data collected from the operating network. The JMA historical catalogue lists the active local-government record 7501634 under the same name, in force since 2011-05-12 at 13:00 JST, with no later same-name handover in the catalogue. The municipal source corroborates the facility address. The position of the instrument within the site remains unverified.",
       "placementLocalityJa": "国東市安岐町",
-      "placementPrecision": "municipality_or_ward"
+      "placementPrecision": "exact_address"
     },
     {
       "code": "4421435",
@@ -168354,9 +168481,13 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://www.data.jma.go.jp/eqev/data/intens-st/",
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.jishin.go.jp/main/chousakenkyuu/beppu_haneyama/h27/27Report_Chap3_3.pdf",
+        "https://www.data.jma.go.jp/eqev/data/bulletin/data/shindo/code_p.zip",
+        "https://www.city.kunisaki.oita.jp/soshiki/zaisei/haichizu-musashi.html",
+        "https://www.pref.oita.jp/uploaded/attachment/2179110.pdf"
       ],
-      "note": "The official observation-point label identifies the locality 国東市武蔵町; it does not publish a host facility or street address.",
+      "note": "The official observation-point label identifies the locality 国東市武蔵町; it does not publish a host facility or street address. Table 3.3.4-1 of the FY2015 Beppu–Haneyama fault-zone research report lists the Ōita Prefecture network instrument 01TA0053 under the same reporting name at 国東市武蔵町古市684（武蔵総合支所）. JMA's historical catalogue dates the active domestic code 7501635 to 2018-10-01 at 12:00 JST. The prefectural directory still lists the branch at Furuichi 684, while the current city directory gives Furuichi 1086-1. The office move and the reporting change need separate confirmation.",
       "placementLocalityJa": "国東市武蔵町",
       "placementPrecision": "municipality_or_ward"
     },
@@ -168509,10 +168640,10 @@
       "areaNameJa": "大分県中部",
       "municipalityCode": "4420100",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
-      "facilityNameEn": null,
-      "metadataStatus": "Official observation-locality label",
+      "publishedAddressJa": "大分県大分市大字佐賀関1407番地の27",
+      "facilityNameJa": "佐賀関市民センター",
+      "facilityNameEn": "Saganoseki Civic Center",
+      "metadataStatus": "Ōita Prefecture seismic-intensity network inventory, JMA station history, and published facility address",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -168521,11 +168652,15 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://www.data.jma.go.jp/eqev/data/intens-st/",
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.jishin.go.jp/main/chousakenkyuu/beppu_haneyama/h27/27Report_Chap3_3.pdf",
+        "https://www.data.jma.go.jp/eqev/data/bulletin/data/shindo/code_p.zip",
+        "https://www.city.oita.oita.jp/o254/kurashi/anshinanzen/documents/20241203shikannrenn.pdf",
+        "https://www.pref.oita.jp/site/chiji/251216kaiken.html"
       ],
-      "note": "The official observation-point label identifies the locality 大分市佐賀関; it does not publish a host facility or street address.",
+      "note": "Table 3.3.4-1 of the FY2015 Beppu–Haneyama fault-zone research report explicitly lists the Ōita Prefecture network instrument 01TA0003 under the JMA reporting label 大分市佐賀関 at 大分市大字佐賀関1407-27（佐賀関市民センター）. The report describes data collected from the operating network. The JMA historical catalogue lists the active local-government record 7510033 under the same name, in force since 2008-11-04 at 12:00 JST, with no later same-name handover in the catalogue. The municipal source corroborates the facility address. The position of the instrument within the site remains unverified.",
       "placementLocalityJa": "大分市佐賀関",
-      "placementPrecision": "municipality_or_ward"
+      "placementPrecision": "exact_address"
     },
     {
       "code": "4420134",
@@ -168568,9 +168703,11 @@
         "https://www.city.oita.oita.jp/o009/kurashi/anshinanzen/1272444132022.html",
         "https://www.city.oita.oita.jp/o009/kurashi/anshinanzen/documents/shinsaitaisakuhen.pdf",
         "https://www.city.oita.oita.jp/o212/kurashi/anshinanzen/1180577976689.html",
-        "https://www.city.oita.oita.jp/o029/shisejoho/annai/1000000000193.html"
+        "https://www.city.oita.oita.jp/o029/shisejoho/annai/1000000000193.html",
+        "https://www.jishin.go.jp/main/chousakenkyuu/beppu_haneyama/h27/27Report_Chap3_3.pdf",
+        "https://www.data.jma.go.jp/eqev/data/bulletin/data/shindo/code_p.zip"
       ],
-      "note": "The official observation-point label identifies the locality 大分市舞鶴町; it does not publish a host facility or street address. Oita Fire Bureau continuity qualification checked on 17 October 2026: an indexed March 2023 city earthquake-plan passage states that an instrumental intensity meter was installed at the Fire Bureau, but the old sinnsai.pdf URL now returns HTTP 404 and the complete original page was not recovered or inspected. It is a qualified historical lead, not a current host certification. The official current disaster-plan index, updated 8 July 2026, links the March 2025 earthquake plan at shinsaitaisakuhen.pdf. Its complete PDF page 122 (bottom printed folio 108, with a separate inner text number 103) was text-read using PDFium, rendered and visually inspected. The corresponding warning-reception paragraph now ends with fax reception and does not contain the old meter-installation sentence. Removal of that sentence is not evidence that the meter itself was removed or relocated. The official Fire Organization guide, updated 5 November 2024 and explicitly current as of 1 July 2024, separately lists Oita City Fire Bureau at 大分市荷揚町3番45号 and Oita City Central Fire Station at 大分市舞鶴町一丁目1番1号. The complete facility table and its heading were read; the independent Central Fire Station contact guide also publishes the Maizurumachi address. Neither the relocated Bureau office address nor the retained Central Fire Station address is assigned to this reporting instrument without direct meter-retention/transfer or explicit current host evidence. No facility/address field is promoted, and no instrument-removal date, sensor-transfer completion, floor, room or exact enclosure is inferred. Association is not inferred from coordinates, proximity or a shared locality. Approved names, coordinates and prior provenance remain unchanged.",
+      "note": "The official observation-point label identifies the locality 大分市舞鶴町; it does not publish a host facility or street address. Oita Fire Bureau continuity qualification checked on 17 October 2026: an indexed March 2023 city earthquake-plan passage states that an instrumental intensity meter was installed at the Fire Bureau, but the old sinnsai.pdf URL now returns HTTP 404 and the complete original page was not recovered or inspected. It is a qualified historical lead, not a current host certification. The official current disaster-plan index, updated 8 July 2026, links the March 2025 earthquake plan at shinsaitaisakuhen.pdf. Its complete PDF page 122 (bottom printed folio 108, with a separate inner text number 103) was text-read using PDFium, rendered and visually inspected. The corresponding warning-reception paragraph now ends with fax reception and does not contain the old meter-installation sentence. Removal of that sentence is not evidence that the meter itself was removed or relocated. The official Fire Organization guide, updated 5 November 2024 and explicitly current as of 1 July 2024, separately lists Oita City Fire Bureau at 大分市荷揚町3番45号 and Oita City Central Fire Station at 大分市舞鶴町一丁目1番1号. The complete facility table and its heading were read; the independent Central Fire Station contact guide also publishes the Maizurumachi address. Neither the relocated Bureau office address nor the retained Central Fire Station address is assigned to this reporting instrument without direct meter-retention/transfer or explicit current host evidence. No facility/address field is promoted, and no instrument-removal date, sensor-transfer completion, floor, room or exact enclosure is inferred. Association is not inferred from coordinates, proximity or a shared locality. Approved names, coordinates and prior provenance remain unchanged. Table 3.3.4-1 of the FY2015 Beppu–Haneyama fault-zone research report lists the Ōita Prefecture network instrument 01TA0001 under the same reporting name at 大分市舞鶴町1-1-1（大分市消防局）. JMA's historical catalogue dates the active domestic code 7510034 to 2011-05-12 at 13:00 JST. The survey gives direct historical evidence for the Fire Bureau installation at Maizurumachi 1-1-1. The modern Fire Bureau address and the sensor's installation history at the two sites still require reconciliation.",
       "placementLocalityJa": "大分市舞鶴町",
       "placementPrecision": "municipality_or_ward"
     },
@@ -168610,9 +168747,12 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://www.data.jma.go.jp/eqev/data/intens-st/",
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.jishin.go.jp/main/chousakenkyuu/beppu_haneyama/h27/27Report_Chap3_3.pdf",
+        "https://www.data.jma.go.jp/eqev/data/bulletin/data/shindo/code_p.zip",
+        "https://www.city.oita.oita.jp/o029/shisejoho/annai/1000000000335.html"
       ],
-      "note": "The official observation-point label identifies the locality 大分市野津原; it does not publish a host facility or street address.",
+      "note": "The official observation-point label identifies the locality 大分市野津原; it does not publish a host facility or street address. Table 3.3.4-1 of the FY2015 Beppu–Haneyama fault-zone research report lists the Ōita Prefecture network instrument 01TA0002 under the same reporting name at 大分市大字野津原580（野津原支所）. JMA's historical catalogue dates the active domestic code 7510035 to 2011-05-12 at 13:00 JST. The city directory gives Nozuharu 800 for the present branch. Establish whether the surveyed lot 580 was an earlier branch location, a separate instrument parcel, or an erroneous address.",
       "placementLocalityJa": "大分市野津原",
       "placementPrecision": "municipality_or_ward"
     },
@@ -168807,10 +168947,10 @@
       "areaNameJa": "大分県中部",
       "municipalityCode": "4420600",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
-      "facilityNameEn": null,
-      "metadataStatus": "Official observation-locality label",
+      "publishedAddressJa": "大分県臼杵市大字臼杵72番1",
+      "facilityNameJa": "臼杵市役所臼杵庁舎",
+      "facilityNameEn": "Usuki City Hall, Usuki Office",
+      "metadataStatus": "Ōita Prefecture seismic-intensity network inventory, JMA station history, and published facility address",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -168819,11 +168959,14 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://www.data.jma.go.jp/eqev/data/intens-st/",
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.jishin.go.jp/main/chousakenkyuu/beppu_haneyama/h27/27Report_Chap3_3.pdf",
+        "https://www.data.jma.go.jp/eqev/data/bulletin/data/shindo/code_p.zip",
+        "https://www.city.usuki.oita.jp/docs/2014013100020/"
       ],
-      "note": "The official observation-point label identifies the locality 臼杵市臼杵; it does not publish a host facility or street address.",
+      "note": "Table 3.3.4-1 of the FY2015 Beppu–Haneyama fault-zone research report explicitly lists the Ōita Prefecture network instrument 01TA0025 under the JMA reporting label 臼杵市臼杵 at 臼杵市大字臼杵72-1（臼杵庁舎）. The report describes data collected from the operating network. The JMA historical catalogue lists the active local-government record 7510232 under the same name, in force since 2011-05-12 at 13:00 JST, with no later same-name handover in the catalogue. The municipal source corroborates the facility address. The position of the instrument within the site remains unverified.",
       "placementLocalityJa": "臼杵市臼杵",
-      "placementPrecision": "municipality_or_ward"
+      "placementPrecision": "exact_address"
     },
     {
       "code": "4420633",
@@ -168849,10 +168992,10 @@
       "areaNameJa": "大分県中部",
       "municipalityCode": "4420600",
       "gsiLocalityJa": "野津町大字野津市",
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
-      "facilityNameEn": null,
-      "metadataStatus": "Official observation-locality label",
+      "publishedAddressJa": "大分県臼杵市野津町大字野津市326番地の1",
+      "facilityNameJa": "臼杵市役所野津庁舎",
+      "facilityNameEn": "Usuki City Hall, Notsu Office",
+      "metadataStatus": "Ōita Prefecture seismic-intensity network inventory, JMA station history, and published facility address",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -168861,11 +169004,14 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://www.data.jma.go.jp/eqev/data/intens-st/",
-        "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=131.69&lat=33.04"
+        "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=131.69&lat=33.04",
+        "https://www.jishin.go.jp/main/chousakenkyuu/beppu_haneyama/h27/27Report_Chap3_3.pdf",
+        "https://www.data.jma.go.jp/eqev/data/bulletin/data/shindo/code_p.zip",
+        "https://www.city.usuki.oita.jp/docs/2014013100020/"
       ],
-      "note": "The official observation-point label identifies the locality 臼杵市野津町; it does not publish a host facility or street address.",
+      "note": "Table 3.3.4-1 of the FY2015 Beppu–Haneyama fault-zone research report explicitly lists the Ōita Prefecture network instrument 01TA0026 under the JMA reporting label 臼杵市野津町 at 臼杵市野津町大字野津市326-1（野津庁舎）. The report describes data collected from the operating network. The JMA historical catalogue lists the active local-government record 7510233 under the same name, in force since 2011-05-12 at 13:00 JST, with no later same-name handover in the catalogue. The municipal source corroborates the facility address. The position of the instrument within the site remains unverified.",
       "placementLocalityJa": "臼杵市野津町",
-      "placementPrecision": "municipality_or_ward"
+      "placementPrecision": "exact_address"
     },
     {
       "code": "4420721",
@@ -168933,10 +169079,10 @@
       "areaNameJa": "大分県中部",
       "municipalityCode": "4420700",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
-      "facilityNameEn": null,
-      "metadataStatus": "Official observation-locality label",
+      "publishedAddressJa": "大分県津久見市宮本町20番15号",
+      "facilityNameJa": "津久見市役所",
+      "facilityNameEn": "Tsukumi City Hall",
+      "metadataStatus": "Ōita Prefecture seismic-intensity network inventory, JMA station history, and published facility address",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -168945,11 +169091,16 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://www.data.jma.go.jp/eqev/data/intens-st/",
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.jishin.go.jp/main/chousakenkyuu/beppu_haneyama/h27/27Report_Chap3_3.pdf",
+        "https://www.data.jma.go.jp/eqev/data/bulletin/data/shindo/code_p.zip",
+        "https://www.city.tsukumi.oita.jp/soshiki/2.html",
+        "https://www.city.tsukumi.oita.jp/site/tyousyakennsetsu/",
+        "https://www.data.jma.go.jp/eqev/data/gaikyo/monthly/202609/202609furoku_1.pdf"
       ],
-      "note": "The official observation-point label identifies the locality 津久見市宮本町; it does not publish a host facility or street address.",
+      "note": "Table 3.3.4-1 of the FY2015 Beppu–Haneyama fault-zone research report explicitly lists the Ōita Prefecture network instrument 01TA0027 under the JMA reporting label 津久見市宮本町 at 津久見市宮本町20-15（津久見市役所）. The report describes data collected from the operating network. The JMA historical catalogue lists the active local-government record 7511231 under the same name, in force since 2011-05-12 at 13:00 JST, with no later same-name handover in the catalogue. The municipal source corroborates the facility address. The position of the instrument within the site remains unverified. JMA still reported observations under the Miyamotochō label in September 2026. In November 2026 the city still publishes the Miyamotochō address for the operating City Hall and schedules the replacement hall to open on 4 January 2027. Recheck the instrument after that move.",
       "placementLocalityJa": "津久見市宮本町",
-      "placementPrecision": "municipality_or_ward"
+      "placementPrecision": "exact_address"
     },
     {
       "code": "4421021",
@@ -169017,10 +169168,10 @@
       "areaNameJa": "大分県中部",
       "municipalityCode": "4421000",
       "gsiLocalityJa": null,
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
-      "facilityNameEn": null,
-      "metadataStatus": "Official observation-locality label",
+      "publishedAddressJa": "大分県杵築市大字杵築377番地1",
+      "facilityNameJa": "杵築市役所本庁舎",
+      "facilityNameEn": "Kitsuki City Hall",
+      "metadataStatus": "Ōita Prefecture seismic-intensity network inventory, JMA station history, and published facility address",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -169029,11 +169180,15 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://www.data.jma.go.jp/eqev/data/intens-st/",
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.jishin.go.jp/main/chousakenkyuu/beppu_haneyama/h27/27Report_Chap3_3.pdf",
+        "https://www.data.jma.go.jp/eqev/data/bulletin/data/shindo/code_p.zip",
+        "https://www.city.kitsuki.lg.jp/soshiki/1/soumu/gaiyou/1438.html",
+        "https://www.city.kitsuki.lg.jp/material/files/group/2/549.pdf"
       ],
-      "note": "The official observation-point label identifies the locality 杵築市杵築; it does not publish a host facility or street address.",
+      "note": "Table 3.3.4-1 of the FY2015 Beppu–Haneyama fault-zone research report explicitly lists the Ōita Prefecture network instrument 01TA0035 under the JMA reporting label 杵築市杵築 at 杵築市大字杵築377（杵築市役所）. The report describes data collected from the operating network. The JMA historical catalogue lists the active local-government record 7510332 under the same name, in force since 2011-05-12 at 13:00 JST, with no later same-name handover in the catalogue. The municipal source corroborates the facility address. The position of the instrument within the site remains unverified. The survey prints lot 377. The city's 2012 newsletter and current office directory both give 377-1 as the published address of the main hall.",
       "placementLocalityJa": "杵築市杵築",
-      "placementPrecision": "municipality_or_ward"
+      "placementPrecision": "exact_address"
     },
     {
       "code": "4421033",
@@ -169059,10 +169214,10 @@
       "areaNameJa": "大分県中部",
       "municipalityCode": "4421000",
       "gsiLocalityJa": "大田石丸",
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
-      "facilityNameEn": null,
-      "metadataStatus": "Official observation-locality label",
+      "publishedAddressJa": "大分県杵築市大田石丸445番地",
+      "facilityNameJa": "杵築市役所大田庁舎",
+      "facilityNameEn": "Kitsuki City Hall, Ota Office",
+      "metadataStatus": "Ōita Prefecture seismic-intensity network inventory, JMA station history, and published facility address",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -169071,11 +169226,14 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://www.data.jma.go.jp/eqev/data/intens-st/",
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.jishin.go.jp/main/chousakenkyuu/beppu_haneyama/h27/27Report_Chap3_3.pdf",
+        "https://www.data.jma.go.jp/eqev/data/bulletin/data/shindo/code_p.zip",
+        "https://www.city.kitsuki.lg.jp/soshiki/1/soumu/gaiyou/1438.html"
       ],
-      "note": "The official observation-point label identifies the locality 杵築市大田; it does not publish a host facility or street address.",
+      "note": "Table 3.3.4-1 of the FY2015 Beppu–Haneyama fault-zone research report explicitly lists the Ōita Prefecture network instrument 01TA0036 under the JMA reporting label 杵築市大田 at 杵築市大田石丸445（大田庁舎）. The report describes data collected from the operating network. The JMA historical catalogue lists the active local-government record 7510333 under the same name, in force since 2011-05-12 at 13:00 JST, with no later same-name handover in the catalogue. The municipal source corroborates the facility address. The position of the instrument within the site remains unverified.",
       "placementLocalityJa": "杵築市大田",
-      "placementPrecision": "municipality_or_ward"
+      "placementPrecision": "exact_address"
     },
     {
       "code": "4421034",
@@ -169101,10 +169259,10 @@
       "areaNameJa": "大分県中部",
       "municipalityCode": "4421000",
       "gsiLocalityJa": "山香町大字内河野",
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
-      "facilityNameEn": null,
-      "metadataStatus": "Official observation-locality label",
+      "publishedAddressJa": "大分県杵築市山香町大字野原1010番地2",
+      "facilityNameJa": "杵築市役所山香庁舎",
+      "facilityNameEn": "Kitsuki City Hall, Yamaga Office",
+      "metadataStatus": "Ōita Prefecture seismic-intensity network inventory, JMA station history, and published facility address",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -169113,11 +169271,14 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://www.data.jma.go.jp/eqev/data/intens-st/",
-        "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=131.50&lat=33.45"
+        "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=131.50&lat=33.45",
+        "https://www.jishin.go.jp/main/chousakenkyuu/beppu_haneyama/h27/27Report_Chap3_3.pdf",
+        "https://www.data.jma.go.jp/eqev/data/bulletin/data/shindo/code_p.zip",
+        "https://www.city.kitsuki.lg.jp/soshiki/1/soumu/gaiyou/1438.html"
       ],
-      "note": "The official observation-point label identifies the locality 杵築市山香町; it does not publish a host facility or street address.",
+      "note": "Table 3.3.4-1 of the FY2015 Beppu–Haneyama fault-zone research report explicitly lists the Ōita Prefecture network instrument 01TA0037 under the JMA reporting label 杵築市山香町 at 杵築市山香町大字野原1010-2（山香庁舎）. The report describes data collected from the operating network. The JMA historical catalogue lists the active local-government record 7510334 under the same name, in force since 2011-05-12 at 13:00 JST, with no later same-name handover in the catalogue. The municipal source corroborates the facility address. The position of the instrument within the site remains unverified.",
       "placementLocalityJa": "杵築市山香町",
-      "placementPrecision": "municipality_or_ward"
+      "placementPrecision": "exact_address"
     },
     {
       "code": "4421330",
@@ -169143,10 +169304,10 @@
       "areaNameJa": "大分県中部",
       "municipalityCode": "4421300",
       "gsiLocalityJa": "挾間町向原",
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
-      "facilityNameEn": null,
-      "metadataStatus": "Official observation-locality label",
+      "publishedAddressJa": "大分県由布市挾間町向原128番地1",
+      "facilityNameJa": "由布市役所挾間庁舎",
+      "facilityNameEn": "Yufu City Hall, Hasama Office",
+      "metadataStatus": "Ōita Prefecture seismic-intensity network inventory, JMA station history, and published facility address",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -169155,11 +169316,14 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://www.data.jma.go.jp/eqev/data/intens-st/",
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.jishin.go.jp/main/chousakenkyuu/beppu_haneyama/h27/27Report_Chap3_3.pdf",
+        "https://www.data.jma.go.jp/eqev/data/bulletin/data/shindo/code_p.zip",
+        "https://www.city.yufu.oita.jp/siseijouhou/sisetu/sisetu_cate1/tyousya_annai"
       ],
-      "note": "The official observation-point label identifies the locality 由布市挾間町; it does not publish a host facility or street address.",
+      "note": "Table 3.3.4-1 of the FY2015 Beppu–Haneyama fault-zone research report explicitly lists the Ōita Prefecture network instrument 01TA0049 under the JMA reporting label 由布市挾間町 at 由布市挾間町向原128-1（挾間庁舎）. The report describes data collected from the operating network. The JMA historical catalogue lists the active local-government record 7511130 under the same name, in force since 2000-07-18 at 12:00 JST, with no later same-name handover in the catalogue. The municipal source corroborates the facility address. The position of the instrument within the site remains unverified.",
       "placementLocalityJa": "由布市挾間町",
-      "placementPrecision": "municipality_or_ward"
+      "placementPrecision": "exact_address"
     },
     {
       "code": "4421335",
@@ -169197,9 +169361,12 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://www.data.jma.go.jp/eqev/data/intens-st/",
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.jishin.go.jp/main/chousakenkyuu/beppu_haneyama/h27/27Report_Chap3_3.pdf",
+        "https://www.data.jma.go.jp/eqev/data/bulletin/data/shindo/code_p.zip",
+        "https://www.city.yufu.oita.jp/siseijouhou/sisetu/sisetu_cate1/tyousya_annai"
       ],
-      "note": "The official observation-point label identifies the locality 由布市庄内町; it does not publish a host facility or street address.",
+      "note": "The official observation-point label identifies the locality 由布市庄内町; it does not publish a host facility or street address. Table 3.3.4-1 of the FY2015 Beppu–Haneyama fault-zone research report lists the Ōita Prefecture network instrument 01TA0048 under the same reporting name at 由布市庄内町柿原302（庄内庁舎）. JMA's historical catalogue dates the active domestic code 7511135 to 2016-03-07 at 12:00 JST. The city still lists the Shonai Office at Kakihara 302. JMA's predecessor record 7511133 remained listed through 22 April 2016 alongside the current record which began on 7 March. A record for the current meter installation is needed.",
       "placementLocalityJa": "由布市庄内町",
       "placementPrecision": "municipality_or_ward"
     },
@@ -169239,9 +169406,17 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://www.data.jma.go.jp/eqev/data/intens-st/",
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.jishin.go.jp/main/chousakenkyuu/beppu_haneyama/h27/27Report_Chap3_3.pdf",
+        "https://www.data.jma.go.jp/eqev/data/bulletin/data/shindo/code_p.zip",
+        "https://www.city.yufu.oita.jp/siseijouhou/sisetu/sisetu_cate1/tyousya_annai",
+        "https://xml.kishou.go.jp/20190214_jmaxml_info.pdf",
+        "https://www.city.yufu.oita.jp/wp-content/uploads/2019/02/vol161.pdf",
+        "https://www.city.yufu.oita.jp/newly/rinnjimadoguti/",
+        "https://www.city.yufu.oita.jp/newly/yufuintyousyaiten",
+        "https://www.city.yufu.oita.jp/uploads/files/2026/04/R8-3-yufushikoukyoushisetukobetukeikaku-zenpen.pdf"
       ],
-      "note": "The official observation-point label identifies the locality 由布市湯布院町川上; it does not publish a host facility or street address.",
+      "note": "The official observation-point label identifies the locality 由布市湯布院町川上; it does not publish a host facility or street address. Table 3.3.4-1 of the FY2015 Beppu–Haneyama fault-zone research report lists the Ōita Prefecture network instrument 01TA0050 under the same reporting name at 由布市湯布院町川上3738-1（湯布院庁舎）. JMA's historical catalogue dates the active domestic code 7511136 to 2019-02-12 at 12:00 JST. The city still lists the Yufuin Office at Kawakami 3738-1. Check where the meter was installed at the reporting handover in 2019. The February 2019 city newsletter records the office's temporary move on the same date as JMA's reporting handover, 12 February 2019. The temporary office was in the former Yufuin Community Center at Kawakami 3758-1. The city moved office and community-center functions to the new Yufuin Luck Hall on the original 3738-1 site in 2021. The city records trace the office moves. The instrument's current site still requires a separate record.",
       "placementLocalityJa": "由布市湯布院町川上",
       "placementPrecision": "municipality_or_ward"
     },
@@ -169473,10 +169648,10 @@
       "areaNameJa": "大分県南部",
       "municipalityCode": "4420500",
       "gsiLocalityJa": "直川大字上直見",
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
-      "facilityNameEn": null,
-      "metadataStatus": "Official observation-locality label",
+      "publishedAddressJa": "大分県佐伯市直川大字赤木105番地",
+      "facilityNameJa": "佐伯市直川振興局",
+      "facilityNameEn": "Saiki City Naokawa Regional Office",
+      "metadataStatus": "Ōita Prefecture seismic-intensity network inventory, JMA station history, and published facility address",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -169485,11 +169660,15 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://www.data.jma.go.jp/eqev/data/intens-st/",
-        "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=131.78&lat=32.90"
+        "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=131.78&lat=32.90",
+        "https://www.jishin.go.jp/main/chousakenkyuu/beppu_haneyama/h27/27Report_Chap3_3.pdf",
+        "https://www.data.jma.go.jp/eqev/data/bulletin/data/shindo/code_p.zip",
+        "https://www.city.saiki.oita.jp/kiji0033572/index.html",
+        "https://www.city.saiki.oita.jp/reiki/reiki_honbun/r159RG00000014.html"
       ],
-      "note": "The official observation-point label identifies the locality 佐伯市直川; it does not publish a host facility or street address.",
+      "note": "Table 3.3.4-1 of the FY2015 Beppu–Haneyama fault-zone research report explicitly lists the Ōita Prefecture network instrument 01TA0021 under the JMA reporting label 佐伯市直川 at 佐伯市直川大字赤木105（直川振興局）. The report describes data collected from the operating network. The JMA historical catalogue lists the active local-government record 7520034 under the same name, in force since 2000-07-18 at 12:00 JST, with no later same-name handover in the catalogue. The municipal source corroborates the facility address. The position of the instrument within the site remains unverified.",
       "placementLocalityJa": "佐伯市直川",
-      "placementPrecision": "municipality_or_ward"
+      "placementPrecision": "exact_address"
     },
     {
       "code": "4420537",
@@ -169515,10 +169694,10 @@
       "areaNameJa": "大分県南部",
       "municipalityCode": "4420500",
       "gsiLocalityJa": "宇目大字千束",
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
-      "facilityNameEn": null,
-      "metadataStatus": "Official observation-locality label",
+      "publishedAddressJa": "大分県佐伯市宇目大字千束1060番地1",
+      "facilityNameJa": "佐伯市宇目振興局",
+      "facilityNameEn": "Saiki City Ume Regional Office",
+      "metadataStatus": "Ōita Prefecture seismic-intensity network inventory, JMA station history, and published facility address",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -169527,11 +169706,18 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://www.data.jma.go.jp/eqev/data/intens-st/",
-        "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=131.66&lat=32.86"
+        "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=131.66&lat=32.86",
+        "https://www.jishin.go.jp/main/chousakenkyuu/beppu_haneyama/h27/27Report_Chap3_3.pdf",
+        "https://www.data.jma.go.jp/eqev/data/bulletin/data/shindo/code_p.zip",
+        "https://www.city.saiki.oita.jp/kiji0033572/index.html",
+        "https://www.city.saiki.oita.jp/reiki/reiki_honbun/r159RG00000014.html",
+        "https://www.city.saiki.oita.jp/kiji0031864/3_1864_793_up_hqdqab4m.pdf",
+        "https://www.pref.oita.jp/uploaded/attachment/2259980.pdf",
+        "https://www.mlit.go.jp/river/bousai/main/saigai/tisiki/syozaiti/pdf/etsuran-kyushu.pdf"
       ],
-      "note": "The official observation-point label identifies the locality 佐伯市宇目; it does not publish a host facility or street address.",
+      "note": "Table 3.3.4-1 of the FY2015 Beppu–Haneyama fault-zone research report explicitly lists the Ōita Prefecture network instrument 01TA0020 under the JMA reporting label 佐伯市宇目 at 佐伯市宇目大字千束1060-1（宇目振興局）. The report describes data collected from the operating network. The JMA historical catalogue lists the active local-government record 7520037 under the same name, in force since 2011-05-12 at 13:00 JST, with no later same-name handover in the catalogue. The municipal source corroborates the facility address. The position of the instrument within the site remains unverified. Saiki's facility plan records construction of a new Ume office building in FY2017. The transport ministry's pre-rebuild directory places the office at Senzoku 1060-1, and the prefecture's 2026 election list still identifies the former office room at that same address. The current Saiki directory publishes the same site address. The placement records the office site without assigning the sensor to a particular building.",
       "placementLocalityJa": "佐伯市宇目",
-      "placementPrecision": "municipality_or_ward"
+      "placementPrecision": "exact_address"
     },
     {
       "code": "4420538",
@@ -169557,10 +169743,10 @@
       "areaNameJa": "大分県南部",
       "municipalityCode": "4420500",
       "gsiLocalityJa": "",
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
-      "facilityNameEn": null,
-      "metadataStatus": "Official observation-locality label",
+      "publishedAddressJa": "大分県佐伯市上浦大字津井浦1400番地3",
+      "facilityNameJa": "佐伯市上浦振興局",
+      "facilityNameEn": "Saiki City Kamiura Regional Office",
+      "metadataStatus": "Ōita Prefecture seismic-intensity network inventory, JMA station history, and published facility address",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -169569,11 +169755,15 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://www.data.jma.go.jp/eqev/data/intens-st/",
-        "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=131.937500&lat=33.057500"
+        "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=131.937500&lat=33.057500",
+        "https://www.jishin.go.jp/main/chousakenkyuu/beppu_haneyama/h27/27Report_Chap3_3.pdf",
+        "https://www.data.jma.go.jp/eqev/data/bulletin/data/shindo/code_p.zip",
+        "https://www.city.saiki.oita.jp/kiji0033572/index.html",
+        "https://www.city.saiki.oita.jp/reiki/reiki_honbun/r159RG00000014.html"
       ],
-      "note": "The official observation-point label identifies the locality 佐伯市上浦; it does not publish a host facility or street address.",
+      "note": "Table 3.3.4-1 of the FY2015 Beppu–Haneyama fault-zone research report explicitly lists the Ōita Prefecture network instrument 01TA0017 under the JMA reporting label 佐伯市上浦 at 佐伯市上浦大字津井浦1400-3（上浦振興局）. The report describes data collected from the operating network. The JMA historical catalogue lists the active local-government record 7520038 under the same name, in force since 2011-05-12 at 13:00 JST, with no later same-name handover in the catalogue. The municipal source corroborates the facility address. The position of the instrument within the site remains unverified.",
       "placementLocalityJa": "佐伯市上浦",
-      "placementPrecision": "municipality_or_ward"
+      "placementPrecision": "exact_address"
     },
     {
       "code": "4420539",
@@ -169599,10 +169789,10 @@
       "areaNameJa": "大分県南部",
       "municipalityCode": "4420500",
       "gsiLocalityJa": "弥生大字井崎",
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
-      "facilityNameEn": null,
-      "metadataStatus": "Official observation-locality label",
+      "publishedAddressJa": "大分県佐伯市弥生大字上小倉656番地1",
+      "facilityNameJa": "佐伯市弥生振興局",
+      "facilityNameEn": "Saiki City Yayoi Regional Office",
+      "metadataStatus": "Ōita Prefecture seismic-intensity network inventory, JMA station history, and published facility address",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -169611,11 +169801,15 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://www.data.jma.go.jp/eqev/data/intens-st/",
-        "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=131.84&lat=32.97"
+        "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=131.84&lat=32.97",
+        "https://www.jishin.go.jp/main/chousakenkyuu/beppu_haneyama/h27/27Report_Chap3_3.pdf",
+        "https://www.data.jma.go.jp/eqev/data/bulletin/data/shindo/code_p.zip",
+        "https://www.city.saiki.oita.jp/kiji0033572/index.html",
+        "https://www.city.saiki.oita.jp/reiki/reiki_honbun/r159RG00000014.html"
       ],
-      "note": "The official observation-point label identifies the locality 佐伯市弥生; it does not publish a host facility or street address.",
+      "note": "Table 3.3.4-1 of the FY2015 Beppu–Haneyama fault-zone research report explicitly lists the Ōita Prefecture network instrument 01TA0018 under the JMA reporting label 佐伯市弥生 at 佐伯市弥生大字上小倉656-1（弥生振興局）. The report describes data collected from the operating network. The JMA historical catalogue lists the active local-government record 7520039 under the same name, in force since 2011-05-12 at 13:00 JST, with no later same-name handover in the catalogue. The municipal source corroborates the facility address. The position of the instrument within the site remains unverified.",
       "placementLocalityJa": "佐伯市弥生",
-      "placementPrecision": "municipality_or_ward"
+      "placementPrecision": "exact_address"
     },
     {
       "code": "4420541",
@@ -169641,10 +169835,10 @@
       "areaNameJa": "大分県南部",
       "municipalityCode": "4420500",
       "gsiLocalityJa": "",
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
-      "facilityNameEn": null,
-      "metadataStatus": "Official observation-locality label",
+      "publishedAddressJa": "大分県佐伯市米水津大字浦代浦1239番地2",
+      "facilityNameJa": "佐伯市米水津振興局",
+      "facilityNameEn": "Saiki City Yonouzu Regional Office",
+      "metadataStatus": "Ōita Prefecture seismic-intensity network inventory, JMA station history, and published facility address",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -169653,11 +169847,15 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://www.data.jma.go.jp/eqev/data/intens-st/",
-        "https://www.city.saiki.oita.jp/"
+        "https://www.city.saiki.oita.jp/",
+        "https://www.jishin.go.jp/main/chousakenkyuu/beppu_haneyama/h27/27Report_Chap3_3.pdf",
+        "https://www.data.jma.go.jp/eqev/data/bulletin/data/shindo/code_p.zip",
+        "https://www.city.saiki.oita.jp/kiji0033572/index.html",
+        "https://www.city.saiki.oita.jp/reiki/reiki_honbun/r159RG00000014.html"
       ],
-      "note": "The official observation-point label identifies the locality 佐伯市米水津; it does not publish a host facility or street address.",
+      "note": "Table 3.3.4-1 of the FY2015 Beppu–Haneyama fault-zone research report explicitly lists the Ōita Prefecture network instrument 01TA0023 under the JMA reporting label 佐伯市米水津 at 佐伯市米水津大字浦代浦1239-2（米水津振興局）. The report describes data collected from the operating network. The JMA historical catalogue lists the active local-government record 7520041 under the same name, in force since 2011-05-12 at 13:00 JST, with no later same-name handover in the catalogue. The municipal source corroborates the facility address. The position of the instrument within the site remains unverified.",
       "placementLocalityJa": "佐伯市米水津",
-      "placementPrecision": "municipality_or_ward"
+      "placementPrecision": "exact_address"
     },
     {
       "code": "4420543",
@@ -169737,9 +169935,13 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://www.data.jma.go.jp/eqev/data/intens-st/",
-        "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=131.96&lat=32.94"
+        "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=131.96&lat=32.94",
+        "https://www.jishin.go.jp/main/chousakenkyuu/beppu_haneyama/h27/27Report_Chap3_3.pdf",
+        "https://www.data.jma.go.jp/eqev/data/bulletin/data/shindo/code_p.zip",
+        "https://www.city.saiki.oita.jp/list00119.html",
+        "https://xml.kishou.go.jp/20180613_jmaxml_info.pdf"
       ],
-      "note": "The official observation-point label identifies the locality 佐伯市鶴見; it does not publish a host facility or street address.",
+      "note": "The official observation-point label identifies the locality 佐伯市鶴見; it does not publish a host facility or street address. Table 3.3.4-1 of the FY2015 Beppu–Haneyama fault-zone research report lists the Ōita Prefecture network instrument 01TA0022 under the same reporting name at 佐伯市鶴見大字地松浦2008-6（鶴見振興局）. JMA's historical catalogue dates the active domestic code 7520044 to 2018-03-28 at 12:00 JST. The current Tsurumi Regional Office directory still gives Jimatsuura 2008-6. The June 2018 XML notice lists a change against the same XML code 4420544, and the domestic catalogue records a different number starting in March 2018. The current instrument parcel remains unverified.",
       "placementLocalityJa": "佐伯市鶴見",
       "placementPrecision": "municipality_or_ward"
     },
@@ -169891,10 +170093,10 @@
       "areaNameJa": "大分県南部",
       "municipalityCode": "4421200",
       "gsiLocalityJa": "千歳町新殿",
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
-      "facilityNameEn": null,
-      "metadataStatus": "Official observation-locality label",
+      "publishedAddressJa": "大分県豊後大野市千歳町新殿706番地1",
+      "facilityNameJa": "豊後大野市役所千歳支所",
+      "facilityNameEn": "Bungo-Ono City Hall Chitose Branch Office",
+      "metadataStatus": "Ōita Prefecture seismic-intensity network inventory, JMA station history, and published facility address",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -169903,11 +170105,14 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://www.data.jma.go.jp/eqev/data/intens-st/",
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.jishin.go.jp/main/chousakenkyuu/beppu_haneyama/h27/27Report_Chap3_3.pdf",
+        "https://www.data.jma.go.jp/eqev/data/bulletin/data/shindo/code_p.zip",
+        "https://www.bungo-ohno.jp/docs/2015020600039/"
       ],
-      "note": "The official observation-point label identifies the locality 豊後大野市千歳町; it does not publish a host facility or street address.",
+      "note": "Table 3.3.4-1 of the FY2015 Beppu–Haneyama fault-zone research report explicitly lists the Ōita Prefecture network instrument 01TA0046 under the JMA reporting label 豊後大野市千歳町 at 豊後大野市千歳町新殿706-1（千歳支所）. The report describes data collected from the operating network. The JMA historical catalogue lists the active local-government record 7521840 under the same name, in force since 2011-05-12 at 13:00 JST, with no later same-name handover in the catalogue. The municipal source corroborates the facility address. The position of the instrument within the site remains unverified.",
       "placementLocalityJa": "豊後大野市千歳町",
-      "placementPrecision": "municipality_or_ward"
+      "placementPrecision": "exact_address"
     },
     {
       "code": "4421242",
@@ -169945,9 +170150,13 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://www.data.jma.go.jp/eqev/data/intens-st/",
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.jishin.go.jp/main/chousakenkyuu/beppu_haneyama/h27/27Report_Chap3_3.pdf",
+        "https://www.data.jma.go.jp/eqev/data/bulletin/data/shindo/code_p.zip",
+        "https://www.bungo-ohno.jp/docs/2020032700011/file_contents/tiikibousaikeikaku_siryou1.pdf",
+        "https://www.bungo-ohno.jp/docs/myna/"
       ],
-      "note": "The official observation-point label identifies the locality 豊後大野市大野町; it does not publish a host facility or street address.",
+      "note": "The official observation-point label identifies the locality 豊後大野市大野町; it does not publish a host facility or street address. Table 3.3.4-1 of the FY2015 Beppu–Haneyama fault-zone research report lists the Ōita Prefecture network instrument 01TA0045 under the same reporting name at 豊後大野市大野町田中8-1（大野支所）. JMA's historical catalogue dates the active domestic code 7521842 to 2016-03-29 at 12:00 JST. The city's current branch directory puts the Ono Branch at Tanaka 55-1. The facility records for the current instrument are still needed.",
       "placementLocalityJa": "豊後大野市大野町",
       "placementPrecision": "municipality_or_ward"
     },
@@ -169987,9 +170196,13 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://www.data.jma.go.jp/eqev/data/intens-st/",
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.jishin.go.jp/main/chousakenkyuu/beppu_haneyama/h27/27Report_Chap3_3.pdf",
+        "https://www.data.jma.go.jp/eqev/data/bulletin/data/shindo/code_p.zip",
+        "https://www.bungo-ohno.jp/docs/2020032700011/file_contents/tiikibousaikeikaku_siryou1.pdf",
+        "https://www.bungo-ohno.jp/docs/myna/"
       ],
-      "note": "The official observation-point label identifies the locality 豊後大野市清川町; it does not publish a host facility or street address.",
+      "note": "The official observation-point label identifies the locality 豊後大野市清川町; it does not publish a host facility or street address. Table 3.3.4-1 of the FY2015 Beppu–Haneyama fault-zone research report lists the Ōita Prefecture network instrument 01TA0042 under the same reporting name at 豊後大野市清川町砂田1844（高齢者生き活性化センターみつば苑）. JMA's historical catalogue dates the active domestic code 7521843 to 2020-02-17 at 12:00 JST. The city's current Kiyokawa Branch is at Sunada 936-2. The survey names Mitsubaen, a separate facility, and the current meter's host still needs evidence.",
       "placementLocalityJa": "豊後大野市清川町",
       "placementPrecision": "municipality_or_ward"
     },
@@ -170029,9 +170242,13 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://www.data.jma.go.jp/eqev/data/intens-st/",
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.jishin.go.jp/main/chousakenkyuu/beppu_haneyama/h27/27Report_Chap3_3.pdf",
+        "https://www.data.jma.go.jp/eqev/data/bulletin/data/shindo/code_p.zip",
+        "https://www.bungo-ohno.jp/docs/2020032700011/file_contents/tiikibousaikeikaku_siryou1.pdf",
+        "https://www.bungo-ohno.jp/docs/myna/"
       ],
-      "note": "The official observation-point label identifies the locality 豊後大野市朝地町; it does not publish a host facility or street address.",
+      "note": "The official observation-point label identifies the locality 豊後大野市朝地町; it does not publish a host facility or street address. Table 3.3.4-1 of the FY2015 Beppu–Haneyama fault-zone research report lists the Ōita Prefecture network instrument 01TA0044 under the same reporting name at 豊後大野市朝地町朝地891（朝地支所）. JMA's historical catalogue dates the active domestic code 7521844 to 2020-02-10 at 12:00 JST. The city's current Asaji Branch is at Asaji 932-1. The facility records for the current instrument are still needed.",
       "placementLocalityJa": "豊後大野市朝地町",
       "placementPrecision": "municipality_or_ward"
     },
@@ -170113,9 +170330,13 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://www.data.jma.go.jp/eqev/data/intens-st/",
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.jishin.go.jp/main/chousakenkyuu/beppu_haneyama/h27/27Report_Chap3_3.pdf",
+        "https://www.data.jma.go.jp/eqev/data/bulletin/data/shindo/code_p.zip",
+        "https://www.bungo-ohno.jp/docs/2020032700011/file_contents/tiikibousaikeikaku_siryou1.pdf",
+        "https://www.bungo-ohno.jp/docs/myna/"
       ],
-      "note": "The official observation-point label identifies the locality 豊後大野市緒方町; it does not publish a host facility or street address.",
+      "note": "The official observation-point label identifies the locality 豊後大野市緒方町; it does not publish a host facility or street address. Table 3.3.4-1 of the FY2015 Beppu–Haneyama fault-zone research report lists the Ōita Prefecture network instrument 01TA0043 under the same reporting name at 豊後大野市緒方町馬場36（緒方支所）. JMA's historical catalogue dates the active domestic code 7521846 to 2020-10-19 at 12:00 JST. The city's current Ogata Branch is at Baba 41-1. The facility records for the current instrument are still needed.",
       "placementLocalityJa": "豊後大野市緒方町",
       "placementPrecision": "municipality_or_ward"
     },
@@ -170575,10 +170796,10 @@
       "areaNameJa": "大分県西部",
       "municipalityCode": "4420800",
       "gsiLocalityJa": "久住町大字久住",
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
-      "facilityNameEn": null,
-      "metadataStatus": "Official observation-locality label",
+      "publishedAddressJa": "大分県竹田市久住町大字久住6161番地1",
+      "facilityNameJa": "竹田市役所久住支所",
+      "facilityNameEn": "Taketa City Hall Kuju Branch Office",
+      "metadataStatus": "Ōita Prefecture seismic-intensity network inventory, JMA station history, and published facility address",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -170587,11 +170808,14 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://www.data.jma.go.jp/eqev/data/intens-st/",
-        "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=131.29&lat=33.02"
+        "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=131.29&lat=33.02",
+        "https://www.jishin.go.jp/main/chousakenkyuu/beppu_haneyama/h27/27Report_Chap3_3.pdf",
+        "https://www.data.jma.go.jp/eqev/data/bulletin/data/shindo/code_p.zip",
+        "https://www.city.taketa.oita.jp/shisei_machizukuri/annai/4/402.html"
       ],
-      "note": "The official observation-point label identifies the locality 竹田市久住町; it does not publish a host facility or street address.",
+      "note": "Table 3.3.4-1 of the FY2015 Beppu–Haneyama fault-zone research report explicitly lists the Ōita Prefecture network instrument 01TA0030 under the JMA reporting label 竹田市久住町 at 竹田市久住町大字久住6161-1（久住支所）. The report describes data collected from the operating network. The JMA historical catalogue lists the active local-government record 7530132 under the same name, in force since 2002-11-12 at 12:00 JST, with no later same-name handover in the catalogue. The municipal source corroborates the facility address. The position of the instrument within the site remains unverified.",
       "placementLocalityJa": "竹田市久住町",
-      "placementPrecision": "municipality_or_ward"
+      "placementPrecision": "exact_address"
     },
     {
       "code": "4420833",
@@ -170617,10 +170841,10 @@
       "areaNameJa": "大分県西部",
       "municipalityCode": "4420800",
       "gsiLocalityJa": "直入町大字長湯",
-      "publishedAddressJa": null,
-      "facilityNameJa": null,
-      "facilityNameEn": null,
-      "metadataStatus": "Official observation-locality label",
+      "publishedAddressJa": "大分県竹田市直入町大字長湯8201番地",
+      "facilityNameJa": "竹田市役所直入支所",
+      "facilityNameEn": "Taketa City Hall Naoiri Branch Office",
+      "metadataStatus": "Ōita Prefecture seismic-intensity network inventory, JMA station history, and published facility address",
       "providerStationCode": null,
       "providerStationNetwork": null,
       "providerStationNameJa": null,
@@ -170629,11 +170853,14 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://www.data.jma.go.jp/eqev/data/intens-st/",
-        "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=131.38&lat=33.08"
+        "https://mreversegeocoder.gsi.go.jp/reverse-geocoder/LonLatToAddress?lon=131.38&lat=33.08",
+        "https://www.jishin.go.jp/main/chousakenkyuu/beppu_haneyama/h27/27Report_Chap3_3.pdf",
+        "https://www.data.jma.go.jp/eqev/data/bulletin/data/shindo/code_p.zip",
+        "https://www.city.taketa.oita.jp/section/reiki/reiki_honbun/r335RG00000034.html?id=j2"
       ],
-      "note": "The official observation-point label identifies the locality 竹田市直入町; it does not publish a host facility or street address.",
+      "note": "Table 3.3.4-1 of the FY2015 Beppu–Haneyama fault-zone research report explicitly lists the Ōita Prefecture network instrument 01TA0031 under the JMA reporting label 竹田市直入町 at 竹田市直入町大字長湯8201（直入支所）. The report describes data collected from the operating network. The JMA historical catalogue lists the active local-government record 7530133 under the same name, in force since 2004-08-09 at 12:00 JST, with no later same-name handover in the catalogue. The municipal source corroborates the facility address. The position of the instrument within the site remains unverified.",
       "placementLocalityJa": "竹田市直入町",
-      "placementPrecision": "municipality_or_ward"
+      "placementPrecision": "exact_address"
     },
     {
       "code": "4420834",
@@ -170715,9 +170942,13 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://www.data.jma.go.jp/eqev/data/intens-st/",
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://www.jishin.go.jp/main/chousakenkyuu/beppu_haneyama/h27/27Report_Chap3_3.pdf",
+        "https://www.data.jma.go.jp/eqev/data/bulletin/data/shindo/code_p.zip",
+        "https://www.city.taketa.oita.jp/material/files/group/1/201504koho121.pdf",
+        "https://www.city.taketa.oita.jp/shisei_machizukuri/annai/4/412.html"
       ],
-      "note": "The official observation-point label identifies the locality 竹田市荻町; it does not publish a host facility or street address.",
+      "note": "The official observation-point label identifies the locality 竹田市荻町; it does not publish a host facility or street address. Table 3.3.4-1 of the FY2015 Beppu–Haneyama fault-zone research report lists the Ōita Prefecture network instrument 01TA0029 under the same reporting name at 竹田市荻町馬場426-20（荻支所）. JMA's historical catalogue dates the active domestic code 7530136 to 2015-03-23 at 12:00 JST. Taketa's April 2015 newsletter says the former Ogi Branch's final day was 20 March and records its move to the Ogi health and welfare complex at Erabaru 1772-7. The JMA code changed on the following Monday, 23 March. The dates make the new branch a strong lead. The surveyed Baba address belongs to the old branch, and a later installation record is needed to assign the new branch address to the meter.",
       "placementLocalityJa": "竹田市荻町",
       "placementPrecision": "municipality_or_ward"
     },
@@ -171258,9 +171489,11 @@
       "providerLongitude": null,
       "sourceUrls": [
         "https://www.data.jma.go.jp/eqev/data/intens-st/",
-        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003"
+        "https://catalog.registries.digital.go.jp/rc/dataset/ba-o1-000000_g2-000003",
+        "https://xml.kishou.go.jp/20261019_jmaxml_info.pdf",
+        "https://www.data.jma.go.jp/eqev/data/bulletin/data/shindo/code_p.zip"
       ],
-      "note": "The official observation-point label identifies the locality 日向市東郷町山陰; it does not publish a host facility or street address.",
+      "note": "The official observation-point label identifies the locality 日向市東郷町山陰; it does not publish a host facility or street address. JMA’s historical catalogue dates the same-name reporting handover to domestic code 7600131 to noon on 6 January 2011. Its 19 October 2026 notice, PDF page 3, lists a further same-name relocation to 4520632, with the code table scheduled to change at noon on 19 November 2026. The two records establish the reporting history. The present and receiving facilities remain open.",
       "placementLocalityJa": "日向市東郷町山陰",
       "placementPrecision": "municipality_or_ward"
     },

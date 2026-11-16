@@ -3,6 +3,7 @@
 package cz.misa.quakedeck.sandbox
 
 import cz.misa.quakedeck.data.AppSnapshot
+import cz.misa.quakedeck.data.BuiltInOverlappingEewReplay
 import cz.misa.quakedeck.data.LiveUpdateKind
 import cz.misa.quakedeck.time.AppClockController
 import cz.misa.quakedeck.time.AppClockMode
@@ -12,7 +13,8 @@ import cz.misa.quakedeck.time.parseJstMillis
 enum class BuiltInSandboxScenario(val firstTimestampJst: String) {
     NOTO_2023_EEW("2023-05-05 14:42:13.900"),
     NOTO_2024_TSUNAMI("2024-01-01 16:10:22.500"),
-    NOTO_2024_COMBINED("2024-01-01 16:10:29.200")
+    NOTO_2024_COMBINED("2024-01-01 16:10:29.200"),
+    OVERLAPPING_EEWS(BuiltInOverlappingEewReplay.FIRST_TIMESTAMP_JST)
 }
 
 /**

@@ -146,6 +146,8 @@
     <string name="replay_noto_tsunami_explanation">Spustí se po pěti sekundách. Běžnými živými parsery přehraje zemětřesení M7,6, nejvyšší varování před tsunami, aktualizaci příchodu, snížení stupně a konečné odvolání.</string>
     <string name="replay_noto_combined">Přehrát společný test EEW + tsunami Noto 2024</string>
     <string name="replay_noto_combined_explanation">Spustí se po pěti sekundách a záměrně překryje aktivní EEW s hlášeními tsunami. Poté zemětřesení potvrdí, sníží stupeň varování a nakonec jej odvolá.</string>
+    <string name="replay_overlapping_eew">Překrývající se varování EEW</string>
+    <string name="replay_overlapping_eew_explanation">Spustí se po pěti sekundách. Simulované varování pro východní Šizuoku následuje 12 sekund po varování pro Noto. Obě jsou současně aktivní 63 sekund. Každé má na mapě vlastní odznak a ve verzi FULL také čela vln P a S.</string>
     <string name="text_size">Velikost textu</string>
     <string name="marker_size_explanation">Velikost značky je pevná vůči obrazovce a při přibližování mapy se nezmenšuje.</string>
 <string name="tsunami_warning">Varování před tsunami</string>

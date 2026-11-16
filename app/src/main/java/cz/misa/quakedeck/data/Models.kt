@@ -231,6 +231,9 @@ data class ReportArchiveStatus(
 )
 
 @Immutable
+data class ActiveEewIncident(val event: EarthquakeEvent, val deadlineMillis: Long?)
+
+@Immutable
 data class AppSnapshot(
     val sourceMode: DataSourceMode,
     val connectionState: ConnectionState,
@@ -254,8 +257,16 @@ data class AppSnapshot(
     val dmdssReportUpdate: Boolean = false,
     val dmdssLiveTypes: Set<String> = emptySet(),
     /** A provider has established tsunami state, including an expiry/cancellation with no active report. */
-    val tsunamiStateKnown: Boolean = false
-)
+    val tsunamiStateKnown: Boolean = false,
+    val activeEews: List<ActiveEewIncident> = emptyList()
+) {
+    fun activeEewIncidents(): List<ActiveEewIncident> =
+        activeEews.ifEmpty {
+            listOfNotNull(activeEewEvent?.takeIf { activeEew && !it.isCancelled }?.let {
+                ActiveEewIncident(it, activeEewUntilMillis)
+            })
+        }
+}
 
 fun waitingSnapshot(
     mode: DataSourceMode = DataSourceMode.FREE,

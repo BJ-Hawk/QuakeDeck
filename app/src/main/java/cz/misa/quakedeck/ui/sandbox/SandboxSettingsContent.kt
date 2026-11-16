@@ -112,6 +112,7 @@ fun SandboxSettingsPage(
     onEewReplay: () -> Unit,
     onTsunamiReplay: () -> Unit,
     onCombinedReplay: () -> Unit,
+    onOverlappingEewReplay: () -> Unit,
     testInjectionDelaySeconds: Int,
     onTestInjectionDelaySecondsChanged: (Int) -> Unit,
     onInjectEarthquakeReport: (Long) -> Unit,
@@ -303,6 +304,13 @@ fun SandboxSettingsPage(
                     description = localized(R.string.replay_noto_combined_explanation, language),
                     runLabel = localized(R.string.run, language),
                     onRun = onCombinedReplay
+                )
+                HorizontalDivider(Modifier.padding(vertical = 7.dp))
+                ReplayRow(
+                    title = localized(R.string.replay_overlapping_eew, language),
+                    description = localized(R.string.replay_overlapping_eew_explanation, language),
+                    runLabel = localized(R.string.run, language),
+                    onRun = onOverlappingEewReplay
                 )
             }
         }

@@ -92,6 +92,9 @@ class P2pQuakeProvider(
     private var pendingEewDetection: EarthquakeEvent? = null
     private val eewRevisions = EewRevisionTracker()
     private var eewCleanupRunnable: Runnable? = null
+    private val eewExpiries = EewIncidentExpiryScheduler(
+        appContext, mainHandler, "P2P", keepCpuAwake = { !testingMode }, onExpired = ::expireEew
+    )
     private var lastTsunami: TsunamiReport? = null
     private var latestLiveTsunamiIssue: Instant? = null
     private var latestLiveTsunamiEnded = false
@@ -109,7 +112,7 @@ class P2pQuakeProvider(
     // it is claimed only when one EEW or confirmed incident identifies it.
     private val pendingCrowdSignals = LinkedHashMap<String, P2pCrowdSignal>()
     private val claimedCrowdEews = LinkedHashMap<String, EarthquakeEvent>()
-    private var externalEewForCrowdAssociation: EarthquakeEvent? = null
+    private var externalEewsForCrowdAssociation = emptyList<EarthquakeEvent>()
     private val sandboxTimelineOffsets = mutableMapOf<String, Long>()
     @Volatile private var stopped = false
     @Volatile private var appInForeground = true
@@ -239,6 +242,29 @@ class P2pQuakeProvider(
     }
 
     override fun startBuiltInReplay(startDelayMillis: Long) {
+        startBuiltInEewScenario(
+            startDelayMillis,
+            "Noto EEW",
+            BuiltInEewReplay.packets,
+            BuiltInEewReplay.COMPLETE_AFTER_MILLIS
+        )
+    }
+
+    override fun startBuiltInOverlappingEewReplay(startDelayMillis: Long) {
+        startBuiltInEewScenario(
+            startDelayMillis,
+            "Overlapping EEWs",
+            BuiltInOverlappingEewReplay.packets,
+            BuiltInOverlappingEewReplay.COMPLETE_AFTER_MILLIS
+        )
+    }
+
+    private fun startBuiltInEewScenario(
+        startDelayMillis: Long,
+        label: String,
+        packets: List<BuiltInEewReplay.Packet>,
+        completeAfterMillis: Long
+    ) {
         if (!SandboxFeature.ENABLED) return
         val armDelay = startDelayMillis.coerceIn(2_000L, 30_000L)
         mainHandler.post {
@@ -254,7 +280,7 @@ class P2pQuakeProvider(
             reconnectAttempt = 0
             currentState = ConnectionState.CONNECTED
             builtInReplayActive = true
-            builtInReplayLabel = "BUILT-IN NOTO EEW REPLAY"
+            builtInReplayLabel = "BUILT-IN ${label.uppercase()} REPLAY"
             clearActiveEew()
             cancelTsunamiCleanup()
             activeTsunami = false
@@ -268,13 +294,13 @@ class P2pQuakeProvider(
                 waitingSnapshot(
                     mode = sourceMode,
                     state = ConnectionState.CONNECTED,
-                    status = "Built-in Noto EEW replay armed · starts in ${armDelay / 1_000}s",
+                    status = "Built-in $label replay armed · starts in ${armDelay / 1_000}s",
                     testingMode = true
-                )
+                ).copy(builtInReplayActive = true)
             )
 
             val generation = replayGeneration
-            BuiltInEewReplay.packets.forEach { packet ->
+            packets.forEach { packet ->
                 scheduleReplayAction(armDelay + packet.offsetMillis, generation) {
                     val json = runCatching { JSONObject(packet.json) }.getOrNull()
                         ?: return@scheduleReplayAction
@@ -283,10 +309,11 @@ class P2pQuakeProvider(
             }
 
             scheduleReplayAction(
-                armDelay + BuiltInEewReplay.COMPLETE_AFTER_MILLIS,
+                armDelay + completeAfterMillis,
                 generation
             ) {
                 builtInReplayActive = false
+                builtInReplayLabel = null
                 connectWebSocket("Built-in replay complete · reconnecting official sandbox…")
             }
         }
@@ -642,6 +669,7 @@ class P2pQuakeProvider(
         appInForeground = true
         mainHandler.post {
             if (stopped || callback == null) return@post
+            eewExpiries.expireIfDue()
 
             // If Android/Doze or a loaded server left us in backoff, waking the
             // app starts a fresh handshake immediately.
@@ -678,10 +706,10 @@ class P2pQuakeProvider(
      * EEW solely for attaching 9611 evidence. It never promotes an unmatched
      * crowd aggregate into an event and never replaces provider earthquake data.
      */
-    fun setExternalEewForCrowdAssociation(event: EarthquakeEvent?) {
-        externalEewForCrowdAssociation = event?.takeIf {
+    fun setExternalEewsForCrowdAssociation(events: List<EarthquakeEvent>) {
+        externalEewsForCrowdAssociation = events.filter {
             it.kind == EarthquakeEventKind.EEW && !it.isCancelled && !it.isDrill
-        }?.also { warning ->
+        }.onEach { warning ->
             warning.p2pCrowdSignal?.let { recordCrowdEewClaim(warning, it) }
         }
     }
@@ -1927,6 +1955,7 @@ class P2pQuakeProvider(
                 }
                 mainHandler.post {
                     if (stopped || generation != connectionGeneration) return@post
+                    eewExpiries.expireIfDue()
                     reconnectAttempt = 0
                     currentState = ConnectionState.CONNECTED
                     if (sandboxForThisConnection) {
@@ -2139,6 +2168,7 @@ class P2pQuakeProvider(
 
     private fun processLiveMessage(json: JSONObject) {
         val code = json.optInt("code", -1)
+        if (code != 556) eewExpiries.expireIfDue()
         if (code == 551 && !useP2pConfirmedReport(json)) return
         if (code == 552 && !testingMode && dmdssTsunamiAvailable) return
         if (!acceptMessage(json)) return
@@ -2248,12 +2278,11 @@ class P2pQuakeProvider(
         return owner to signal
     }
 
-    private fun liveCrowdCandidates(): Sequence<EarthquakeEvent> = sequenceOf(
-        activeEewEvent,
-        externalEewForCrowdAssociation,
-        lastEvent,
-        *eventHistory.toTypedArray()
-    ).filterNotNull().filterNot { it.isDrill || it.isCancelled }
+    private fun liveCrowdCandidates(): Sequence<EarthquakeEvent> = (
+        eewExpiries.incidents(activeEewEvent).asSequence().map { it.event } +
+            externalEewsForCrowdAssociation.asSequence() + sequenceOf(lastEvent).filterNotNull() +
+            eventHistory.asSequence()
+        ).filterNot { it.isDrill || it.isCancelled }
 
     private fun recordCrowdEewClaim(event: EarthquakeEvent, signal: P2pCrowdSignal) {
         if (event.kind == EarthquakeEventKind.EEW && !event.isDrill && !event.isCancelled &&
@@ -2733,6 +2762,11 @@ class P2pQuakeProvider(
     }
 
     private fun clearActiveEew() {
+        eewExpiries.clear()
+        clearVisibleEew()
+    }
+
+    private fun clearVisibleEew() {
         cancelEewCleanup()
         activeEew = false
         activeEewEvent = null
@@ -2768,53 +2802,50 @@ class P2pQuakeProvider(
         mainHandler.postDelayed(runnable, 30_000L)
     }
 
-    private fun activateEew(event: EarthquakeEvent): Boolean {
-        cancelEewCleanup()
+    private fun activateEew(event: EarthquakeEvent, showAsPrimary: Boolean): Boolean {
         val nowMillis = System.currentTimeMillis()
-        val deadline = P2pEewLifecyclePolicy.deadline(event, nowMillis)
-        val targetMillis = deadline.epochMillis
-        if (targetMillis <= nowMillis) {
-            activeEew = false
-            activeEewEvent = null
-            activeEewUntilMillis = null
-            return false
-        }
+        val deadline = if (testingMode) {
+            P2pEewLifecyclePolicy.deadline(event, nowMillis).epochMillis
+        } else EewLifecyclePolicy.deadline(event, nowMillis)
+        if (deadline <= nowMillis) return false
 
+        cancelEewCleanup()
         activeEew = true
-        activeEewEvent = event
         pendingEewDetection = null
-        activeEewUntilMillis = targetMillis
-        val expectedId = event.id
-        val expectedSerial = event.reportSerial
-        val runnable = Runnable {
-            eewCleanupRunnable = null
-            val active = activeEewEvent ?: return@Runnable
-            if (!activeEew || active.id != expectedId || active.reportSerial != expectedSerial) {
-                return@Runnable
-            }
-
-            activeEew = false
-            activeEewEvent = null
-            activeEewUntilMillis = null
-            val visibleEvent = lastEvent ?: active
-            emit(
-                liveSnapshot(
-                    state = currentState,
-                    activeEew = false,
-                    event = visibleEvent,
-                    status = if (deadline.forecastDerived) {
-                        "EEW estimated wave passage complete · ${sourceLabel()}"
-                    } else {
-                        "EEW warning display safety timeout · ${sourceLabel()}"
-                    },
-                    updateKind = LiveUpdateKind.EEW_ENDED,
-                    eewUpdateEvent = active
-                )
-            )
+        if (showAsPrimary || activeEewEvent == null) {
+            activeEewEvent = event
+            activeEewUntilMillis = deadline
         }
-        eewCleanupRunnable = runnable
-        mainHandler.postDelayed(runnable, (targetMillis - nowMillis).coerceAtLeast(1L))
+        eewExpiries.schedule(event, deadline)
         return true
+    }
+
+    private fun expireEew(expiry: PendingEewExpiry) {
+        if (stopped) return
+        val event = activeEewEvent?.takeIf { it.id == expiry.event.id } ?: expiry.event
+        if (activeEewEvent?.id == event.id) promoteRemainingEew()
+        emit(
+            liveSnapshot(
+                state = currentState,
+                activeEew = activeEew,
+                event = lastEvent ?: event,
+                status = "EEW warning display timeout · ${sourceLabel()}",
+                updateKind = LiveUpdateKind.EEW_ENDED,
+                eewUpdateEvent = event,
+                eewDeadlineMillis = expiry.deadlineMillis
+            )
+        )
+    }
+
+    private fun promoteRemainingEew() {
+        val remaining = eewExpiries.newestIncident()
+        clearVisibleEew()
+        if (remaining != null) {
+            activeEew = true
+            activeEewEvent = remaining.event
+            activeEewUntilMillis = remaining.deadlineMillis
+            if (lastEvent?.kind == EarthquakeEventKind.EEW) lastEvent = remaining.event
+        }
     }
 
     override fun setP2pCrowdSignalsEnabled(enabled: Boolean) {
@@ -3232,9 +3263,9 @@ class P2pQuakeProvider(
         val issuedAt = formatJst(issue?.optString("time").orEmpty())
 
         if (json.optBoolean("cancelled", false)) {
-            val warning = activeEewEvent ?: eewRevisions.current(eventId) ?: lastEvent?.takeIf {
-                it.kind == EarthquakeEventKind.EEW
-            }
+            val warning = activeEewEvent?.takeIf { eventId.isBlank() || it.id == eventId }
+                ?: eewRevisions.current(eventId)
+                ?: lastEvent?.takeIf { it.kind == EarthquakeEventKind.EEW && it.id == eventId }
             if (warning != null && (eventId.isBlank() || warning.id == eventId)) {
                 val cancelled = warning.copy(
                     reportSerial = serial.ifBlank { warning.reportSerial },
@@ -3248,23 +3279,21 @@ class P2pQuakeProvider(
                     return LiveUpdateKind.NONE
                 }
                 eewRevisions.record(cancelled)
-                clearActiveEew()
+                eewExpiries.remove(warning.id)
+                if (activeEewEvent?.id == warning.id) promoteRemainingEew()
+                eewExpiries.expireIfDue()
 
                 val current = lastEvent
-                val visibleEvent = if (
-                    current?.kind == EarthquakeEventKind.CONFIRMED &&
-                    likelySameEarthquake(current, warning)
-                ) {
-                    current
-                } else {
+                val visibleEvent = if (current == null || current.id == warning.id &&
+                    current.kind == EarthquakeEventKind.EEW) {
                     cancelled.also { lastEvent = it }
-                }
+                } else current
 
                 if (emitUpdate) {
                     emit(
                         liveSnapshot(
                             state = ConnectionState.CONNECTED,
-                            activeEew = false,
+                            activeEew = activeEew,
                             event = visibleEvent,
                             status = if (recovered) {
                                 "Recovered EEW cancellation · ${sourceLabel()}"
@@ -3282,13 +3311,16 @@ class P2pQuakeProvider(
         }
 
         val parsedEew = parseEew(json) ?: return LiveUpdateKind.NONE
+        if (eewExpiries.incident(parsedEew.id) == null) eewExpiries.expireIfDue()
         val rejection = eewRevisions.rejection(parsedEew)
         if (!testingMode && rejection != null) {
+            eewExpiries.expireIfDue()
             deliveryDiagnostics.recordEewDecision(parsedEew, "ingest", rejection, "P2PQuake", LiveUpdateKind.EEW)
             return LiveUpdateKind.NONE
         }
         val current = lastEvent
-        val currentWarning = activeEewEvent
+        val currentWarning = activeEewEvent?.takeIf { it.id == parsedEew.id }
+            ?: eewExpiries.incident(parsedEew.id)?.event
         val eew = parsedEew.copy(
             p2pCrowdSignal = currentWarning
                 ?.takeIf { it.id == parsedEew.id }
@@ -3322,20 +3354,13 @@ class P2pQuakeProvider(
             // has already become the current report.
             return LiveUpdateKind.NONE
         }
-        val orderingReference = currentWarning ?: current
-        if (
-            !testingMode &&
-            orderingReference != null &&
-            orderingReference.id != eew.id &&
-            !matchesConfirmed &&
-            isOlderEvent(eew, orderingReference)
-        ) {
-            return LiveUpdateKind.NONE
-        }
-
-        if (!activateEew(eew)) {
+        val primaryWarning = activeEewEvent
+        val showAsPrimary = primaryWarning == null || primaryWarning.id == eew.id ||
+            (currentWarning == null && (testingMode || !isOlderEvent(eew, primaryWarning)))
+        if (!activateEew(eew, showAsPrimary)) {
+            eewExpiries.expireIfDue()
             deliveryDiagnostics.recordEewDecision(eew, "lifecycle", "Stale bulletin not activated", "P2PQuake",
-                LiveUpdateKind.NONE, P2pEewLifecyclePolicy.deadline(eew, System.currentTimeMillis()).epochMillis)
+                LiveUpdateKind.NONE, EewLifecyclePolicy.deadline(eew, System.currentTimeMillis()))
             // A delayed/recovered warning whose estimated passage already ended
             // is useful as history, but must not flash as a new active alert.
             return LiveUpdateKind.NONE
@@ -3343,8 +3368,9 @@ class P2pQuakeProvider(
         eew.p2pCrowdSignal?.let { recordCrowdEewClaim(eew, it) }
         eewRevisions.record(eew)
 
-        val visibleEvent = current.takeIf { matchesConfirmed }
-            ?: eew.also { lastEvent = it }
+        val visibleEvent = if (activeEewEvent?.id == eew.id && !matchesConfirmed) {
+            eew.also { lastEvent = it }
+        } else current ?: activeEewEvent ?: eew
         val reportLabel = eew.reportSerial?.takeIf { it.isNotBlank() }
             ?.let { " report #$it" }
             .orEmpty()
@@ -3359,7 +3385,9 @@ class P2pQuakeProvider(
                     } else {
                         "EEW WARNING$reportLabel · ${sourceLabel()}"
                     },
-                    updateKind = LiveUpdateKind.EEW
+                    updateKind = LiveUpdateKind.EEW,
+                    eewUpdateEvent = eew,
+                    eewDeadlineMillis = eewExpiries.incident(eew.id)?.deadlineMillis
                 )
             )
         }
@@ -3810,6 +3838,7 @@ class P2pQuakeProvider(
         activeEew = activeEew,
         activeEewEvent = activeEewEvent,
         activeEewUntilMillis = activeEewUntilMillis.takeIf { activeEew },
+        activeEews = eewExpiries.incidents(activeEewEvent),
         activeTsunami = activeTsunami,
         tsunami = lastTsunami,
         tsunamiStateKnown = latestLiveTsunamiIssue != null,
@@ -3831,7 +3860,8 @@ class P2pQuakeProvider(
         updateKind: LiveUpdateKind,
         eewUpdateEvent: EarthquakeEvent? = if (updateKind in setOf(
                 LiveUpdateKind.EEW, LiveUpdateKind.EEW_DETECTED, LiveUpdateKind.EEW_ENDED))
-            activeEewEvent ?: event.takeIf { it.kind == EarthquakeEventKind.EEW } else null
+            activeEewEvent ?: event.takeIf { it.kind == EarthquakeEventKind.EEW } else null,
+        eewDeadlineMillis: Long? = activeEewUntilMillis.takeIf { activeEew }
     ): AppSnapshot {
         liveUpdateSequence++
         val snapshot = AppSnapshot(
@@ -3840,6 +3870,7 @@ class P2pQuakeProvider(
             activeEew = activeEew,
             activeEewEvent = activeEewEvent,
             activeEewUntilMillis = activeEewUntilMillis.takeIf { activeEew },
+            activeEews = eewExpiries.incidents(activeEewEvent),
             activeTsunami = activeTsunami,
             tsunami = lastTsunami,
             tsunamiStateKnown = latestLiveTsunamiIssue != null,
@@ -3855,7 +3886,7 @@ class P2pQuakeProvider(
             recentReportsRefreshing = recentReportsRefreshing
         )
         eewUpdateEvent?.let { deliveryDiagnostics.recordEewDecision(it, "lifecycle", status,
-            "P2PQuake", updateKind, snapshot.activeEewUntilMillis) }
+            "P2PQuake", updateKind, eewDeadlineMillis) }
         return snapshot
     }
 

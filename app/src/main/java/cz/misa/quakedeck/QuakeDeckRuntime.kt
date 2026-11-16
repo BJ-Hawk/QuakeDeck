@@ -6,6 +6,7 @@ import android.net.Uri
 import android.os.Handler
 import android.os.Looper
 import android.os.Process
+import cz.misa.quakedeck.data.ActiveEewIncident
 import cz.misa.quakedeck.data.AppSettings
 import cz.misa.quakedeck.data.ActivityTimeTracker
 import cz.misa.quakedeck.data.AppSnapshot
@@ -19,6 +20,7 @@ import cz.misa.quakedeck.data.EarthquakeEvent
 import cz.misa.quakedeck.data.EarthquakeEventKind
 import cz.misa.quakedeck.data.EarthquakeReportStage
 import cz.misa.quakedeck.data.EewAlertLevel
+import cz.misa.quakedeck.data.EewLifecyclePolicy
 import cz.misa.quakedeck.data.HistoricalEventSummary
 import cz.misa.quakedeck.data.HistoricalIncident
 import cz.misa.quakedeck.data.HolidayCountryDetector
@@ -28,6 +30,7 @@ import cz.misa.quakedeck.data.LiveUpdateKind
 import cz.misa.quakedeck.data.LocalEewForecasts
 import cz.misa.quakedeck.data.valueOrNull
 import cz.misa.quakedeck.data.P2pQuakeProvider
+import cz.misa.quakedeck.data.P2pCrowdSignal
 import cz.misa.quakedeck.data.matchesLiveEewReport
 import cz.misa.quakedeck.data.preferredActiveEew
 import cz.misa.quakedeck.data.withAssociatedCrowdUpdate
@@ -93,8 +96,7 @@ class QuakeDeckRuntime(context: Context) : QuakeDataProvider {
 
     private var combinedLiveSequence = 0L
     private var sandboxForecastGeneration = 0L
-    private var sandboxLocalForecastKey: String? = null
-    private var sandboxLocalForecastEvent: EarthquakeEvent? = null
+    private val sandboxForecasts = mutableMapOf<String, EarthquakeEvent>()
 
     @Volatile
     var dmdssContractSummary: DmDssContractSummary? = null
@@ -183,58 +185,89 @@ class QuakeDeckRuntime(context: Context) : QuakeDataProvider {
             lastP2pUpdateMillis = System.currentTimeMillis()
         }
         dmdssSnapshot = dmdssSnapshot.withAssociatedP2pCrowdSignal()
-        p2pProvider.setExternalEewForCrowdAssociation(dmdssSnapshot.activeEewEvent?.takeUnless { it.isDrill })
+        updateExternalEewCrowdAssociation()
         publishCombined(origin = DataSourceMode.FREE)
     }
 
     private fun AppSnapshot.withSandboxLocalForecast(): AppSnapshot {
-        val active = activeEewEvent ?: return this
-        val key = listOf(active.id, active.reportSerial, active.reportIssuedAt).joinToString(":")
-        val enriched = if (sandboxLocalForecastKey == key) {
-            sandboxLocalForecastEvent ?: active
-        } else {
-            active.copy(
-                localIntensityForecast = LocalEewForecasts.intensityForecast(active).valueOrNull()
-            ).also {
-                sandboxLocalForecastKey = key
-                sandboxLocalForecastEvent = it
+        val active = activeEewIncidents()
+        sandboxForecasts.keys.retainAll(active.map { it.event.id }.toSet())
+        if (active.isEmpty()) return this
+        val enriched = active.map { incident ->
+            val warning = incident.event
+            val cached = sandboxForecasts[warning.id]
+            val updated = if (cached != null && cached.reportSerial == warning.reportSerial &&
+                cached.reportIssuedAt == warning.reportIssuedAt
+            ) {
+                warning.copy(localIntensityForecast = cached.localIntensityForecast)
+            } else {
+                warning.copy(localIntensityForecast = LocalEewForecasts.intensityForecast(warning).valueOrNull())
             }
+            sandboxForecasts[warning.id] = updated
+            incident.copy(event = updated)
         }
+        val byId = enriched.associateBy { it.event.id }
         return copy(
-            activeEewEvent = enriched,
-            event = if (event.id == active.id) enriched else event
+            activeEews = enriched,
+            activeEewEvent = enriched.first().event,
+            event = byId[event.id]?.event ?: event,
+            eewUpdateEvent = eewUpdateEvent?.let { update ->
+                val activeUpdate = byId[update.id]?.event
+                if (activeUpdate == null) update else update.copy(localIntensityForecast = activeUpdate.localIntensityForecast)
+            }
         )
     }
 
     private fun handleDmdssSnapshot(snapshot: AppSnapshot) {
-        val previousSignal = dmdssSnapshot.activeEewEvent?.p2pCrowdSignal
-            ?: dmdssSnapshot.event.p2pCrowdSignal
-        dmdssSnapshot = snapshot.withAssociatedP2pCrowdSignal(previousSignal)
-        p2pProvider.setExternalEewForCrowdAssociation(dmdssSnapshot.activeEewEvent?.takeUnless { it.isDrill })
+        dmdssSnapshot = snapshot.withAssociatedP2pCrowdSignal(dmdssSnapshot)
+        updateExternalEewCrowdAssociation()
         publishCombined(origin = DataSourceMode.DMDSS)
     }
 
-    private fun AppSnapshot.withAssociatedP2pCrowdSignal(
-        retainedSignal: cz.misa.quakedeck.data.P2pCrowdSignal? = null
-    ): AppSnapshot {
-        val active = activeEewEvent
-        val target = active ?: event.takeIf { it.kind == EarthquakeEventKind.EEW } ?: return this
-        if (target.isDrill) return this
-        val established = target.p2pCrowdSignal ?: retainedSignal?.takeIf {
-            it.startedAt.isNotBlank() && target.id == dmdssSnapshot.event.id
+    private fun updateExternalEewCrowdAssociation() {
+        val active = dmdssSnapshot.activeEewIncidents().map { it.event }.filterNot { it.isDrill }
+        p2pProvider.setExternalEewsForCrowdAssociation(active)
+    }
+
+    private fun AppSnapshot.withAssociatedP2pCrowdSignal(previous: AppSnapshot = this): AppSnapshot {
+        val active = activeEewIncidents()
+        val retained = mutableMapOf<String, P2pCrowdSignal>()
+        val owners = mutableMapOf<String, String>()
+        val priorWarnings = previous.activeEewIncidents().map { it.event } +
+            listOfNotNull(previous.eewUpdateEvent, previous.event)
+        priorWarnings.forEach { warning ->
+            val signal = warning.p2pCrowdSignal
+            if (warning.kind == EarthquakeEventKind.EEW && signal != null) {
+                retained.putIfAbsent(warning.id, signal)
+                owners.putIfAbsent(signal.startedAt, warning.id)
+            }
         }
-        if (active == null && established == null) return this
-        val signal = established.withAssociatedCrowdUpdate(p2pProvider.crowdSignalFor(target))
-            ?: return this
-        val warningUpdate = eewUpdateEvent?.takeIf {
-            it.id == target.id && it.p2pCrowdSignal != signal
+        if (active.isEmpty() && retained.isEmpty()) return this
+
+        fun EarthquakeEvent.withCrowdSignal(allowNewSignal: Boolean): EarthquakeEvent {
+            if (kind != EarthquakeEventKind.EEW || isDrill) return this
+            val established = p2pCrowdSignal ?: retained[id]
+            if (!allowNewSignal && established == null) return this
+            val anchor = if (established == p2pCrowdSignal) this else copy(p2pCrowdSignal = established)
+            val incoming = p2pProvider.crowdSignalFor(anchor)?.takeIf { signal ->
+                owners[signal.startedAt]?.let { it == id } != false
+            }
+            val signal = established.withAssociatedCrowdUpdate(incoming) ?: return this
+            owners[signal.startedAt] = id
+            return if (signal == p2pCrowdSignal) this else copy(p2pCrowdSignal = signal)
         }
-        if (signal == target.p2pCrowdSignal && warningUpdate == null) return this
-        val enriched = target.copy(p2pCrowdSignal = signal)
+
+        val enriched = active.map { incident -> incident.copy(event = incident.event.withCrowdSignal(true)) }
+        val activeById = enriched.associateBy { it.event.id }
+        val warningUpdate = eewUpdateEvent?.let { update ->
+            val signal = activeById[update.id]?.event?.p2pCrowdSignal
+            if (signal != null) update.copy(p2pCrowdSignal = signal) else update.withCrowdSignal(false)
+        }
         return copy(
-            activeEewEvent = active?.let { enriched },
-            event = if (event.id == target.id) enriched else event,
-            eewUpdateEvent = warningUpdate?.copy(p2pCrowdSignal = signal) ?: eewUpdateEvent
+            activeEews = enriched,
+            activeEewEvent = enriched.firstOrNull()?.event,
+            event = activeById[event.id]?.event ?: event.withCrowdSignal(false),
+            eewUpdateEvent = warningUpdate
         )
     }
 
@@ -309,6 +342,18 @@ class QuakeDeckRuntime(context: Context) : QuakeDataProvider {
         val sandbox = p2pSnapshot.testingMode
         val dmdssConnected = dmdssSnapshot.connectionState == ConnectionState.CONNECTED && !sandbox
         if (!dmdssConnected) {
+            val retained = if (!sandbox && dmdssSnapshot.activeEewIncidents().isNotEmpty()) {
+                selectLiveEewPresentation(dmdssSnapshot, p2pSnapshot, origin)
+            } else null
+            val primary = retained?.activeIncidents?.firstOrNull()
+            val updateKind = if (sandbox && origin == DataSourceMode.DMDSS) {
+                LiveUpdateKind.NONE
+            } else {
+                combineLiveUpdateKind(
+                    origin, dmdssSnapshot, p2pSnapshot, primary?.event ?: p2pSnapshot.activeEewEvent,
+                    paidConnected = false
+                )
+            }
             val fallbackState = when (p2pSnapshot.connectionState) {
                 ConnectionState.CONNECTED, ConnectionState.FREE_FALLBACK ->
                     ConnectionState.FREE_FALLBACK
@@ -324,12 +369,19 @@ class QuakeDeckRuntime(context: Context) : QuakeDataProvider {
                 p2pSnapshot.copy(
                     sourceMode = DataSourceMode.DMDSS,
                     connectionState = fallbackState,
+                    activeEew = primary != null || p2pSnapshot.activeEew,
+                    activeEewEvent = primary?.event ?: p2pSnapshot.activeEewEvent,
+                    activeEewUntilMillis = primary?.deadlineMillis ?: p2pSnapshot.activeEewUntilMillis,
+                    activeEews = retained?.activeIncidents ?: p2pSnapshot.activeEews,
+                    event = retained?.latestEvent ?: p2pSnapshot.event,
                     statusText = "$reason · using P2PQuake fallback",
-                    liveUpdateKind = if (origin == DataSourceMode.FREE) {
-                        p2pSnapshot.liveUpdateKind
-                    } else {
-                        LiveUpdateKind.NONE
-                    }
+                    liveUpdateKind = updateKind,
+                    eewUpdateEvent = if (origin == DataSourceMode.FREE) {
+                        p2pSnapshot.eewUpdateEvent
+                    } else if (updateKind == LiveUpdateKind.EEW_ENDED) {
+                        dmdssSnapshot.eewUpdateEvent
+                    } else null,
+                    dmdssEewUpdate = origin == DataSourceMode.DMDSS && updateKind == LiveUpdateKind.EEW_ENDED
                 )
             )
         }
@@ -337,38 +389,16 @@ class QuakeDeckRuntime(context: Context) : QuakeDataProvider {
         val presentation = selectLiveEewPresentation(dmdssSnapshot, p2pSnapshot, origin)
         val usingDmdss = presentation.usesPaidWarning
         val selectedEew = presentation.activeWarning
-        val updateKind = when (origin) {
-            DataSourceMode.DMDSS -> if (
-                !usingDmdss && selectedEew != null && dmdssSnapshot.liveUpdateKind == LiveUpdateKind.EEW
-            ) {
-                LiveUpdateKind.NONE
-            } else if (
-                dmdssSnapshot.liveUpdateKind == LiveUpdateKind.EEW_ENDED &&
-                p2pSnapshot.activeEew
-            ) {
-                LiveUpdateKind.NONE
-            } else {
-                dmdssSnapshot.liveUpdateKind
-            }
-            DataSourceMode.FREE -> if (
-                usingDmdss && p2pSnapshot.liveUpdateKind in P2P_EEW_UPDATES
-            ) {
-                LiveUpdateKind.NONE
-            } else {
-                p2pSnapshot.liveUpdateKind
-            }
-        }
+        val primary = presentation.activeIncidents.firstOrNull()
+        val updateKind = combineLiveUpdateKind(origin, dmdssSnapshot, p2pSnapshot, selectedEew)
         return withCombinedSequence(
             p2pSnapshot.copy(
                 sourceMode = DataSourceMode.DMDSS,
                 connectionState = ConnectionState.CONNECTED,
                 activeEew = selectedEew != null,
                 activeEewEvent = selectedEew,
-                activeEewUntilMillis = if (usingDmdss) {
-                    dmdssSnapshot.activeEewUntilMillis
-                } else {
-                    p2pSnapshot.activeEewUntilMillis
-                },
+                activeEewUntilMillis = primary?.deadlineMillis,
+                activeEews = presentation.activeIncidents,
                 event = presentation.latestEvent,
                 eewUpdateEvent = if (origin == DataSourceMode.DMDSS) {
                     dmdssSnapshot.eewUpdateEvent
@@ -420,7 +450,7 @@ class QuakeDeckRuntime(context: Context) : QuakeDataProvider {
         ) {
             refreshDmdssContractsAndConnect()
         } else {
-            p2pProvider.setExternalEewForCrowdAssociation(null)
+            p2pProvider.setExternalEewsForCrowdAssociation(emptyList())
             dmdssProvider.stop()
         }
         publishCombined(origin = mode)
@@ -475,10 +505,11 @@ class QuakeDeckRuntime(context: Context) : QuakeDataProvider {
         dmdssContractCheckInFlight = true
         lastDmdssContractCheckElapsed = android.os.SystemClock.elapsedRealtime()
         if (dmdssSnapshot.connectionState != ConnectionState.CONNECTED) {
-            dmdssSnapshot = waitingSnapshot(
-                DataSourceMode.DMDSS,
-                ConnectionState.CONNECTING,
-                "Checking DM-D.S.S account access…"
+            dmdssSnapshot = dmdssSnapshot.copy(
+                connectionState = ConnectionState.CONNECTING,
+                statusText = "Checking DM-D.S.S account access…",
+                liveUpdateKind = LiveUpdateKind.NONE,
+                eewUpdateEvent = null
             )
             publishCombined(origin = DataSourceMode.DMDSS)
         }
@@ -541,6 +572,11 @@ class QuakeDeckRuntime(context: Context) : QuakeDataProvider {
     override fun startBuiltInReplay(startDelayMillis: Long) {
         if (!SandboxFeature.ENABLED) return
         p2pProvider.startBuiltInReplay(startDelayMillis)
+    }
+
+    override fun startBuiltInOverlappingEewReplay(startDelayMillis: Long) {
+        if (!SandboxFeature.ENABLED) return
+        p2pProvider.startBuiltInOverlappingEewReplay(startDelayMillis)
     }
 
     override fun startBuiltInTsunamiReplay(startDelayMillis: Long) {
@@ -608,7 +644,9 @@ class QuakeDeckRuntime(context: Context) : QuakeDataProvider {
                 activeEewEvent = event,
                 activeEewUntilMillis = System.currentTimeMillis() +
                     INJECTED_FORECAST_DISPLAY_MILLIS,
+                activeEews = emptyList(),
                 event = event,
+                eewUpdateEvent = event,
                 statusText = "INJECTED TEST DM-D.S.S EEW FORECAST · connection unchanged",
                 liveUpdateKind = LiveUpdateKind.EEW,
                 testingMode = p2pSnapshot.testingMode,
@@ -697,30 +735,90 @@ class QuakeDeckRuntime(context: Context) : QuakeDataProvider {
             DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss 'JST'")
         private const val INJECTED_FORECAST_DISPLAY_MILLIS = 45_000L
         private const val MAX_TEST_INJECTION_DELAY_MILLIS = 60_000L
-        private val P2P_EEW_UPDATES = setOf(
-            LiveUpdateKind.EEW_DETECTED,
-            LiveUpdateKind.EEW,
-            LiveUpdateKind.EEW_ENDED,
-            LiveUpdateKind.CANCELLED
-        )
     }
 }
 
+internal fun combineLiveUpdateKind(
+    origin: DataSourceMode,
+    paid: AppSnapshot,
+    baseline: AppSnapshot,
+    selectedWarning: EarthquakeEvent?,
+    paidConnected: Boolean = true
+): LiveUpdateKind {
+    val source = if (origin == DataSourceMode.DMDSS) paid else baseline
+    val updateKind = source.liveUpdateKind
+    val updateEvent = source.eewUpdateEvent?.takeIf { it.kind == EarthquakeEventKind.EEW }
+    val otherIncidents = when {
+        origin == DataSourceMode.DMDSS -> baseline.activeEewIncidents()
+        else -> paid.activeEewIncidents()
+    }
+    val counterpart = otherIncidents.firstOrNull { it.event.id == updateEvent?.id }?.event
+    if (updateKind == LiveUpdateKind.EEW_ENDED || (updateKind == LiveUpdateKind.CANCELLED && updateEvent != null)) {
+        val ended = updateEvent ?: return LiveUpdateKind.NONE
+        if (ended.isDrill && selectedWarning?.isDrill == false) return LiveUpdateKind.NONE
+        if (ended.isCancelled || updateKind == LiveUpdateKind.CANCELLED) return LiveUpdateKind.EEW_ENDED
+        val stillActive = counterpart != null && !counterpart.isCancelled &&
+            counterpart.isDrill == ended.isDrill &&
+            (counterpart.eewAlertLevel == ended.eewAlertLevel || ended.eewAlertLevel == EewAlertLevel.FORECAST)
+        return if (stillActive) LiveUpdateKind.NONE else LiveUpdateKind.EEW_ENDED
+    }
+
+    if (origin == DataSourceMode.DMDSS && !paidConnected) return LiveUpdateKind.NONE
+    if (updateKind == LiveUpdateKind.EEW) {
+        val event = updateEvent ?: source.activeEewEvent ?: return LiveUpdateKind.NONE
+        if (event.isDrill && selectedWarning?.isDrill == false) return LiveUpdateKind.NONE
+        val other = counterpart ?: otherIncidents.firstOrNull { it.event.id == event.id }?.event
+        val preferred = if (origin == DataSourceMode.DMDSS) {
+            preferredActiveEew(event, other)
+        } else {
+            preferredActiveEew(other, event)
+        }
+        if (preferred != null && preferred !== event) return LiveUpdateKind.NONE
+    }
+    if (updateKind == LiveUpdateKind.EEW_DETECTED && origin == DataSourceMode.FREE &&
+        paidConnected && paid.activeEewIncidents().any { it.event === selectedWarning }
+    ) return LiveUpdateKind.NONE
+    return updateKind
+}
+
+internal fun combineActiveEewIncidents(paid: AppSnapshot, baseline: AppSnapshot): List<ActiveEewIncident> {
+    val byId = linkedMapOf<String, ActiveEewIncident>()
+    paid.activeEewIncidents().forEach { incident -> byId[incident.event.id] = incident }
+    baseline.activeEewIncidents().forEach { incident ->
+        val paidIncident = byId[incident.event.id]
+        if (paidIncident == null || preferredActiveEew(paidIncident.event, incident.event) !== paidIncident.event) {
+            byId[incident.event.id] = incident
+        }
+    }
+    // A retained drill must never take display priority over a real incident.
+    return byId.values.sortedBy { it.event.isDrill }
+}
+
 internal data class LiveEewPresentation(
-    val activeWarning: EarthquakeEvent?,
+    val activeIncidents: List<ActiveEewIncident>,
     val usesPaidWarning: Boolean,
     val latestEvent: EarthquakeEvent
-)
+) {
+    val activeWarning: EarthquakeEvent? get() = activeIncidents.firstOrNull()?.event
+}
 
 internal fun selectLiveEewPresentation(
     paid: AppSnapshot,
     baseline: AppSnapshot,
     origin: DataSourceMode
 ): LiveEewPresentation {
-    val warning = preferredActiveEew(paid.activeEewEvent, baseline.activeEewEvent)
+    val activeIncidents = combineActiveEewIncidents(paid, baseline)
+    val warning = activeIncidents.firstOrNull()?.event
     val terminalWarning = if (origin == DataSourceMode.DMDSS && paid.liveUpdateKind == LiveUpdateKind.EEW_ENDED) {
-        paid.eewUpdateEvent ?: paid.event
+        paid.eewUpdateEvent?.takeIf { it.kind == EarthquakeEventKind.EEW }
     } else null
+    if (warning == null && terminalWarning != null) {
+        val baselineOrigin = EewLifecyclePolicy.sourceMillis(baseline.event.originTime)
+        val terminalOrigin = EewLifecyclePolicy.sourceMillis(terminalWarning.originTime)
+        if (baselineOrigin != null && terminalOrigin != null && baselineOrigin > terminalOrigin &&
+            !matchesLiveEewReport(terminalWarning, baseline.event)
+        ) return LiveEewPresentation(activeIncidents, false, baseline.event)
+    }
     val latest = (warning ?: terminalWarning)?.let { eew ->
         val candidates = listOf(baseline.event) + baseline.history
         val confirmed = candidates.firstOrNull { it.jmaReportEventId == eew.id && matchesLiveEewReport(eew, it) }
@@ -730,7 +828,8 @@ internal fun selectLiveEewPresentation(
         val crowd = eew.p2pCrowdSignal.withAssociatedCrowdUpdate(reportSignal)
         if (crowd == reportSignal) confirmed else confirmed.copy(p2pCrowdSignal = crowd)
     } ?: baseline.event
-    return LiveEewPresentation(warning, warning != null && warning === paid.activeEewEvent, latest)
+    val usesPaidWarning = warning != null && paid.activeEewIncidents().any { it.event === warning }
+    return LiveEewPresentation(activeIncidents, usesPaidWarning, latest)
 }
 
 /** Keep notification content tied to the provider callback that produced the update. */
@@ -745,11 +844,19 @@ internal fun notificationSnapshotForProviderUpdate(
         DataSourceMode.FREE -> p2p
         DataSourceMode.DMDSS -> dmdss
     }
+    val warningUpdate = provider.eewUpdateEvent ?: provider.activeEewEvent
+        .takeIf { combined.liveUpdateKind == LiveUpdateKind.EEW }
+    val deadline = when (combined.liveUpdateKind) {
+        LiveUpdateKind.EEW -> provider.activeEewIncidents()
+            .firstOrNull { it.event.id == warningUpdate?.id }?.deadlineMillis
+        LiveUpdateKind.EEW_ENDED -> null
+        else -> provider.activeEewUntilMillis
+    }
     return combined.copy(
         event = provider.event,
-        eewUpdateEvent = provider.eewUpdateEvent,
+        eewUpdateEvent = warningUpdate,
         tsunami = provider.tsunami,
-        activeEewUntilMillis = provider.activeEewUntilMillis,
+        activeEewUntilMillis = deadline,
         dmdssEewUpdate = origin == DataSourceMode.DMDSS && combined.dmdssEewUpdate
     )
 }
