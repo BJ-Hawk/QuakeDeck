@@ -1,5 +1,7 @@
 # Workstreams
 
+- [Confirmed reports with revised origin times](workstreams/confirmed-report-origin-reconciliation.md) — **0.10.4-dev.6 / 255. FULL COMPILES AND ALL 219 UNIT TESTS PASS.** Reconciles duplicate Recent Earthquakes records when source copies share bulletin evidence and differ in origin time. Device cache validation is pending.
+
 - [Simultaneous EEWs and screen-off expiry](workstreams/simultaneous-eew-expiry.md) — **0.10.4-dev.5 / 254. FULL PASSES ALL 213 UNIT TESTS WITH THE OVERLAPPING EEW REPLAY.** Independent deadlines, terminal notification routing, and selectable map badges for concurrent EEWs. Screen-off timing and concurrent map rendering need device validation.
 
 - [Replay, map alerts, and Data Sources UI](workstreams/replay-and-alert-ui.md) — **0.10.4-dev.4 / 253 LOCAL FOLLOW-UP; FULL/LITE COMPILE AND 198 TESTS PASS IN EACH EDITION.** Removes the temporary incident-specific saved-report correction and its dedicated tests/hooks. General confirmed-report association, felt-cluster retention, and ordinary cache restoration remain intact. The menu/address and device checks remain open.

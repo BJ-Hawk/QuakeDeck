@@ -1439,7 +1439,18 @@ class P2pQuakeProvider(
 
                 val restoredCrowd = restoreRememberedCrowdSignals(remembered)
                 if (freshRecentReportsLoaded || lastEvent != null) {
-                    if (restoredCrowd) {
+                    val priorHistory = eventHistory.toList()
+                    val priorEvent = lastEvent
+                    remembered.forEach { cached ->
+                        val matches = (listOfNotNull(lastEvent) + eventHistory)
+                            .filter { sameConfirmedIncident(it, cached) }
+                        if (matches.isEmpty() || matches.mapNotNull { it.jmaReportEventId }.distinct().size > 1) {
+                            return@forEach
+                        }
+                        val merged = addToHistory(cached)
+                        if (lastEvent?.id == merged.id) lastEvent = merged
+                    }
+                    if (restoredCrowd || priorHistory != eventHistory || priorEvent != lastEvent) {
                         scheduleRecentReportCacheWrite()
                         emitCurrentRecentState(sourceLabel())
                     }
@@ -1447,6 +1458,7 @@ class P2pQuakeProvider(
                 }
 
                 remembered.asReversed().forEach(::addToHistory)
+                scheduleRecentReportCacheWrite()
                 lastEvent = eventHistory.firstOrNull()
                 showingRememberedReports = lastEvent != null
                 lastEvent?.let { event ->
@@ -3182,6 +3194,7 @@ class P2pQuakeProvider(
         if (
             !testingMode &&
             current != null &&
+            current.id != quake.id &&
             !amendsCurrentCrowd &&
             !confirmsCurrentEew &&
             !confirmsActiveEew &&
@@ -3529,45 +3542,77 @@ class P2pQuakeProvider(
     }
 
     private fun addToHistory(event: EarthquakeEvent): EarthquakeEvent {
-        val existing = eventHistory.firstOrNull { it.id == event.id }
-            ?: lastEvent?.takeIf { it.id == event.id }
-            ?: lastEvent?.takeIf {
-                it.kind == EarthquakeEventKind.EEW && likelySameEarthquake(it, event)
+        val candidates = listOfNotNull(lastEvent) + eventHistory
+        val matches = candidates.filter { candidate ->
+            val conflictingIds = candidate.jmaReportEventId != null && event.jmaReportEventId != null &&
+                candidate.jmaReportEventId != event.jmaReportEventId
+            !conflictingIds && (
+                candidate.id == event.id || sameConfirmedIncident(candidate, event) ||
+                    (candidate.kind == EarthquakeEventKind.EEW && likelySameEarthquake(candidate, event)) ||
+                    (candidate.isP2pCrowdOnly() && candidate.p2pCrowdSignal?.coincidesWith(event) == true)
+                )
+        }
+        val matchedJmaIds = matches.mapNotNull { it.jmaReportEventId }.distinct()
+        val jmaId = event.jmaReportEventId
+            ?: matches.firstOrNull { it.id == event.id }?.jmaReportEventId
+            ?: matchedJmaIds.singleOrNull()
+        val explicitAnchor = if (event.jmaReportEventId != null) event else {
+            matches.firstOrNull { jmaId != null && it.jmaReportEventId == jmaId }
+        }
+        val compatible = matches.filter { candidate ->
+            (candidate.jmaReportEventId == null || candidate.jmaReportEventId == jmaId) &&
+                (explicitAnchor == null || candidate.id == event.id || candidate.id == explicitAnchor.id ||
+                    sameConfirmedIncident(candidate, explicitAnchor))
+        }
+        val establishedId = compatible.firstOrNull()?.id ?: event.id
+        val confirmedMatches = compatible.filter { it.kind == EarthquakeEventKind.CONFIRMED }
+        var existing = confirmedMatches.firstOrNull() ?: compatible.firstOrNull()
+        confirmedMatches.drop(1).forEach { duplicate ->
+            val accumulated = existing
+            if (accumulated?.kind == EarthquakeEventKind.CONFIRMED &&
+                duplicate.kind == EarthquakeEventKind.CONFIRMED
+            ) {
+                existing = mergeConfirmedEvent(accumulated, duplicate).copy(
+                    reportCount = maxOf(accumulated.reportCount, duplicate.reportCount)
+                )
             }
-            ?: eventHistory.firstOrNull {
-                it.isP2pCrowdOnly() && it.p2pCrowdSignal?.coincidesWith(event) == true
-            }
-            ?: lastEvent?.takeIf {
-                it.isP2pCrowdOnly() && it.p2pCrowdSignal?.coincidesWith(event) == true
-            }
-            // P2PQuake normally repeats the exact origin timestamp in every
-            // bulletin, but a follow-up can occasionally use another valid
-            // textual representation of the same instant. Do not let that
-            // transport variation create a second live incident card.
-            ?: eventHistory.firstOrNull { sameConfirmedIncident(it, event) }
-            ?: lastEvent?.takeIf { sameConfirmedIncident(it, event) }
+        }
+        val established = existing
         val report = when {
-            existing != null &&
-                existing.kind == EarthquakeEventKind.CONFIRMED &&
-                event.kind == EarthquakeEventKind.CONFIRMED -> mergeConfirmedEvent(existing, event)
-            existing != null &&
-                existing.kind == EarthquakeEventKind.EEW &&
+            established?.kind == EarthquakeEventKind.CONFIRMED &&
+                event.kind == EarthquakeEventKind.CONFIRMED -> mergeConfirmedEvent(established, event)
+            established?.kind == EarthquakeEventKind.EEW &&
                 event.kind == EarthquakeEventKind.CONFIRMED -> event.copy(
                     // A regular report amends the EEW incident. Keeping this
                     // identity also keeps a pre-confirmation felt counter on it.
-                    id = existing.id,
-                    p2pCrowdSignal = existing.p2pCrowdSignal.withAssociatedCrowdUpdate(event.p2pCrowdSignal)
+                    id = established.id,
+                    p2pCrowdSignal = established.p2pCrowdSignal.withAssociatedCrowdUpdate(event.p2pCrowdSignal)
                 )
             else -> event
         }
+        val retainedSignal = compatible.fold(report.p2pCrowdSignal) { signal, duplicate ->
+            signal.withAssociatedCrowdUpdate(duplicate.p2pCrowdSignal)
+        }
         val merged = report.copy(
-            p2pCrowdSignal = report.p2pCrowdSignal.withAssociatedCrowdUpdate(pendingCrowdSignalFor(report))
+            id = establishedId,
+            p2pCrowdSignal = retainedSignal.withAssociatedCrowdUpdate(pendingCrowdSignalFor(report))
         )
 
         // Remove a previously split representation as well as the normal
         // exact-ID match. The surviving event keeps the established ID, which
         // preserves UI selection and notification navigation.
-        eventHistory.removeAll { it.id == merged.id || sameConfirmedIncident(it, merged) }
+        val mergedIds = compatible.map { it.id }.toSet() + merged.id
+        mergedIds.filterNot { it == merged.id }.forEach { alias ->
+            val aliasComponents = confirmedComponents.remove(alias) ?: return@forEach
+            val components = confirmedComponents.getOrPut(merged.id) { linkedMapOf() }
+            aliasComponents.forEach { (type, component) ->
+                val previous = components[type]
+                if (previous == null || incomingReportIsAuthoritative(previous, component)) {
+                    components[type] = component
+                }
+            }
+        }
+        eventHistory.removeAll { it.id in mergedIds }
         eventHistory.add(merged)
         eventHistory.sortWith(
             compareByDescending<EarthquakeEvent> {
@@ -3618,6 +3663,11 @@ class P2pQuakeProvider(
             report.reportStage == EarthquakeReportStage.DETAILED &&
                 report.points.any { point -> !point.isArea }
         }
+        val samePublication = reportIssuedInstant(existing)?.let { issued ->
+            issued == reportIssuedInstant(incoming) &&
+                existing.reportType.equals(incoming.reportType, ignoreCase = true) &&
+                existing.reportCorrection.orEmpty().equals(incoming.reportCorrection.orEmpty(), ignoreCase = true)
+        } == true
 
         return authoritative.copy(
             // Preserve the established incident identity if a malformed or
@@ -3656,7 +3706,9 @@ class P2pQuakeProvider(
             } ?: supplementary.reportStage,
             reportType = authoritative.reportType ?: supplementary.reportType,
             contributingReportTypes = contributingTypes,
-            reportCount = existing.reportCount + if (incoming.reportType != null) 1 else 0,
+            reportCount = if (samePublication) {
+                maxOf(existing.reportCount, incoming.reportCount)
+            } else existing.reportCount + if (incoming.reportType != null) 1 else 0,
             hasHypocenter = effectiveHasHypocenter,
             p2pCrowdSignal = existing.p2pCrowdSignal.withAssociatedCrowdUpdate(incoming.p2pCrowdSignal),
             // The frame label reflects the newest reliable report, regardless
@@ -3679,7 +3731,8 @@ class P2pQuakeProvider(
         }
         val firstTime = eventInstant(first) ?: return false
         val secondTime = eventInstant(second) ?: return false
-        return abs(java.time.Duration.between(firstTime, secondTime).seconds) <= 2L
+        return abs(java.time.Duration.between(firstTime, secondTime).seconds) <= 2L ||
+            sameConfirmedBulletinAcrossOrigins(first, second)
     }
 
     private fun incomingReportIsAuthoritative(
@@ -3696,6 +3749,9 @@ class P2pQuakeProvider(
         val existingStage = reportStageRank(existing.reportStage)
         val incomingStage = reportStageRank(incoming.reportStage)
         if (existingStage != incomingStage) return incomingStage > existingStage
+        if (existingIssued != null && existingIssued == incomingIssued &&
+            (existing.jmaReportEventId != null) != (incoming.jmaReportEventId != null)
+        ) return incoming.jmaReportEventId != null
 
         return !incoming.reportCorrection.isNullOrBlank() && existing.reportCorrection.isNullOrBlank()
     }

@@ -2,7 +2,7 @@
 
 QuakeDeck release history
 
-## v0.10.4-dev.5 (in progress)
+## v0.10.4-dev.6 (in progress)
 
 - Keeps the History loading bar visible at the bottom while scrolling and gives the replay header fixed rows. Opening an incident focuses its earliest mappable earthquake or EEW frame.
 - Skips P2PQuake felt updates when stepping through replay. Associated reports still lists distinct cumulative updates, including real changes to count, confidence or area.
@@ -21,6 +21,7 @@ QuakeDeck release history
 - Tracks simultaneous early warnings separately. The map gives each warning a selectable badge and renders its own P/S wave rings where local forecasting is available.
 - Ends each live warning three minutes after its latest accepted bulletin. A time-limited CPU wake lock supports expiry with the screen off, and a newer earthquake leaves the earlier warning's Ended notification eligible.
 - Adds an Overlapping EEWs Sandbox replay with two synthetic warnings, 63 seconds of overlap, and staggered cancellations for checking each map badge and P/S ring pair.
+- Reconciles source copies of the same published earthquake bulletin when their origin times differ. Shared publication, report type, correction and hypocenter evidence merge the Recent Earthquakes entries and preserve the associated felt count.
 
 ## v0.10.3
 
